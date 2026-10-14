@@ -59,6 +59,7 @@ export function drawField(V){
     for(let h=2;h<=7;h++){ txt(h+' m',ux+16,GY-h*s,'#fff',11); }
     if(V.bar){ const by=GY-V.bar*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ux-12,by); ctx.lineTo(ux+12,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke(); }
   }
+  if(ev.kind==='lj'&&!V.act) ljBands(V,X,GY);
   if(ev.kind!=='lj'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
       ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
@@ -97,4 +98,15 @@ export function drawPole(V,X,GY,fig){
       const bx=u*u*tipX+2*u*q*cx+q*q*hx, by=u*u*tipY+2*u*q*cy+q*q*hy; target(hx,hy); drawStar(bx+(p>1?(p-1)*30:0),by-(p>1?(p-1)*30:0),9,p); }
     return; }
   line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L);
+}
+// long jump run-up: green / yellow / red bands before the board (about 2 s of running);
+// red = the last metres, where the red take-off buttons appear. The band you're in lights up.
+const LJ_BANDS=[[18,10,'31,190,90'],[10,4,'255,205,40'],[4,0,'240,60,50']];
+function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x;
+  LJ_BANDS.forEach(([from,to,rgb])=>{ const x0=X(ev.line-from), x1=X(ev.line-to); if(x1<-10||x0>LW+10) return;
+    const on=d<=from&&d>to;
+    ctx.fillStyle=`rgba(${rgb},${on?.65:.3})`; ctx.fillRect(x0,GY-25,x1-x0,40);
+    ctx.strokeStyle=`rgba(${rgb},${on?1:.75})`; ctx.lineWidth=3;
+    for(let x=x0+6;x<x1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
+    ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x0-1,GY-25,3,40); });
 }

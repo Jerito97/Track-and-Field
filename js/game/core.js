@@ -29,7 +29,6 @@ export function resetAttempt(){
   S.cam=S.x-camLead();
 }
 export const camLead=()=>LW*.36/S.ppm;
-const LJ_PPM=48;
 export const CUEPOS={L:()=>[50,150],C:()=>[LW/2,150],R:()=>[LW-50,150]};
 // hurdle numbers: higher up and closer together; NUM_DX = gap between neighbours (logical px)
 export const NUM_DX=()=>Math.round(LW*.24), NUM_Y=108;
@@ -80,9 +79,6 @@ export function update(dt){
   const ev=S.ev;
   let tx=S.x-camLead(), k=6;
   if(S.jv&&!S.jv.held){ tx=S.jv.x-LW*.55/S.ppm; k=8; }
-  // long jump: zoom in near the board and keep the jumper at ~30% of the screen while flying
-  if(ev.kind==='lj'){ const near=S.phase==='act'||S.phase==='post'||(S.phase==='run'&&ev.line-S.x<14);
-    S.ppm+=((near?LJ_PPM:34)-S.ppm)*Math.min(1,dt*3); if(S.phase==='act'||S.phase==='post') tx=S.x-LW*.3/S.ppm; }
   S.cam+=(tx-S.cam)*Math.min(1,dt*k);
   if(ev.kind==='pv'){ const ty=Math.max(0,S.y-2.2); S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
   if(ev.kind==='jav'){ const ty=(S.jv&&!S.jv.held)?Math.max(0,S.jv.y-3):0; S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
