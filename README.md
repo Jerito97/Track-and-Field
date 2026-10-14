@@ -1,4 +1,4 @@
-# Olimpiada de Bolsillo
+# Track and Field
 
 Juego de atletismo para el navegador: 100 m, salto en largo, 110 m con vallas, salto con garrocha, jabalina y modo torneo.
 
