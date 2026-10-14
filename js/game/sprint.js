@@ -10,8 +10,13 @@ import {bothCue,judge,numCue,pop,sideCue} from './core.js';
 
 export function resetRivals(){
   const ev=S.ev;
-  S.rivals.forEach(r=>{ const T=ev.hurdles? 12.5+(1.03-r.a.sk)*17+rand(-.2,.2) : 10.2+(1.03-r.a.sk)*17+rand(-.15,.15);
-    Object.assign(r,{T,vmax:ev.dist/(T-2.0),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set()}); });
+  S.rivals.forEach(r=>{
+    // reaction to the gun; now and then a sleepy start
+    let react=rand(.13,.24); if(Math.random()<.1) react+=rand(.25,.45);
+    const T=ev.hurdles? 12.5+(1.03-r.a.sk)*17+rand(-.2,.2) : 10.3+(1.03-r.a.sk)*14+rand(-.25,.25);
+    // flat sprint: about one in three rivals trips somewhere mid-race
+    const trip=!ev.hurdles&&Math.random()<.3?rand(15,85):null;
+    Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set()}); });
 }
 export function updateSprint(dt){
   const ev=S.ev;
@@ -69,7 +74,9 @@ export function updateSprint(dt){
 export function rivalStep(r,dt){
   if(r.vmax==null) return;
   const d=S.ev.dist; r.t+=dt; r.slow+=(1-r.slow)*dt*.9;
-  let v=r.vmax*(1-Math.exp(-r.t/2.0))*r.slow;
+  if(r.trip!=null&&r.x>=r.trip){ r.trip=null; r.slow=.6; r.tripT=.4; }
+  if(r.tripT>0) r.tripT-=dt;
+  let v=r.vmax*(1-Math.exp(-Math.max(0,r.t-r.react)/2.0))*r.slow;
   if(r.final!=null){ r.done+=dt; v*=Math.max(0,1-r.done*.6); }
   r.v=v; r.x+=v*dt; r.legP+=v*dt*2.4;
   if(r.final==null&&r.x>=d) r.final=Math.ceil((r.t-(r.x-d)/Math.max(v,.5))*100)/100;

@@ -32,6 +32,6 @@ export function drawRig(c,s,ox,oy,alt,J,C,rot){
   return {hand:rp(...arms[0].e)};
 }
 export const SPK=64/140; // logical px per sprite px
-export function drawSprite(k,x,feet,rot){ const sp=SPR[k]; if(!sp||!sp.im.complete) return false; const w=sp.w*SPK, h=sp.h*SPK;
-  if(rot){ ctx.save(); ctx.translate(x,feet-h*.4); ctx.rotate(rot); ctx.drawImage(sp.im,-sp.hx*SPK,-h*.6,w,h); ctx.restore(); }
-  else ctx.drawImage(sp.im,x-sp.hx*SPK,feet-h+2,w,h); return true; }
+export function drawSprite(k,x,feet,rot,K=SPK){ const sp=SPR[k]; if(!sp||!sp.im.complete) return false; const w=sp.w*K, h=sp.h*K;
+  if(rot){ ctx.save(); ctx.translate(x,feet-h*.4); ctx.rotate(rot); ctx.drawImage(sp.im,-sp.hx*K,-h*.6,w,h); ctx.restore(); }
+  else ctx.drawImage(sp.im,x-sp.hx*K,feet-h+2,w,h); return true; }
