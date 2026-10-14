@@ -129,6 +129,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "yo/trip/trip1.png",
+     "yo/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  },
@@ -258,6 +270,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "santi/trip/trip1.png",
+     "santi/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  },
@@ -387,6 +411,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "nacho/trip/trip1.png",
+     "nacho/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  },
@@ -516,6 +552,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "rafa/trip/trip1.png",
+     "rafa/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  },
@@ -645,6 +693,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "lucho/trip/trip1.png",
+     "lucho/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  },
@@ -774,6 +834,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "beto/trip/trip1.png",
+     "beto/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  },
@@ -903,6 +975,18 @@ export const ROSTER=[
     "hx": 52.8,
     "feet": 120.1,
     "scale": 0.2112
+   },
+   "trip": {
+    "files": [
+     "tomi/trip/trip1.png",
+     "tomi/trip/trip2.png"
+    ],
+    "frames": 2,
+    "w": 150,
+    "h": 162,
+    "hx": 62.4,
+    "feet": 161.2,
+    "scale": 0.2356
    }
   }
  }
