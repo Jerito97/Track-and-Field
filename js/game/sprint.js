@@ -73,7 +73,7 @@ export function updateSprint(dt){
       pop(S.final.toFixed(2)+' s',{dur:2.2,big:1.1,sub:isRec?'¡NUEVO RÉCORD!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
       S.next=finishSprintEvent;
     }
-  } else if(S.t>40){ S.final=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
+  } else if(S.t>40){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
 }
 export function rivalStep(r,dt){
   if(r.vmax==null) return;

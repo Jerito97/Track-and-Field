@@ -22,11 +22,11 @@ export function onTap(pos){
   if(!S.cue||S.cue.type==='hold') return;
   const cue=S.cue;
   if(cue.type==='side'){
-    if(pos==='C') return;
+    if(pos==='C'||pos==='B') return;  // Space/Enter is for the red buttons
     if(pos===cue.side){ S.v+=gS(S.v); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
     else { addX(pos); bad(); }
   } else if(cue.type==='num'){
-    if(S.stumble>0) return;
+    if(S.stumble>0||pos==='B') return;
     const want=cue.order[cue.next];
     // the three numbers are one combo: no speed per tap, one boost when the 3 lands, bigger the faster 1-2-3 went
     if(pos===want){ if(cue.next===0) cue.t0=S.clock; addRing(pos); tone(440+cue.next*110,.05,'triangle',.04); cue.next++;
@@ -63,4 +63,6 @@ export function initInput(){
     if(!pos) return; e.preventDefault(); onTap(pos); if(pos==='B') holdStart();
   });
 }
-export function backHit(e){ const lx=(e.clientX-OX)/SC, ly=(e.clientY-OY)/SC; if(lx>0&&lx<36&&ly>286&&ly<322){ showEventCard(); return true; } return false; }
+// back arrow (bottom left): not while buttons are up (it sits in the left tap zone), nor once the result is in
+export function backHit(e){ const lx=(e.clientX-OX)/SC, ly=(e.clientY-OY)/SC;
+  if(lx>0&&lx<36&&ly>286&&ly<322&&!S.cue&&S.phase!=='wait'&&S.phase!=='post'&&!S.replay){ showEventCard(); return true; } return false; }

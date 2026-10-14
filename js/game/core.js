@@ -25,7 +25,7 @@ export function resetAttempt(){
   const ev=S.ev;
   Object.assign(S,{t:0,x:0,y:0,v:0,legP:0,cue:null,last:null,streak:0,pend:null,rot:0,pose:null,
     hk:0,armed:false,air:0,airT:.4,knocked:new Set(),stumble:0,finished:false,final:null,after:0,nextBoth:0,smoke:null,
-    act:null,jv:null,landX:null,bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],replay:null,ppm:ev.type==='sprint'?24:34,camY:0,dip:0});
+    act:null,jv:null,landX:null,bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,ppm:ev.type==='sprint'?24:34,camY:0,dip:0});
   S.cam=S.x-camLead();
 }
 export const camLead=()=>LW*.36/S.ppm;
@@ -82,7 +82,9 @@ export function update(dt){
   S.cam+=(tx-S.cam)*Math.min(1,dt*k);
   if(ev.kind==='pv'){ const ty=Math.max(0,S.y-2.2); S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
   if(ev.kind==='jav'){ const ty=(S.jv&&!S.jv.held)?Math.max(0,S.jv.y-3):0; S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
-  if(ev.type==='field'&&(S.phase==='run'||S.phase==='act'||S.phase==='post')){ S.snaps.push(snap()); if(S.snaps.length>800) S.snaps.shift(); }
+  // replay snapshots on a fixed 1/60 s step (played back at 30 per second: half speed), whatever the screen's refresh rate
+  if(ev.type==='field'&&(S.phase==='run'||S.phase==='act'||S.phase==='post')){ S.snapAcc=(S.snapAcc||0)+dt;
+    while(S.snapAcc>=1/60){ S.snapAcc-=1/60; S.snaps.push(snap()); } if(S.snaps.length>900) S.snaps.splice(0,S.snaps.length-900); }
 }
 export function coast(dt){ if(S.ev.type==='field') return; S.v=Math.max(0,S.v-S.v*1.6*dt); S.x+=S.v*dt; S.legP+=S.v*dt*2.4; if(S.phase!=='set') S.pose=S.v>.3?runPose(S.legP,Math.min(1,S.v/4)):(S.finished?POSE.cheer:POSE.stand); }
 export function armsFor(){ const k=S.ev.kind; return k==='jav'?'jav':(k==='pv'?'pole':null); }

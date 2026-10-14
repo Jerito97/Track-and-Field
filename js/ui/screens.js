@@ -78,9 +78,11 @@ export function showEventCard(){
     ${tour?'<button class="link" data-act="menu">Abandonar torneo</button>':''}
   </div></div>`);
 }
+// place shown in a table: equal values share it (1, 2, 2, 4)
+const place=(rows,i,valFmt)=>{ let j=i; while(j>0&&valFmt(rows[j-1])===valFmt(rows[i])) j--; return j+1; };
 export function table(tag,title,rows,valFmt,subFmt,btn){
   return `<div class="card"><div class="head"><div class="logo">${tag}</div><h2>${title}</h2></div><div class="body">
-    <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${i+1}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}</td>${subFmt?`<td class="sub">${subFmt(r)}</td>`:''}<td>${valFmt(r)}</td></tr>`).join('')}</tbody></table>
+    <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${place(rows,i,valFmt)}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}</td>${subFmt?`<td class="sub">${subFmt(r)}</td>`:''}<td>${valFmt(r)}</td></tr>`).join('')}</tbody></table>
     <button class="ok" data-act="${btn}" data-focus>OK</button></div></div>`;
 }
 export function showRoundStandings(){
@@ -112,7 +114,7 @@ export function showFinalTable(){
   setS(null);
   showOv(`<div class="card"><div class="head"><div class="logo">TORNEO</div><h2>Resultado final</h2></div><div class="body">
     <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${i+1}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}${i<3?' · '+['oro','plata','bronce'][i]:''}</td><td>${r.v}</td></tr>`).join('')}</tbody></table>
-    <p class="small" style="text-align:center">${me===1?'¡Ganaste el torneo!':`Terminaste en el puesto ${me}.`} Tu mejor torneo: ${rec.tour} puntos.</p>
+    <p class="small" style="text-align:center">${me===1?'¡Ganaste el torneo!':`Terminaste en el puesto ${me}.`} Tu mejor torneo: ${rec.tour||0} puntos.</p>
     <div class="btns"><button class="btn" data-act="tour" data-focus>Jugar otro torneo</button><button class="btn alt" data-act="menu">Menú</button></div></div></div>`);
 }
 export function initScreens(){
