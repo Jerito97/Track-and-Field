@@ -30,14 +30,18 @@ export function resetAttempt(){
 }
 export const camLead=()=>LW*.36/S.ppm;
 export const CUEPOS={L:()=>[50,150],C:()=>[LW/2,150],R:()=>[LW-50,150]};
+// hurdle numbers: higher up and closer together; NUM_DX = gap between neighbours (logical px)
+export const NUM_DX=()=>Math.round(LW*.24), NUM_Y=108;
+export const NUMPOS={L:()=>[LW/2-NUM_DX(),NUM_Y],C:()=>[LW/2,NUM_Y],R:()=>[LW/2+NUM_DX(),NUM_Y]};
+export const cuePos=p=>(S.cue&&S.cue.type==='num'?NUMPOS:CUEPOS)[p]();
 export function sideCue(){
   let n; if(S.streak>=2) n=S.last==='L'?'R':'L'; else n=Math.random()<.5?'L':'R';
   S.streak=(n===S.last)?S.streak+1:1; S.last=n; S.cue={type:'side',side:n,t:0};
 }
 export function numCue(){ const p=['L','C','R'].sort(()=>Math.random()-.5); S.cue={type:'num',order:p,next:0,t:0}; }
 export function bothCue(){ S.cue={type:'both',t:0}; S.pend=null; tone(760,.05,'triangle',.03); }
-export function addRing(pos){ const [x,y]=CUEPOS[pos](); S.fx.push({k:'ring',x,y,t:0}); }
-export function addX(pos){ const [x,y]=CUEPOS[pos](); S.fx.push({k:'x',x,y,t:0}); }
+export function addRing(pos){ const [x,y]=cuePos(pos); S.fx.push({k:'ring',x,y,t:0}); }
+export function addX(pos){ const [x,y]=cuePos(pos); S.fx.push({k:'x',x,y,t:0}); }
 export function pop(text,o={}){ S.pops.push({text,t:0,dur:o.dur||1.4,col:o.col||'#fff',sub:o.sub||'',big:o.big||1,hold:!!o.hold}); }
 
 export const gS=v=>.42/(1+v/10)+1.3*Math.exp(-v/3);

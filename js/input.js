@@ -1,14 +1,16 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
-import {cv,OX,OY,SC,SW} from './canvas.js';
-import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,sideCue,startRun} from './game/core.js';
+import {cv,LW,OX,OY,SC,SW} from './canvas.js';
+import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,startRun} from './game/core.js';
 import {fieldAction,javThrow} from './game/field.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
 import {S,screen} from './state.js';
 import {showEventCard} from './ui/screens.js';
 
-export function zoneOf(clientX,three){ const f=clientX/SW; if(three) return f<1/3?'L':(f<2/3?'C':'R'); return f<.5?'L':'R'; }
+export function zoneOf(clientX,three){ const f=clientX/SW;
+  if(three){ const lx=(clientX-OX)/SC, h=NUM_DX()/2; return lx<LW/2-h?'L':(lx<LW/2+h?'C':'R'); }
+  return f<.5?'L':'R'; }
 export function onTap(pos){
   unlockAudio();
   if(screen!=='play'||!S) return;
