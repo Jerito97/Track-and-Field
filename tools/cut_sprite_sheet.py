@@ -2,10 +2,14 @@
 
 Every figure becomes one frame, in reading order (rows top to bottom, left to right).
 Frames share one canvas size: the hip (centre of the shorts) sits at the same x in
-every frame and the feet stand on the bottom edge. Writes <name>1.png ... and
-meta.json (frame count, size, hip x, feet y) next to them.
+every frame and the lowest point (feet, hands) on the bottom edge. Writes <name>1.png ...
+and meta.json (frame count, size, hip x, feet y) next to them.
 
-Usage: python3 tools/cut_sprite_sheet.py assets/source/base_run_sheet.jpg assets/characters/base/run run
+Sheets come at different zoom levels; with a reference animation folder the frames
+are scaled so the character's head (hair) is the same size as in the reference.
+
+Usage: python3 tools/cut_sprite_sheet.py SHEET OUT_DIR NAME [REFERENCE_DIR]
+  e.g. python3 tools/cut_sprite_sheet.py assets/source/base_start_sheet.jpg assets/characters/base/start start assets/characters/base/run
 Needs: Pillow, numpy
 """
 import json
@@ -45,12 +49,35 @@ def premultiplied_resize(img, size):
     return Image.fromarray(np.dstack([rgb, g[..., 3:]]).astype(np.uint8), 'RGBA')
 
 
-def main(src, outdir, name):
+def hair_area(rgb, m):
+    """Area of the dark-brown hair in a figure (source px): a stable measure of the character's scale."""
+    f = rgb / 255
+    mx, mn = f.max(2), f.min(2)
+    d = np.maximum(mx - mn, 1e-6)
+    r, g, b = f[..., 0], f[..., 1], f[..., 2]
+    h = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60
+    s = (mx - mn) / np.maximum(mx, 1e-6)
+    return int((m & (h >= 5) & (h < 50) & (s > .3) & (mx < .62) & (mx > .09)).sum())
+
+
+def main(src, outdir, name, ref=None):
     im = np.asarray(Image.open(src).convert('RGB')).astype(int)
     H, W, _ = im.shape
     light = im.min(2) > 215
     border = [(y, x) for x in range(W) for y in (0, H - 1)] + [(y, x) for y in range(H) for x in (0, W - 1)]
-    fg = ~flood(light, border)
+    bg = flood(light, border)
+    # paper showing through gaps (between the legs, under an arm) is pure white;
+    # the vest stripe and the shoes are a greyer white
+    holes, left = light & ~bg, light & ~bg
+    for sy, sx in zip(*np.nonzero(holes)):
+        if not left[sy, sx]:
+            continue
+        m = flood(left, [(sy, sx)])
+        left &= ~m
+        px = im[m]
+        if m.sum() >= 40 and px.mean() >= 249 and np.percentile(px.min(1), 5) >= 228:
+            bg |= m
+    fg = ~bg
     # figures = big connected blobs
     left, blobs = fg.copy(), []
     for sy, sx in zip(*np.nonzero(fg)):
@@ -88,21 +115,26 @@ def main(src, outdir, name):
         ys, xs = np.nonzero(m)
         sy, sx = np.nonzero(m & (v > .07) & (v < .35) & (s < .4))  # shorts
         frames.append((np.dstack([rgb, a]).astype(np.uint8), int(round(sx.mean())), ys.min(), ys.max(), xs.min(), xs.max()))
+    hair = float(np.median([hair_area(im, m) for m in blobs]))
+    scale = SCALE
+    if ref:
+        scale = SCALE * (json.loads((Path(ref) / 'meta.json').read_text())['hair_src'] / hair) ** .5
     L = max(f[1] - f[4] for f in frames) + 6
     R = max(f[5] - f[1] for f in frames) + 6
     T = max(f[3] - f[2] for f in frames) + 6
     out = Path(outdir)
     out.mkdir(parents=True, exist_ok=True)
-    size = (round((L + R) * SCALE), round((T + 2) * SCALE))
+    size = (round((L + R) * scale), round((T + 2) * scale))
     for i, (rgba, hx, top, bot, x0, x1) in enumerate(frames):
         c = Image.new('RGBA', (L + R, T + 2), (0, 0, 0, 0))
         piece = Image.fromarray(rgba[top:bot + 1, x0:x1 + 1], 'RGBA')
         c.paste(piece, (L - (hx - x0), T - (bot - top)), piece)
         premultiplied_resize(c, size).save(out / f'{name}{i + 1}.png', optimize=True)
-    meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * SCALE), 1), 'feet': round(float(T * SCALE), 1)}
+    meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * scale), 1), 'feet': round(float(T * scale), 1),
+            'scale': round(scale, 4), 'hair_src': hair}
     (out / 'meta.json').write_text(json.dumps(meta) + '\n')
     print(meta)
 
 
 if __name__ == '__main__':
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:5])

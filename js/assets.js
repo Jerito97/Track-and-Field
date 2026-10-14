@@ -23,8 +23,8 @@ const url=(who,kind,k)=>new URL(`${who}/${kind}/${k}.png`,BASE).href;
 export const SPR={};
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
-// run cycle per athlete id: {frames:[Image], w,h,hx,feet}
-export const RUNS={};
+// animations per athlete id: {run:{frames:[Image], w,h,hx,feet,scale}, start:{...}, ...}
+export const ANIMS={};
 // resolves once every image has loaded (or failed); drawing code falls back to vector art for anything missing
 export function loadAssets(){
   const waits=[];
@@ -36,7 +36,8 @@ export function loadAssets(){
     load(im,src); };
   CHARS.forEach(C=>{ if(!C.parts) return; const set=RIGS[C.id]={};
     Object.entries(C.parts).forEach(([k,v])=>rigPart(set,k,v,new URL(v.file,BASE).href)); });
-  CHARS.forEach(C=>{ if(!C.run) return; const {files,...meta}=C.run;
-    RUNS[C.id]={...meta,frames:files.map(f=>{ const im=new Image(); load(im,new URL(f,BASE).href); return im; })}; });
+  CHARS.forEach(C=>{ const set=ANIMS[C.id]={};
+    Object.entries(C.anims).forEach(([name,{files,...meta}])=>{
+      set[name]={...meta,frames:files.map(f=>{ const im=new Image(); load(im,new URL(f,BASE).href); return im; })}; }); });
   return Promise.all(waits);
 }

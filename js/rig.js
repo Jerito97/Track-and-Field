@@ -1,5 +1,5 @@
 // Athlete art: cut-out rig (image parts on the drawChar skeleton) and optional full-body sprites
-import {RIGS,RUNS,SPR} from './assets.js';
+import {ANIMS,RIGS,SPR} from './assets.js';
 import {ctx} from './canvas.js';
 import {INK} from './config.js';
 import {drawChar} from './draw/character.js';
@@ -46,9 +46,10 @@ export function drawAthlete(c,s,ox,oy,alt,J,C,effort,rot){
   if(rigReady(C)) return drawRig(c,s*RIG_FIT,ox,oy,alt/RIG_FIT,J===POSE.cheer?POSE.cheerRig:J,C,rot||0);
   return drawChar(c,s,ox,oy,alt,J,C,effort,rot);
 }
-// run cycle frames: true once all of C's frames loaded
-export function runReady(C){ const R=C&&RUNS[C.id]; return !!R&&R.frames.every(im=>im.complete&&im.naturalWidth>0); }
-// draw C's run cycle at phase p (1 = one full cycle, both legs), hip at x, feet at y, figure H logical px tall
-export function drawRun(c,C,x,feet,p,H){ const R=RUNS[C.id], n=R.frames.length, k=H/(R.feet-2.4);
-  const im=R.frames[((Math.floor(p*n)%n)+n)%n];
-  c.drawImage(im,x-R.hx*k,feet-R.feet*k,R.w*k,R.h*k); }
+// animation frames (run cycle, start, ...): true once all of C's frames for that animation loaded
+export function animReady(C,name){ const A=C&&ANIMS[C.id]&&ANIMS[C.id][name]; return !!A&&A.frames.every(im=>im.complete&&im.naturalWidth>0); }
+// frame i of C's animation, hip at x, lowest point at feet; K = logical px per image px (same for every animation)
+export function drawAnim(c,C,name,i,x,feet,K){ const A=ANIMS[C.id][name], n=A.frames.length;
+  c.drawImage(A.frames[((i%n)+n)%n],x-A.hx*K,feet-A.feet*K,A.w*K,A.h*K); }
+// K that makes the run cycle figure H logical px tall
+export function animScale(C,H){ const R=ANIMS[C.id].run; return H/(R.feet-2.4); }
