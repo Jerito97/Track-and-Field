@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun; cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun, javpull; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>/          animaciones de cada atleta (generadas o propias)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
@@ -31,6 +31,7 @@ tools/
   build_characters.py   genera las piezas de cada atleta y js/roster.js
   cut_base_sheet.py     recorta la hoja del personaje base en piezas
   cut_sprite_sheet.py   recorta una hoja de animación (fondo blanco) en cuadros alineados
+  javelin_split.py      separa figuras cuyas jabalinas cruzan a los vecinos (lo usa cut_sprite_sheet.py)
 js/
   main.js               arranque y loop principal
   config.js             datos: pruebas, colores; arma los atletas desde roster.js
@@ -92,6 +93,7 @@ En los 100 m y los 110 m con vallas todos los atletas usan animaciones dibujadas
 - `ljland`: caída en la arena (talones, deslizarse, sentado).
 - `javstand`: parado con la jabalina antes de arrancar (la jabalina viene en el dibujo).
 - `javrun`: carrera con la jabalina al hombro, 6 cuadros (hasta empezar el lanzamiento).
+- `javpull`: llevar la jabalina atrás, 4 cuadros, mientras mantenés apretado; la estrellita recorre la jabalina dibujada (el `meta.json` guarda la cola y la punta de cada cuadro).
 
 El salto en largo ya va todo con dibujos; solo el nulo (pisar la tabla) sigue con piezas.
 
@@ -106,7 +108,7 @@ python3 tools/cut_sprite_sheet.py assets/source/base_start_sheet.jpg assets/char
 python3 tools/build_characters.py
 ```
 
-La carrera es la referencia de tamaño: si se cambia, va sin el último argumento. Para animaciones con saltos agregá `--keep-height`, así los cuadros en el aire no se apoyan en el piso. El tamaño se iguala con la carrera por la mediana de cuatro medidas (pelo, musculosa + short, zapatillas y silueta), porque cada hoja generada dibuja el cuerpo con proporciones un poco distintas. `--measure=2,3` mide solo con esos cuadros (para hojas que mezclan vistas) y `--adjust=0.95` corrige a ojo. `--javelin` separa la cola de cada jabalina del atleta de al lado (en las hojas de jabalina se tocan).
+La carrera es la referencia de tamaño: si se cambia, va sin el último argumento. Para animaciones con saltos agregá `--keep-height`, así los cuadros en el aire no se apoyan en el piso. El tamaño se iguala con la carrera por la mediana de cuatro medidas (pelo, musculosa + short, zapatillas y silueta), porque cada hoja generada dibuja el cuerpo con proporciones un poco distintas. `--measure=2,3` mide solo con esos cuadros (para hojas que mezclan vistas) y `--adjust=0.95` corrige a ojo. `--javelin` separa la cola de cada jabalina del atleta de al lado (en las hojas de jabalina se tocan). Si las jabalinas cruzan por delante o por detrás de los vecinos, `--javelins="x0,y0,x1,y1;..."` da cada jabalina a mano (cola y punta en px de la hoja, una por figura, de izquierda a derecha; alcanza con aproximado): se ajusta la línea, se separan las figuras y a cada una se le devuelve su jabalina, redibujando la parte que quedaba tapada.
 
 ## Sprites de Yo
 

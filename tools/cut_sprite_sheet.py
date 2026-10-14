@@ -19,6 +19,11 @@ that mix views (e.g. a celebration with front-view frames for the podium).
 With --javelin, long javelins whose tail touches the neighbouring figure are cut
 loose at the tail end before the figures are separated.
 
+With --javelins="x0,y0,x1,y1;..." (sheet px, tail end to tip, one per figure) javelins
+that cross the neighbouring figures are lifted off and given back to their owner
+(tools/javelin_split.py); the lines only need to be roughly right. meta.json then also
+has 'jav': each frame's javelin tail x,y and tip x,y in frame px.
+
 With --adjust=0.95 the measured scale is multiplied by that factor, for a final touch by eye.
 
 Usage: python3 tools/cut_sprite_sheet.py SHEET OUT_DIR NAME [REFERENCE_DIR] [--keep-height] [--measure=2,3] [--adjust=0.95]
@@ -32,6 +37,9 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import javelin_split  # noqa: E402
 
 SCALE = .4  # source sheets are ~400 px per figure; the game draws them ~60 px tall
 
@@ -110,7 +118,7 @@ def cut_javelin_tails(fg, im):
     return fg
 
 
-def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0, javelin=False):
+def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0, javelin=False, javelins=None):
     im = np.asarray(Image.open(src).convert('RGB')).astype(int)
     H, W, _ = im.shape
     light = im.min(2) > 215
@@ -133,15 +141,23 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
     if javelin:
         fg = cut_javelin_tails(fg, im)
     # figures = big connected blobs
-    left, blobs = fg.copy(), []
-    for sy, sx in zip(*np.nonzero(fg)):
-        if not left[sy, sx]:
-            continue
-        m = flood(left, [(sy, sx)])
-        left &= ~m
-        blobs.append(m)
-    big = max(b.sum() for b in blobs)
-    blobs = [b for b in blobs if b.sum() > .4 * big]
+    if javelins:
+        pairs = javelin_split.split(im, fg, javelins, flood)
+        blobs, rgbs = [m for m, _, _ in pairs], [c for _, c, _ in pairs]
+        jav_of = {id(m): e for m, _, e in pairs}
+    else:
+        left, blobs = fg.copy(), []
+        for sy, sx in zip(*np.nonzero(fg)):
+            if not left[sy, sx]:
+                continue
+            m = flood(left, [(sy, sx)])
+            left &= ~m
+            blobs.append(m)
+        big = max(b.sum() for b in blobs)
+        blobs = [b for b in blobs if b.sum() > .4 * big]
+        rgbs = [im] * len(blobs)
+    rgb_of = {id(b): c for b, c in zip(blobs, rgbs)}
+    jav = []
     # reading order: a new row starts when the vertical centre jumps by more than half a figure
     info = sorted(((np.nonzero(b)[0].mean(), np.nonzero(b)[1].mean(), b) for b in blobs), key=lambda t: t[0])
     fh = np.median([np.ptp(np.nonzero(b)[0]) for b in blobs])
@@ -159,6 +175,7 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
     s = (im.max(2) - im.min(2)) / np.maximum(im.max(2), 1)
     frames = []
     for m in blobs:
+        im = rgb_of[id(m)]
         rim = np.zeros_like(m)
         for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             rim |= m & ~np.roll(np.roll(m, dy, 0), dx, 1)
@@ -173,8 +190,10 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         sy, sx = np.nonzero(m & (v > .07) & (v < .35) & (s < .4))  # shorts
         # bottom: own lowest point, or the row's ground line to keep jumps in the air
         bottom = ground[row_of[len(frames)]] if keep_height else ys.max()
+        if javelins:  # javelin tail and tip, from the hip and the bottom
+            jav.append([(float(p[0]) - int(round(sx.mean())), float(p[1]) - bottom) for p in jav_of[id(m)]])
         frames.append((np.dstack([rgb, a]).astype(np.uint8), int(round(sx.mean())), ys.min(), ys.max(), xs.min(), xs.max(), bottom))
-    per = [sizes(im, m) for i, m in enumerate(blobs) if not measure or i + 1 in measure]
+    per = [sizes(rgb_of[id(m)], m) for i, m in enumerate(blobs) if not measure or i + 1 in measure]
     size_src = {k: float(np.median([p[k] for p in per])) for k in per[0]}
     scale = SCALE
     if ref:
@@ -194,6 +213,8 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         premultiplied_resize(c, size).save(out / f'{name}{i + 1}.png', optimize=True)
     meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * scale), 1), 'feet': round(float(T * scale), 1),
             'scale': round(scale, 4), 'size_src': size_src}
+    if jav:  # javelin tail x,y and tip x,y in frame px, per frame
+        meta['jav'] = [[round((L + dx) * scale, 1) if k % 2 == 0 else round((T + dx) * scale, 1) for k, dx in enumerate(np.ravel(e))] for e in jav]
     (out / 'meta.json').write_text(json.dumps(meta) + '\n')
     print(meta)
 
@@ -203,4 +224,6 @@ if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     measure = next((a.split('=')[1] for a in flags if a.startswith('--measure=')), None)
     adjust = next((float(a.split('=')[1]) for a in flags if a.startswith('--adjust=')), 1.0)
-    main(*args[:4], javelin='--javelin' in flags, keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)
+    jl = next((a.split('=')[1] for a in flags if a.startswith('--javelins=')), None)
+    jl = [((float(q[0]), float(q[1])), (float(q[2]), float(q[3]))) for q in (s.split(',') for s in jl.split(';'))] if jl else None
+    main(*args[:4], javelins=jl, javelin='--javelin' in flags, keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)
