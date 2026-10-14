@@ -9,6 +9,9 @@ import {armsFor,bothCue,judge,pop} from './core.js';
 import {startReplay} from './replay.js';
 
 export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
+// long jump stretch, by flight progress u (0 take-off .. 1 landing): useless going up, best on the way down just
+// before landing (.78-.93), a little worse if left to the very last instant
+export const stretchQ=u=>u<.45?0:u<.78?(u-.45)/.33:u<=.93?1:Math.max(0,1-(u-.93)*6);
 export function updateField(dt){
   const ev=S.ev;
   if(S.phase==='ready'){ const k=armsFor(); S.pose=k==='jav'?{...POSE.stand,arms:[{a:-2.4,b:.55},POSE.stand.arms[1]]}:(k==='pole'?{...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]}:POSE.stand); return; }
@@ -42,8 +45,8 @@ export function fieldFoul(){
 export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
-    if(a&&a.k==='lj'&&!a.tapped&&S.meter&&S.meter.k==='air'){ a.tapped=1; a.q2=qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
-      a.mark=Math.max(.5,a.base+.7*a.q2-.25); a.x1=ev.line+a.mark; S.meter.to=a.x1; }
+    if(a&&a.k==='lj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.q2=stretchQ(Math.min(1,a.t/a.T)); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
+      a.mark=Math.max(.5,a.base+.7*a.q2-.25); a.x1=ev.line+a.mark; }
     if(a&&a.k==='pv'&&a.stage==='rise'&&!a.pushed&&S.meter){ a.pushed=1; a.q2=qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); }
     return;
   }
@@ -53,7 +56,6 @@ export function fieldAction(){
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=base-.25;
     S.act={k:'lj',t:0,T,x0:S.x,x1:ev.line+mark,base,mark,h,q2:0};
-    S.meter={k:'air',p:0,from:S.x,to:ev.line+base+.3,h};
     judge(1-d/ev.zone); noise(.12,.15); S.cueDelay=.12;
   } else if(ev.kind==='pv'){
     const q1=qOf(S.meter.p); S.meter.hit=S.meter.p; judge(q1);
@@ -72,7 +74,7 @@ export function updateAct(dt){
   if(a.k==='lj'){
     if(S.cueDelay>0){ S.cueDelay-=dt; if(S.cueDelay<=0&&!a.tapped) bothCue(); }
     const u=Math.min(1,a.t/a.T); S.x=a.x0+(a.x1-a.x0)*u; S.y=4*a.h*u*(1-u); S.pose=u<.15?POSE.hurdle:(a.tapped?{...POSE.ljAir,legs:[{a:1.75,b:.05},{a:1.65,b:.1}]}:POSE.ljAir);
-    if(S.meter&&S.meter.k==='air'){ S.meter.p=a.t/(a.T*.8); if(S.meter.p>1.25&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); a.mark=Math.max(.5,a.base-.25); a.x1=ev.line+a.mark; } }
+    if(u>=1&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); }
     if(u>=1){ S.y=0; S.pose=a.q2>.5?POSE.sit:POSE.lie; S.landX=S.x; sand(S.x); S.meter=null; landed(Math.floor(a.mark*100)/100); }
   } else if(a.k==='ljfoul'){
     S.x+=a.v*Math.max(0,1-a.t*1.5)*dt; S.pose=POSE.stumble;

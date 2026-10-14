@@ -38,11 +38,13 @@ export function drawField(V){
     for(let m=0;m<ev.line;m+=5){ const x=X(m); if(x>-20&&x<LW+20){ ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(x-1,GY+12,2,4); } }
   }
   if(ev.kind==='lj'){
-    const p0=X(ev.line+.5), p1=X(ev.line+10.5);
-    ctx.fillStyle='#f3ead2'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,20); ctx.fill(); ctx.stroke();
-    ctx.fillStyle='rgba(160,130,70,.25)'; for(let k=0;k<70;k++) ctx.fillRect(X(ev.line+1+hash(k)*9.3),GY-3+hash(k+50)*14,2,1.5);
-    const nb=GY-44; ctx.fillStyle='#fff'; ctx.fillRect(p0,nb,p1-p0,14); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(p0,nb,p1-p0,14);
-    for(let m=1;m<=10;m++){ const x=X(ev.line+m); ctx.fillStyle=INK; ctx.fillRect(x-.5,nb+10,1,4); txt(String(m),x,nb+7,'#e8262d',11,{stroke:null}); }
+    const p0=X(ev.line+.5), p1=X(ev.line+11), sd=26;
+    ctx.fillStyle='#f3ead2'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,sd); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(160,130,70,.25)'; for(let k=0;k<110;k++) ctx.fillRect(X(ev.line+1+hash(k)*9.8),GY-3+hash(k+50)*(sd-4),2,1.5);
+    // distance board along the pit: a mark every half metre, numbers every metre
+    const nb=GY-48; ctx.fillStyle='#fff'; ctx.fillRect(p0,nb,p1-p0,18); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(p0,nb,p1-p0,18);
+    ctx.fillStyle='#e8262d'; ctx.fillRect(p0,nb+15,p1-p0,3);
+    for(let m=1;m<=10.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     const bx=X(ev.line); ctx.fillStyle='#fff'; ctx.fillRect(bx-.25*s,GY-4,.25*s,14); ctx.fillStyle='#e8262d'; ctx.fillRect(bx-1,GY-4,3,14);
     rivalFlags(V,X,GY);
   }
@@ -57,15 +59,10 @@ export function drawField(V){
     for(let h=2;h<=7;h++){ txt(h+' m',ux+16,GY-h*s,'#fff',11); }
     if(V.bar){ const by=GY-V.bar*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ux-12,by); ctx.lineTo(ux+12,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke(); }
   }
-  if(V.zone||S.phase==='ready'||S.phase==='run'){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
+  if(ev.kind!=='lj'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
       ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
       ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
-  if(!V.replay&&V.meter&&V.meter.k==='air'){ const m=V.meter, N=24;
-    const pt=u=>[X(m.from+(m.to-m.from)*u),GY-4*m.h*u*(1-u)*s];
-    ctx.fillStyle='rgba(255,255,255,.85)'; for(let i=0;i<=N;i++){ const [x,y]=pt(i/N); ctx.beginPath(); ctx.arc(x,y,1.6,0,Math.PI*2); ctx.fill(); }
-    const [ex,ey]=pt(1); target(ex,ey);
-    const pp=m.hit!=null?m.hit:m.p; const [sx,sy]=pt(Math.min(pp,1.25)); drawStar(sx,sy,9,pp); }
   const px=X(V.x);
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
   const fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);

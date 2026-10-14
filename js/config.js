@@ -9,8 +9,8 @@ export const CHARS=ROSTER.map(r=>{ const p=r.palette;
 export const EVENTS=[
  {id:'100',name:'100 metros',tag:'100 M',type:'sprint',dist:100,wr:8.90,
   help:'Tocá el <b>botón verde</b> del lado donde aparece: izquierda o derecha. Cada acierto te da velocidad y cada error te frena. Cerca de la meta aparecen <b>dos botones rojos</b>: tocá los dos a la vez para tirarte de cabeza. Si lo hacés justo al llegar, ganás unas centésimas.'},
- {id:'lj',name:'Salto en largo',tag:'LARGO',type:'field',kind:'lj',line:42,zone:10,wr:9.50,ref:7.9,
-  help:'Tocá los <b>botones verdes</b> para tomar carrera. Al llegar a la <b>zona amarilla</b> ya no ganás velocidad: tocá los <b>dos rojos</b> para despegar, lo más cerca posible de la tabla. En el aire, una <b>estrellita</b> recorre el salto: tocá los dos rojos cuando llegue al final. Si pasás la tabla, es <b>nulo</b>. Tenés 3 rondas.'},
+ {id:'lj',name:'Salto en largo',tag:'LARGO',type:'field',kind:'lj',line:42,zone:4,wr:9.50,ref:8.8,
+  help:'<b>1. Correr:</b> tocá los <b>botones verdes</b> para tomar velocidad. <b>2. Saltar:</b> cerca de la tabla aparecen <b>dos rojos</b>: tocalos juntos para despegar, lo más pegado posible a la tabla. Si la pisás, es <b>nulo</b>. <b>3. Estirarse:</b> en el aire, tocá de nuevo los dos rojos cuando ya vas bajando, justo antes de caer, para estirar las piernas y llegar más lejos. Tenés 3 rondas.'},
  {id:'110h',name:'110 m con vallas',tag:'VALLAS',type:'sprint',hurdles:true,dist:110,wr:12.00,
   help:'Para cada valla aparecen <b>tres botones numerados</b> (salen apenas saltás la anterior). Tocalos en orden: 1, 2 y 3. Al completar los tres, tu atleta salta la valla. Si llegás a la valla sin terminar la tirás, y si tocás el número equivocado perdés velocidad. Cerca de la meta, <b>dos rojos</b>: tocalos juntos para tirarte de cabeza.'},
  {id:'pv',name:'Salto con garrocha',tag:'GARROCHA',type:'field',kind:'pv',line:40,zone:9,wr:6.80,ref:5.5,
