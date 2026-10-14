@@ -4,6 +4,7 @@ import {INK} from '../config.js';
 import {drawChar} from '../draw/character.js';
 import {POSE} from '../poses.js';
 import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
+import {POLE_ART} from '../assets.js';
 import {ATH,ME,S} from '../state.js';
 import {rec} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -69,7 +70,9 @@ export function drawField(V){
   // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
   { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):ev.kind==='pv'?pvFrame(ME(),V):null;
-    if(f){ const K=animScale(ME(),s*FIELD_H), feet=GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
+    if(f){ const K=animScale(ME(),s*FIELD_H), A0=ME().anims[f[0]], fi0=((f[1]%A0.frames)+A0.frames)%A0.frames;
+      // frames placed by the hip (pole vault in the air: the body turns over) or by their lowest point
+      const feet=f[2]&&A0.hipy?GY-f[2].hip*s+(A0.feet-A0.hipy[fi0])*K:GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
       // javelin in the frame: its tail and tip on screen (for the star); the whole javelin goes underneath, tip on the
       // drawn tip, so every frame shows it at full length (the sheets draw it shorter or cut off at the tail)
       const A=ME().anims[f[0]], fi=((f[1]%A.frames)+A.frames)%A.frames, j=A.jav&&A.jav[fi], hd=A.hands&&A.hands[fi];
@@ -98,7 +101,16 @@ export function rivalFlags(V,X,GY){
 }
 export function drawPole(V,X,GY,fig){
   const ev=V.ev, s=V.ppm, a=V.act, L=4.6*s, [hx,hy]=fig.hand;
-  const line=(x1,y1,x2,y2,cx,cy)=>{ ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x1,y1); if(cx!=null) ctx.quadraticCurveTo(cx,cy,x2,y2); else ctx.lineTo(x2,y2); ctx.stroke(); ctx.strokeStyle='#7ccf3a'; ctx.lineWidth=2.6; ctx.stroke(); };
+  // pole from (x1,y1) to (x2,y2), bent through (cx,cy): the drawn pole in short straight slices along the curve
+  // (grip end at x2,y2 when gripEnd), or a plain line until it loads
+  const line=(x1,y1,x2,y2,cx,cy,gripEnd)=>{
+    if(POLE_ART.complete&&POLE_ART.naturalWidth){ const N=cx!=null?16:1, P=u=>cx!=null?[(1-u)*(1-u)*x1+2*u*(1-u)*cx+u*u*x2,(1-u)*(1-u)*y1+2*u*(1-u)*cy+u*u*y2]:[x1+(x2-x1)*u,y1+(y2-y1)*u];
+      const W=POLE_ART.naturalWidth, Hh=POLE_ART.naturalHeight, h=L*.03;
+      for(let k=0;k<N;k++){ const [ax,ay]=P(k/N), [bx,by]=P((k+1)/N), len=Math.hypot(bx-ax,by-ay), sx0=gripEnd?(1-(k+1)/N)*W:k/N*W;
+        ctx.save(); ctx.translate(ax,ay); ctx.rotate(Math.atan2(by-ay,bx-ax)); if(gripEnd) ctx.scale(-1,1);
+        ctx.drawImage(POLE_ART,sx0,0,W/N,Hh,gripEnd?-len-.5:0,-h/2,len+.5,h); ctx.restore(); }
+      return; }
+    ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x1,y1); if(cx!=null) ctx.quadraticCurveTo(cx,cy,x2,y2); else ctx.lineTo(x2,y2); ctx.stroke(); ctx.strokeStyle='#7ccf3a'; ctx.lineWidth=2.6; ctx.stroke(); };
   const tipX=X(ev.line)-2, tipY=GY+2;
   if(!a||a.k==='pvfoul'){ const d=ev.line-V.x; let ang=a?.1:.15+.75*clamp(d/14,0,1);
     if(fig.hands&&!a&&(V.v||0)<=.2) ang=Math.atan2(fig.hands[1]-fig.hands[3],fig.hands[2]-fig.hands[0]);
@@ -108,11 +120,11 @@ export function drawPole(V,X,GY,fig){
     line(hx-Math.cos(ang)*back,hy+Math.sin(ang)*back,fx,fy);
     if(!V.replay&&V.meter&&V.meter.k==='pole'&&V.meter.started){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
     return; }
-  if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy);
+  if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy,true);
     if(!V.replay&&V.meter&&V.meter.k==='rise'){ const p=Math.min(V.meter.hit!=null?V.meter.hit:V.meter.p,1.25), q=Math.min(p,1), u=1-q;
       const bx=u*u*tipX+2*u*q*cx+q*q*hx, by=u*u*tipY+2*u*q*cy+q*q*hy; target(hx,hy); drawStar(bx+(p>1?(p-1)*30:0),by-(p>1?(p-1)*30:0),9,p); }
     return; }
-  line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L);
+  line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L,null,null,true);
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.
@@ -144,12 +156,19 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
-// pole vault: drawn frames where we have them (standing, running, also while lowering the pole, planting); rig pieces for the rest
+// pole vault: drawn frames for the whole jump (standing, running, lowering the pole, planting, in the air, on the mat);
+// rig pieces for the foul
 function pvFrame(C,V){
   const a=V.act;
   // planting the pole: last step, arms up, take-off, hanging from the pole as the rise starts
   if(a&&a.k==='pv'&&(a.stage==='plant'||a.stage==='rise'&&(a.t||0)<.12)){ const t=a.stage==='plant'?a.t||0:1;
     return animReady(C,'pvplant')?['pvplant',t<.05?0:t<.11?1:t<.17?2:3]:null; }
+  // in the air, placed by the hip (about 1 m above V.y, like the rig): swinging up the pole, over the bar, falling
+  // back (the hip drops toward the mat), then on the mat: lying, legs down, sitting up with a fist up
+  if(a&&a.k==='pv'&&a.stage==='rise'){ const r=a.r??0; return animReady(C,'pvswing')?['pvswing',r<.35?0:r<.6?1:r<.85?2:3,{hip:(V.y||0)+1}]:null; }
+  if(a&&a.k==='pv'&&a.stage==='over') return animReady(C,'pvover')?['pvover',0,{hip:(V.y||0)+1}]:null;
+  if(a&&a.k==='pv'&&a.stage==='fall'&&a.pt==null){ const y=V.y||0; return animReady(C,'pvover')?['pvover',2,{hip:y+.4+.6*clamp((y-.85)/2,0,1)}]:null; }
+  if(a&&a.k==='pv'&&a.stage==='fall'){ const pt=a.pt; return animReady(C,'pvland')?['pvland',pt<.25?0:pt<.7?1:2]:null; }
   if(a) return null;
   if((V.v||0)>.2) return animReady(C,'pvrun')?['pvrun',Math.floor(V.x/4*C.anims.pvrun.frames)]:null;
   return animReady(C,'pvstand')?['pvstand',Math.floor(S.clock*1.2)%2]:null;

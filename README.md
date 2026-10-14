@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun, javpull, javthrow, javafter, pvstand, pvrun, pvplant; cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun, javpull, javthrow, javafter, pvstand, pvrun, pvplant, pvswing, pvover, pvland; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>.png       animaciones de cada atleta: todos los cuadros en fila en una imagen (generadas;
                         un cuadro propio va en <id>/<anim>/<anim>N.png y reemplaza al generado)
@@ -102,6 +102,10 @@ En los 100 m y los 110 m con vallas todos los atletas usan animaciones dibujadas
 - `pvstand`: parado antes de la garrocha. Las hojas de garrocha vienen sin la garrocha (la dibuja el juego, doblada); `--hands="x0,y0,x1,y1;..."` marca la mano de atrás y la de adelante de cada cuadro y la garrocha pasa por las dos.
 - `pvrun`: carrera con la garrocha, 6 cuadros (también mientras se baja la garrocha; la garrocha sale del puño de adelante).
 - `pvplant`: clavar la garrocha y despegar, 4 cuadros (último paso, brazos arriba, despegue, colgado al empezar a subir).
+- `pvswing`: subida colgado de la garrocha, 4 cuadros (colgado, rodillas arriba, cabeza abajo, girando).
+- `pvover`: pasar la varilla (cuadro 1) y caer de espaldas (cuadro 3; el 2 no se usa).
+- `pvland`: en el colchón (acostado, piernas bajando, sentado con el puño arriba).
+- En el aire, los cuadros de garrocha se ubican por la cadera (`hipy` en el `meta.json`), no por el punto más bajo, porque el atleta se da vuelta. La garrocha es `assets/pole.png` (de `assets/source/pole.jpg`), doblada en tramos.
 
 El salto en largo ya va todo con dibujos; solo el nulo (pisar la tabla) sigue con piezas.
 

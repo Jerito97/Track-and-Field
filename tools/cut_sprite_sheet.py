@@ -162,7 +162,7 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         rgbs = [im] * len(blobs)
         jav_of = {}
     rgb_of = {id(b): c for b, c in zip(blobs, rgbs)}
-    jav, hand = [], []
+    jav, hand, hipy = [], [], []
     # reading order: a new row starts when the vertical centre jumps by more than half a figure
     info = sorted(((np.nonzero(b)[0].mean(), np.nonzero(b)[1].mean(), b) for b in blobs), key=lambda t: t[0])
     fh = np.median([np.ptp(np.nonzero(b)[0]) for b in blobs])
@@ -203,6 +203,7 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         if jav_of:  # javelin tail and tip, from the hip and the bottom
             e = jav_of[id(m)]
             jav.append([(float(p[0]) - int(round(sx.mean())), float(p[1]) - bottom) for p in e] if e else None)
+        hipy.append(float(sy.mean()) - bottom)  # shorts centre, from the bottom
         frames.append((np.dstack([rgb, a]).astype(np.uint8), int(round(sx.mean())), ys.min(), ys.max(), xs.min(), xs.max(), bottom))
     per = [sizes(rgb_of[id(m)], m) for i, m in enumerate(blobs) if not measure or i + 1 in measure]
     size_src = {k: float(np.median([p[k] for p in per])) for k in per[0]}
@@ -224,6 +225,8 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         premultiplied_resize(c, size).save(out / f'{name}{i + 1}.png', optimize=True)
     meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * scale), 1), 'feet': round(float(T * scale), 1),
             'scale': round(scale, 4), 'size_src': size_src}
+    # hip (shorts centre) height in frame px, per frame: for frames placed by the hip (pole vault)
+    meta['hipy'] = [round((T + dy) * scale, 1) for dy in hipy]
     if hand:  # back hand x,y and front hand x,y in frame px, per frame
         meta['hands'] = [[round((L + dx) * scale, 1) if k % 2 == 0 else round((T + dx) * scale, 1) for k, dx in enumerate(np.ravel(e))] for e in hand]
     if jav:  # javelin tail x,y and tip x,y in frame px, per frame

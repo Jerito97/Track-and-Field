@@ -81,7 +81,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "yo/dip.png",
@@ -90,7 +96,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "yo/hurdle.png",
@@ -99,7 +109,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "yo/javafter.png",
@@ -108,7 +123,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "yo/javpull.png",
@@ -118,6 +138,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -153,6 +179,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -200,6 +234,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -223,6 +261,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -252,7 +296,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "yo/ljland.png",
@@ -261,7 +311,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "yo/ljstretch.png",
@@ -270,7 +325,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "yo/ljtakeoff.png",
@@ -279,7 +339,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "yo/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "yo/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "yo/pvplant.png",
@@ -289,6 +383,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -324,6 +424,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -371,6 +479,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -386,6 +498,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "yo/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "yo/run.png",
     "frames": 8,
@@ -393,7 +546,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "yo/stand.png",
@@ -402,7 +565,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "yo/start.png",
@@ -411,7 +578,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "yo/trip.png",
@@ -420,7 +591,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  },
@@ -502,7 +677,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "santi/dip.png",
@@ -511,7 +692,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "santi/hurdle.png",
@@ -520,7 +705,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "santi/javafter.png",
@@ -529,7 +719,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "santi/javpull.png",
@@ -539,6 +734,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -574,6 +775,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -621,6 +830,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -644,6 +857,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -673,7 +892,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "santi/ljland.png",
@@ -682,7 +907,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "santi/ljstretch.png",
@@ -691,7 +921,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "santi/ljtakeoff.png",
@@ -700,7 +935,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "santi/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "santi/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "santi/pvplant.png",
@@ -710,6 +979,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -745,6 +1020,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -792,6 +1075,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -807,6 +1094,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "santi/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "santi/run.png",
     "frames": 8,
@@ -814,7 +1142,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "santi/stand.png",
@@ -823,7 +1161,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "santi/start.png",
@@ -832,7 +1174,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "santi/trip.png",
@@ -841,7 +1187,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  },
@@ -923,7 +1273,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "nacho/dip.png",
@@ -932,7 +1288,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "nacho/hurdle.png",
@@ -941,7 +1301,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "nacho/javafter.png",
@@ -950,7 +1315,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "nacho/javpull.png",
@@ -960,6 +1330,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -995,6 +1371,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -1042,6 +1426,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -1065,6 +1453,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -1094,7 +1488,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "nacho/ljland.png",
@@ -1103,7 +1503,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "nacho/ljstretch.png",
@@ -1112,7 +1517,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "nacho/ljtakeoff.png",
@@ -1121,7 +1531,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "nacho/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "nacho/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "nacho/pvplant.png",
@@ -1131,6 +1575,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -1166,6 +1616,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -1213,6 +1671,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -1228,6 +1690,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "nacho/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "nacho/run.png",
     "frames": 8,
@@ -1235,7 +1738,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "nacho/stand.png",
@@ -1244,7 +1757,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "nacho/start.png",
@@ -1253,7 +1770,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "nacho/trip.png",
@@ -1262,7 +1783,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  },
@@ -1344,7 +1869,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "rafa/dip.png",
@@ -1353,7 +1884,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "rafa/hurdle.png",
@@ -1362,7 +1897,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "rafa/javafter.png",
@@ -1371,7 +1911,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "rafa/javpull.png",
@@ -1381,6 +1926,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -1416,6 +1967,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -1463,6 +2022,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -1486,6 +2049,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -1515,7 +2084,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "rafa/ljland.png",
@@ -1524,7 +2099,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "rafa/ljstretch.png",
@@ -1533,7 +2113,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "rafa/ljtakeoff.png",
@@ -1542,7 +2127,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "rafa/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "rafa/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "rafa/pvplant.png",
@@ -1552,6 +2171,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -1587,6 +2212,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -1634,6 +2267,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -1649,6 +2286,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "rafa/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "rafa/run.png",
     "frames": 8,
@@ -1656,7 +2334,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "rafa/stand.png",
@@ -1665,7 +2353,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "rafa/start.png",
@@ -1674,7 +2366,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "rafa/trip.png",
@@ -1683,7 +2379,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  },
@@ -1765,7 +2465,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "lucho/dip.png",
@@ -1774,7 +2480,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "lucho/hurdle.png",
@@ -1783,7 +2493,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "lucho/javafter.png",
@@ -1792,7 +2507,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "lucho/javpull.png",
@@ -1802,6 +2522,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -1837,6 +2563,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -1884,6 +2618,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -1907,6 +2645,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -1936,7 +2680,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "lucho/ljland.png",
@@ -1945,7 +2695,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "lucho/ljstretch.png",
@@ -1954,7 +2709,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "lucho/ljtakeoff.png",
@@ -1963,7 +2723,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "lucho/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "lucho/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "lucho/pvplant.png",
@@ -1973,6 +2767,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -2008,6 +2808,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -2055,6 +2863,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -2070,6 +2882,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "lucho/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "lucho/run.png",
     "frames": 8,
@@ -2077,7 +2930,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "lucho/stand.png",
@@ -2086,7 +2949,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "lucho/start.png",
@@ -2095,7 +2962,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "lucho/trip.png",
@@ -2104,7 +2975,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  },
@@ -2186,7 +3061,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "beto/dip.png",
@@ -2195,7 +3076,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "beto/hurdle.png",
@@ -2204,7 +3089,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "beto/javafter.png",
@@ -2213,7 +3103,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "beto/javpull.png",
@@ -2223,6 +3118,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -2258,6 +3159,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -2305,6 +3214,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -2328,6 +3241,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -2357,7 +3276,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "beto/ljland.png",
@@ -2366,7 +3291,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "beto/ljstretch.png",
@@ -2375,7 +3305,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "beto/ljtakeoff.png",
@@ -2384,7 +3319,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "beto/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "beto/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "beto/pvplant.png",
@@ -2394,6 +3363,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -2429,6 +3404,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -2476,6 +3459,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -2491,6 +3478,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "beto/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "beto/run.png",
     "frames": 8,
@@ -2498,7 +3526,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "beto/stand.png",
@@ -2507,7 +3545,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "beto/start.png",
@@ -2516,7 +3558,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "beto/trip.png",
@@ -2525,7 +3571,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  },
@@ -2607,7 +3657,13 @@ export const ROSTER=[
     "h": 173,
     "hx": 33.1,
     "feet": 172.1,
-    "scale": 0.2151
+    "scale": 0.2151,
+    "hipy": [
+     107.8,
+     96.9,
+     96.0,
+     106.6
+    ]
    },
    "dip": {
     "file": "tomi/dip.png",
@@ -2616,7 +3672,11 @@ export const ROSTER=[
     "h": 148,
     "hx": 56.3,
     "feet": 147.4,
-    "scale": 0.1962
+    "scale": 0.1962,
+    "hipy": [
+     84.8,
+     86.7
+    ]
    },
    "hurdle": {
     "file": "tomi/hurdle.png",
@@ -2625,7 +3685,12 @@ export const ROSTER=[
     "h": 158,
     "hx": 59.5,
     "feet": 157.3,
-    "scale": 0.2694
+    "scale": 0.2694,
+    "hipy": [
+     87.9,
+     118.7,
+     94.6
+    ]
    },
    "javafter": {
     "file": "tomi/javafter.png",
@@ -2634,7 +3699,12 @@ export const ROSTER=[
     "h": 172,
     "hx": 52.3,
     "feet": 171.9,
-    "scale": 0.2143
+    "scale": 0.2143,
+    "hipy": [
+     108.4,
+     97.5,
+     109.0
+    ]
    },
    "javpull": {
     "file": "tomi/javpull.png",
@@ -2644,6 +3714,12 @@ export const ROSTER=[
     "hx": 137.1,
     "feet": 178.3,
     "scale": 0.3123,
+    "hipy": [
+     104.5,
+     105.7,
+     108.0,
+     110.3
+    ],
     "jav": [
      [
       75.7,
@@ -2679,6 +3755,14 @@ export const ROSTER=[
     "hx": 66.6,
     "feet": 181.0,
     "scale": 0.3435,
+    "hipy": [
+     98.2,
+     97.0,
+     98.2,
+     99.3,
+     97.2,
+     101.0
+    ],
     "jav": [
      [
       1.7,
@@ -2726,6 +3810,10 @@ export const ROSTER=[
     "hx": 103.0,
     "feet": 176.2,
     "scale": 0.2846,
+    "hipy": [
+     95.4,
+     94.3
+    ],
     "jav": [
      [
       2.8,
@@ -2749,6 +3837,12 @@ export const ROSTER=[
     "hx": 128.7,
     "feet": 182.7,
     "scale": 0.2324,
+    "hipy": [
+     113.3,
+     103.9,
+     100.3,
+     121.5
+    ],
     "jav": [
      [
       76.0,
@@ -2778,7 +3872,13 @@ export const ROSTER=[
     "h": 178,
     "hx": 47.2,
     "feet": 177.4,
-    "scale": 0.2758
+    "scale": 0.2758,
+    "hipy": [
+     105.0,
+     107.6,
+     109.6,
+     106.6
+    ]
    },
    "ljland": {
     "file": "tomi/ljland.png",
@@ -2787,7 +3887,12 @@ export const ROSTER=[
     "h": 150,
     "hx": 54.8,
     "feet": 149.4,
-    "scale": 0.2599
+    "scale": 0.2599,
+    "hipy": [
+     95.4,
+     90.7,
+     106.2
+    ]
    },
    "ljstretch": {
     "file": "tomi/ljstretch.png",
@@ -2796,7 +3901,12 @@ export const ROSTER=[
     "h": 156,
     "hx": 48.5,
     "feet": 155.1,
-    "scale": 0.2712
+    "scale": 0.2712,
+    "hipy": [
+     102.2,
+     129.3,
+     93.8
+    ]
    },
    "ljtakeoff": {
     "file": "tomi/ljtakeoff.png",
@@ -2805,7 +3915,41 @@ export const ROSTER=[
     "h": 162,
     "hx": 54.3,
     "feet": 161.2,
-    "scale": 0.2953
+    "scale": 0.2953,
+    "hipy": [
+     103.7,
+     100.8,
+     113.7,
+     96.7
+    ]
+   },
+   "pvland": {
+    "file": "tomi/pvland.png",
+    "frames": 3,
+    "w": 149,
+    "h": 130,
+    "hx": 81.9,
+    "feet": 129.5,
+    "scale": 0.2796,
+    "hipy": [
+     97.1,
+     108.3,
+     86.2
+    ]
+   },
+   "pvover": {
+    "file": "tomi/pvover.png",
+    "frames": 3,
+    "w": 164,
+    "h": 181,
+    "hx": 80.6,
+    "feet": 180.9,
+    "scale": 0.2761,
+    "hipy": [
+     117.2,
+     106.5,
+     126.9
+    ]
    },
    "pvplant": {
     "file": "tomi/pvplant.png",
@@ -2815,6 +3959,12 @@ export const ROSTER=[
     "hx": 47.0,
     "feet": 220.7,
     "scale": 0.2763,
+    "hipy": [
+     147.9,
+     147.4,
+     130.3,
+     127.0
+    ],
     "hands": [
      [
       21.3,
@@ -2850,6 +4000,14 @@ export const ROSTER=[
     "hx": 38.9,
     "feet": 195.3,
     "scale": 0.2758,
+    "hipy": [
+     114.5,
+     121.6,
+     116.4,
+     108.1,
+     114.1,
+     114.1
+    ],
     "hands": [
      [
       41.9,
@@ -2897,6 +4055,10 @@ export const ROSTER=[
     "hx": 34.0,
     "feet": 172.9,
     "scale": 0.2178,
+    "hipy": [
+     107.9,
+     108.8
+    ],
     "hands": [
      [
       11.5,
@@ -2912,6 +4074,47 @@ export const ROSTER=[
      ]
     ]
    },
+   "pvswing": {
+    "file": "tomi/pvswing.png",
+    "frames": 4,
+    "w": 108,
+    "h": 219,
+    "hx": 62.8,
+    "feet": 218.1,
+    "scale": 0.2843,
+    "hipy": [
+     133.7,
+     166.3,
+     119.9,
+     105.4
+    ],
+    "hands": [
+     [
+      75.3,
+      12.5,
+      56.9,
+      8.2
+     ],
+     [
+      74.8,
+      60.3,
+      57.1,
+      56.6
+     ],
+     [
+      61.7,
+      108.6,
+      60.3,
+      104.3
+     ],
+     [
+      82.4,
+      206.1,
+      88.1,
+      209.0
+     ]
+    ]
+   },
    "run": {
     "file": "tomi/run.png",
     "frames": 8,
@@ -2919,7 +4122,17 @@ export const ROSTER=[
     "h": 170,
     "hx": 48.8,
     "feet": 169.2,
-    "scale": 0.4
+    "scale": 0.4,
+    "hipy": [
+     109.6,
+     107.8,
+     99.7,
+     97.3,
+     106.0,
+     106.1,
+     101.9,
+     97.9
+    ]
    },
    "stand": {
     "file": "tomi/stand.png",
@@ -2928,7 +4141,11 @@ export const ROSTER=[
     "h": 177,
     "hx": 31.7,
     "feet": 176.1,
-    "scale": 0.2399
+    "scale": 0.2399,
+    "hipy": [
+     110.4,
+     104.0
+    ]
    },
    "start": {
     "file": "tomi/start.png",
@@ -2937,7 +4154,11 @@ export const ROSTER=[
     "h": 115,
     "hx": 50.5,
     "feet": 115.0,
-    "scale": 0.202
+    "scale": 0.202,
+    "hipy": [
+     74.0,
+     59.8
+    ]
    },
    "trip": {
     "file": "tomi/trip.png",
@@ -2946,7 +4167,11 @@ export const ROSTER=[
     "h": 147,
     "hx": 56.7,
     "feet": 146.2,
-    "scale": 0.2138
+    "scale": 0.2138,
+    "hipy": [
+     90.4,
+     88.7
+    ]
    }
   }
  }

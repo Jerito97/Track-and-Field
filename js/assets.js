@@ -23,6 +23,8 @@ const url=(who,kind,k)=>new URL(`${who}/${kind}/${k}.png`,BASE).href;
 export const SPR={};
 // the javelin on its own (assets/javelin.png): flying, stuck in the grass, and under the drawn frames
 export const JAV_ART=new Image();
+// the pole on its own (assets/pole.png, grip on the left): bent and drawn by the pole vault
+export const POLE_ART=new Image();
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
 // animations per athlete id: {run:{im (strip of frames side by side), frames (count), w,h,hx,feet,scale}, start:{...}, ...}
@@ -41,5 +43,6 @@ export function loadAssets(){
   CHARS.forEach(C=>{ const set=ANIMS[C.id]={};
     Object.entries(C.anims).forEach(([name,{file,...meta}])=>{ const im=new Image(); load(im,new URL(file,BASE).href); set[name]={...meta,im}; }); });
   load(JAV_ART,new URL('../assets/javelin.png',import.meta.url).href);
+  load(POLE_ART,new URL('../assets/pole.png',import.meta.url).href);
   return Promise.all(waits);
 }
