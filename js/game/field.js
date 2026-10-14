@@ -8,8 +8,10 @@ import {clamp,rand} from '../utils.js';
 import {armsFor,bothCue,judge,pop} from './core.js';
 import {startReplay} from './replay.js';
 
-// pole vault: seconds for the star to run the pole once it's lowered
-const POLE_T=1.0;
+// pole vault (as in the original): hold both buttons to lower the pole (the star runs it in POLE_T s; let go and
+// it comes back up), it plants itself PV_REACH m before the box if you're still holding; then release both at the
+// top of the swing
+const POLE_T=1.0, PV_REACH=3.5;
 export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
 // within .44-.56), fading to nothing at .2 and .8
@@ -25,7 +27,7 @@ export function updateField(dt){
       S.zone=true; S.cue=null; tone(880,.08,'triangle',.05);
       S.pops.push({text:'¡PREPARATE!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true});
       if(ev.kind==='lj') bothCue();
-      else if(ev.kind==='pv'){ S.meter={k:'pole',p:0,started:false}; bothCue(); }
+      else if(ev.kind==='pv'){ S.meter={k:'pole',p:0,held:false}; S.cue={type:'both',hold:true,t:0}; }
       else S.cue={type:'hold',t:0};
     }
     const sp=S.v;
@@ -35,7 +37,9 @@ export function updateField(dt){
       if(S.meter){ S.meter.p+=dt/.7; if(S.meter.p>=1.2) javThrow(); }
     } else {
       S.pose=S.v>.2?runPose(S.legP,Math.min(1,S.v/4),armsFor()):S.pose;
-      if(S.zone&&ev.kind==='pv'&&S.meter.started){ S.meter.p+=dt/POLE_T; if(S.meter.p>=1.25){ S.meter.p=1.25; fieldAction(); } }
+      if(S.zone&&ev.kind==='pv'){ const m=S.meter; m.held=!!S.held2;
+        m.p=m.held?Math.min(1.25,m.p+dt/POLE_T):Math.max(0,m.p-dt/POLE_T*1.5);
+        if(m.held&&m.p>0&&ev.line-S.x<=PV_REACH) plantPole(); }
     }
     if(S.phase==='run'&&S.x>=ev.line){ S.x=ev.line; fieldFoul(); }
     return;
@@ -52,21 +56,22 @@ export function fieldAction(){
   if(S.phase==='act'){
     if(a&&a.k==='lj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,a.t/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.mark=Math.max(.5,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; a.x1=ev.line+a.mark; }
-    if(a&&a.k==='pv'&&a.stage==='rise'&&!a.pushed&&S.meter){ a.pushed=1; a.q2=qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); }
     return;
   }
   if(S.phase!=='run'||!S.zone) return;
-  if(ev.kind==='pv'&&!S.meter.started){ S.meter.started=true; tone(500,.06,'triangle',.04); bothCue(); return; }
   S.cue=null;
   const d=Math.max(0,ev.line-S.x), v=S.v;
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=Math.max(.5,base+LJ_NOPUSH);
     S.act={k:'lj',t:0,T,x0:S.x,x1:ev.line+mark,base,mark,h,q2:0};
     judge(1-d/ev.zone); noise(.12,.15); S.cueDelay=.12;
-  } else if(ev.kind==='pv'){
-    const q1=qOf(S.meter.p); S.meter.hit=S.meter.p; judge(q1);
-    S.act={k:'pv',t:0,q1,v,pushed:0,stage:'plant',H:1.0+.44*v*(.72+.28*q1)}; tone(300,.15,'triangle',.05);
   }
+  S.phase='act';
+}
+// pole vault: the pole goes into the box; how far down it was (the star on it) sets the height
+export function plantPole(){
+  const v=S.v, q1=qOf(S.meter.p); S.meter.hit=S.meter.p; judge(q1); S.cue=null;
+  S.act={k:'pv',t:0,q1,v,pushed:0,stage:'plant',H:1.0+.44*v*(.72+.28*q1)}; tone(300,.15,'triangle',.05);
   S.phase='act';
 }
 export function javThrow(){
@@ -89,11 +94,13 @@ export function updateAct(dt){
     S.x+=a.v*Math.max(0,1-a.t*1.5)*dt; S.pose=POSE.stumble;
     if(a.t>.7){ S.pose=POSE.sit; sand(S.x); landed(null); }
   } else if(a.k==='pv'){
-    if(a.stage==='plant'){ S.x+=S.v*dt*.8; S.pose=POSE.pvPlant; if(a.t>.22){ a.stage='rise'; a.t=0; a.xs=S.x; a.Trise=1.0+a.H*.05; S.meter={k:'rise',p:0}; bothCue(); } }
+    if(a.stage==='plant'){ S.x+=S.v*dt*.8; S.pose=POSE.pvPlant; if(a.t>.22){ a.stage='rise'; a.t=0; a.xs=S.x; a.Trise=1.0+a.H*.05; S.meter={k:'rise',p:0}; S.cue={type:'both',hold:true,release:true,t:0}; } }
     else if(a.stage==='rise'){
       const u=Math.min(1,a.t/a.Trise), e=1-Math.pow(1-u,2);
       S.x=a.xs+(ev.line+.25-a.xs)*e; S.y=(a.H-.9)*e; S.rot=-Math.PI*e*.95; S.pose=POSE.pvSwing;
-      if(S.meter&&S.meter.k==='rise'){ S.meter.p=a.t/(a.Trise*.85); if(S.meter.p>1.25&&!a.pushed){ a.pushed=1; a.q2=0; S.cue=null; judge(0); } }
+      // let go of both buttons at the top (star at the end of the pole); holding on too long = no push
+      if(S.meter&&S.meter.k==='rise'&&!a.pushed){ S.meter.p=a.t/(a.Trise*.85);
+        if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
       if(a.pushed&&a.t>=Math.max(a.Trise*.7,.5)||a.t>a.Trise+.35){ S.cue=null; S.meter=null; a.stage='over'; a.t=0; a.yo=S.y; a.bonus=.7*(a.q2||0)-.25; }
     } else if(a.stage==='over'){
       const u=Math.min(1,a.t/.45); S.y=a.yo+Math.max(0,a.bonus+.4)*Math.sin(u*Math.PI/2); S.x+=dt*1.2; S.rot=-Math.PI*.95-Math.PI*.55*u; S.pose=POSE.pvOver;

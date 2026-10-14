@@ -114,11 +114,11 @@ export function drawPole(V,X,GY,fig){
   const tipX=X(ev.line)-2, tipY=GY+2;
   if(!a||a.k==='pvfoul'){ const d=ev.line-V.x; let ang=a?.1:.15+.75*clamp(d/14,0,1);
     if(fig.hands&&!a&&(V.v||0)<=.2) ang=Math.atan2(fig.hands[1]-fig.hands[3],fig.hands[2]-fig.hands[0]);
-    if(V.meter&&V.meter.k==='pole'&&V.meter.started) ang=.55*(1-V.meter.p)+.04;
+    if(V.meter&&V.meter.k==='pole'&&V.meter.p>0) ang=.55*(1-Math.min(1,V.meter.p))+.04;
     // grip: 1.1 m from the back end; running with the drawn frames (fists in front of the chest) only 0.5 m sticks out behind
     const back=fig.hands&&(V.v||0)>.2?.5*s:1.1*s, fx=hx+Math.cos(ang)*(L-back), fy=hy-Math.sin(ang)*(L-back);
     line(hx-Math.cos(ang)*back,hy+Math.sin(ang)*back,fx,fy);
-    if(!V.replay&&V.meter&&V.meter.k==='pole'&&V.meter.started){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
+    if(!V.replay&&V.meter&&V.meter.k==='pole'&&V.meter.p>0){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
     return; }
   if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy,true);
     if(!V.replay&&V.meter&&V.meter.k==='rise'){ const p=Math.min(V.meter.hit!=null?V.meter.hit:V.meter.p,1.25), q=Math.min(p,1), u=1-q;

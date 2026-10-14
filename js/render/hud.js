@@ -31,7 +31,7 @@ export function drawStar(x,y,r,p,spark){
   for(let i=0;i<10;i++){ const rr=i%2?r*.45:r, a=-Math.PI/2+i*Math.PI/5; ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr); }
   ctx.closePath(); ctx.fillStyle=good?'#fff36b':'#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.fill(); ctx.stroke(); ctx.restore();
 }
-export const CUECOL={'#2fd166':'#139a44','#ff4d2e':'#b8200f','#2f7fd6':'#1b4f9c'};
+export const CUECOL={'#2fd166':'#139a44','#ff4d2e':'#b8200f','#2f7fd6':'#1b4f9c','#ff8a1e':'#c4520a'};
 export function cueCircle(x,y,col,label){
   const K=1.45;
   ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(x+2,y+3.5,20*K,0,Math.PI*2); ctx.fill();
@@ -45,6 +45,7 @@ export function drawCue(cue){
   const pulse=1+.06*Math.sin(S.clock*14);
   const at=(p,col,label)=>{ const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
   if(cue.type==='side') at(cue.side,'#2fd166','');
+  else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'¡SOLTÁ LOS DOS!':'MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ APRETADO',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='num') cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=NUMPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } });
