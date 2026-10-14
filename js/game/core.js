@@ -5,7 +5,7 @@ import {EVENTS} from '../config.js';
 import {POSE,runPose} from '../poses.js';
 import {ATH,S,setS,setScreen} from '../state.js';
 import {hideOv} from '../ui/screens.js';
-import {rand} from '../utils.js';
+import {clamp,rand} from '../utils.js';
 import {updateField} from './field.js';
 import {snap,updateReplay} from './replay.js';
 import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js';
@@ -42,6 +42,10 @@ export function pop(text,o={}){ S.pops.push({text,t:0,dur:o.dur||1.4,col:o.col||
 
 export const gS=v=>.42/(1+v/10)+1.3*Math.exp(-v/3);
 export const gH=v=>1.0/(1+v/6)+2.0*Math.exp(-v/3);
+// hurdles: quality of a 1-2-3 combo from the time between the first and third tap
+// (0.35 s -> 1.22, 0.55 s -> 1.0, 1 s -> 0.5, 1.3 s or slower -> 0.25)
+export const COMBO_K=2.1; // boost of a perfect combo, in single-tap units
+export const comboQ=dt=>clamp(1+(.55-dt)*1.1,.25,1.25);
 export function bad(){ S.v*=.86; tone(120,.12,'sawtooth',.05); }
 export function startPlay(){
   setScreen('play'); hideOv(); resetAttempt(); S.pops=[]; S.fx=[];

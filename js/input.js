@@ -1,7 +1,7 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
 import {cv,OX,OY,SC,SW} from './canvas.js';
-import {addRing,addX,bad,gH,gS,sideCue,startRun} from './game/core.js';
+import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,sideCue,startRun} from './game/core.js';
 import {fieldAction,javThrow} from './game/field.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -26,7 +26,9 @@ export function onTap(pos){
   } else if(cue.type==='num'){
     if(S.stumble>0) return;
     const want=cue.order[cue.next];
-    if(pos===want){ S.v+=gH(S.v); addRing(pos); tone(440+cue.next*110,.05,'triangle',.04); cue.next++; if(cue.next>=3){ S.armed=true; S.cue=null; } }
+    // the three numbers are one combo: no speed per tap, one boost when the 3 lands, bigger the faster 1-2-3 went
+    if(pos===want){ if(cue.next===0) cue.t0=S.clock; addRing(pos); tone(440+cue.next*110,.05,'triangle',.04); cue.next++;
+      if(cue.next>=3){ const q=comboQ(S.clock-cue.t0); S.v+=COMBO_K*gH(S.v)*q; judge(Math.min(1,q)); S.armed=true; S.cue=null; } }
     else { addX(pos); bad(); }
   } else if(cue.type==='both'){
     if(pos==='B'){ addRing('L'); addRing('R'); bothHit(); return; }
