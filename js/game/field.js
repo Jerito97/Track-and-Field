@@ -127,8 +127,9 @@ export function landed(mark){
   S.mark=mark; S.phase='post'; S.postT=2.0;
   if(mark==null){ pop('NULO',{col:'#ff5a3c',dur:2,big:1.2,sub:'¡AY!'}); tone(130,.4,'sawtooth',.05); }
   else {
-    const prev=S.marks[0].slice(0,-1).filter(m=>m!=null);
-    const isRec=rec[ev.id]==null||mark>rec[ev.id];
+    // the record is only saved when the event ends, so earlier attempts of this event count too
+    const prev=S.marks[0].slice(0,-1).filter(m=>m!=null), best=Math.max(rec[ev.id]??-Infinity,...prev);
+    const isRec=mark>best;
     pop(mark.toFixed(2)+' m',{dur:2,big:1.1,sub:isRec?'¡NUEVO RÉCORD!':(!prev.length||mark>Math.max(...prev)?'¡GENIAL!':'')});
     cheer();
   }
