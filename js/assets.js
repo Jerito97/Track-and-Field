@@ -25,7 +25,7 @@ export const SPR={};
 export const JAV_ART=new Image();
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
-// animations per athlete id: {run:{frames:[Image], w,h,hx,feet,scale}, start:{...}, ...}
+// animations per athlete id: {run:{im (strip of frames side by side), frames (count), w,h,hx,feet,scale}, start:{...}, ...}
 export const ANIMS={};
 // resolves once every image has loaded (or failed); drawing code falls back to vector art for anything missing
 export function loadAssets(){
@@ -39,8 +39,7 @@ export function loadAssets(){
   CHARS.forEach(C=>{ if(!C.parts) return; const set=RIGS[C.id]={};
     Object.entries(C.parts).forEach(([k,v])=>rigPart(set,k,v,new URL(v.file,BASE).href)); });
   CHARS.forEach(C=>{ const set=ANIMS[C.id]={};
-    Object.entries(C.anims).forEach(([name,{files,...meta}])=>{
-      set[name]={...meta,frames:files.map(f=>{ const im=new Image(); load(im,new URL(f,BASE).href); return im; })}; }); });
+    Object.entries(C.anims).forEach(([name,{file,...meta}])=>{ const im=new Image(); load(im,new URL(file,BASE).href); set[name]={...meta,im}; }); });
   load(JAV_ART,new URL('../assets/javelin.png',import.meta.url).href);
   return Promise.all(waits);
 }

@@ -43,9 +43,9 @@ export function drawAthlete(c,s,ox,oy,alt,J,C,effort,rot){
   return drawChar(c,s,ox,oy,alt,J,C,effort,rot);
 }
 // animation frames (run cycle, start, ...): true once all of C's frames for that animation loaded
-export function animReady(C,name){ const A=C&&ANIMS[C.id]&&ANIMS[C.id][name]; return !!A&&A.frames.every(im=>im.complete&&im.naturalWidth>0); }
+export function animReady(C,name){ const A=C&&ANIMS[C.id]&&ANIMS[C.id][name]; return !!A&&A.im.complete&&A.im.naturalWidth>0; }
 // frame i of C's animation, hip at x, lowest point at feet; K = logical px per image px (same for every animation)
-export function drawAnim(c,C,name,i,x,feet,K){ const A=ANIMS[C.id][name], n=A.frames.length;
-  c.drawImage(A.frames[((i%n)+n)%n],x-A.hx*K,feet-A.feet*K,A.w*K,A.h*K); }
+export function drawAnim(c,C,name,i,x,feet,K){ const A=ANIMS[C.id][name], n=A.frames;
+  c.drawImage(A.im,(((i%n)+n)%n)*A.w,0,A.w,A.h,x-A.hx*K,feet-A.feet*K,A.w*K,A.h*K); }
 // K that makes the run cycle figure H logical px tall
 export function animScale(C,H){ const R=ANIMS[C.id].run; return H/(R.feet-2.4); }

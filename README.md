@@ -24,7 +24,8 @@ assets/characters/
   base/*.png            personaje base en piezas (de él salen todos los rivales)
   base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun, javpull, javthrow, javafter, pvstand; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
-  <id>/<anim>/          animaciones de cada atleta (generadas o propias)
+  <id>/<anim>.png       animaciones de cada atleta: todos los cuadros en fila en una imagen (generadas;
+                        un cuadro propio va en <id>/<anim>/<anim>N.png y reemplaza al generado)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
 assets/source/          hojas originales del personaje base (piezas, vistas, carrera)
 tools/
