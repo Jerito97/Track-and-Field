@@ -113,6 +113,22 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javrun": {
+    "files": [
+     "yo/javrun/javrun1.png",
+     "yo/javrun/javrun2.png",
+     "yo/javrun/javrun3.png",
+     "yo/javrun/javrun4.png",
+     "yo/javrun/javrun5.png",
+     "yo/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
+   },
    "javstand": {
     "files": [
      "yo/javstand/javstand1.png",
@@ -344,6 +360,22 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javrun": {
+    "files": [
+     "santi/javrun/javrun1.png",
+     "santi/javrun/javrun2.png",
+     "santi/javrun/javrun3.png",
+     "santi/javrun/javrun4.png",
+     "santi/javrun/javrun5.png",
+     "santi/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
    },
    "javstand": {
     "files": [
@@ -577,6 +609,22 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javrun": {
+    "files": [
+     "nacho/javrun/javrun1.png",
+     "nacho/javrun/javrun2.png",
+     "nacho/javrun/javrun3.png",
+     "nacho/javrun/javrun4.png",
+     "nacho/javrun/javrun5.png",
+     "nacho/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
+   },
    "javstand": {
     "files": [
      "nacho/javstand/javstand1.png",
@@ -808,6 +856,22 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javrun": {
+    "files": [
+     "rafa/javrun/javrun1.png",
+     "rafa/javrun/javrun2.png",
+     "rafa/javrun/javrun3.png",
+     "rafa/javrun/javrun4.png",
+     "rafa/javrun/javrun5.png",
+     "rafa/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
    },
    "javstand": {
     "files": [
@@ -1041,6 +1105,22 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javrun": {
+    "files": [
+     "lucho/javrun/javrun1.png",
+     "lucho/javrun/javrun2.png",
+     "lucho/javrun/javrun3.png",
+     "lucho/javrun/javrun4.png",
+     "lucho/javrun/javrun5.png",
+     "lucho/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
+   },
    "javstand": {
     "files": [
      "lucho/javstand/javstand1.png",
@@ -1273,6 +1353,22 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javrun": {
+    "files": [
+     "beto/javrun/javrun1.png",
+     "beto/javrun/javrun2.png",
+     "beto/javrun/javrun3.png",
+     "beto/javrun/javrun4.png",
+     "beto/javrun/javrun5.png",
+     "beto/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
+   },
    "javstand": {
     "files": [
      "beto/javstand/javstand1.png",
@@ -1504,6 +1600,22 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javrun": {
+    "files": [
+     "tomi/javrun/javrun1.png",
+     "tomi/javrun/javrun2.png",
+     "tomi/javrun/javrun3.png",
+     "tomi/javrun/javrun4.png",
+     "tomi/javrun/javrun5.png",
+     "tomi/javrun/javrun6.png"
+    ],
+    "frames": 6,
+    "w": 118,
+    "h": 182,
+    "hx": 66.6,
+    "feet": 181.0,
+    "scale": 0.3435
    },
    "javstand": {
     "files": [

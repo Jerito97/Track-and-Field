@@ -16,6 +16,9 @@ lowest point of each row): use it for jumps, so airborne frames stay in the air.
 With --measure=2,3 only those frames (1-based) are used to measure the size, for sheets
 that mix views (e.g. a celebration with front-view frames for the podium).
 
+With --javelin, long javelins whose tail touches the neighbouring figure are cut
+loose at the tail end before the figures are separated.
+
 With --adjust=0.95 the measured scale is multiplied by that factor, for a final touch by eye.
 
 Usage: python3 tools/cut_sprite_sheet.py SHEET OUT_DIR NAME [REFERENCE_DIR] [--keep-height] [--measure=2,3] [--adjust=0.95]
@@ -73,7 +76,41 @@ def sizes(rgb, m):
     return {'hair': int(hair.sum()), 'body': int(body.sum()), 'shoes': int(shoes.sum()), 'silhouette': int(m.sum())}
 
 
-def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0):
+def cut_javelin_tails(fg, im):
+    """Break the contact between each javelin's tail end and the figure to its left."""
+    H, W = fg.shape
+    f = im / 255
+    mx, mn = f.max(2), f.min(2)
+    s = (mx - mn) / np.maximum(mx, 1e-6)
+    shaft = fg & (s < .2) & (mx > .55)
+    shaft[int(H * .5):] = False
+    left = shaft.copy()
+    fg = fg.copy()
+    for sy, sx in zip(*np.nonzero(shaft)):
+        if not left[sy, sx]:
+            continue
+        m = flood(left, [(sy, sx)])
+        left &= ~m
+        ys, xs = np.nonzero(m)
+        if np.ptp(xs) < 20 or np.ptp(xs) < 2 * np.ptp(ys):  # not a thin shaft piece
+            continue
+        # the tail piece is the one that runs into the red grip on its right end
+        xr = xs.max()
+        yr = int(ys[xs == xr].mean())
+        win = (slice(max(0, yr - 10), yr + 11), slice(xr, min(W, xr + 14)))
+        h = np.where(mx == f[..., 0], ((f[..., 1] - f[..., 2]) / np.maximum(mx - mn, 1e-6)) % 6 * 60, 180)
+        # (the grip is a strong red; the tip's pinkish shading is not)
+        if (((h[win] < 15) | (h[win] > 340)) & (s[win] > .65) & (mx[win] > .45)).sum() < 8:
+            continue
+        x0 = xs.min()
+        y0 = int(ys[xs == x0].mean())
+        if x0 < 12:
+            continue
+        fg[max(0, y0 - 22):y0 + 23, max(0, x0 - 7):x0 + 1] = False
+    return fg
+
+
+def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0, javelin=False):
     im = np.asarray(Image.open(src).convert('RGB')).astype(int)
     H, W, _ = im.shape
     light = im.min(2) > 215
@@ -88,9 +125,13 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         m = flood(left, [(sy, sx)])
         left &= ~m
         px = im[m]
-        if m.sum() >= 40 and px.mean() >= 249 and np.percentile(px.min(1), 5) >= 228:
+        hy, hx = np.nonzero(m)
+        thin = np.ptp(hx) > 3 * max(np.ptp(hy), 1)  # long thin white shape: a javelin shaft, not paper
+        if m.sum() >= 40 and px.mean() >= 249 and np.percentile(px.min(1), 5) >= 228 and not thin:
             bg |= m
     fg = ~bg
+    if javelin:
+        fg = cut_javelin_tails(fg, im)
     # figures = big connected blobs
     left, blobs = fg.copy(), []
     for sy, sx in zip(*np.nonzero(fg)):
@@ -162,4 +203,4 @@ if __name__ == '__main__':
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     measure = next((a.split('=')[1] for a in flags if a.startswith('--measure=')), None)
     adjust = next((float(a.split('=')[1]) for a in flags if a.startswith('--adjust=')), 1.0)
-    main(*args[:4], keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)
+    main(*args[:4], javelin='--javelin' in flags, keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)

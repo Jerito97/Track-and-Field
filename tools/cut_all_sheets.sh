@@ -18,4 +18,5 @@ python3 tools/cut_sprite_sheet.py $S/base_ljstretch_sheet.jpg $B/ljstretch ljstr
 python3 tools/cut_sprite_sheet.py $S/base_ljland_sheet.jpg $B/ljland ljland $B/run
 # javelin: the white javelin throws off the size measures; matched by eye to the standing pose
 python3 tools/cut_sprite_sheet.py $S/base_javstand_sheet.jpg $B/javstand javstand $B/run --adjust=1.19
+python3 tools/cut_sprite_sheet.py $S/base_javrun_sheet.jpg $B/javrun javrun $B/run --javelin --adjust=1.15
 python3 tools/build_characters.py

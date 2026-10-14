@@ -68,7 +68,7 @@ export function drawField(V){
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
   // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
-  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):null; if(f){ drawAnim(ctx,ME(),f[0],f[1],px,GY-V.y*s,animScale(ME(),s*FIELD_H)); fig={hand:[px,GY-V.y*s-1.4*s],drawnJav:f[0]==='javstand'}; } }
+  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):null; if(f){ drawAnim(ctx,ME(),f[0],f[1],px,GY-V.y*s,animScale(ME(),s*FIELD_H)); fig={hand:[px,GY-V.y*s-1.4*s],drawnJav:f[0].startsWith('jav')}; } }
   if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
@@ -130,8 +130,9 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
-// javelin: drawn frames where we have them (standing with the javelin); rig pieces for the rest
+// javelin: drawn frames where we have them (standing and running with the javelin); rig pieces for the rest
 function javFrame(C,V){
-  if(V.act||V.jv||(V.v||0)>.2||(V.meter&&V.meter.k==='jav')) return null;
+  if(V.act||V.jv||(V.meter&&V.meter.k==='jav')) return null;
+  if((V.v||0)>.2) return animReady(C,'javrun')?['javrun',Math.floor(V.x/4*C.anims.javrun.frames)]:null;
   return animReady(C,'javstand')?['javstand',Math.floor(S.clock*1.2)%2]:null;
 }
