@@ -21,7 +21,7 @@ export function onTap(pos){
   const cue=S.cue;
   if(cue.type==='side'){
     if(pos==='C') return;
-    if(pos===cue.side){ S.v+=gS(S.v); addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
+    if(pos===cue.side){ S.v+=gS(S.v); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
     else { addX(pos); bad(); }
   } else if(cue.type==='num'){
     if(S.stumble>0) return;

@@ -8,6 +8,8 @@ import {endEvent} from '../ui/screens.js';
 import {clamp,rand} from '../utils.js';
 import {bothCue,judge,numCue,pop,sideCue} from './core.js';
 
+// seconds without a correct tap before slowing down, and how fast (fraction of speed per second)
+const IDLE_GRACE=.5, IDLE_DECAY=.3;
 export function resetRivals(){
   const ev=S.ev;
   S.rivals.forEach(r=>{
@@ -25,7 +27,7 @@ export function updateSprint(dt){
     if(st!==S.setStage){ S.setStage=st;
       if(st===0){ S.pops=[]; pop('PREPARADOS',{hold:true}); tone(392,.12); }
       else if(st===1){ S.pops=[]; pop('LISTOS',{hold:true}); tone(392,.12); }
-      else { S.pops=[]; pop('¡YA!',{col:'#ffd23a',dur:.9,big:1.3}); noise(.35,.35); S.smoke=0; S.phase='run'; S.phaseT=0; S.t=0;
+      else { S.pops=[]; pop('¡YA!',{col:'#ffd23a',dur:.9,big:1.3}); noise(.35,.35); S.smoke=0; S.phase='run'; S.phaseT=0; S.t=0; S.lastTap=S.clock;
         if(ev.hurdles) numCue(); else sideCue(); } }
     S.pose=st===0?POSE.crouch:POSE.set;
     return;
@@ -34,6 +36,8 @@ export function updateSprint(dt){
   S.rivals.forEach(r=>rivalStep(r,dt));
   if(S.phase!=='run') return;
   if(!S.finished) S.t+=dt;
+  // 100 m: no top speed, but stop tapping the green buttons for a moment and you slowly lose speed
+  if(!ev.hurdles&&!S.finished&&S.cue&&S.cue.type==='side'&&S.clock-(S.lastTap||0)>IDLE_GRACE) S.v-=S.v*IDLE_DECAY*dt;
   if(S.stumble>0){ S.stumble-=dt; S.x+=S.v*.6*dt; S.pose=POSE.stumble; }
   else { S.x+=S.v*dt; S.legP+=S.v*dt*2.4; }
   if(ev.hurdles){
