@@ -15,7 +15,7 @@ export function resetRivals(){
   S.rivals.forEach(r=>{
     // reaction to the gun; now and then a sleepy start
     let react=rand(.13,.24); if(Math.random()<.1) react+=rand(.25,.45);
-    const T=ev.hurdles? 12.5+(1.03-r.a.sk)*17+rand(-.2,.2) : 11.0+(1.03-r.a.sk)*16+rand(-.3,.3);  // field ~11.0-12.6 s: a decent human run is in the mix
+    const T=ev.hurdles? 13.1+(1.03-r.a.sk)*17+rand(-.25,.25) : 11.0+(1.03-r.a.sk)*16+rand(-.3,.3);  // field ~11.0-12.6 s: a decent human run is in the mix
     // flat sprint: about one in three rivals trips somewhere mid-race
     const trip=!ev.hurdles&&Math.random()<.3?rand(15,85):null;
     Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set()}); });
@@ -86,7 +86,7 @@ export function rivalStep(r,dt){
   if(r.final==null&&r.x>=d) r.final=Math.ceil((r.t-(r.x-d)/Math.max(v,.5))*100)/100;
   if(S.ev.hurdles){
     if(r.air>0){ r.air-=dt; r.y=r.air>0?1.05*Math.sin(Math.PI*(1-r.air/r.airT)):0; }
-    else { const i=HURDLES.findIndex(h=>h>r.x); if(i>=0&&!r.knocked.has(i)&&HURDLES[i]-r.x<clamp(.2*v,1.6,2.6)){ if(Math.random()<.5*(1.05-r.a.sk)){ r.knocked.add(i); r.slow=.6; } else { r.airT=clamp(3.4/Math.max(v,4),.26,.6); r.air=r.airT; } } }
+    else { const i=HURDLES.findIndex(h=>h>r.x); if(i>=0&&!r.knocked.has(i)&&HURDLES[i]-r.x<clamp(.2*v,1.6,2.6)){ if(Math.random()<.5*(1.05-r.a.sk)){ r.knocked.add(i); r.slow=.6; r.tripT=.35; } else { r.airT=clamp(3.4/Math.max(v,4),.26,.6); r.air=r.airT; } } }
   }
 }
 export function finishSprintEvent(){ const ev=S.ev; const res=ATH.map(a=>{ if(a.me) return S.final; const r=S.rivals.find(r=>r.a===a); return r.final!=null?r.final:Math.ceil((r.t+(ev.dist-r.x)/Math.max(r.vmax,1))*100)/100; }); endEvent(res); }

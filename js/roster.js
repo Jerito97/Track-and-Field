@@ -100,6 +100,19 @@ export const ROSTER=[
     "feet": 147.4,
     "scale": 0.1962
    },
+   "hurdle": {
+    "files": [
+     "yo/hurdle/hurdle1.png",
+     "yo/hurdle/hurdle2.png",
+     "yo/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
+   },
    "run": {
     "files": [
      "yo/run/run1.png",
@@ -252,6 +265,19 @@ export const ROSTER=[
     "hx": 56.3,
     "feet": 147.4,
     "scale": 0.1962
+   },
+   "hurdle": {
+    "files": [
+     "santi/hurdle/hurdle1.png",
+     "santi/hurdle/hurdle2.png",
+     "santi/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
    },
    "run": {
     "files": [
@@ -406,6 +432,19 @@ export const ROSTER=[
     "feet": 147.4,
     "scale": 0.1962
    },
+   "hurdle": {
+    "files": [
+     "nacho/hurdle/hurdle1.png",
+     "nacho/hurdle/hurdle2.png",
+     "nacho/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
+   },
    "run": {
     "files": [
      "nacho/run/run1.png",
@@ -558,6 +597,19 @@ export const ROSTER=[
     "hx": 56.3,
     "feet": 147.4,
     "scale": 0.1962
+   },
+   "hurdle": {
+    "files": [
+     "rafa/hurdle/hurdle1.png",
+     "rafa/hurdle/hurdle2.png",
+     "rafa/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
    },
    "run": {
     "files": [
@@ -712,6 +764,19 @@ export const ROSTER=[
     "feet": 147.4,
     "scale": 0.1962
    },
+   "hurdle": {
+    "files": [
+     "lucho/hurdle/hurdle1.png",
+     "lucho/hurdle/hurdle2.png",
+     "lucho/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
+   },
    "run": {
     "files": [
      "lucho/run/run1.png",
@@ -865,6 +930,19 @@ export const ROSTER=[
     "feet": 147.4,
     "scale": 0.1962
    },
+   "hurdle": {
+    "files": [
+     "beto/hurdle/hurdle1.png",
+     "beto/hurdle/hurdle2.png",
+     "beto/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
+   },
    "run": {
     "files": [
      "beto/run/run1.png",
@@ -1017,6 +1095,19 @@ export const ROSTER=[
     "hx": 56.3,
     "feet": 147.4,
     "scale": 0.1962
+   },
+   "hurdle": {
+    "files": [
+     "tomi/hurdle/hurdle1.png",
+     "tomi/hurdle/hurdle2.png",
+     "tomi/hurdle/hurdle3.png"
+    ],
+    "frames": 3,
+    "w": 134,
+    "h": 158,
+    "hx": 59.5,
+    "feet": 157.3,
+    "scale": 0.2694
    },
    "run": {
     "files": [
