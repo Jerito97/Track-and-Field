@@ -15,7 +15,7 @@ export function endReplay(){ S.replay=null; afterAttempt(); }
 export function afterAttempt(){
   const ev=S.ev;
   ATH.forEach((a,i)=>{ if(a.me) return;
-    const m=Math.random()<(ev.kind==='pv'?.15:.12)?null:Math.floor(ev.ref*Math.pow(a.sk,1.6)*(1+rand(-.035,.035))*100)/100;
+    const m=Math.random()<(ev.kind==='pv'?.15:.12)?null:Math.floor(ev.ref*.8*Math.pow(a.sk,1.6)*(1+rand(-.04,.04))*100)/100;  // ~80% of the reference mark
     S.marks[i].push(m); });
   showRoundStandings();
 }

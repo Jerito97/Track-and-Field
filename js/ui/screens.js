@@ -10,7 +10,7 @@ import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,myChar,S,setMyChar,setS,setScreen} from '../state.js';
-import {rec,saveRec,store} from '../storage.js';
+import {rec,saveRec,saveWr,store,wrec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
@@ -44,7 +44,7 @@ export function showMenu(){
   const tour=menuSel===5, ev=EVENTS[menuSel];
   const stats=tour
     ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>5</b></div>`
-    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${fmt(ev,ev.wr)}</b></div>`;
+    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${wrec[ev.id]==null?'—':fmt(ev,wrec[ev.id])}</b></div>`;
   const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${i===menuSel?'<i>Elegida</i>':''}</button>`).join('')
     +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="5" aria-pressed="${tour}"><canvas data-pict="5"></canvas><b>TORNEO</b>${tour?'<i>Elegido</i>':''}</button>`;
   showOv(`<div class="mm">
@@ -70,7 +70,7 @@ export function showEventCard(){
   showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/5`:''}</h2></div><div class="body">
     <div class="row2"><canvas class="pict" data-pict="${G.evIdx}"></canvas>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
-        <div class="wr"><span>Récord mundial</span><b>${fmt(ev,ev.wr)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
+        <div class="wr"><span>Récord mundial</span><b>${wrec[ev.id]==null?'—':fmt(ev,wrec[ev.id])}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
         <div class="menu"><button class="mi play" data-act="play" data-focus>Jugar</button><button class="mi" data-act="help">Instrucciones</button>${tour?'':'<button class="mi" data-act="menu">Otra prueba</button>'}</div>
       </div></div>
     <p class="help" id="help" hidden>${ev.help}</p>
@@ -93,6 +93,7 @@ export function endEvent(vals){
   const ev=S.ev; G.res[ev.id]=vals;
   const mine=vals[0]; let newRec=false;
   if(mine!=null&&(rec[ev.id]==null||(ev.type==='sprint'?mine<rec[ev.id]:mine>rec[ev.id]))){ rec[ev.id]=mine; newRec=true; saveRec(); }
+  if(mine!=null&&(wrec[ev.id]==null||(ev.type==='sprint'?mine<wrec[ev.id]:mine>wrec[ev.id]))){ wrec[ev.id]=mine; saveWr(); }
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   showOv(table(ev.tag,newRec?'¡Nuevo récord!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));

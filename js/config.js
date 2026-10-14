@@ -7,15 +7,15 @@ const LOOK={yo:{hair:'curly'}};
 export const CHARS=ROSTER.map(r=>{ const p=r.palette;
   return {id:r.id,name:r.name,own:r.own,parts:r.parts||null,anims:r.anims||{},skin:p.piel,hc:p.pelo,j:p.musculosa,j2:p.franja,sh:p.short,shoe:p.zapatillas,hair:'short',...LOOK[r.id]}; });
 export const EVENTS=[
- {id:'100',name:'100 metros',tag:'100 M',type:'sprint',dist:100,wr:8.90,
+ {id:'100',name:'100 metros',tag:'100 M',type:'sprint',dist:100,
   help:'Tocá el <b>botón verde</b> del lado donde aparece: izquierda o derecha. Cada acierto te da velocidad y cada error te frena. Si dejás de tocar, vas <b>perdiendo velocidad</b> de a poco. Cerca de la meta aparecen <b>dos botones rojos</b>: tocá los dos a la vez para tirarte de cabeza. Si lo hacés justo al llegar, ganás unas centésimas.'},
- {id:'lj',name:'Largo',tag:'LARGO',type:'field',kind:'lj',line:55,zone:4,bands:[14,9,4],wr:9.50,ref:8.7,
+ {id:'lj',name:'Largo',tag:'LARGO',type:'field',kind:'lj',line:55,zone:4,bands:[14,9,4],ref:8.7,
   help:'<b>1. Correr:</b> tocá los <b>botones verdes</b> para tomar velocidad. <b>2. Saltar:</b> antes de la tabla el piso se pinta de <b>verde, amarillo y rojo</b>. Desde el verde ya no hay botones: mantenés la velocidad y te preparás. En el rojo aparecen <b>dos botones rojos</b>: tocalos juntos para despegar, lo más pegado posible a la tabla. Si la pisás, es <b>nulo</b>. <b>3. Impulso en el aire:</b> tocá de nuevo los dos rojos <b>en el punto más alto</b> del salto para darte un empujón y llegar más lejos. Cuanto más cerca del punto más alto, más empuja. Tenés 3 rondas.'},
- {id:'110h',name:'110 m con vallas',tag:'VALLAS',type:'sprint',hurdles:true,dist:110,wr:12.00,
+ {id:'110h',name:'110 m con vallas',tag:'VALLAS',type:'sprint',hurdles:true,dist:110,
   help:'Para cada valla aparecen <b>tres botones numerados</b> (salen apenas saltás la anterior). Tocalos en orden: 1, 2 y 3. Los tres son un conjunto: <b>cuanto más rápido los toques, más velocidad ganás</b> al completar el 3, y tu atleta salta la valla. Si llegás a la valla sin terminar, la tirás; si tocás el número equivocado, perdés velocidad. Cerca de la meta, <b>dos rojos</b>: tocalos juntos para tirarte de cabeza.'},
- {id:'pv',name:'Garrocha',tag:'GARROCHA',type:'field',kind:'pv',line:60,zone:18,bands:[18,12,6],wr:6.80,ref:5.5,
+ {id:'pv',name:'Garrocha',tag:'GARROCHA',type:'field',kind:'pv',line:60,zone:18,bands:[18,12,6],ref:5.5,
   help:'Tocá los <b>botones verdes</b> para correr. Antes de la tabla el piso se pinta de <b>verde, amarillo y rojo</b>: desde el verde ya no hay botones verdes, mantenés la velocidad. Cuando quieras, tocá los <b>dos rojos</b> para bajar la garrocha: una <b>estrellita</b> la recorre de punta a punta en un segundo. Tocá los dos rojos otra vez cuando llegue a la punta para clavarla, antes de llegar a la tabla. Al subir, la estrellita va desde el piso hasta arriba: tocá de nuevo cuando llegue arriba para soltarte. Cuanto más cerca de las puntas, más alto. Tenés 3 rondas.'},
- {id:'jav',name:'Jabalina',tag:'JABALINA',type:'field',kind:'jav',line:57,zone:18,bands:[18,12,6],wr:99.00,ref:80,
+ {id:'jav',name:'Jabalina',tag:'JABALINA',type:'field',kind:'jav',line:57,zone:18,bands:[18,12,6],ref:80,
   help:'Tocá los <b>botones verdes</b> para tomar carrera. Antes de la línea el piso se pinta de <b>verde, amarillo y rojo</b>: desde el verde ya no hay botones verdes y mantenés la velocidad. Cuando quieras, <b>mantené apretado</b> y unas <b>chispitas</b> recorren la jabalina desde atrás hasta la punta: soltá lo más cerca posible de la punta, antes de pisar la línea. Si la pisás, es <b>nulo</b>. Tenés 3 rondas.'}
 ];
 export const HURDLES=Array.from({length:10},(_,i)=>13.72+9.14*i);
