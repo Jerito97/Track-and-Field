@@ -10,10 +10,10 @@ import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,myChar,S,setMyChar,setS,setScreen} from '../state.js';
-import {rec,saveRec} from '../storage.js';
+import {rec,saveRec,store} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
-export function showOv(html,clear){ setScreen('menu'); OV.className=clear?'clear':''; OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
+export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
   const f=OV.querySelector('[data-focus]'); if(f) try{f.focus({preventScroll:true});}catch(e){} }
 export function paintOv(){ OV.querySelectorAll('canvas[data-face]').forEach(c=>paintFace(c,CHARS.find(x=>x.id===c.dataset.face))); OV.querySelectorAll('canvas[data-pict]').forEach(c=>paintPict(c,+c.dataset.pict)); }
 export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c.height=px*d; const g=c.getContext('2d'); if(C.sprite&&SPR.face){ const draw=()=>{ g.clearRect(0,0,c.width,c.height); g.drawImage(SPR.face.im,0,0,c.width,c.height); }; if(SPR.face.im.complete) draw(); else SPR.face.im.onload=draw; return; } const head=rigReady(C)&&RIGS[C.id].head;
@@ -31,17 +31,37 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
   drawAthlete(g,s,ox,oy-(k==='lj'?s*.35:0)-(k==='pv'?s*.9:0),0,J,C,true,k==='pv'?-2.4:0);
   if(k==='jav'){ g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=4; g.beginPath(); g.moveTo(px*.04,px*.36); g.lineTo(px*.92,px*.1); g.stroke(); g.strokeStyle='#fff'; g.lineWidth=2; g.stroke(); g.restore(); }
 }
+// main menu: selected event (0-4) or tournament (5), remembered between visits
+let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<=5?v:0; })();
+const ICON={
+  medal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h4l1 5-3 2zM17 2h-4l-1 5 3 2z" fill="#e8262d"/><circle cx="12" cy="15" r="6.5" fill="#ffd23a" stroke="#a8740c" stroke-width="1.5"/><path d="M12 11.6l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#a8740c"/></svg>',
+  cup:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0zM5 4h2v3a2 2 0 0 1-2-2zM19 4h-2v3a2 2 0 0 0 2-2zM11 12h2v4h-2zM8 17h8v3H8z" fill="currentColor"/></svg>',
+  globe:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  snd:on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on?'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg>`
+};
 export function showMenu(){
   setS(null); setScreen('menu');
-  showOv(`<div class="card"><div class="head"><div class="logo">OLIMPIADA</div><h2>Elegí la prueba</h2></div><div class="body">
-    <div class="events">${EVENTS.map((e,i)=>`<button class="ev" data-act="event" data-i="${i}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b></button>`).join('')}
-      <button class="ev tour" data-act="tour" data-focus><canvas data-pict="5"></canvas><b>TORNEO</b></button></div>
-    <p class="lbl">Tu atleta</p>
-    <div class="chars">${CHARS.map(c=>`<button class="ch" data-act="pick" data-id="${c.id}" aria-pressed="${c.id===myChar}"><canvas data-face="${c.id}"></canvas><b>${c.name}</b></button>`).join('')}</div>
-    <p class="small">En el celu jugá en horizontal y tocá la mitad izquierda o derecha de la pantalla (en las vallas, tocá cada número). En la compu: <kbd>←</kbd> <kbd>→</kbd>, <kbd>↓</kbd> para el botón del centro y <kbd>Espacio</kbd> para los dos rojos.</p>
-    ${rec.tour?`<p class="small">Mejor torneo: <b>${rec.tour} puntos</b></p>`:''}
-    <button class="link" data-act="sound">Sonido: ${soundOn?'activado':'apagado'}</button>
-  </div></div>`);
+  const tour=menuSel===5, ev=EVENTS[menuSel];
+  const stats=tour
+    ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>5</b></div>`
+    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${fmt(ev,ev.wr)}</b></div>`;
+  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${i===menuSel?'<i>Elegida</i>':''}</button>`).join('')
+    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="5" aria-pressed="${tour}"><canvas data-pict="5"></canvas><b>TORNEO</b>${tour?'<i>Elegido</i>':''}</button>`;
+  showOv(`<div class="mm">
+  <header class="m-top"><div class="m-logo"><span class="m-ic">${ICON.medal}</span>OLIMPIADA</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
+  <section class="m-hero">
+    <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
+    <div class="m-info"><span class="m-tag">${tour?'Modo torneo':'Prueba elegida'}</span><h1>${tour?'Torneo':ev.name}</h1><p>${tour?'Las cinco pruebas seguidas. Sumá puntos y subí al podio.':ev.tagline}</p>
+      <div class="m-acts"><button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>${tour?'':'<button class="m-how" data-act="howto">Cómo se juega</button>'}</div></div>
+    <div class="m-stats">${stats}</div>
+    ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
+  </section>
+  <nav class="m-evs" aria-label="Pruebas">${cards}</nav>
+  <footer class="m-bot">
+    <div class="m-ath"><span class="m-lbl">Tu atleta</span><div class="m-faces">${CHARS.map(c=>`<button class="m-face${c.id===myChar?' on':''}" data-act="pick" data-id="${c.id}" aria-pressed="${c.id===myChar}"><span><canvas data-face="${c.id}"></canvas></span><b>${c.name}</b></button>`).join('')}</div></div>
+    <div class="m-ctrl"><span class="m-lbl">Controles</span><p>Celular en horizontal: tocá los botones de la pantalla. Compu: <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd> y <kbd>Espacio</kbd>.</p></div>
+    <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
+  </footer></div>`,'menu');
 }
 export const rivalsFaces=()=>`<div class="faces">${ATH.filter(a=>!a.me).map(a=>`<canvas data-face="${a.C.id}"></canvas>`).join('')}</div>`;
 export function showEventCard(){
@@ -101,10 +121,14 @@ OV.addEventListener('click',e=>{
   if(a==='event'){ G.mode='single'; G.evIdx=+b.dataset.i; buildAthletes(); showEventCard(); }
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
   else if(a==='pick'){ setMyChar(b.dataset.id); buildAthletes(); showMenu(); }
+  else if(a==='sel'){ menuSel=+b.dataset.i; store.set('odb-menusel',menuSel); showMenu(); }
+  else if(a==='go'){ if(menuSel===5){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
+    else { G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); } }
+  else if(a==='howto'){ const h=$('help'); if(h) h.hidden=!h.hidden; }
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='help'){ const h=$('help'); h.hidden=!h.hidden; }
   else if(a==='menu') showMenu();
-  else if(a==='sound'){ b.textContent='Sonido: '+(toggleSound()?'activado':'apagado'); }
+  else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')) showMenu(); else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
   else if(a==='evdone') endEvent(S.marks.map(bestOf));
   else if(a==='afterres') afterResults();

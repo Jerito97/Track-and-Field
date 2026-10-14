@@ -5,6 +5,7 @@ import {S} from '../state.js';
 import {drawField} from './field.js';
 import {drawHud} from './hud.js';
 import {drawPodium} from './podium.js';
+import {drawBoards,drawStands} from './scenery.js';
 import {drawSprint} from './sprint.js';
 
 export function view(){
@@ -20,4 +21,11 @@ export function frame(){
   else drawIdle();
   ctx.restore();
 }
-export function drawIdle(){ ctx.fillStyle='#14284f'; ctx.fillRect(0,0,LW,LH); }
+// menus: the stadium behind the panels, panning slowly
+export function drawIdle(){ const t=performance.now()/1000, cam=t*1.2;
+  const sky=ctx.createLinearGradient(0,0,0,LH*.55); sky.addColorStop(0,'#5aa8e6'); sky.addColorStop(1,'#cfe8f8'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
+  drawStands(cam,26,176,.7,t); drawBoards(cam,176,14,24);
+  ctx.fillStyle='#a6c94a'; ctx.fillRect(0,190,LW,10);
+  ctx.fillStyle='#2f7fd6'; ctx.fillRect(0,200,LW,LH-200);
+  ctx.fillStyle='rgba(255,255,255,.85)'; for(let l=0;l<5;l++) ctx.fillRect(0,200+l*30,LW,2);
+}
