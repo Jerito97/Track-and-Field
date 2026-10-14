@@ -54,7 +54,7 @@ js/
 - **100 m:** cada toque verde correcto suma velocidad (sin tope). Si pasa medio segundo sin un toque correcto, frenás de a poco. Errarle al lado te saca un 14%.
 - **110 m con vallas:** los tres números de cada valla son un conjunto. Los toques sueltos no suman; al completar el 3 recibís un impulso que depende de cuánto tardaste del 1 al 3 (0,55 s = normal, 0,35 s o menos = máximo, 1,3 s o más = mínimo). Errarle a un número te frena.
 
-- **Salto en largo** (como la app original): 1) correr con los verdes; 2) antes de la tabla el piso se pinta de verde (18 a 10 m), amarillo (10 a 4 m) y rojo (últimos 4 m), unos 2 s de preparación; en el rojo aparecen los dos botones rojos: despegar lo más pegado a la tabla (pisarla es nulo); 3) en el aire, los dos rojos otra vez para estirarse, a ojo: lo mejor es bajando, entre el 78% y el 93% del vuelo (+0,70 m).
+- **Salto en largo** (como la app original): 1) correr con los verdes (41 m); 2) a 14 m de la tabla el piso se pinta de verde (14 a 9 m), amarillo (9 a 4 m) y rojo (últimos 4 m); desde el verde ya no hay botones, mantenés la velocidad y te preparás; en el rojo aparecen los dos botones rojos: despegar lo más pegado a la tabla (pisarla es nulo); 3) en el aire, los dos rojos otra vez para estirarse, a ojo: lo mejor es bajando, entre el 78% y el 93% del vuelo (+0,70 m).
 
 ## Atletas
 

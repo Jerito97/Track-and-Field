@@ -16,6 +16,7 @@ export function updateField(dt){
   const ev=S.ev;
   if(S.phase==='ready'){ const k=armsFor(); S.pose=k==='jav'?{...POSE.stand,arms:[{a:-2.4,b:.55},POSE.stand.arms[1]]}:(k==='pole'?{...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]}:POSE.stand); return; }
   if(S.phase==='run'){
+    if(ev.bands&&!S.prep&&ev.line-S.x<=ev.bands[0]){ S.prep=true; S.cue=null; tone(520,.06,'triangle',.04); }
     if(!S.zone&&ev.line-S.x<=ev.zone){
       S.zone=true; S.cue=null; tone(880,.08,'triangle',.05);
       S.pops.push({text:'¡PREPARATE!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true});

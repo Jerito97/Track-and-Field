@@ -99,11 +99,11 @@ export function drawPole(V,X,GY,fig){
     return; }
   line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L);
 }
-// long jump run-up: green / yellow / red bands before the board (about 2 s of running);
-// red = the last metres, where the red take-off buttons appear. The band you're in lights up.
-const LJ_BANDS=[[18,10,'31,190,90'],[10,4,'255,205,40'],[4,0,'240,60,50']];
-function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x;
-  LJ_BANDS.forEach(([from,to,rgb])=>{ const x0=X(ev.line-from), x1=X(ev.line-to); if(x1<-10||x0>LW+10) return;
+// long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
+// speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.
+const LJ_COLORS=['31,190,90','255,205,40','240,60,50'];
+function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x, b=ev.bands;
+  [[b[0],b[1],LJ_COLORS[0]],[b[1],b[2],LJ_COLORS[1]],[b[2],0,LJ_COLORS[2]]].forEach(([from,to,rgb])=>{ const x0=X(ev.line-from), x1=X(ev.line-to); if(x1<-10||x0>LW+10) return;
     const on=d<=from&&d>to;
     ctx.fillStyle=`rgba(${rgb},${on?.65:.3})`; ctx.fillRect(x0,GY-25,x1-x0,40);
     ctx.strokeStyle=`rgba(${rgb},${on?1:.75})`; ctx.lineWidth=3;
