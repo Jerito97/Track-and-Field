@@ -19,7 +19,7 @@ that mix views (e.g. a celebration with front-view frames for the podium).
 With --javelin, long javelins whose tail touches the neighbouring figure are cut
 loose at the tail end before the figures are separated.
 
-With --javelins="x0,y0,x1,y1;..." (sheet px, tail end to tip, one per figure) javelins
+With --javelins="x0,y0,x1,y1;..." (sheet px, tail end to tip, one per figure; an empty item for a figure without one) javelins
 that cross the neighbouring figures are lifted off and given back to their owner
 (tools/javelin_split.py); the lines only need to be roughly right. meta.json then also
 has 'jav': each frame's javelin tail x,y and tip x,y in frame px.
@@ -191,7 +191,8 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         # bottom: own lowest point, or the row's ground line to keep jumps in the air
         bottom = ground[row_of[len(frames)]] if keep_height else ys.max()
         if javelins:  # javelin tail and tip, from the hip and the bottom
-            jav.append([(float(p[0]) - int(round(sx.mean())), float(p[1]) - bottom) for p in jav_of[id(m)]])
+            e = jav_of[id(m)]
+            jav.append([(float(p[0]) - int(round(sx.mean())), float(p[1]) - bottom) for p in e] if e else None)
         frames.append((np.dstack([rgb, a]).astype(np.uint8), int(round(sx.mean())), ys.min(), ys.max(), xs.min(), xs.max(), bottom))
     per = [sizes(rgb_of[id(m)], m) for i, m in enumerate(blobs) if not measure or i + 1 in measure]
     size_src = {k: float(np.median([p[k] for p in per])) for k in per[0]}
@@ -214,7 +215,7 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
     meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * scale), 1), 'feet': round(float(T * scale), 1),
             'scale': round(scale, 4), 'size_src': size_src}
     if jav:  # javelin tail x,y and tip x,y in frame px, per frame
-        meta['jav'] = [[round((L + dx) * scale, 1) if k % 2 == 0 else round((T + dx) * scale, 1) for k, dx in enumerate(np.ravel(e))] for e in jav]
+        meta['jav'] = [[round((L + dx) * scale, 1) if k % 2 == 0 else round((T + dx) * scale, 1) for k, dx in enumerate(np.ravel(e))] if e else None for e in jav]
     (out / 'meta.json').write_text(json.dumps(meta) + '\n')
     print(meta)
 
@@ -225,5 +226,5 @@ if __name__ == '__main__':
     measure = next((a.split('=')[1] for a in flags if a.startswith('--measure=')), None)
     adjust = next((float(a.split('=')[1]) for a in flags if a.startswith('--adjust=')), 1.0)
     jl = next((a.split('=')[1] for a in flags if a.startswith('--javelins=')), None)
-    jl = [((float(q[0]), float(q[1])), (float(q[2]), float(q[3]))) for q in (s.split(',') for s in jl.split(';'))] if jl else None
+    jl = [((float(q[0]), float(q[1])), (float(q[2]), float(q[3]))) if len(q) == 4 else None for q in (s.split(',') for s in jl.split(';'))] if jl else None
     main(*args[:4], javelins=jl, javelin='--javelin' in flags, keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)

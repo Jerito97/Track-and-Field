@@ -71,15 +71,19 @@ def _fit(im, p0, p1):
 
 
 def split(im, fg, lines, flood):
-    """im: sheet RGB (int); fg: foreground mask; lines: [((x0, y0), (x1, y1)), ...] tail -> tip.
-    Returns [(mask, rgb, (tail, tip)), ...] per figure, in the order of the lines, each with its own javelin."""
+    """im: sheet RGB (int); fg: foreground mask; lines: [((x0, y0), (x1, y1)), ...] tail -> tip, one per figure
+    left to right (None for a figure without a javelin).
+    Returns [(mask, rgb, (tail, tip) or None), ...] per figure, in the order of the lines, each with its own javelin."""
     H, W = fg.shape
     f = im / 255
     mx, mn = f.max(2), f.min(2)
     s = (mx - mn) / np.maximum(mx, 1e-6)
     javlike = (s < .3) | (mx < .45)  # white/grey shaft, black outline (the red grip stays with the hand)
+    n = len(lines)
+    owner = [k for k, ln in enumerate(lines) if ln]  # figure holding each javelin
+    ends_of = [None] * n
     bands, ends = [], []
-    for p0, p1 in lines:
+    for p0, p1 in (ln for ln in lines if ln):
         q0, q1, hw = _fit(im, p0, p1)
         ends.append((q0, q1))
         t, d, L, u = _geom((H, W), q0, q1)
@@ -107,15 +111,16 @@ def split(im, fg, lines, flood):
     dark = fg & (mx > .07) & (mx < .35) & (s < .4) & ~lifted
     hue = np.where(mx == f[..., 0], ((f[..., 1] - f[..., 2]) / np.maximum(mx - mn, 1e-6)) % 6 * 60, 180)
     hair = fg & (hue >= 5) & (hue < 50) & (s > .3) & (mx < .62) & (mx > .09) & ~lifted
-    shorts = _big_blobs(dark, flood, len(lines))
+    shorts = _big_blobs(dark, flood, n)
     shorts.sort(key=lambda b: np.nonzero(b)[1].mean())
     sx = [np.nonzero(b)[1].mean() for b in shorts]
     seeds = [b.copy() for b in shorts]
-    grip_seeds = [None] * len(lines)
-    for k, (band, t, d, L, hw) in enumerate(bands):  # the hand around the grip belongs to the javelin's owner
-        zone = fg & ~lifted & (t >= grips[k] - 12) & (t < grips[k] + 45)
-        grip_seeds[k] = (zone & (np.abs(d) <= hw + 6), zone & (np.abs(d) <= hw + 14))
-    for b in _big_blobs(hair, flood, 3 * len(lines), min_px=400):
+    grip_seeds = [(np.zeros_like(fg), np.zeros_like(fg)) for _ in range(n)]
+    for j, (band, t, d, L, hw) in enumerate(bands):  # the hand around the grip belongs to the javelin's owner
+        zone = fg & ~lifted & (t >= grips[j] - 12) & (t < grips[j] + 45)
+        grip_seeds[owner[j]] = (zone & (np.abs(d) <= hw + 6), zone & (np.abs(d) <= hw + 14))
+        ends_of[owner[j]] = ends[j]
+    for b in _big_blobs(hair, flood, 3 * n, min_px=400):
         k = int(np.argmin([abs(np.nonzero(b)[1].mean() - x) for x in sx]))
         seeds[k] |= b
     # each figure grows from its seeds through the sheet, blocked by every javelin tail and by the other figures' javelins;
@@ -134,14 +139,13 @@ def split(im, fg, lines, flood):
         ok = side[0] & side[1]
         bridges.append(band & ok[np.clip(t.astype(int) + 8, 0, len(ok) - 1)])
     allowed = []
-    for k in range(len(lines)):
+    for k in range(n):
         a = fg.copy()
         for j, (band, t, d, L, hw) in enumerate(bands):
-            a &= ~(band & javlike & ((t < grips[j]) | (j != k)) & ~bridges[j])
+            a &= ~(band & javlike & ((t < grips[j]) | (owner[j] != k)) & ~bridges[j])
         allowed.append(a)
     # the grip hands start late: a neighbour's front hand touching them is reached first from its own body
     # (the fingers right around the grip are taken at once but only start growing then)
-    n = len(lines)
     # first without crossing the black outlines (where two figures touch, their outlines keep them apart),
     # then the outlines go to whichever figure reaches them first
     ink = mx < .12
@@ -150,8 +154,7 @@ def split(im, fg, lines, flood):
     label = np.where(label >= 0, label % n, -1)
     label = _grow([(label == k, 0, 0) for k in range(n)], allowed)
     label[lifted] = -1
-    figs = [label == k for k in range(len(lines))]
-    owner = list(range(len(lines)))
+    figs = [label == k for k in range(n)]
 
     def inside(k, band, t, d, hw):
         """Band pixels lying inside figure k's silhouette (figure k on both sides of the band)."""
@@ -224,7 +227,7 @@ def split(im, fg, lines, flood):
                 left &= ~piece
                 if piece.sum() < 200:
                     m &= ~piece
-        out.append((m, rgb, ends[k]))
+        out.append((m, rgb, ends_of[k]))
     return out
 
 

@@ -21,4 +21,6 @@ python3 tools/cut_sprite_sheet.py $S/base_javstand_sheet.jpg $B/javstand javstan
 python3 tools/cut_sprite_sheet.py $S/base_javrun_sheet.jpg $B/javrun javrun $B/run --javelin --adjust=1.15
 python3 tools/cut_sprite_sheet.py $S/base_javpull_sheet.jpg $B/javpull javpull $B/run --adjust=1.14 \
   "--javelins=2,271,358,98;103,403,658,138;410,418,955,132;725,462,1275,150"
+python3 tools/cut_sprite_sheet.py $S/base_javthrow_sheet.jpg $B/javthrow javthrow $B/run \
+  "--javelins=2,234,418,72;118,371,755,70;300,282,1215,40;"
 python3 tools/build_characters.py

@@ -79,7 +79,7 @@ export function drawField(V){
     else if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=2.6*s, cx=fig.hand[0]+Math.cos(a)*.15*s, cy=fig.hand[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
       if(!V.replay){ const tx=cx-Math.cos(a)*L/2, ty=cy+Math.sin(a)*L/2, hx=cx+Math.cos(a)*L/2, hy=cy-Math.sin(a)*L/2; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
     else if(!V.jv){ if(!fig.drawnJav) javelin(fig.hand[0]+6,fig.hand[1]-4,.25,2.6*s); }
-    else if(V.jv.held){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,2.6*s); }
+    else if(V.jv.held){ if(!fig.drawnJav){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,2.6*s); } }
     else { let cx=X(V.jv.x), cy=GY-V.jv.y*s; if(V.jv.stuck){ cx-=Math.cos(V.jv.a)*.9*s; cy=GY+Math.sin(V.jv.a)*.9*s; } javelin(cx,cy,V.jv.a,2.6*s); }
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
@@ -134,8 +134,10 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
-// javelin: drawn frames where we have them (standing, running, drawing the javelin back); rig pieces for the rest
+// javelin: drawn frames where we have them (standing, running, drawing the javelin back, throwing); rig pieces for the rest
 function javFrame(C,V){
+  // the throw: arm back, javelin overhead, then the follow-through once it's gone (sheet frame 1, front view, unused)
+  if(V.act&&V.act.k==='jav'&&V.jv) return animReady(C,'javthrow')?['javthrow',!V.jv.held?3:(V.act.t||0)<.22?1:2]:null;
   if(V.act||V.jv) return null;
   // holding the button: drawing the javelin back over the last steps
   if(V.meter&&V.meter.k==='jav'){ const p=V.meter.p; return animReady(C,'javpull')?['javpull',p<.15?0:p<.35?1:p<.6?2:3]:null; }
