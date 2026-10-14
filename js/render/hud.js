@@ -1,0 +1,51 @@
+// HUD: header bar, cue buttons, popups, meters
+import {ctx,LW} from '../canvas.js';
+import {INK} from '../config.js';
+import {CUEPOS} from '../game/core.js';
+import {S} from '../state.js';
+import {txt} from './text.js';
+
+export function drawHud(V){
+  const ev=V.ev;
+  ctx.fillStyle='#14284f'; ctx.fillRect(0,0,LW,20);
+  ctx.fillStyle='#e8262d'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(108,0); ctx.lineTo(100,20); ctx.lineTo(0,20); ctx.closePath(); ctx.fill();
+  txt('JUGADOR 1',8,11,'#fff',14,{align:'left',stroke:null});
+  if(ev.type==='sprint'){ const t=S.finished?S.final:S.t; ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(LW-62,2,58,16); ctx.fill(); ctx.stroke(); txt((t||0).toFixed(2),LW-33,10.5,'#fff',14,{stroke:null}); }
+  else txt(`RONDA ${S.round}/3`,LW-8,11,'#fff',14,{align:'right',stroke:null});
+  if(!V.replay&&S.cue) drawCue(S.cue);
+  if(S.phase==='ready'&&!V.replay){ cueCircle(LW/2,150,'#ff4d2e',''); txt('TOCÁ PARA EMPEZAR',LW/2,196,'#fff',16); }
+  S.fx.forEach(f=>{ if(f.k==='ring'){ const k=f.t/.45; ctx.strokeStyle=`rgba(255,255,255,${1-k})`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(f.x,f.y,28+k*16,0,Math.PI*2); ctx.stroke(); }
+    else if(f.k==='x'){ const k=f.t/.45; ctx.save(); ctx.globalAlpha=1-k; ctx.translate(f.x,f.y); ctx.strokeStyle=INK; ctx.lineWidth=9; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(-14,-14); ctx.lineTo(14,14); ctx.moveTo(14,-14); ctx.lineTo(-14,14); ctx.stroke(); ctx.strokeStyle='#e8262d'; ctx.lineWidth=5.5; ctx.stroke(); ctx.restore(); } });
+  S.pops.forEach(p=>{ const k=Math.min(1,p.t/.15), sc=(.6+.4*k)*p.big, a=p.hold?1:Math.min(1,(p.dur-p.t)/.3);
+    ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.translate(LW/2,p.small?52:94); ctx.rotate(-.05); ctx.scale(sc,sc);
+    txt(p.text,0,0,p.col,40,{lw:6}); if(p.sub) txt(p.sub,0,32,'#ffd23a',20,{lw:4}); ctx.restore(); });
+  if(V.replay){ txt('REPETICIÓN',LW/2,36,'#fff',20); ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(LW-22,282,13,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(LW-29,276); ctx.lineTo(LW-22,282); ctx.lineTo(LW-29,288); ctx.closePath(); ctx.moveTo(LW-22,276); ctx.lineTo(LW-15,282); ctx.lineTo(LW-22,288); ctx.closePath(); ctx.fill(); }
+}
+export function target(x,y){ ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=2; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); }
+export function drawStar(x,y,r,p,spark){
+  const good=p>=.9&&p<=1.05;
+  ctx.save(); ctx.translate(x,y);
+  ctx.fillStyle=good?'rgba(255,240,120,.55)':'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(0,0,r*1.7,0,Math.PI*2); ctx.fill();
+  if(spark){ for(let i=0;i<6;i++){ const a=S.clock*9+i*1.05, d=r*(1.2+.5*Math.sin(S.clock*23+i)); ctx.fillStyle=i%2?'#fff':'#ffd23a'; ctx.fillRect(Math.cos(a)*d-1.5,Math.sin(a)*d-1.5,3,3); } }
+  ctx.rotate(S.clock*4); ctx.beginPath();
+  for(let i=0;i<10;i++){ const rr=i%2?r*.45:r, a=-Math.PI/2+i*Math.PI/5; ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr); }
+  ctx.closePath(); ctx.fillStyle=good?'#fff36b':'#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.fill(); ctx.stroke(); ctx.restore();
+}
+export const CUECOL={'#2fd166':'#139a44','#ff4d2e':'#b8200f','#2f7fd6':'#1b4f9c'};
+export function cueCircle(x,y,col,label){
+  const K=1.45;
+  ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(x+2,y+3.5,20*K,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x,y,20*K,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y,18*K,0,Math.PI*2); ctx.fill();
+  const g=ctx.createRadialGradient(x-7,y-9,2,x,y,16*K); g.addColorStop(0,'#fff'); g.addColorStop(.25,col); g.addColorStop(1,CUECOL[col]);
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,15.5*K,0,Math.PI*2); ctx.fill();
+  if(label) txt(label,x,y+1,'#fff',28,{lw:3});
+}
+export function drawCue(cue){
+  const pulse=1+.06*Math.sin(S.clock*14);
+  const at=(p,col,label)=>{ const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
+  if(cue.type==='side') at(cue.side,'#2fd166','');
+  else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
+  else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ APRETADO',LW/2,150,'#fff',18,{lw:4}); }
+  else if(cue.type==='num') cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=CUEPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } });
+}

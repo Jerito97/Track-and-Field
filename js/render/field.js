@@ -1,0 +1,103 @@
+// Field event rendering
+import {ctx,LH,LW} from '../canvas.js';
+import {INK} from '../config.js';
+import {drawChar} from '../draw/character.js';
+import {POSE} from '../poses.js';
+import {drawRig,rigReady} from '../rig.js';
+import {ATH,ME,S} from '../state.js';
+import {rec} from '../storage.js';
+import {clamp,hash} from '../utils.js';
+import {drawStar,target} from './hud.js';
+import {drawBoards,drawBottomAds,drawStands,flag,javelin,shadow,upright} from './scenery.js';
+import {txt} from './text.js';
+
+export function drawField(V){
+  const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s, sh=V.camY*s;
+  const GY=264+sh;
+  const excite=(S.phase==='act'||S.phase==='post'||V.replay)?1:.35;
+  const sky=ctx.createLinearGradient(0,0,0,LH); sky.addColorStop(0,'#7fc4f0'); sky.addColorStop(1,'#d5ecfa'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
+  if(sh>2){ ctx.fillStyle='#fff'; for(let i=0;i<5;i++){ const W2=LW+200, cx=((i*173-V.cam*2)%W2+W2)%W2-100, cy=50+i*26-sh*.15; ctx.beginPath(); ctx.ellipse(cx,cy,34,10,0,0,Math.PI*2); ctx.ellipse(cx+18,cy-6,20,10,0,0,Math.PI*2); ctx.fill(); } }
+  const stTop=24+sh, stBot=170+sh;
+  ctx.fillStyle='#e6e9ef'; ctx.fillRect(0,stTop-8,LW,8); ctx.fillStyle='#a9b0bd'; ctx.fillRect(0,stTop-2,LW,2);
+  drawStands(V.cam*(s/34),stTop,stBot,excite,S.clock);
+  drawBoards(V.cam,stBot,14,s);
+  const apTop=stBot+14;
+  ctx.fillStyle='#3d9be0'; ctx.fillRect(0,apTop,LW,LH-apTop);
+  ctx.fillStyle='rgba(255,255,255,.06)'; for(let y=apTop+4;y<LH;y+=6) ctx.fillRect(0,y,LW,2);
+  if(ev.kind==='jav'){
+    const lx=X(ev.line);
+    ctx.fillStyle='#8cc63f'; ctx.fillRect(Math.max(0,lx),apTop,LW,LH-apTop);
+    for(let m=0;m<130;m+=10){ const a=X(ev.line+m), b=X(ev.line+m+5); if(b<0||a>LW) continue; ctx.fillStyle='#99d04a'; ctx.fillRect(Math.max(a,lx),apTop,b-Math.max(a,lx),LH-apTop); }
+    ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,apTop); ctx.quadraticCurveTo(lx+14,(apTop+LH)/2,lx,LH); ctx.stroke();
+    for(let m=10;m<=120;m+=10){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,apTop,2,LH-apTop); txt(m+' m',x,apTop+12,'#fff',13); }
+    if(lx>0){ ctx.fillStyle='#fff'; ctx.fillRect(0,GY+16,lx,2); ctx.fillRect(0,GY-26,lx,2); }
+  } else {
+    ctx.fillStyle='#fff'; ctx.fillRect(0,GY-26,LW,2); ctx.fillRect(0,GY+16,LW,2);
+    ctx.fillStyle='#e8262d'; ctx.fillRect(0,GY+19,LW,3);
+    ctx.fillStyle='#e6e9ef'; ctx.fillRect(0,GY+22,LW,LH);
+    for(let m=0;m<ev.line;m+=5){ const x=X(m); if(x>-20&&x<LW+20){ ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(x-1,GY+12,2,4); } }
+  }
+  if(ev.kind==='lj'){
+    const p0=X(ev.line+.5), p1=X(ev.line+10.5);
+    ctx.fillStyle='#f3ead2'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,20); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(160,130,70,.25)'; for(let k=0;k<70;k++) ctx.fillRect(X(ev.line+1+hash(k)*9.3),GY-3+hash(k+50)*14,2,1.5);
+    const nb=GY-44; ctx.fillStyle='#fff'; ctx.fillRect(p0,nb,p1-p0,14); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(p0,nb,p1-p0,14);
+    for(let m=1;m<=10;m++){ const x=X(ev.line+m); ctx.fillStyle=INK; ctx.fillRect(x-.5,nb+10,1,4); txt(String(m),x,nb+7,'#e8262d',11,{stroke:null}); }
+    const bx=X(ev.line); ctx.fillStyle='#fff'; ctx.fillRect(bx-.25*s,GY-4,.25*s,14); ctx.fillStyle='#e8262d'; ctx.fillRect(bx-1,GY-4,3,14);
+    rivalFlags(V,X,GY);
+  }
+  if(ev.kind==='jav') rivalFlags(V,X,GY);
+  if(ev.kind==='pv'){
+    const bx=X(ev.line), ux=X(ev.line+.6);
+    ctx.fillStyle='#555'; ctx.beginPath(); ctx.moveTo(bx-.5*s,GY); ctx.lineTo(bx,GY+4); ctx.lineTo(bx,GY); ctx.closePath(); ctx.fill();
+    upright(ux-6,GY-10,s);
+    const m0=X(ev.line+.3), m1=X(ev.line+5.5), mh=.85*s;
+    ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(m0,GY-mh,m1-m0,mh); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#2f6fd6'; ctx.fillRect(m0+2,GY-mh+2,m1-m0-4,mh*.35);
+    for(let h=2;h<=7;h++){ txt(h+' m',ux+16,GY-h*s,'#fff',11); }
+    if(V.bar){ const by=GY-V.bar*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ux-12,by); ctx.lineTo(ux+12,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke(); }
+  }
+  if(V.zone||S.phase==='ready'||S.phase==='run'){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
+    if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
+      ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
+      ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
+  if(!V.replay&&V.meter&&V.meter.k==='air'){ const m=V.meter, N=24;
+    const pt=u=>[X(m.from+(m.to-m.from)*u),GY-4*m.h*u*(1-u)*s];
+    ctx.fillStyle='rgba(255,255,255,.85)'; for(let i=0;i<=N;i++){ const [x,y]=pt(i/N); ctx.beginPath(); ctx.arc(x,y,1.6,0,Math.PI*2); ctx.fill(); }
+    const [ex,ey]=pt(1); target(ex,ey);
+    const pp=m.hit!=null?m.hit:m.p; const [sx,sy]=pt(Math.min(pp,1.25)); drawStar(sx,sy,9,pp); }
+  const px=X(V.x);
+  shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
+  const fig=(ME().rig&&rigReady())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
+  if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
+  if(ev.kind==='jav'){
+    if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=2.6*s, cx=fig.hand[0]+Math.cos(a)*.15*s, cy=fig.hand[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
+      if(!V.replay){ const tx=cx-Math.cos(a)*L/2, ty=cy+Math.sin(a)*L/2, hx=cx+Math.cos(a)*L/2, hy=cy-Math.sin(a)*L/2; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
+    else if(!V.jv){ javelin(fig.hand[0]+6,fig.hand[1]-4,.25,2.6*s); }
+    else if(V.jv.held){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,2.6*s); }
+    else { let cx=X(V.jv.x), cy=GY-V.jv.y*s; if(V.jv.stuck){ cx-=Math.cos(V.jv.a)*.9*s; cy=GY+Math.sin(V.jv.a)*.9*s; } javelin(cx,cy,V.jv.a,2.6*s); }
+  }
+  if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
+  S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle='#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill(); });
+  drawBottomAds();
+}
+export function rivalFlags(V,X,GY){
+  ATH.forEach((a,i)=>{ if(a.me) return; const b=S.marks[i].filter(m=>m!=null); if(!b.length) return; flag(X(V.ev.line+Math.max(...b)),GY+14,a.C.j,a.name[0]); });
+  if(rec[V.ev.id]!=null){ const x=X(V.ev.line+rec[V.ev.id]); ctx.setLineDash([4,4]); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,GY-30); ctx.lineTo(x,GY+16); ctx.stroke(); ctx.setLineDash([]); txt('RÉCORD',x,GY-36,'#fff',11); }
+}
+export function drawPole(V,X,GY,fig){
+  const ev=V.ev, s=V.ppm, a=V.act, L=4.6*s, [hx,hy]=fig.hand;
+  const line=(x1,y1,x2,y2,cx,cy)=>{ ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x1,y1); if(cx!=null) ctx.quadraticCurveTo(cx,cy,x2,y2); else ctx.lineTo(x2,y2); ctx.stroke(); ctx.strokeStyle='#7ccf3a'; ctx.lineWidth=2.6; ctx.stroke(); };
+  const tipX=X(ev.line)-2, tipY=GY+2;
+  if(!a||a.k==='pvfoul'){ const d=ev.line-V.x; let ang=a?.1:.15+.75*clamp(d/14,0,1);
+    if(V.meter&&V.meter.k==='pole') ang=.55*(1-V.meter.p)+.04;
+    const fx=hx+Math.cos(ang)*(L-1.1*s), fy=hy-Math.sin(ang)*(L-1.1*s);
+    line(hx-Math.cos(ang)*1.1*s,hy+Math.sin(ang)*1.1*s,fx,fy);
+    if(!V.replay&&V.meter&&V.meter.k==='pole'){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
+    return; }
+  if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy);
+    if(!V.replay&&V.meter&&V.meter.k==='rise'){ const p=Math.min(V.meter.hit!=null?V.meter.hit:V.meter.p,1.25), q=Math.min(p,1), u=1-q;
+      const bx=u*u*tipX+2*u*q*cx+q*q*hx, by=u*u*tipY+2*u*q*cy+q*q*hy; target(hx,hy); drawStar(bx+(p>1?(p-1)*30:0),by-(p>1?(p-1)*30:0),9,p); }
+    return; }
+  line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L);
+}
