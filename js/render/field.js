@@ -117,8 +117,12 @@ function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x, b=ev.bands;
 const FIELD_H=2.37;
 function ljFrame(C,V){
   const a=V.act;
-  if(a&&a.k==='lj'){ if(a.u==null||a.u>=.3||!animReady(C,'ljtakeoff')) return null;
-    return ['ljtakeoff',a.u<.05?0:a.u<.12?1:a.u<.2?2:3]; }
+  if(a&&a.k==='lj'&&a.u!=null){
+    // take-off (first 30% of the jump), then the flight: arms up at the top, coming down, knees up for the landing
+    // (flight frame 1 repeats the last take-off pose, so it is skipped); landing stays on rig pieces
+    if(a.u<.3) return animReady(C,'ljtakeoff')?['ljtakeoff',a.u<.05?0:a.u<.12?1:a.u<.2?2:3]:null;
+    if(a.u<1) return animReady(C,'ljflight')?['ljflight',a.u<.5?1:a.u<.68?2:3]:null;
+    return null; }
   if(a) return null;
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
