@@ -9,6 +9,8 @@ export const POSE={
   stumble:{hip:.5,lean:1.3,legs:[{a:.4,b:1.3},{a:-.5,b:.7}],arms:[{a:1.7,b:.2},{a:1.4,b:.3}]},
   dip:{hip:.72,lean:.75,legs:[{a:-.7,b:.4},{a:.8,b:.4}],arms:[{a:-1.3,b:.3},{a:-1.0,b:.2}]},
   cheer:{hip:.8,lean:0,legs:[{a:.12,b:.05},{a:-.12,b:.05}],arms:[{a:2.7,b:.2},{a:-2.7,b:-.2}]},
+  // same celebration for image parts: both arms up and back so the wide near arm doesn't cover the face
+  cheerRig:{hip:.8,lean:0,legs:[{a:.12,b:.05},{a:-.12,b:.05}],arms:[{a:-2.55,b:-.4},{a:-2.85,b:-.2}]},
   pvPlant:{hip:.82,lean:-.15,legs:[{a:.5,b:.6},{a:-.4,b:.3}],arms:[{a:2.75,b:.1},{a:2.55,b:.2}]},
   pvSwing:{hip:.85,lean:-.3,legs:[{a:1.7,b:.25},{a:1.5,b:.45}],arms:[{a:2.9,b:.05},{a:2.75,b:.1}]},
   pvOver:{hip:.85,lean:-.5,legs:[{a:-1.4,b:-.5},{a:-1.2,b:-.7}],arms:[{a:2.6,b:.1},{a:2.4,b:.2}]},

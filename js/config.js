@@ -1,13 +1,10 @@
 // Static game data: characters, events, scenery palettes
-export const CHARS=[
- {id:'yo',name:'Yo',sprite:true,rig:true,skin:'#c98e64',hair:'curly',hc:'#4a2e1a',beard:true,j:'#e8262d',j2:'#ffffff',sh:'#16161d',shoe:'#ffffff'},
- {id:'fede',name:'Fede',skin:'#f0c39a',hair:'spiky',hc:'#e0602a',j:'#e8262d',j2:'#ffffff',sh:'#16161d',shoe:'#ffffff'},
- {id:'lola',name:'Lola',skin:'#8a5a3b',hair:'buns',hc:'#1d1410',j:'#ffd23a',j2:'#1f9e54',sh:'#1f9e54',shoe:'#ff5a3c'},
- {id:'chuck',name:'Chuck',skin:'#f6d0b0',hair:'short',hc:'#ffd94a',j:'#2f6fe0',j2:'#ffffff',sh:'#ffffff',shoe:'#2f6fe0'},
- {id:'kenji',name:'Kenji',skin:'#e9c09a',hair:'short',hc:'#141414',j:'#ffffff',j2:'#e8323c',sh:'#e8323c',shoe:'#141414',band:'#e8323c'},
- {id:'mora',name:'Mora',skin:'#b97b55',hair:'braid',hc:'#2b1a12',j:'#8e4fd6',j2:'#ffcc33',sh:'#2b2240',shoe:'#ffffff'},
- {id:'nils',name:'Nils',skin:'#d9a07a',hair:'bald',hc:'#c46a2a',j:'#ff8a1f',j2:'#ffffff',sh:'#3b3b3b',shoe:'#ffd23a'}
-];
+import {ROSTER} from './roster.js';
+
+// athletes from assets/characters/characters.json (via js/roster.js); the extra fields are for the vector fallback
+const LOOK={yo:{sprite:true,hair:'curly',beard:true}};
+export const CHARS=ROSTER.map(r=>{ const p=r.palette;
+  return {id:r.id,name:r.name,own:r.own,parts:r.parts||null,skin:p.piel,hc:p.pelo,j:p.musculosa,j2:p.franja,sh:p.short,shoe:p.zapatillas,hair:'short',...LOOK[r.id]}; });
 export const EVENTS=[
  {id:'100',name:'100 metros',tag:'100 M',type:'sprint',dist:100,wr:8.90,
   help:'Tocá el <b>botón verde</b> del lado donde aparece: izquierda o derecha. Cada acierto te da velocidad y cada error te frena. Cerca de la meta aparecen <b>dos botones rojos</b>: tocá los dos a la vez para tirarte de cabeza. Si lo hacés justo al llegar, ganás unas centésimas.'},

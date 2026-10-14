@@ -1,0 +1,40 @@
+{
+  "atletas": [
+    {
+      "id": "yo",
+      "nombre": "Yo",
+      "propio": true,
+      "paleta": { "piel": "#c98e64", "pelo": "#4a2e1a", "musculosa": "#e8262d", "franja": "#ffffff", "short": "#16161d", "zapatillas": "#ffffff" }
+    },
+    {
+      "id": "santi",
+      "nombre": "Santi",
+      "paleta": { "piel": "#f3cba8", "pelo": "#e8c25a", "musculosa": "#2f6fe0", "franja": "#ffffff", "short": "#1c2a55", "zapatillas": "#ff5a3c" }
+    },
+    {
+      "id": "nacho",
+      "nombre": "Nacho",
+      "paleta": { "piel": "#6b4329", "pelo": "#17120e", "musculosa": "#ffd23a", "franja": "#1f9e54", "short": "#1f9e54", "zapatillas": "#ffffff" }
+    },
+    {
+      "id": "rafa",
+      "nombre": "Rafa",
+      "paleta": { "piel": "#c99062", "pelo": "#151515", "musculosa": "#1f9e54", "franja": "#ffd23a", "short": "#f2f2f2", "zapatillas": "#16161d" }
+    },
+    {
+      "id": "lucho",
+      "nombre": "Lucho",
+      "paleta": { "piel": "#f7d9c6", "pelo": "#c4541f", "musculosa": "#8e4fd6", "franja": "#ff9b2f", "short": "#2b2240", "zapatillas": "#ffd23a" }
+    },
+    {
+      "id": "beto",
+      "nombre": "Beto",
+      "paleta": { "piel": "#8a5a3b", "pelo": "#c3c6cc", "musculosa": "#ff7a1a", "franja": "#14284f", "short": "#14284f", "zapatillas": "#ffffff" }
+    },
+    {
+      "id": "tomi",
+      "nombre": "Tomi",
+      "paleta": { "piel": "#dcaa7e", "pelo": "#7a4a26", "musculosa": "#2bc4e0", "franja": "#ffffff", "short": "#ffffff", "zapatillas": "#e8262d" }
+    }
+  ]
+}

@@ -1,16 +1,15 @@
 // Sprint track rendering
 import {ctx,LW} from '../canvas.js';
 import {HURDLES,INK} from '../config.js';
-import {drawChar} from '../draw/character.js';
 import {POSE,runPose} from '../poses.js';
-import {drawRig,drawSprite,rigReady} from '../rig.js';
+import {drawAthlete,drawSprite} from '../rig.js';
 import {ME,S} from '../state.js';
 import {drawBoards,drawBottomAds,drawStands,hurdle,shadow} from './scenery.js';
 import {txt} from './text.js';
 
 const LANES=7;
 // "Yo" is the size reference: his standing sprite is YO_H logical px tall, rivals are scaled to match
-const YO_H=60, YO_K=YO_H/144, RIV_K=.9*YO_H/(1.93*24);
+const YO_H=60, YO_K=YO_H/144, RIV_K=YO_H/(2.09*24); // 2.09: drawChar height in units of s
 export function drawSprint(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s;
   const TT=176, TB=298, lh=(TB-TT)/LANES;
@@ -39,12 +38,11 @@ export function drawSprint(V){
         else if(V.v>.3) k='run'+(1+Math.floor(((S.legP/(Math.PI*2))*5%5+5)%5)); else k=S.finished?'cheer':'stand';
         drawn=k==='stumble'?drawSprite('run2',px+6,feet,.5,YO_K):drawSprite(k,px+6,feet-V.y*s,0,YO_K);
       }
-      if(!drawn&&ME().rig&&rigReady()){ drawRig(ctx,s,px,feet,V.y,V.pose||POSE.stand,ME(),0); drawn=true; }
-      if(!drawn) drawChar(ctx,s*RIV_K,px,feet,V.y/RIV_K,V.pose||POSE.stand,ME(),V.v>5);
+      if(!drawn) drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,V.pose||POSE.stand,ME(),V.v>5);
       ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; const ty=feet-V.y*s-YO_H-4; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue; const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
       let J; if(r.t<=r.react) J=S.setStage>=1?POSE.set:POSE.crouch; else if(r.air>0) J=POSE.hurdle; else if(r.tripT>0) J=POSE.stumble; else if(r.final!=null&&r.v<.5) J=POSE.cheer; else J=r.v>.2?runPose(r.legP,Math.min(1,r.v/4)):POSE.stand;
-      drawChar(ctx,s*RIV_K,x,feet,r.y/RIV_K,J,r.a.C,r.v>5); }
+      drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,J,r.a.C,r.v>5); }
   }
   drawStarter(X(5.5));
   drawBottomAds();

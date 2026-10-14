@@ -1,4 +1,7 @@
-// Image assets. Files live in assets/characters/<id>/{rig,sprites}/<name>.png
+// Image assets. Yo: assets/characters/yo/{rig,sprites}/<name>.png (manifest below).
+// Everyone else: assets/characters/<id>/<piece>.png, listed in js/roster.js by tools/build_characters.py.
+import {CHARS} from './config.js';
+
 // rig parts: w,h = image size; px,py = pivot (joint) in image px
 // sprites:   w,h = image size; hx = hip x in image px (feet are the bottom edge)
 const BASE=new URL('../assets/characters/',import.meta.url);
@@ -29,14 +32,19 @@ const url=(who,kind,k)=>new URL(`${who}/${kind}/${k}.png`,BASE).href;
 
 export const SPR={};
 export const PARTS={};
+// rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
+export const RIGS={yo:PARTS};
 // resolves once every image has loaded (or failed); drawing code falls back to vector art for anything missing
 export function loadAssets(){
   const waits=[];
   const load=(im,src)=>{ waits.push(new Promise(res=>{ im.addEventListener('load',res,{once:true}); im.addEventListener('error',res,{once:true}); })); im.src=src; };
   Object.entries(YO_SPRITES).forEach(([k,v])=>{ const im=new Image(); SPR[k]={im,w:v.w,h:v.h,hx:v.hx}; load(im,url('yo','sprites',k)); });
-  Object.entries(YO_RIG).forEach(([k,v])=>{ const im=new Image(); const P={im,dark:null,w:v.w,h:v.h,px:v.px,py:v.py}; PARTS[k]=P;
+  const rigPart=(set,k,v,src)=>{ const im=new Image(); const P={im,dark:null,w:v.w,h:v.h,px:v.px,py:v.py}; set[k]=P;
     // darker copy for the far-side limbs
     im.addEventListener('load',()=>{ const c=document.createElement('canvas'); c.width=v.w; c.height=v.h; const g=c.getContext('2d'); g.drawImage(im,0,0); g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(20,10,30,.28)'; g.fillRect(0,0,v.w,v.h); P.dark=c; });
-    load(im,url('yo','rig',k)); });
+    load(im,src); };
+  Object.entries(YO_RIG).forEach(([k,v])=>rigPart(PARTS,k,v,url('yo','rig',k)));
+  CHARS.forEach(C=>{ if(!C.parts) return; const set=RIGS[C.id]={};
+    Object.entries(C.parts).forEach(([k,v])=>rigPart(set,k,v,new URL(v.file,BASE).href)); });
   return Promise.all(waits);
 }
