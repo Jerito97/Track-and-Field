@@ -30,7 +30,7 @@ export function updateField(dt){
     S.x+=sp*dt; S.legP+=sp*dt*2.4;
     if(S.zone&&ev.kind==='jav'){
       S.pose=S.meter?POSE.javBack:runPose(S.legP,Math.min(1,sp/4),'jav');
-      if(S.meter){ S.meter.p+=dt/.9; if(S.meter.p>=1.2) javThrow(); }
+      if(S.meter){ S.meter.p+=dt/.7; if(S.meter.p>=1.2) javThrow(); }
     } else {
       S.pose=S.v>.2?runPose(S.legP,Math.min(1,S.v/4),armsFor()):S.pose;
       if(S.zone&&ev.kind==='pv') S.meter.p=clamp(1-(ev.line-S.x)/ev.zone,0,1);

@@ -56,7 +56,7 @@ js/
 
 - **Salto en largo** (como la app original): 1) correr con los verdes (41 m); 2) a 14 m de la tabla el piso se pinta de verde (14 a 9 m), amarillo (9 a 4 m) y rojo (últimos 4 m); desde el verde ya no hay botones, mantenés la velocidad y te preparás; en el rojo aparecen los dos botones rojos: despegar lo más pegado a la tabla (pisarla es nulo); 3) en el aire, los dos rojos otra vez para el impulso: lo ideal es en el punto más alto (entre el 44% y el 56% del vuelo, +1,40 m); se va perdiendo hasta no sumar nada antes del 20% o después del 80%. Al apretar, el atleta se estira, sube un poco y acelera hacia la marca nueva.
 
-- **Garrocha y jabalina:** el mismo semáforo que el largo (verde 14 a 9 m, amarillo 9 a 4 m, rojo últimos 4 m antes de la tabla o la línea). Desde el verde no hay botones verdes y mantenés la velocidad. Garrocha: la estrellita recorre la garrocha a lo largo de todo el semáforo y se clava con los dos rojos cuando llega a la punta. Jabalina: se mantiene apretado (las chispitas recorren la jabalina en 0,9 s) y se suelta antes de pisar la línea.
+- **Garrocha y jabalina:** el mismo semáforo que el largo (verde 14 a 9 m, amarillo 9 a 4 m, rojo últimos 4 m antes de la tabla o la línea). Desde el verde no hay botones verdes y mantenés la velocidad. El verde es solo preparación; la acción arranca en el amarillo. Garrocha: la estrellita recorre la garrocha durante el amarillo y el rojo (unos 9 m, ~1 s) y se clava con los dos rojos cuando llega a la punta. Jabalina: desde el amarillo se mantiene apretado (las chispitas recorren la jabalina en 0,7 s) y se suelta antes de pisar la línea.
 - **Participantes:** 6 por prueba, vos y 5 rivales sorteados entre los otros atletas (en el torneo son los mismos en las cinco pruebas).
 
 ## Atletas
