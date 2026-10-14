@@ -95,6 +95,7 @@ En los 100 m y los 110 m con vallas todos los atletas usan animaciones dibujadas
 - `javrun`: carrera con la jabalina al hombro, 6 cuadros (hasta empezar el lanzamiento).
 - `javpull`: llevar la jabalina atrás, 4 cuadros, mientras mantenés apretado; la estrellita recorre la jabalina dibujada (el `meta.json` guarda la cola y la punta de cada cuadro).
 - `javthrow`: lanzamiento (cuadro 2 brazo atrás, 3 jabalina arriba de la cabeza, 4 seguimiento ya sin la jabalina; el 1, de frente, no se usa).
+- La jabalina sola (`assets/javelin.png`, de `assets/source/javelin.jpg`) es la que vuela y queda clavada, y se dibuja debajo de cada cuadro con la punta sobre la punta dibujada: así se ve siempre entera aunque la hoja la dibuje más corta o cortada (`--javelin-lines` guarda dónde está en hojas que no necesitan `--javelins`).
 - `javafter`: después del tiro (paso de recuperación mientras frena, mirando el vuelo con la mano en la frente, puño arriba cuando se clava).
 
 El salto en largo ya va todo con dibujos; solo el nulo (pisar la tabla) sigue con piezas.

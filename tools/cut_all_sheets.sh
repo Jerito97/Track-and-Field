@@ -17,8 +17,10 @@ python3 tools/cut_sprite_sheet.py $S/base_ljflight_sheet.jpg $B/ljflight ljfligh
 python3 tools/cut_sprite_sheet.py $S/base_ljstretch_sheet.jpg $B/ljstretch ljstretch $B/run
 python3 tools/cut_sprite_sheet.py $S/base_ljland_sheet.jpg $B/ljland ljland $B/run
 # javelin: the white javelin throws off the size measures; matched by eye to the standing pose
-python3 tools/cut_sprite_sheet.py $S/base_javstand_sheet.jpg $B/javstand javstand $B/run --adjust=1.19
-python3 tools/cut_sprite_sheet.py $S/base_javrun_sheet.jpg $B/javrun javrun $B/run --javelin --adjust=1.15
+python3 tools/cut_sprite_sheet.py $S/base_javstand_sheet.jpg $B/javstand javstand $B/run --adjust=1.19 \
+  "--javelin-lines=20,230,598,135;552,230,1130,128"
+python3 tools/cut_sprite_sheet.py $S/base_javrun_sheet.jpg $B/javrun javrun $B/run --javelin --adjust=1.15 \
+  "--javelin-lines=0,185,320,100;270,165,570,100;520,162,822,100;770,165,1070,100;1020,168,1312,105;1265,165,1560,102"
 python3 tools/cut_sprite_sheet.py $S/base_javpull_sheet.jpg $B/javpull javpull $B/run --adjust=1.14 \
   "--javelins=2,271,358,98;103,403,658,138;410,418,955,132;725,462,1275,150"
 python3 tools/cut_sprite_sheet.py $S/base_javthrow_sheet.jpg $B/javthrow javthrow $B/run \

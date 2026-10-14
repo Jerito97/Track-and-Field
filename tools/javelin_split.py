@@ -25,8 +25,9 @@ def _geom(shape, p0, p1):
     return t, d, L, u
 
 
-def _fit(im, p0, p1):
-    """Refit a rough line to the shaft centre; returns new end points and the band half width."""
+def _fit(im, p0, p1, fg=None):
+    """Refit a rough line to the shaft centre; returns new end points and the band half width.
+    With fg, the tip is moved to the real end of the javelin (the last foreground pixel on the line)."""
     dark = im.min(2) < 110
     light = im.min(2) > 150
     p0, p1 = np.array(p0, float), np.array(p1, float)
@@ -67,7 +68,19 @@ def _fit(im, p0, p1):
     v = vt[0] if vt[0] @ u > 0 else -vt[0]
     q0 = m + v * ((p0 - m) @ v)
     q1 = m + v * ((p1 - m) @ v)
+    if fg is not None:
+        L = np.hypot(*(q1 - q0))
+        for e in np.arange(L - 40, L + 40, .5):
+            x, y = np.round(q0 + v * e).astype(int)
+            if 0 <= y < fg.shape[0] and 0 <= x < fg.shape[1] and fg[max(0, y - 1):y + 2, max(0, x - 1):x + 2].any():
+                q1 = q0 + v * e
     return q0, q1, float(np.median(widths)) / 2 + 3.5
+
+
+def fit_line(im, fg, p0, p1):
+    """Tail and tip of a javelin drawn roughly from p0 (tail) to p1 (tip), fitted to the sheet."""
+    q0, q1, _ = _fit(im, p0, p1, fg)
+    return q0, q1
 
 
 def split(im, fg, lines, flood):
@@ -84,7 +97,7 @@ def split(im, fg, lines, flood):
     ends_of = [None] * n
     bands, ends = [], []
     for p0, p1 in (ln for ln in lines if ln):
-        q0, q1, hw = _fit(im, p0, p1)
+        q0, q1, hw = _fit(im, p0, p1, fg)
         ends.append((q0, q1))
         t, d, L, u = _geom((H, W), q0, q1)
         band = (np.abs(d) <= hw) & (t >= -4) & (t <= L + 4)

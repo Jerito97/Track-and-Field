@@ -69,18 +69,22 @@ export function drawField(V){
   // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
   { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):null;
-    if(f){ const K=animScale(ME(),s*FIELD_H), feet=GY-V.y*s; drawAnim(ctx,ME(),f[0],f[1],px,feet,K); fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
-      // javelin drawn in the frame: its tail and tip on screen (for the star)
-      const A=ME().anims[f[0]], j=A.jav&&A.jav[f[1]]; if(j) fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K]; } }
+    if(f){ const K=animScale(ME(),s*FIELD_H), feet=GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
+      // javelin in the frame: its tail and tip on screen (for the star); the whole javelin goes underneath, tip on the
+      // drawn tip, so every frame shows it at full length (the sheets draw it shorter or cut off at the tail)
+      const A=ME().anims[f[0]], j=A.jav&&A.jav[f[1]];
+      if(j){ fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K];
+        const [tx,ty,hx,hy]=fig.jav, a=Math.atan2(ty-hy,hx-tx), L=JAV_L*s; javelin(hx-Math.cos(a)*L/2,hy+Math.sin(a)*L/2,a,L); }
+      drawAnim(ctx,ME(),f[0],f[1],px,feet,K); } }
   if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
     if(!V.jv&&V.meter&&V.meter.k==='jav'&&fig.jav){ if(!V.replay){ const [tx,ty,hx,hy]=fig.jav; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
-    else if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=2.6*s, cx=fig.hand[0]+Math.cos(a)*.15*s, cy=fig.hand[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
+    else if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=JAV_L*s, cx=fig.hand[0]+Math.cos(a)*.15*s, cy=fig.hand[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
       if(!V.replay){ const tx=cx-Math.cos(a)*L/2, ty=cy+Math.sin(a)*L/2, hx=cx+Math.cos(a)*L/2, hy=cy-Math.sin(a)*L/2; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
-    else if(!V.jv){ if(!fig.drawnJav) javelin(fig.hand[0]+6,fig.hand[1]-4,.25,2.6*s); }
-    else if(V.jv.held){ if(!fig.drawnJav){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,2.6*s); } }
-    else { let cx=X(V.jv.x), cy=GY-V.jv.y*s; if(V.jv.stuck){ cx-=Math.cos(V.jv.a)*.9*s; cy=GY+Math.sin(V.jv.a)*.9*s; } javelin(cx,cy,V.jv.a,2.6*s); }
+    else if(!V.jv){ if(!fig.drawnJav) javelin(fig.hand[0]+6,fig.hand[1]-4,.25,JAV_L*s); }
+    else if(V.jv.held){ if(!fig.drawnJav){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,JAV_L*s); } }
+    else { let cx=X(V.jv.x), cy=GY-V.jv.y*s; if(V.jv.stuck){ cx-=Math.cos(V.jv.a)*.9*s; cy=GY+Math.sin(V.jv.a)*.9*s; } javelin(cx,cy,V.jv.a,JAV_L*s); }
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
   S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle='#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill(); });
@@ -119,6 +123,8 @@ function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x, b=ev.bands;
 }
 // field athletes are drawn FIELD_H*ppm logical px tall (same height as the rig pieces at that scale)
 const FIELD_H=2.37;
+// javelin length in metres (as long as the sheets draw it when it's whole)
+const JAV_L=2.75;
 function ljFrame(C,V){
   const a=V.act;
   if(a&&a.k==='lj'&&a.u!=null){

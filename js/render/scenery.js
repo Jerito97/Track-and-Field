@@ -1,6 +1,7 @@
 // Stadium scenery and props
 import {ctx,LW} from '../canvas.js';
 import {BOARDS,FAN_SHIRTS,HAIRS,INK,SKINS} from '../config.js';
+import {JAV_ART} from '../assets.js';
 import {hash} from '../utils.js';
 import {txt} from './text.js';
 
@@ -48,7 +49,10 @@ export function shadow(px,py,alt,s){ ctx.fillStyle='rgba(0,0,40,.25)'; ctx.begin
 export function flag(x,y,col,letter){ ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-22); ctx.stroke();
   ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(x,y-22); ctx.lineTo(x+13,y-18); ctx.lineTo(x,y-13); ctx.closePath(); ctx.fill(); ctx.stroke(); if(letter) txt(letter,x+4.5,y-17.5,INK,8,{stroke:null}); }
 export function upright(x,y,s){ ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(x-2.5,y-7.2*s,5,7.2*s); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,y,9,3,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
-export function javelin(cx,cy,a,len){ const dx=Math.cos(a)*len/2, dy=-Math.sin(a)*len/2, w=2.4;
+// javelin centred at cx,cy, angle a (up is positive), len logical px long: the drawn javelin, or a vector one until it loads
+export function javelin(cx,cy,a,len){
+  if(JAV_ART.complete&&JAV_ART.naturalWidth){ const h=len*.034; ctx.save(); ctx.translate(cx,cy); ctx.rotate(-a); ctx.drawImage(JAV_ART,-len/2,-h/2,len,h); ctx.restore(); return; }
+  const dx=Math.cos(a)*len/2, dy=-Math.sin(a)*len/2, w=2.4;
   ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=w+2.5; ctx.beginPath(); ctx.moveTo(cx-dx,cy-dy); ctx.lineTo(cx+dx,cy+dy); ctx.stroke();
   ctx.strokeStyle='#f4f4f4'; ctx.lineWidth=w; ctx.stroke();
   ctx.strokeStyle='#e8262d'; ctx.lineWidth=w+1; ctx.beginPath(); ctx.moveTo(cx-dx*.05,cy-dy*.05); ctx.lineTo(cx+dx*.2,cy+dy*.2); ctx.stroke(); }

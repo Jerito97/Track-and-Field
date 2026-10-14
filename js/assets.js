@@ -21,6 +21,8 @@ const YO_SPRITES={
 const url=(who,kind,k)=>new URL(`${who}/${kind}/${k}.png`,BASE).href;
 
 export const SPR={};
+// the javelin on its own (assets/javelin.png): flying, stuck in the grass, and under the drawn frames
+export const JAV_ART=new Image();
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
 // animations per athlete id: {run:{frames:[Image], w,h,hx,feet,scale}, start:{...}, ...}
@@ -39,5 +41,6 @@ export function loadAssets(){
   CHARS.forEach(C=>{ const set=ANIMS[C.id]={};
     Object.entries(C.anims).forEach(([name,{files,...meta}])=>{
       set[name]={...meta,frames:files.map(f=>{ const im=new Image(); load(im,new URL(f,BASE).href); return im; })}; }); });
+  load(JAV_ART,new URL('../assets/javelin.png',import.meta.url).href);
   return Promise.all(waits);
 }
