@@ -118,6 +118,18 @@ export const ROSTER=[
     "feet": 169.2,
     "scale": 0.4
    },
+   "stand": {
+    "files": [
+     "yo/stand/stand1.png",
+     "yo/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
+   },
    "start": {
     "files": [
      "yo/start/start1.png",
@@ -258,6 +270,18 @@ export const ROSTER=[
     "hx": 48.8,
     "feet": 169.2,
     "scale": 0.4
+   },
+   "stand": {
+    "files": [
+     "santi/stand/stand1.png",
+     "santi/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
    },
    "start": {
     "files": [
@@ -400,6 +424,18 @@ export const ROSTER=[
     "feet": 169.2,
     "scale": 0.4
    },
+   "stand": {
+    "files": [
+     "nacho/stand/stand1.png",
+     "nacho/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
+   },
    "start": {
     "files": [
      "nacho/start/start1.png",
@@ -540,6 +576,18 @@ export const ROSTER=[
     "hx": 48.8,
     "feet": 169.2,
     "scale": 0.4
+   },
+   "stand": {
+    "files": [
+     "rafa/stand/stand1.png",
+     "rafa/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
    },
    "start": {
     "files": [
@@ -682,6 +730,18 @@ export const ROSTER=[
     "feet": 169.2,
     "scale": 0.4
    },
+   "stand": {
+    "files": [
+     "lucho/stand/stand1.png",
+     "lucho/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
+   },
    "start": {
     "files": [
      "lucho/start/start1.png",
@@ -823,6 +883,18 @@ export const ROSTER=[
     "feet": 169.2,
     "scale": 0.4
    },
+   "stand": {
+    "files": [
+     "beto/stand/stand1.png",
+     "beto/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
+   },
    "start": {
     "files": [
      "beto/start/start1.png",
@@ -963,6 +1035,18 @@ export const ROSTER=[
     "hx": 48.8,
     "feet": 169.2,
     "scale": 0.4
+   },
+   "stand": {
+    "files": [
+     "tomi/stand/stand1.png",
+     "tomi/stand/stand2.png"
+    ],
+    "frames": 2,
+    "w": 63,
+    "h": 186,
+    "hx": 33.3,
+    "feet": 185.4,
+    "scale": 0.2526
    },
    "start": {
     "files": [

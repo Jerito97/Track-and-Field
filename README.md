@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run, start, cheer, dip, trip; cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>/          animaciones de cada atleta (generadas o propias)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
@@ -74,6 +74,7 @@ En los 100 m todos los atletas usan animaciones dibujadas, recoloreadas para cad
 - `cheer`: cuadro 1 de frente parado y cuadro 4 de frente con el brazo arriba (para el podio); cuadros 2 y 3 de perfil saltando (festejo en la pista al terminar).
 - `dip`: inclinación y cabezazo en la meta.
 - `trip`: tropezón y recuperación (rivales).
+- `stand`: parado de perfil, respirando (después del disparo, hasta el primer toque).
 
 Si una animación no carga, ese momento se dibuja con piezas.
 
