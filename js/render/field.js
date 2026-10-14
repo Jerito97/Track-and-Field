@@ -91,10 +91,10 @@ export function drawPole(V,X,GY,fig){
   const line=(x1,y1,x2,y2,cx,cy)=>{ ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x1,y1); if(cx!=null) ctx.quadraticCurveTo(cx,cy,x2,y2); else ctx.lineTo(x2,y2); ctx.stroke(); ctx.strokeStyle='#7ccf3a'; ctx.lineWidth=2.6; ctx.stroke(); };
   const tipX=X(ev.line)-2, tipY=GY+2;
   if(!a||a.k==='pvfoul'){ const d=ev.line-V.x; let ang=a?.1:.15+.75*clamp(d/14,0,1);
-    if(V.meter&&V.meter.k==='pole') ang=.55*(1-V.meter.p)+.04;
+    if(V.meter&&V.meter.k==='pole'&&V.meter.started) ang=.55*(1-V.meter.p)+.04;
     const fx=hx+Math.cos(ang)*(L-1.1*s), fy=hy-Math.sin(ang)*(L-1.1*s);
     line(hx-Math.cos(ang)*1.1*s,hy+Math.sin(ang)*1.1*s,fx,fy);
-    if(!V.replay&&V.meter&&V.meter.k==='pole'){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
+    if(!V.replay&&V.meter&&V.meter.k==='pole'&&V.meter.started){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
     return; }
   if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy);
     if(!V.replay&&V.meter&&V.meter.k==='rise'){ const p=Math.min(V.meter.hit!=null?V.meter.hit:V.meter.p,1.25), q=Math.min(p,1), u=1-q;

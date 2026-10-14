@@ -8,6 +8,8 @@ import {clamp,rand} from '../utils.js';
 import {armsFor,bothCue,judge,pop} from './core.js';
 import {startReplay} from './replay.js';
 
+// pole vault: seconds for the star to run the pole once it's lowered
+const POLE_T=1.0;
 export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
 // within .44-.56), fading to nothing at .2 and .8
@@ -23,7 +25,7 @@ export function updateField(dt){
       S.zone=true; S.cue=null; tone(880,.08,'triangle',.05);
       S.pops.push({text:'¡PREPARATE!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true});
       if(ev.kind==='lj') bothCue();
-      else if(ev.kind==='pv'){ S.meter={k:'pole',p:0}; bothCue(); }
+      else if(ev.kind==='pv'){ S.meter={k:'pole',p:0,started:false}; bothCue(); }
       else S.cue={type:'hold',t:0};
     }
     const sp=S.v;
@@ -33,7 +35,7 @@ export function updateField(dt){
       if(S.meter){ S.meter.p+=dt/.7; if(S.meter.p>=1.2) javThrow(); }
     } else {
       S.pose=S.v>.2?runPose(S.legP,Math.min(1,S.v/4),armsFor()):S.pose;
-      if(S.zone&&ev.kind==='pv') S.meter.p=clamp(1-(ev.line-S.x)/ev.zone,0,1);
+      if(S.zone&&ev.kind==='pv'&&S.meter.started){ S.meter.p+=dt/POLE_T; if(S.meter.p>=1.25){ S.meter.p=1.25; fieldAction(); } }
     }
     if(S.phase==='run'&&S.x>=ev.line){ S.x=ev.line; fieldFoul(); }
     return;
@@ -54,6 +56,7 @@ export function fieldAction(){
     return;
   }
   if(S.phase!=='run'||!S.zone) return;
+  if(ev.kind==='pv'&&!S.meter.started){ S.meter.started=true; tone(500,.06,'triangle',.04); bothCue(); return; }
   S.cue=null;
   const d=Math.max(0,ev.line-S.x), v=S.v;
   if(ev.kind==='lj'){
