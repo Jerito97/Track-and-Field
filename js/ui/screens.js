@@ -37,7 +37,7 @@ export function showMenu(){
       <button class="ev tour" data-act="tour" data-focus><canvas data-pict="5"></canvas><b>TORNEO</b></button></div>
     <p class="lbl">Tu atleta</p>
     <div class="chars">${CHARS.map(c=>`<button class="ch" data-act="pick" data-id="${c.id}" aria-pressed="${c.id===myChar}"><canvas data-face="${c.id}"></canvas><b>${c.name}</b></button>`).join('')}</div>
-    <p class="small">En el celu jugá en horizontal y tocá la mitad izquierda o derecha de la pantalla (en las vallas: izquierda, centro o derecha). En la compu: <kbd>←</kbd> <kbd>→</kbd>, <kbd>↓</kbd> para el botón del centro y <kbd>Espacio</kbd> para los dos rojos.</p>
+    <p class="small">En el celu jugá en horizontal y tocá la mitad izquierda o derecha de la pantalla (en las vallas, tocá cada número). En la compu: <kbd>←</kbd> <kbd>→</kbd>, <kbd>↓</kbd> para el botón del centro y <kbd>Espacio</kbd> para los dos rojos.</p>
     ${rec.tour?`<p class="small">Mejor torneo: <b>${rec.tour} puntos</b></p>`:''}
     <button class="link" data-act="sound">Sonido: ${soundOn?'activado':'apagado'}</button>
   </div></div>`);
