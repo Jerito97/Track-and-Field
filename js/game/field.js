@@ -46,7 +46,7 @@ export function fieldFoul(){
 export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
-    if(a&&a.k==='lj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.q2=stretchQ(Math.min(1,a.t/a.T)); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
+    if(a&&a.k==='lj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,a.t/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.mark=Math.max(.5,a.base+.7*a.q2-.25); a.x1=ev.line+a.mark; }
     if(a&&a.k==='pv'&&a.stage==='rise'&&!a.pushed&&S.meter){ a.pushed=1; a.q2=qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); }
     return;

@@ -127,6 +127,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljstretch": {
+    "files": [
+     "yo/ljstretch/ljstretch1.png",
+     "yo/ljstretch/ljstretch2.png",
+     "yo/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
+   },
    "ljtakeoff": {
     "files": [
      "yo/ljtakeoff/ljtakeoff1.png",
@@ -320,6 +333,19 @@ export const ROSTER=[
     "hx": 47.2,
     "feet": 177.4,
     "scale": 0.2758
+   },
+   "ljstretch": {
+    "files": [
+     "santi/ljstretch/ljstretch1.png",
+     "santi/ljstretch/ljstretch2.png",
+     "santi/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
    },
    "ljtakeoff": {
     "files": [
@@ -515,6 +541,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljstretch": {
+    "files": [
+     "nacho/ljstretch/ljstretch1.png",
+     "nacho/ljstretch/ljstretch2.png",
+     "nacho/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
+   },
    "ljtakeoff": {
     "files": [
      "nacho/ljtakeoff/ljtakeoff1.png",
@@ -708,6 +747,19 @@ export const ROSTER=[
     "hx": 47.2,
     "feet": 177.4,
     "scale": 0.2758
+   },
+   "ljstretch": {
+    "files": [
+     "rafa/ljstretch/ljstretch1.png",
+     "rafa/ljstretch/ljstretch2.png",
+     "rafa/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
    },
    "ljtakeoff": {
     "files": [
@@ -903,6 +955,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljstretch": {
+    "files": [
+     "lucho/ljstretch/ljstretch1.png",
+     "lucho/ljstretch/ljstretch2.png",
+     "lucho/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
+   },
    "ljtakeoff": {
     "files": [
      "lucho/ljtakeoff/ljtakeoff1.png",
@@ -1097,6 +1162,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljstretch": {
+    "files": [
+     "beto/ljstretch/ljstretch1.png",
+     "beto/ljstretch/ljstretch2.png",
+     "beto/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
+   },
    "ljtakeoff": {
     "files": [
      "beto/ljtakeoff/ljtakeoff1.png",
@@ -1290,6 +1368,19 @@ export const ROSTER=[
     "hx": 47.2,
     "feet": 177.4,
     "scale": 0.2758
+   },
+   "ljstretch": {
+    "files": [
+     "tomi/ljstretch/ljstretch1.png",
+     "tomi/ljstretch/ljstretch2.png",
+     "tomi/ljstretch/ljstretch3.png"
+    ],
+    "frames": 3,
+    "w": 126,
+    "h": 156,
+    "hx": 48.5,
+    "feet": 155.1,
+    "scale": 0.2712
    },
    "ljtakeoff": {
     "files": [

@@ -121,6 +121,8 @@ function ljFrame(C,V){
     // take-off (first 30% of the jump), then the flight: arms up at the top, coming down, knees up for the landing
     // (flight frame 1 repeats the last take-off pose, so it is skipped); landing stays on rig pieces
     if(a.u<.3) return animReady(C,'ljtakeoff')?['ljtakeoff',a.u<.05?0:a.u<.12?1:a.u<.2?2:3]:null;
+    // stretch pressed: legs coming up for an instant, then the full stretch until the sand (frame 3 unused)
+    if(a.tapU!=null&&a.u<1) return animReady(C,'ljstretch')?['ljstretch',a.u-a.tapU<.04?0:1]:null;
     if(a.u<1) return animReady(C,'ljflight')?['ljflight',a.u<.5?1:a.u<.68?2:3]:null;
     return null; }
   if(a) return null;
