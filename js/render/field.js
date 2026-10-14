@@ -72,7 +72,7 @@ export function drawField(V){
     if(f){ const K=animScale(ME(),s*FIELD_H), feet=GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
       // javelin in the frame: its tail and tip on screen (for the star); the whole javelin goes underneath, tip on the
       // drawn tip, so every frame shows it at full length (the sheets draw it shorter or cut off at the tail)
-      const A=ME().anims[f[0]], j=A.jav&&A.jav[f[1]], hd=A.hands&&A.hands[f[1]];
+      const A=ME().anims[f[0]], fi=((f[1]%A.frames)+A.frames)%A.frames, j=A.jav&&A.jav[fi], hd=A.hands&&A.hands[fi];
       // hands drawn holding a pole the game draws: pole through the front hand, along the line of both hands
       if(hd){ fig.hands=[px+(hd[0]-A.hx)*K,feet+(hd[1]-A.feet)*K,px+(hd[2]-A.hx)*K,feet+(hd[3]-A.feet)*K]; fig.hand=[fig.hands[2],fig.hands[3]]; }
       if(j){ fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K];
@@ -103,8 +103,9 @@ export function drawPole(V,X,GY,fig){
   if(!a||a.k==='pvfoul'){ const d=ev.line-V.x; let ang=a?.1:.15+.75*clamp(d/14,0,1);
     if(fig.hands&&!a&&(V.v||0)<=.2) ang=Math.atan2(fig.hands[1]-fig.hands[3],fig.hands[2]-fig.hands[0]);
     if(V.meter&&V.meter.k==='pole'&&V.meter.started) ang=.55*(1-V.meter.p)+.04;
-    const fx=hx+Math.cos(ang)*(L-1.1*s), fy=hy-Math.sin(ang)*(L-1.1*s);
-    line(hx-Math.cos(ang)*1.1*s,hy+Math.sin(ang)*1.1*s,fx,fy);
+    // grip: 1.1 m from the back end; running with the drawn frames (fists in front of the chest) only 0.5 m sticks out behind
+    const back=fig.hands&&(V.v||0)>.2?.5*s:1.1*s, fx=hx+Math.cos(ang)*(L-back), fy=hy-Math.sin(ang)*(L-back);
+    line(hx-Math.cos(ang)*back,hy+Math.sin(ang)*back,fx,fy);
     if(!V.replay&&V.meter&&V.meter.k==='pole'&&V.meter.started){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
     return; }
   if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy);
@@ -143,9 +144,10 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
-// pole vault: drawn frames where we have them (standing); rig pieces for the rest
+// pole vault: drawn frames where we have them (standing, running, also while lowering the pole); rig pieces for the rest
 function pvFrame(C,V){
-  if(V.act||(V.v||0)>.2||V.meter) return null;
+  if(V.act) return null;
+  if((V.v||0)>.2) return animReady(C,'pvrun')?['pvrun',Math.floor(V.x/4*C.anims.pvrun.frames)]:null;
   return animReady(C,'pvstand')?['pvstand',Math.floor(S.clock*1.2)%2]:null;
 }
 // javelin: drawn frames for the whole attempt (standing, running, drawing the javelin back, throwing, after the throw);

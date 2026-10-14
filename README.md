@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun, javpull, javthrow, javafter, pvstand; cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand, javrun, javpull, javthrow, javafter, pvstand, pvrun; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>.png       animaciones de cada atleta: todos los cuadros en fila en una imagen (generadas;
                         un cuadro propio va en <id>/<anim>/<anim>N.png y reemplaza al generado)
@@ -100,6 +100,7 @@ En los 100 m y los 110 m con vallas todos los atletas usan animaciones dibujadas
 - La jabalina sola (`assets/javelin.png`, de `assets/source/javelin.jpg`) es la que vuela y queda clavada, y se dibuja debajo de cada cuadro con la punta sobre la punta dibujada: así se ve siempre entera aunque la hoja la dibuje más corta o cortada (`--javelin-lines` guarda dónde está en hojas que no necesitan `--javelins`).
 - `javafter`: después del tiro (paso de recuperación mientras frena, mirando el vuelo con la mano en la frente, puño arriba cuando se clava).
 - `pvstand`: parado antes de la garrocha. Las hojas de garrocha vienen sin la garrocha (la dibuja el juego, doblada); `--hands="x0,y0,x1,y1;..."` marca la mano de atrás y la de adelante de cada cuadro y la garrocha pasa por las dos.
+- `pvrun`: carrera con la garrocha, 6 cuadros (también mientras se baja la garrocha; la garrocha sale del puño de adelante).
 
 El salto en largo ya va todo con dibujos; solo el nulo (pisar la tabla) sigue con piezas.
 
