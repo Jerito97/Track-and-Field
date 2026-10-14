@@ -1,7 +1,6 @@
 // Athlete art: cut-out rig (image parts on the drawChar skeleton) and optional full-body sprites
 import {ANIMS,RIGS,SPR} from './assets.js';
 import {ctx} from './canvas.js';
-import {INK} from './config.js';
 import {drawChar} from './draw/character.js';
 import {POSE} from './poses.js';
 
@@ -21,9 +20,6 @@ export function drawRig(c,s,ox,oy,alt,J,C,rot){
   const R0=rot||0;
   const R=RIGS[C.id];
   const part=(k,at,th,hW,dark,wm=1)=>{ const P=R[k], sc=hW*s/P.h, [x,y]=rp(...at); c.save(); c.translate(x,y); c.rotate(th+R0); c.drawImage(dark?P.dark:P.im,-P.px*sc*wm,-P.py*sc,P.w*sc*wm,P.h*sc); c.restore(); };
-  const ow=Math.max(1.1,s*.04);
-  const seg=(pts,col,w)=>{ const path=()=>{c.beginPath();c.moveTo(...rp(...pts[0]));for(let i=1;i<pts.length;i++)c.lineTo(...rp(...pts[i]));};
-    c.lineCap='round'; c.lineJoin='round'; c.strokeStyle=INK; c.lineWidth=w*s+ow*2; path(); c.stroke(); c.strokeStyle=col; c.lineWidth=w*s; path(); c.stroke(); };
   const leg=(L,dark)=>{ part('shin',L.k,-L.a2,RIG.shin,dark,RIG.LW); part('thigh',L.o,-L.a,RIG.thigh,dark,RIG.LW); };
   // back arm, back leg
   part('uarm',arms[1].o,-arms[1].a,RIG.uarm,true,RIG.AW); part('farm',arms[1].k,-arms[1].a2,RIG.farm,true,RIG.AW);
