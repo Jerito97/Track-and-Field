@@ -2,7 +2,7 @@
 import {ctx,LW} from '../canvas.js';
 import {HURDLES,INK} from '../config.js';
 import {POSE,runPose} from '../poses.js';
-import {drawAthlete,drawSprite} from '../rig.js';
+import {drawAthlete,drawRun,drawSprite,runReady} from '../rig.js';
 import {ME,S} from '../state.js';
 import {drawBoards,drawBottomAds,drawStands,hurdle,shadow} from './scenery.js';
 import {txt} from './text.js';
@@ -10,6 +10,8 @@ import {txt} from './text.js';
 const LANES=7;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
 const YO_H=60, YO_K=YO_H/144, RIV_K=YO_H/(2.09*24); // 2.09: drawChar height in units of s
+// run cycle frames (100 m): one full cycle (two steps) every STRIDE metres, figure RUN_H px tall
+const STRIDE=4, RUN_H=YO_H*.97;
 export function drawSprint(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s;
   const TT=176, TB=298, lh=(TB-TT)/LANES;
@@ -38,11 +40,13 @@ export function drawSprint(V){
         else if(V.v>.3) k='run'+(1+Math.floor(((S.legP/(Math.PI*2))*5%5+5)%5)); else k=S.finished?'cheer':'stand';
         drawn=k==='stumble'?drawSprite('run2',px+6,feet,.5,YO_K):drawSprite(k,px+6,feet-V.y*s,0,YO_K);
       }
+      if(!drawn&&!ev.hurdles&&V.v>.3&&S.phase!=='set'&&!(S.stumble>0)&&!(S.dip>0)&&runReady(ME())){ drawRun(ctx,ME(),px,feet-V.y*s,V.x/STRIDE,RUN_H); drawn=true; }
       if(!drawn) drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,V.pose||POSE.stand,ME(),V.v>5);
       ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; const ty=feet-V.y*s-YO_H-4; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue; const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
       let J; if(r.t<=r.react) J=S.setStage>=1?POSE.set:POSE.crouch; else if(r.air>0) J=POSE.hurdle; else if(r.tripT>0) J=POSE.stumble; else if(r.final!=null&&r.v<.5) J=POSE.cheer; else J=r.v>.2?runPose(r.legP,Math.min(1,r.v/4)):POSE.stand;
-      drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,J,r.a.C,r.v>5); }
+      if(!ev.hurdles&&r.t>r.react&&!(r.air>0)&&!(r.tripT>0)&&!(r.final!=null&&r.v<.5)&&r.v>.2&&runReady(r.a.C)) drawRun(ctx,r.a.C,x,feet-r.y*s,r.x/STRIDE+l*.37,RUN_H);
+      else drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,J,r.a.C,r.v>5); }
   }
   drawStarter(X(5.5));
   drawBottomAds();

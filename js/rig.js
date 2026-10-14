@@ -1,5 +1,5 @@
 // Athlete art: cut-out rig (image parts on the drawChar skeleton) and optional full-body sprites
-import {RIGS,SPR} from './assets.js';
+import {RIGS,RUNS,SPR} from './assets.js';
 import {ctx} from './canvas.js';
 import {INK} from './config.js';
 import {drawChar} from './draw/character.js';
@@ -46,3 +46,9 @@ export function drawAthlete(c,s,ox,oy,alt,J,C,effort,rot){
   if(rigReady(C)) return drawRig(c,s*RIG_FIT,ox,oy,alt/RIG_FIT,J===POSE.cheer?POSE.cheerRig:J,C,rot||0);
   return drawChar(c,s,ox,oy,alt,J,C,effort,rot);
 }
+// run cycle frames: true once all of C's frames loaded
+export function runReady(C){ const R=C&&RUNS[C.id]; return !!R&&R.frames.every(im=>im.complete&&im.naturalWidth>0); }
+// draw C's run cycle at phase p (1 = one full cycle, both legs), hip at x, feet at y, figure H logical px tall
+export function drawRun(c,C,x,feet,p,H){ const R=RUNS[C.id], n=R.frames.length, k=H/(R.feet-2.4);
+  const im=R.frames[((Math.floor(p*n)%n)+n)%n];
+  c.drawImage(im,x-R.hx*k,feet-R.feet*k,R.w*k,R.h*k); }

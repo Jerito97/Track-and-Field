@@ -22,12 +22,15 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
+  base/run/             ciclo de carrera del base (8 cuadros + meta.json)
   <id>/*.png            piezas de cada atleta (generadas o propias)
+  <id>/run/             ciclo de carrera de cada atleta (generado o propio)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
-assets/source/          hojas originales del personaje base
+assets/source/          hojas originales del personaje base (piezas, vistas, carrera)
 tools/
   build_characters.py   genera las piezas de cada atleta y js/roster.js
   cut_base_sheet.py     recorta la hoja del personaje base en piezas
+  cut_sprite_sheet.py   recorta una hoja de animación (fondo blanco) en cuadros alineados
 js/
   main.js               arranque y loop principal
   config.js             datos: pruebas, colores; arma los atletas desde roster.js
@@ -62,6 +65,17 @@ El script recolorea las piezas del personaje base por zonas de color, guarda los
 Yo tiene `"recolorear": false`: usa las piezas del personaje base tal cual. Su paleta solo se usa para el muñeco de respaldo. Un atleta con `"propio": true` no se genera (todas sus piezas tienen que estar en su carpeta).
 
 Si una imagen no carga, ese atleta se dibuja con el muñeco vectorial de antes.
+
+## Animaciones
+
+En los 100 m, mientras corren, todos los atletas usan el ciclo de carrera de 8 cuadros (`base/run/`, recoloreado para cada uno). La largada, el cabezazo, el tropezón y el festejo siguen con piezas.
+
+Para cambiar el ciclo con una hoja nueva (figuras sobre fondo blanco, de perfil mirando a la derecha):
+
+```sh
+python3 tools/cut_sprite_sheet.py assets/source/base_run_sheet.jpg assets/characters/base/run run
+python3 tools/build_characters.py
+```
 
 ## Sprites de Yo
 

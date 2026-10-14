@@ -5,7 +5,7 @@ import {ROSTER} from './roster.js';
 // sprite:true draws that athlete with full-body sprites in 100 m / hurdles / podium (only Yo has them, off for now)
 const LOOK={yo:{hair:'curly'}};
 export const CHARS=ROSTER.map(r=>{ const p=r.palette;
-  return {id:r.id,name:r.name,own:r.own,parts:r.parts||null,skin:p.piel,hc:p.pelo,j:p.musculosa,j2:p.franja,sh:p.short,shoe:p.zapatillas,hair:'short',...LOOK[r.id]}; });
+  return {id:r.id,name:r.name,own:r.own,parts:r.parts||null,run:r.run||null,skin:p.piel,hc:p.pelo,j:p.musculosa,j2:p.franja,sh:p.short,shoe:p.zapatillas,hair:'short',...LOOK[r.id]}; });
 export const EVENTS=[
  {id:'100',name:'100 metros',tag:'100 M',type:'sprint',dist:100,wr:8.90,
   help:'Tocá el <b>botón verde</b> del lado donde aparece: izquierda o derecha. Cada acierto te da velocidad y cada error te frena. Cerca de la meta aparecen <b>dos botones rojos</b>: tocá los dos a la vez para tirarte de cabeza. Si lo hacés justo al llegar, ganás unas centésimas.'},
