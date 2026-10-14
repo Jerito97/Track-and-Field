@@ -127,6 +127,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljland": {
+    "files": [
+     "yo/ljland/ljland1.png",
+     "yo/ljland/ljland2.png",
+     "yo/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
+   },
    "ljstretch": {
     "files": [
      "yo/ljstretch/ljstretch1.png",
@@ -333,6 +346,19 @@ export const ROSTER=[
     "hx": 47.2,
     "feet": 177.4,
     "scale": 0.2758
+   },
+   "ljland": {
+    "files": [
+     "santi/ljland/ljland1.png",
+     "santi/ljland/ljland2.png",
+     "santi/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
    },
    "ljstretch": {
     "files": [
@@ -541,6 +567,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljland": {
+    "files": [
+     "nacho/ljland/ljland1.png",
+     "nacho/ljland/ljland2.png",
+     "nacho/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
+   },
    "ljstretch": {
     "files": [
      "nacho/ljstretch/ljstretch1.png",
@@ -747,6 +786,19 @@ export const ROSTER=[
     "hx": 47.2,
     "feet": 177.4,
     "scale": 0.2758
+   },
+   "ljland": {
+    "files": [
+     "rafa/ljland/ljland1.png",
+     "rafa/ljland/ljland2.png",
+     "rafa/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
    },
    "ljstretch": {
     "files": [
@@ -955,6 +1007,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljland": {
+    "files": [
+     "lucho/ljland/ljland1.png",
+     "lucho/ljland/ljland2.png",
+     "lucho/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
+   },
    "ljstretch": {
     "files": [
      "lucho/ljstretch/ljstretch1.png",
@@ -1162,6 +1227,19 @@ export const ROSTER=[
     "feet": 177.4,
     "scale": 0.2758
    },
+   "ljland": {
+    "files": [
+     "beto/ljland/ljland1.png",
+     "beto/ljland/ljland2.png",
+     "beto/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
+   },
    "ljstretch": {
     "files": [
      "beto/ljstretch/ljstretch1.png",
@@ -1368,6 +1446,19 @@ export const ROSTER=[
     "hx": 47.2,
     "feet": 177.4,
     "scale": 0.2758
+   },
+   "ljland": {
+    "files": [
+     "tomi/ljland/ljland1.png",
+     "tomi/ljland/ljland2.png",
+     "tomi/ljland/ljland3.png"
+    ],
+    "frames": 3,
+    "w": 123,
+    "h": 150,
+    "hx": 54.8,
+    "feet": 149.4,
+    "scale": 0.2599
    },
    "ljstretch": {
     "files": [

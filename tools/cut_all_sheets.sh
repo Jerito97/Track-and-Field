@@ -15,4 +15,5 @@ python3 tools/cut_sprite_sheet.py $S/base_cheer_sheet.jpg $B/cheer cheer $B/run 
 python3 tools/cut_sprite_sheet.py $S/base_ljtakeoff_sheet.jpg $B/ljtakeoff ljtakeoff $B/run
 python3 tools/cut_sprite_sheet.py $S/base_ljflight_sheet.jpg $B/ljflight ljflight $B/run
 python3 tools/cut_sprite_sheet.py $S/base_ljstretch_sheet.jpg $B/ljstretch ljstretch $B/run
+python3 tools/cut_sprite_sheet.py $S/base_ljland_sheet.jpg $B/ljland ljland $B/run
 python3 tools/build_characters.py

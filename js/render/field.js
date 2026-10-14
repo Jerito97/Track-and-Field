@@ -66,7 +66,7 @@ export function drawField(V){
       ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
   const px=X(V.x);
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
-  // long jump: drawn animations where we have them (stand, run cycle, take-off), rig pieces for the rest
+  // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
   if(ev.kind==='lj'){ const f=ljFrame(ME(),V); if(f){ drawAnim(ctx,ME(),f[0],f[1],px,GY-V.y*s,animScale(ME(),s*FIELD_H)); fig={hand:[px,GY-V.y*s-1.4*s]}; } }
   if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
@@ -124,7 +124,8 @@ function ljFrame(C,V){
     // stretch pressed: legs coming up for an instant, then the full stretch until the sand (frame 3 unused)
     if(a.tapU!=null&&a.u<1) return animReady(C,'ljstretch')?['ljstretch',a.u-a.tapU<.04?0:1]:null;
     if(a.u<1) return animReady(C,'ljflight')?['ljflight',a.u<.5?1:a.u<.68?2:3]:null;
-    return null; }
+    // in the sand: heels touch, slide in, sit
+    const pt=a.pt||0; return animReady(C,'ljland')?['ljland',pt<.08?0:pt<.2?1:2]:null; }
   if(a) return null;
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
