@@ -51,7 +51,7 @@ export function showMenu(){
   <header class="m-top"><div class="m-logo"><span class="m-ic">${ICON.medal}</span>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
-    <div class="m-info"><span class="m-tag">${tour?'Modo torneo':'Prueba elegida'}</span><h1>${tour?'Torneo':ev.name}</h1><p>${tour?'Las cinco pruebas seguidas. Sumá puntos y subí al podio.':ev.tagline}</p>
+    <div class="m-info"><span class="m-tag">${tour?'Modo torneo':'Prueba elegida'}</span><h1>${tour?'Torneo':ev.name}</h1>
       <div class="m-acts"><button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>${tour?'':'<button class="m-how" data-act="howto">Cómo se juega</button>'}</div></div>
     <div class="m-stats">${stats}</div>
     ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
