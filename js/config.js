@@ -2,7 +2,8 @@
 import {ROSTER} from './roster.js';
 
 // athletes from assets/characters/characters.json (via js/roster.js); the extra fields are for the vector fallback
-const LOOK={yo:{sprite:true,hair:'curly',beard:true}};
+// sprite:true draws that athlete with full-body sprites in 100 m / hurdles / podium (only Yo has them, off for now)
+const LOOK={yo:{hair:'curly'}};
 export const CHARS=ROSTER.map(r=>{ const p=r.palette;
   return {id:r.id,name:r.name,own:r.own,parts:r.parts||null,skin:p.piel,hc:p.pelo,j:p.musculosa,j2:p.franja,sh:p.short,shoe:p.zapatillas,hair:'short',...LOOK[r.id]}; });
 export const EVENTS=[

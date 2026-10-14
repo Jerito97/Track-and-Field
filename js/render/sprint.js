@@ -8,7 +8,7 @@ import {drawBoards,drawBottomAds,drawStands,hurdle,shadow} from './scenery.js';
 import {txt} from './text.js';
 
 const LANES=7;
-// "Yo" is the size reference: his standing sprite is YO_H logical px tall, rivals are scaled to match
+// every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
 const YO_H=60, YO_K=YO_H/144, RIV_K=YO_H/(2.09*24); // 2.09: drawChar height in units of s
 export function drawSprint(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s;

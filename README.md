@@ -23,8 +23,7 @@ assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
   <id>/*.png            piezas de cada atleta (generadas o propias)
-  yo/rig/*.png          piezas de Yo
-  yo/sprites/*.png      sprites de cuerpo entero de Yo (100 m y vallas)
+  yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
 assets/source/          hojas originales del personaje base
 tools/
   build_characters.py   genera las piezas de cada atleta y js/roster.js
@@ -37,7 +36,7 @@ js/
   storage.js            localStorage y récords
   audio.js              sonidos
   canvas.js             canvas y escalado (320 px lógicos de alto)
-  assets.js             carga de imágenes (piezas de cada atleta, sprites de Yo)
+  assets.js             carga de imágenes (piezas de cada atleta, sprites opcionales)
   input.js              toques y teclado
   poses.js              poses del esqueleto
   rig.js                dibujo con piezas (drawAthlete) y sprites
@@ -60,10 +59,10 @@ El script recolorea las piezas del personaje base por zonas de color, guarda los
 
 **Piezas propias:** si ponés un PNG tuyo en la carpeta de un atleta (por ejemplo `assets/characters/santi/head.png`), el script no lo pisa y el juego usa ese en lugar del recoloreado. El pivote se calcula solo: cuello en la cabeza, cadera en la musculosa, cintura en el short, hombro en el brazo, codo en el antebrazo, cadera en el muslo y rodilla en la pierna. Para volver a la pieza generada, borrá tu archivo y corré el script de nuevo.
 
-Yo (`"propio": true`) no se genera: usa sus piezas de `yo/rig/` y, en 100 m y vallas, sus sprites.
+Yo tiene `"recolorear": false`: usa las piezas del personaje base tal cual. Su paleta solo se usa para el muñeco de respaldo. Un atleta con `"propio": true` no se genera (todas sus piezas tienen que estar en su carpeta).
 
 Si una imagen no carga, ese atleta se dibuja con el muñeco vectorial de antes.
 
-## Imágenes de Yo
+## Sprites de Yo
 
-`js/assets.js` tiene el manifiesto de Yo: para cada PNG, su tamaño y su punto de anclaje (`px,py` es la articulación en las piezas; `hx` es la cadera en los sprites).
+Los sprites de cuerpo entero de antes siguen en `assets/characters/yo/sprites/` pero no se usan. Para volver a activarlos, poné `sprite:true` en `LOOK.yo` (`js/config.js`): se usan en 100 m, vallas, podio y menú. El manifiesto (tamaño y cadera `hx` de cada uno) está en `js/assets.js`.

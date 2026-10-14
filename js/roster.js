@@ -5,14 +5,72 @@ export const ROSTER=[
   "id": "yo",
   "name": "Yo",
   "palette": {
-   "piel": "#c98e64",
-   "pelo": "#4a2e1a",
-   "musculosa": "#e8262d",
-   "franja": "#ffffff",
-   "short": "#16161d",
-   "zapatillas": "#ffffff"
+   "piel": "#fcb579",
+   "pelo": "#3f2817",
+   "musculosa": "#c41a1b",
+   "franja": "#f5f5f5",
+   "short": "#2b2c2d",
+   "zapatillas": "#f0f0ef"
   },
-  "own": true
+  "own": false,
+  "parts": {
+   "head": {
+    "file": "yo/head.png",
+    "w": 130,
+    "h": 163,
+    "px": 64.5,
+    "py": 152.8,
+    "own": false
+   },
+   "torso": {
+    "file": "yo/torso.png",
+    "w": 95,
+    "h": 198,
+    "px": 47.0,
+    "py": 181.2,
+    "own": false
+   },
+   "shorts": {
+    "file": "yo/shorts.png",
+    "w": 93,
+    "h": 115,
+    "px": 52.0,
+    "py": 13.8,
+    "own": false
+   },
+   "uarm": {
+    "file": "yo/uarm.png",
+    "w": 64,
+    "h": 204,
+    "px": 35.5,
+    "py": 21.4,
+    "own": false
+   },
+   "farm": {
+    "file": "yo/farm.png",
+    "w": 54,
+    "h": 176,
+    "px": 20.0,
+    "py": 17.6,
+    "own": false
+   },
+   "thigh": {
+    "file": "yo/thigh.png",
+    "w": 67,
+    "h": 187,
+    "px": 34.0,
+    "py": 12.2,
+    "own": false
+   },
+   "shin": {
+    "file": "yo/shin.png",
+    "w": 106,
+    "h": 195,
+    "px": 44.0,
+    "py": 12.7,
+    "own": false
+   }
+  }
  },
  {
   "id": "santi",

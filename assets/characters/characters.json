@@ -3,8 +3,8 @@
     {
       "id": "yo",
       "nombre": "Yo",
-      "propio": true,
-      "paleta": { "piel": "#c98e64", "pelo": "#4a2e1a", "musculosa": "#e8262d", "franja": "#ffffff", "short": "#16161d", "zapatillas": "#ffffff" }
+      "recolorear": false,
+      "paleta": { "piel": "#fcb579", "pelo": "#3f2817", "musculosa": "#c41a1b", "franja": "#f5f5f5", "short": "#2b2c2d", "zapatillas": "#f0f0ef" }
     },
     {
       "id": "santi",

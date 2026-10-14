@@ -1,4 +1,4 @@
-// Athlete art: cut-out rig (image parts on the drawChar skeleton) and Yo's full-body sprites
+// Athlete art: cut-out rig (image parts on the drawChar skeleton) and optional full-body sprites
 import {RIGS,SPR} from './assets.js';
 import {ctx} from './canvas.js';
 import {INK} from './config.js';
