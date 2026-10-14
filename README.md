@@ -78,6 +78,8 @@ En los 100 m todos los atletas usan animaciones dibujadas, recoloreadas para cad
 
 Si una animación no carga, ese momento se dibuja con piezas.
 
+Para recortar todas las hojas de nuevo y regenerar a todos los atletas: `./tools/cut_all_sheets.sh` (ahí están los ajustes de cada hoja).
+
 Para agregar o cambiar una animación con una hoja nueva (figuras sobre fondo blanco, de perfil mirando a la derecha). El último argumento iguala el tamaño del personaje con la carrera:
 
 ```sh
@@ -85,7 +87,7 @@ python3 tools/cut_sprite_sheet.py assets/source/base_start_sheet.jpg assets/char
 python3 tools/build_characters.py
 ```
 
-La carrera es la referencia de tamaño: si se cambia, va sin el último argumento. Para animaciones con saltos agregá `--keep-height`, así los cuadros en el aire no se apoyan en el piso.
+La carrera es la referencia de tamaño: si se cambia, va sin el último argumento. Para animaciones con saltos agregá `--keep-height`, así los cuadros en el aire no se apoyan en el piso. El tamaño se iguala con la carrera por la mediana de cuatro medidas (pelo, musculosa + short, zapatillas y silueta), porque cada hoja generada dibuja el cuerpo con proporciones un poco distintas. `--measure=2,3` mide solo con esos cuadros (para hojas que mezclan vistas) y `--adjust=0.95` corrige a ojo.
 
 ## Sprites de Yo
 

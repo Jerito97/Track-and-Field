@@ -1,0 +1,14 @@
+#!/bin/sh
+# Re-cut every animation sheet of the base character (run is the size reference), then rebuild all athletes.
+set -e
+cd "$(dirname "$0")/.."
+S=assets/source; B=assets/characters/base
+python3 tools/cut_sprite_sheet.py $S/base_run_sheet.jpg   $B/run   run
+python3 tools/cut_sprite_sheet.py $S/base_start_sheet.jpg $B/start start $B/run
+python3 tools/cut_sprite_sheet.py $S/base_dip_sheet.jpg   $B/dip   dip   $B/run
+python3 tools/cut_sprite_sheet.py $S/base_trip_sheet.jpg  $B/trip  trip  $B/run
+# standing came out ~5% taller than the front-view standing frame of the celebration
+python3 tools/cut_sprite_sheet.py $S/base_stand_sheet.jpg $B/stand stand $B/run --adjust=0.95
+# celebration: frames 1 and 4 are front view (podium); measure on the side-view jump frames
+python3 tools/cut_sprite_sheet.py $S/base_cheer_sheet.jpg $B/cheer cheer $B/run --keep-height --measure=2,3
+python3 tools/build_characters.py

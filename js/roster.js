@@ -82,11 +82,11 @@ export const ROSTER=[
      "yo/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -94,11 +94,11 @@ export const ROSTER=[
      "yo/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -124,11 +124,11 @@ export const ROSTER=[
      "yo/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -136,11 +136,11 @@ export const ROSTER=[
      "yo/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -148,11 +148,11 @@ export const ROSTER=[
      "yo/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  },
@@ -235,11 +235,11 @@ export const ROSTER=[
      "santi/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -247,11 +247,11 @@ export const ROSTER=[
      "santi/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -277,11 +277,11 @@ export const ROSTER=[
      "santi/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -289,11 +289,11 @@ export const ROSTER=[
      "santi/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -301,11 +301,11 @@ export const ROSTER=[
      "santi/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  },
@@ -388,11 +388,11 @@ export const ROSTER=[
      "nacho/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -400,11 +400,11 @@ export const ROSTER=[
      "nacho/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -430,11 +430,11 @@ export const ROSTER=[
      "nacho/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -442,11 +442,11 @@ export const ROSTER=[
      "nacho/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -454,11 +454,11 @@ export const ROSTER=[
      "nacho/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  },
@@ -541,11 +541,11 @@ export const ROSTER=[
      "rafa/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -553,11 +553,11 @@ export const ROSTER=[
      "rafa/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -583,11 +583,11 @@ export const ROSTER=[
      "rafa/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -595,11 +595,11 @@ export const ROSTER=[
      "rafa/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -607,11 +607,11 @@ export const ROSTER=[
      "rafa/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  },
@@ -694,11 +694,11 @@ export const ROSTER=[
      "lucho/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -706,11 +706,11 @@ export const ROSTER=[
      "lucho/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -736,11 +736,11 @@ export const ROSTER=[
      "lucho/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -748,11 +748,11 @@ export const ROSTER=[
      "lucho/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -760,11 +760,11 @@ export const ROSTER=[
      "lucho/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  },
@@ -847,11 +847,11 @@ export const ROSTER=[
      "beto/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -859,11 +859,11 @@ export const ROSTER=[
      "beto/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -889,11 +889,11 @@ export const ROSTER=[
      "beto/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -901,11 +901,11 @@ export const ROSTER=[
      "beto/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -913,11 +913,11 @@ export const ROSTER=[
      "beto/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  },
@@ -1000,11 +1000,11 @@ export const ROSTER=[
      "tomi/cheer/cheer4.png"
     ],
     "frames": 4,
-    "w": 84,
-    "h": 202,
-    "hx": 38.7,
-    "feet": 201.3,
-    "scale": 0.2516
+    "w": 72,
+    "h": 173,
+    "hx": 33.1,
+    "feet": 172.1,
+    "scale": 0.2151
    },
    "dip": {
     "files": [
@@ -1012,11 +1012,11 @@ export const ROSTER=[
      "tomi/dip/dip2.png"
     ],
     "frames": 2,
-    "w": 142,
-    "h": 182,
-    "hx": 69.5,
-    "feet": 181.8,
-    "scale": 0.2421
+    "w": 115,
+    "h": 148,
+    "hx": 56.3,
+    "feet": 147.4,
+    "scale": 0.1962
    },
    "run": {
     "files": [
@@ -1042,11 +1042,11 @@ export const ROSTER=[
      "tomi/stand/stand2.png"
     ],
     "frames": 2,
-    "w": 63,
-    "h": 186,
-    "hx": 33.3,
-    "feet": 185.4,
-    "scale": 0.2526
+    "w": 60,
+    "h": 177,
+    "hx": 31.7,
+    "feet": 176.1,
+    "scale": 0.2399
    },
    "start": {
     "files": [
@@ -1054,11 +1054,11 @@ export const ROSTER=[
      "tomi/start/start2.png"
     ],
     "frames": 2,
-    "w": 138,
-    "h": 121,
-    "hx": 52.8,
-    "feet": 120.1,
-    "scale": 0.2112
+    "w": 132,
+    "h": 115,
+    "hx": 50.5,
+    "feet": 115.0,
+    "scale": 0.202
    },
    "trip": {
     "files": [
@@ -1066,11 +1066,11 @@ export const ROSTER=[
      "tomi/trip/trip2.png"
     ],
     "frames": 2,
-    "w": 150,
-    "h": 162,
-    "hx": 62.4,
-    "feet": 161.2,
-    "scale": 0.2356
+    "w": 136,
+    "h": 147,
+    "hx": 56.7,
+    "feet": 146.2,
+    "scale": 0.2138
    }
   }
  }

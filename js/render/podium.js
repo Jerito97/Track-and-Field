@@ -9,7 +9,7 @@ import {txt} from './text.js';
 
 // front view from the drawn celebration (frame 0 standing, 3 arm up) when loaded; s as in drawChar
 function podiumAthlete(C,s,x,feet,up){
-  if(animReady(C,'cheer')){ drawAnim(ctx,C,'cheer',up?3:0,x,feet,animScale(C,s*1.75)); return true; }
+  if(animReady(C,'cheer')){ drawAnim(ctx,C,'cheer',up?3:0,x,feet,animScale(C,s*2.05)); return true; }
   drawAthlete(ctx,s,x,feet,0,up?POSE.cheer:POSE.stand,C,false); return false;
 }
 export function drawPodium(){

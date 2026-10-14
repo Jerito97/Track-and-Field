@@ -223,7 +223,7 @@ def main():
                     Image.fromarray(img, 'RGBA').save(f, optimize=True)
                     new_written[rel] = sha(f)
                 files.append(rel)
-            entry['anims'][name] = {'files': files, **{k: v for k, v in meta.items() if k != 'hair_src'}}
+            entry['anims'][name] = {'files': files, **{k: v for k, v in meta.items() if k not in ('hair_src', 'size_src')}}
         own = [p for p in PIECES if parts[p]['own']]
         kind = 'base pieces' if c.get('recolorear') is False else 'recoloured'
         print(f"{c['id']}: {kind}" + (f", own {', '.join(own)}" if own else ''))

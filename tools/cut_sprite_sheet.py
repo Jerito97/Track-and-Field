@@ -5,13 +5,20 @@ Frames share one canvas size: the hip (centre of the shorts) sits at the same x 
 every frame and the lowest point (feet, hands) on the bottom edge. Writes <name>1.png ...
 and meta.json (frame count, size, hip x, feet y) next to them.
 
-Sheets come at different zoom levels; with a reference animation folder the frames
-are scaled so the character's head (hair) is the same size as in the reference.
+Sheets come at different zoom levels, and each generated sheet draws the body a bit
+bigger or smaller than the others. With a reference animation folder the frames are
+scaled to the reference by the median of four size ratios: hair, vest + shorts, shoes
+and whole silhouette, so one odd proportion doesn't throw the scale off.
 
 With --keep-height, figures keep their height above the sheet's ground line (the
 lowest point of each row): use it for jumps, so airborne frames stay in the air.
 
-Usage: python3 tools/cut_sprite_sheet.py SHEET OUT_DIR NAME [REFERENCE_DIR] [--keep-height]
+With --measure=2,3 only those frames (1-based) are used to measure the size, for sheets
+that mix views (e.g. a celebration with front-view frames for the podium).
+
+With --adjust=0.95 the measured scale is multiplied by that factor, for a final touch by eye.
+
+Usage: python3 tools/cut_sprite_sheet.py SHEET OUT_DIR NAME [REFERENCE_DIR] [--keep-height] [--measure=2,3] [--adjust=0.95]
   e.g. python3 tools/cut_sprite_sheet.py assets/source/base_start_sheet.jpg assets/characters/base/start start assets/characters/base/run
 Needs: Pillow, numpy
 """
@@ -52,18 +59,21 @@ def premultiplied_resize(img, size):
     return Image.fromarray(np.dstack([rgb, g[..., 3:]]).astype(np.uint8), 'RGBA')
 
 
-def hair_area(rgb, m):
-    """Area of the dark-brown hair in a figure (source px): a stable measure of the character's scale."""
+def sizes(rgb, m):
+    """Areas (source px) that measure the character's scale: hair, vest + shorts, shoes, silhouette."""
     f = rgb / 255
     mx, mn = f.max(2), f.min(2)
     d = np.maximum(mx - mn, 1e-6)
     r, g, b = f[..., 0], f[..., 1], f[..., 2]
     h = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60
     s = (mx - mn) / np.maximum(mx, 1e-6)
-    return int((m & (h >= 5) & (h < 50) & (s > .3) & (mx < .62) & (mx > .09)).sum())
+    hair = m & (h >= 5) & (h < 50) & (s > .3) & (mx < .62) & (mx > .09)
+    body = m & ((((h < 14) | (h > 335)) & (s > .62)) | ((s < .45) & (mx > .07) & (mx < .35)))
+    shoes = m & (s < .2) & (mx > .6)
+    return {'hair': int(hair.sum()), 'body': int(body.sum()), 'shoes': int(shoes.sum()), 'silhouette': int(m.sum())}
 
 
-def main(src, outdir, name, ref=None, keep_height=False):
+def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0):
     im = np.asarray(Image.open(src).convert('RGB')).astype(int)
     H, W, _ = im.shape
     light = im.min(2) > 215
@@ -123,10 +133,13 @@ def main(src, outdir, name, ref=None, keep_height=False):
         # bottom: own lowest point, or the row's ground line to keep jumps in the air
         bottom = ground[row_of[len(frames)]] if keep_height else ys.max()
         frames.append((np.dstack([rgb, a]).astype(np.uint8), int(round(sx.mean())), ys.min(), ys.max(), xs.min(), xs.max(), bottom))
-    hair = float(np.median([hair_area(im, m) for m in blobs]))
+    per = [sizes(im, m) for i, m in enumerate(blobs) if not measure or i + 1 in measure]
+    size_src = {k: float(np.median([p[k] for p in per])) for k in per[0]}
     scale = SCALE
     if ref:
-        scale = SCALE * (json.loads((Path(ref) / 'meta.json').read_text())['hair_src'] / hair) ** .5
+        rs = json.loads((Path(ref) / 'meta.json').read_text())['size_src']
+        scale = SCALE * float(np.median([(rs[k] / size_src[k]) ** .5 for k in rs if size_src[k] > 0]))
+    scale *= adjust
     L = max(f[1] - f[4] for f in frames) + 6
     R = max(f[5] - f[1] for f in frames) + 6
     T = max(f[6] - f[2] for f in frames) + 6
@@ -139,11 +152,14 @@ def main(src, outdir, name, ref=None, keep_height=False):
         c.paste(piece, (L - (hx - x0), T - (bottom - top)), piece)
         premultiplied_resize(c, size).save(out / f'{name}{i + 1}.png', optimize=True)
     meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * scale), 1), 'feet': round(float(T * scale), 1),
-            'scale': round(scale, 4), 'hair_src': hair}
+            'scale': round(scale, 4), 'size_src': size_src}
     (out / 'meta.json').write_text(json.dumps(meta) + '\n')
     print(meta)
 
 
 if __name__ == '__main__':
-    args = [a for a in sys.argv[1:] if a != '--keep-height']
-    main(*args[:4], keep_height='--keep-height' in sys.argv)
+    flags = [a for a in sys.argv[1:] if a.startswith('--')]
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    measure = next((a.split('=')[1] for a in flags if a.startswith('--measure=')), None)
+    adjust = next((float(a.split('=')[1]) for a in flags if a.startswith('--adjust=')), 1.0)
+    main(*args[:4], keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)
