@@ -13,7 +13,7 @@ export function resetRivals(){
   S.rivals.forEach(r=>{
     // reaction to the gun; now and then a sleepy start
     let react=rand(.13,.24); if(Math.random()<.1) react+=rand(.25,.45);
-    const T=ev.hurdles? 12.5+(1.03-r.a.sk)*17+rand(-.2,.2) : 10.3+(1.03-r.a.sk)*14+rand(-.25,.25);
+    const T=ev.hurdles? 12.5+(1.03-r.a.sk)*17+rand(-.2,.2) : 11.0+(1.03-r.a.sk)*16+rand(-.3,.3);  // field ~11.0-12.6 s: a decent human run is in the mix
     // flat sprint: about one in three rivals trips somewhere mid-race
     const trip=!ev.hurdles&&Math.random()<.3?rand(15,85):null;
     Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set()}); });
