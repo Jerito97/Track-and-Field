@@ -2,11 +2,16 @@
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {POSE} from '../poses.js';
-import {drawAthlete,drawSprite} from '../rig.js';
+import {animReady,animScale,drawAnim,drawAthlete,drawSprite} from '../rig.js';
 import {ATH,G,S} from '../state.js';
 import {drawBoards,drawStands} from './scenery.js';
 import {txt} from './text.js';
 
+// front view from the drawn celebration (frame 0 standing, 3 arm up) when loaded; s as in drawChar
+function podiumAthlete(C,s,x,feet,up){
+  if(animReady(C,'cheer')){ drawAnim(ctx,C,'cheer',up?3:0,x,feet,animScale(C,s*1.75)); return true; }
+  drawAthlete(ctx,s,x,feet,0,up?POSE.cheer:POSE.stand,C,false); return false;
+}
 export function drawPodium(){
   const p=S.podium;
   ctx.fillStyle='#bcd3ea'; ctx.fillRect(0,0,LW,LH);
@@ -14,11 +19,12 @@ export function drawPodium(){
   ctx.fillStyle='#8cc63f'; ctx.fillRect(0,164,LW,LH-164); for(let i=0;i<LW;i+=60){ ctx.fillStyle='#99d04a'; ctx.fillRect(i,164,30,LH-164); }
   const cx=LW/2, gy=262, s=34;
   const spots=[{dx:0,h:34},{dx:-62,h:22},{dx:62,h:12}];
-  p.order.slice(3).forEach((a,i)=>drawAthlete(ctx,s*.85,cx+(i%2?1:-1)*(124+Math.floor(i/2)*34),gy+16,0,POSE.stand,a.C,false));
+  p.order.slice(3).forEach((a,i)=>podiumAthlete(a.C,s*.85,cx+(i%2?1:-1)*(124+Math.floor(i/2)*34),gy+16,false));
   [1,0,2].forEach(k=>{ const sp=spots[k]; ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(cx+sp.dx-28,gy-sp.h,56,sp.h+12); ctx.fill(); ctx.stroke(); ctx.fillStyle='#e8262d'; ctx.fillRect(cx+sp.dx-28,gy-sp.h,56,5); txt(String(k+1),cx+sp.dx,gy-sp.h/2+7,'#e8262d',16,{stroke:null}); });
   [2,1,0].forEach((k,idx)=>{ const a=p.order[k]; if(!a) return; const sp=spots[k], shown=p.step>=idx+1;
-    if(!(a.C.sprite&&drawSprite(shown?'cheer':'stand',cx+sp.dx,gy-sp.h))) drawAthlete(ctx,s,cx+sp.dx,gy-sp.h,0,shown?POSE.cheer:POSE.stand,a.C,false);
-    if(shown){ ctx.fillStyle=['#ffd23a','#d9dde6','#e0975a'][k]; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx+sp.dx+2,gy-sp.h-1.02*s,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); } });
+    let front=false;
+    if(!(a.C.sprite&&drawSprite(shown?'cheer':'stand',cx+sp.dx,gy-sp.h))) front=podiumAthlete(a.C,s,cx+sp.dx,gy-sp.h,shown);
+    if(shown){ ctx.fillStyle=['#ffd23a','#d9dde6','#e0975a'][k]; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx+sp.dx+(front?0:2),gy-sp.h-(front?1.3:1.02)*s,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); } });
   for(let i=0;i<LW/36;i++){ const x=18+i*36; ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x,314,10,Math.PI,0); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,305,11,3,0,0,Math.PI*2); ctx.fill(); ctx.fillRect(x-5,297,10,7); }
   ctx.fillStyle='#14284f'; ctx.fillRect(0,0,LW,20); txt('TORNEO',LW-8,11,'#e8262d',14,{align:'right',stroke:null});
   if(p.step>=1&&p.step<=3){ const k=3-p.step, a=p.order[k]; const names=['MEDALLA DE ORO','MEDALLA DE PLATA','MEDALLA DE BRONCE'];

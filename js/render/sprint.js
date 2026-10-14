@@ -13,9 +13,11 @@ const YO_H=60, YO_K=YO_H/144, RIV_K=YO_H/(2.09*24); // 2.09: drawChar height in 
 // drawn animations (100 m): the run cycle figure is RUN_H px tall, one full cycle (two steps) every STRIDE metres
 const STRIDE=4, RUN_H=YO_H*.97;
 // frame of a drawn animation for a runner: start (marks/set) or run cycle at distance x; null = use the rig
-function animFrame(C,ev,{blocks,setStage,running,x,lane}){
+function animFrame(C,ev,{blocks,setStage,running,cheer,x,lane}){
   if(ev.hurdles) return null;
   if(blocks) return animReady(C,'start')?['start',setStage>=1?1:0]:null;
+  // cheer frames: 0 front standing, 1-2 side jump, 3 front arm up (podium)
+  if(cheer) return animReady(C,'cheer')?['cheer',1+(Math.floor(S.clock*3+lane*.5)%2)]:null;
   if(running&&animReady(C,'run')){ const n=C.anims.run.frames; return ['run',Math.floor((x/STRIDE+lane*.37)*n)]; }
   return null;
 }
@@ -47,13 +49,13 @@ export function drawSprint(V){
         else if(V.v>.3) k='run'+(1+Math.floor(((S.legP/(Math.PI*2))*5%5+5)%5)); else k=S.finished?'cheer':'stand';
         drawn=k==='stumble'?drawSprite('run2',px+6,feet,.5,YO_K):drawSprite(k,px+6,feet-V.y*s,0,YO_K);
       }
-      if(!drawn){ const blocks=S.phase==='set'||(S.phase==='wait'&&!S.t), f=animFrame(ME(),ev,{blocks,setStage:S.setStage,running:V.v>.3&&!(S.stumble>0)&&!(S.dip>0),x:V.x,lane:0});
+      if(!drawn){ const blocks=S.phase==='set'||(S.phase==='wait'&&!S.t), f=animFrame(ME(),ev,{blocks,setStage:S.setStage,running:V.v>.3&&!(S.stumble>0)&&!(S.dip>0),cheer:S.finished&&V.v<=.3&&!(S.dip>0),x:V.x,lane:0});
         if(f){ drawAnim(ctx,ME(),f[0],f[1],px,feet-V.y*s,animScale(ME(),RUN_H)); drawn=true; } }
       if(!drawn) drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,V.pose||POSE.stand,ME(),V.v>5);
       ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; const ty=feet-V.y*s-YO_H-4; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue; const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
       let J; if(r.t<=r.react) J=S.setStage>=1?POSE.set:POSE.crouch; else if(r.air>0) J=POSE.hurdle; else if(r.tripT>0) J=POSE.stumble; else if(r.final!=null&&r.v<.5) J=POSE.cheer; else J=r.v>.2?runPose(r.legP,Math.min(1,r.v/4)):POSE.stand;
-      const f=animFrame(r.a.C,ev,{blocks:r.t<=r.react,setStage:S.setStage,running:r.t>r.react&&!(r.air>0)&&!(r.tripT>0)&&!(r.final!=null&&r.v<.5)&&r.v>.2,x:r.x,lane:l});
+      const f=animFrame(r.a.C,ev,{blocks:r.t<=r.react,setStage:S.setStage,running:r.t>r.react&&!(r.air>0)&&!(r.tripT>0)&&!(r.final!=null&&r.v<.5)&&r.v>.2,cheer:r.final!=null&&r.v<.5,x:r.x,lane:l});
       if(f) drawAnim(ctx,r.a.C,f[0],f[1],x,feet-r.y*s,animScale(r.a.C,RUN_H));
       else drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,J,r.a.C,r.v>5); }
   }

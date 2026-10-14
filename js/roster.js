@@ -74,6 +74,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "yo/cheer/cheer1.png",
+     "yo/cheer/cheer2.png",
+     "yo/cheer/cheer3.png",
+     "yo/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "yo/run/run1.png",
@@ -177,6 +191,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "santi/cheer/cheer1.png",
+     "santi/cheer/cheer2.png",
+     "santi/cheer/cheer3.png",
+     "santi/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "santi/run/run1.png",
@@ -280,6 +308,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "nacho/cheer/cheer1.png",
+     "nacho/cheer/cheer2.png",
+     "nacho/cheer/cheer3.png",
+     "nacho/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "nacho/run/run1.png",
@@ -383,6 +425,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "rafa/cheer/cheer1.png",
+     "rafa/cheer/cheer2.png",
+     "rafa/cheer/cheer3.png",
+     "rafa/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "rafa/run/run1.png",
@@ -486,6 +542,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "lucho/cheer/cheer1.png",
+     "lucho/cheer/cheer2.png",
+     "lucho/cheer/cheer3.png",
+     "lucho/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "lucho/run/run1.png",
@@ -589,6 +659,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "beto/cheer/cheer1.png",
+     "beto/cheer/cheer2.png",
+     "beto/cheer/cheer3.png",
+     "beto/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "beto/run/run1.png",
@@ -692,6 +776,20 @@ export const ROSTER=[
    }
   },
   "anims": {
+   "cheer": {
+    "files": [
+     "tomi/cheer/cheer1.png",
+     "tomi/cheer/cheer2.png",
+     "tomi/cheer/cheer3.png",
+     "tomi/cheer/cheer4.png"
+    ],
+    "frames": 4,
+    "w": 84,
+    "h": 202,
+    "hx": 38.7,
+    "feet": 201.3,
+    "scale": 0.2516
+   },
    "run": {
     "files": [
      "tomi/run/run1.png",

@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run (carrera), start (largada); cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>/          animaciones de cada atleta (generadas o propias)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
@@ -71,8 +71,9 @@ Si una imagen no carga, ese atleta se dibuja con el muñeco vectorial de antes.
 En los 100 m todos los atletas usan animaciones dibujadas, recoloreadas para cada uno:
 - `run`: ciclo de carrera de 8 cuadros.
 - `start`: "en sus marcas" y "listos".
+- `cheer`: cuadro 1 de frente parado y cuadro 4 de frente con el brazo arriba (para el podio); cuadros 2 y 3 de perfil saltando (festejo en la pista al terminar).
 
-El cabezazo, el tropezón y el festejo siguen con piezas.
+El cabezazo y el tropezón siguen con piezas.
 
 Para agregar o cambiar una animación con una hoja nueva (figuras sobre fondo blanco, de perfil mirando a la derecha). El último argumento iguala el tamaño del personaje con la carrera:
 
@@ -81,7 +82,7 @@ python3 tools/cut_sprite_sheet.py assets/source/base_start_sheet.jpg assets/char
 python3 tools/build_characters.py
 ```
 
-La carrera es la referencia de tamaño: si se cambia, va sin el último argumento.
+La carrera es la referencia de tamaño: si se cambia, va sin el último argumento. Para animaciones con saltos agregá `--keep-height`, así los cuadros en el aire no se apoyan en el piso.
 
 ## Sprites de Yo
 
