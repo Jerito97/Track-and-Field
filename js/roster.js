@@ -335,6 +335,32 @@ export const ROSTER=[
     "feet": 161.2,
     "scale": 0.2953
    },
+   "pvstand": {
+    "files": [
+     "yo/pvstand/pvstand1.png",
+     "yo/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
+   },
    "run": {
     "files": [
      "yo/run/run1.png",
@@ -722,6 +748,32 @@ export const ROSTER=[
     "hx": 54.3,
     "feet": 161.2,
     "scale": 0.2953
+   },
+   "pvstand": {
+    "files": [
+     "santi/pvstand/pvstand1.png",
+     "santi/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
    },
    "run": {
     "files": [
@@ -1111,6 +1163,32 @@ export const ROSTER=[
     "feet": 161.2,
     "scale": 0.2953
    },
+   "pvstand": {
+    "files": [
+     "nacho/pvstand/pvstand1.png",
+     "nacho/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
+   },
    "run": {
     "files": [
      "nacho/run/run1.png",
@@ -1498,6 +1576,32 @@ export const ROSTER=[
     "hx": 54.3,
     "feet": 161.2,
     "scale": 0.2953
+   },
+   "pvstand": {
+    "files": [
+     "rafa/pvstand/pvstand1.png",
+     "rafa/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
    },
    "run": {
     "files": [
@@ -1887,6 +1991,32 @@ export const ROSTER=[
     "feet": 161.2,
     "scale": 0.2953
    },
+   "pvstand": {
+    "files": [
+     "lucho/pvstand/pvstand1.png",
+     "lucho/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
+   },
    "run": {
     "files": [
      "lucho/run/run1.png",
@@ -2275,6 +2405,32 @@ export const ROSTER=[
     "feet": 161.2,
     "scale": 0.2953
    },
+   "pvstand": {
+    "files": [
+     "beto/pvstand/pvstand1.png",
+     "beto/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
+   },
    "run": {
     "files": [
      "beto/run/run1.png",
@@ -2662,6 +2818,32 @@ export const ROSTER=[
     "hx": 54.3,
     "feet": 161.2,
     "scale": 0.2953
+   },
+   "pvstand": {
+    "files": [
+     "tomi/pvstand/pvstand1.png",
+     "tomi/pvstand/pvstand2.png"
+    ],
+    "frames": 2,
+    "w": 82,
+    "h": 173,
+    "hx": 34.0,
+    "feet": 172.9,
+    "scale": 0.2178,
+    "hands": [
+     [
+      11.5,
+      113.0,
+      74.3,
+      91.7
+     ],
+     [
+      10.9,
+      112.8,
+      69.7,
+      92.1
+     ]
+    ]
    },
    "run": {
     "files": [

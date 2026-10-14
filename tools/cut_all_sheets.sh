@@ -26,4 +26,6 @@ python3 tools/cut_sprite_sheet.py $S/base_javpull_sheet.jpg $B/javpull javpull $
 python3 tools/cut_sprite_sheet.py $S/base_javthrow_sheet.jpg $B/javthrow javthrow $B/run \
   "--javelins=2,234,418,72;118,371,755,70;300,282,1215,40;"
 python3 tools/cut_sprite_sheet.py $S/base_javafter_sheet.jpg $B/javafter javafter $B/run --measure=1,2
+# pole vault: no pole in the sheets (the game draws it); --hands marks where it goes
+python3 tools/cut_sprite_sheet.py $S/base_pvstand_sheet.jpg $B/pvstand pvstand $B/run --adjust=1.1 "--hands=126,543,414,445;905,543,1175,448"
 python3 tools/build_characters.py

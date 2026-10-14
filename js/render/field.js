@@ -68,11 +68,13 @@ export function drawField(V){
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
   // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
-  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):null;
+  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):ev.kind==='pv'?pvFrame(ME(),V):null;
     if(f){ const K=animScale(ME(),s*FIELD_H), feet=GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
       // javelin in the frame: its tail and tip on screen (for the star); the whole javelin goes underneath, tip on the
       // drawn tip, so every frame shows it at full length (the sheets draw it shorter or cut off at the tail)
-      const A=ME().anims[f[0]], j=A.jav&&A.jav[f[1]];
+      const A=ME().anims[f[0]], j=A.jav&&A.jav[f[1]], hd=A.hands&&A.hands[f[1]];
+      // hands drawn holding a pole the game draws: pole through the front hand, along the line of both hands
+      if(hd){ fig.hands=[px+(hd[0]-A.hx)*K,feet+(hd[1]-A.feet)*K,px+(hd[2]-A.hx)*K,feet+(hd[3]-A.feet)*K]; fig.hand=[fig.hands[2],fig.hands[3]]; }
       if(j){ fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K];
         const [tx,ty,hx,hy]=fig.jav, a=Math.atan2(ty-hy,hx-tx), L=JAV_L*s; javelin(hx-Math.cos(a)*L/2,hy+Math.sin(a)*L/2,a,L); }
       drawAnim(ctx,ME(),f[0],f[1],px,feet,K); } }
@@ -99,6 +101,7 @@ export function drawPole(V,X,GY,fig){
   const line=(x1,y1,x2,y2,cx,cy)=>{ ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(x1,y1); if(cx!=null) ctx.quadraticCurveTo(cx,cy,x2,y2); else ctx.lineTo(x2,y2); ctx.stroke(); ctx.strokeStyle='#7ccf3a'; ctx.lineWidth=2.6; ctx.stroke(); };
   const tipX=X(ev.line)-2, tipY=GY+2;
   if(!a||a.k==='pvfoul'){ const d=ev.line-V.x; let ang=a?.1:.15+.75*clamp(d/14,0,1);
+    if(fig.hands&&!a&&(V.v||0)<=.2) ang=Math.atan2(fig.hands[1]-fig.hands[3],fig.hands[2]-fig.hands[0]);
     if(V.meter&&V.meter.k==='pole'&&V.meter.started) ang=.55*(1-V.meter.p)+.04;
     const fx=hx+Math.cos(ang)*(L-1.1*s), fy=hy-Math.sin(ang)*(L-1.1*s);
     line(hx-Math.cos(ang)*1.1*s,hy+Math.sin(ang)*1.1*s,fx,fy);
@@ -139,6 +142,11 @@ function ljFrame(C,V){
   if(a) return null;
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
+}
+// pole vault: drawn frames where we have them (standing); rig pieces for the rest
+function pvFrame(C,V){
+  if(V.act||(V.v||0)>.2||V.meter) return null;
+  return animReady(C,'pvstand')?['pvstand',Math.floor(S.clock*1.2)%2]:null;
 }
 // javelin: drawn frames for the whole attempt (standing, running, drawing the javelin back, throwing, after the throw);
 // rig pieces for the foul

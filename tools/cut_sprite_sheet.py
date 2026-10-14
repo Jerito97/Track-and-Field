@@ -25,6 +25,9 @@ that cross the neighbouring figures are lifted off and given back to their owner
 has 'jav': each frame's javelin tail x,y and tip x,y in frame px. --javelin-lines="..." (same
 format) only records 'jav', for sheets whose figures come apart on their own.
 
+With --hands="x0,y0,x1,y1;..." (sheet px, back hand then front hand, one per figure) meta.json
+has 'hands' in frame px: where the game puts a pole the sheet doesn't draw.
+
 With --adjust=0.95 the measured scale is multiplied by that factor, for a final touch by eye.
 
 Usage: python3 tools/cut_sprite_sheet.py SHEET OUT_DIR NAME [REFERENCE_DIR] [--keep-height] [--measure=2,3] [--adjust=0.95]
@@ -119,7 +122,7 @@ def cut_javelin_tails(fg, im):
     return fg
 
 
-def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0, javelin=False, javelins=None, javelin_lines=None):
+def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.0, javelin=False, javelins=None, javelin_lines=None, hands=None):
     im = np.asarray(Image.open(src).convert('RGB')).astype(int)
     H, W, _ = im.shape
     light = im.min(2) > 215
@@ -159,7 +162,7 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         rgbs = [im] * len(blobs)
         jav_of = {}
     rgb_of = {id(b): c for b, c in zip(blobs, rgbs)}
-    jav = []
+    jav, hand = [], []
     # reading order: a new row starts when the vertical centre jumps by more than half a figure
     info = sorted(((np.nonzero(b)[0].mean(), np.nonzero(b)[1].mean(), b) for b in blobs), key=lambda t: t[0])
     fh = np.median([np.ptp(np.nonzero(b)[0]) for b in blobs])
@@ -173,6 +176,7 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
     row_of = [r for r, _ in order]
     if javelin_lines:  # only record where each javelin is
         jav_of = {id(b): javelin_split.fit_line(im, fg, *ln) if ln else None for b, ln in zip(blobs, javelin_lines)}
+    hands_of = {id(b): h for b, h in zip(blobs, hands)} if hands else {}
     ground = {r: max(np.nonzero(b)[0].max() for rr, b in zip(row_of, blobs) if rr == r) for r in set(row_of)}
 
     v = im.max(2) / 255
@@ -194,6 +198,8 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         sy, sx = np.nonzero(m & (v > .07) & (v < .35) & (s < .4))  # shorts
         # bottom: own lowest point, or the row's ground line to keep jumps in the air
         bottom = ground[row_of[len(frames)]] if keep_height else ys.max()
+        if hands_of:  # back and front hand, from the hip and the bottom
+            hand.append([(float(p[0]) - int(round(sx.mean())), float(p[1]) - bottom) for p in hands_of[id(m)]])
         if jav_of:  # javelin tail and tip, from the hip and the bottom
             e = jav_of[id(m)]
             jav.append([(float(p[0]) - int(round(sx.mean())), float(p[1]) - bottom) for p in e] if e else None)
@@ -218,6 +224,8 @@ def main(src, outdir, name, ref=None, keep_height=False, measure=None, adjust=1.
         premultiplied_resize(c, size).save(out / f'{name}{i + 1}.png', optimize=True)
     meta = {'frames': len(frames), 'w': size[0], 'h': size[1], 'hx': round(float(L * scale), 1), 'feet': round(float(T * scale), 1),
             'scale': round(scale, 4), 'size_src': size_src}
+    if hand:  # back hand x,y and front hand x,y in frame px, per frame
+        meta['hands'] = [[round((L + dx) * scale, 1) if k % 2 == 0 else round((T + dx) * scale, 1) for k, dx in enumerate(np.ravel(e))] for e in hand]
     if jav:  # javelin tail x,y and tip x,y in frame px, per frame
         meta['jav'] = [[round((L + dx) * scale, 1) if k % 2 == 0 else round((T + dx) * scale, 1) for k, dx in enumerate(np.ravel(e))] if e else None for e in jav]
     (out / 'meta.json').write_text(json.dumps(meta) + '\n')
@@ -233,4 +241,6 @@ if __name__ == '__main__':
     jl = [((float(q[0]), float(q[1])), (float(q[2]), float(q[3]))) if len(q) == 4 else None for q in (s.split(',') for s in jl.split(';'))] if jl else None
     jo = next((a.split('=')[1] for a in flags if a.startswith('--javelin-lines=')), None)
     jo = [((float(q[0]), float(q[1])), (float(q[2]), float(q[3]))) if len(q) == 4 else None for q in (s.split(',') for s in jo.split(';'))] if jo else None
-    main(*args[:4], javelin_lines=jo, javelins=jl, javelin='--javelin' in flags, keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)
+    hd = next((a.split('=')[1] for a in flags if a.startswith('--hands=')), None)
+    hd = [((float(q[0]), float(q[1])), (float(q[2]), float(q[3]))) for q in (s.split(',') for s in hd.split(';'))] if hd else None
+    main(*args[:4], hands=hd, javelin_lines=jo, javelins=jl, javelin='--javelin' in flags, keep_height='--keep-height' in flags, measure=[int(n) for n in measure.split(',')] if measure else None, adjust=adjust)
