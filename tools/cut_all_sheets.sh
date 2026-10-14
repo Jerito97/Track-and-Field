@@ -12,4 +12,5 @@ python3 tools/cut_sprite_sheet.py $S/base_hurdle_sheet.jpg $B/hurdle hurdle $B/r
 python3 tools/cut_sprite_sheet.py $S/base_stand_sheet.jpg $B/stand stand $B/run --adjust=0.95
 # celebration: frames 1 and 4 are front view (podium); measure on the side-view jump frames
 python3 tools/cut_sprite_sheet.py $S/base_cheer_sheet.jpg $B/cheer cheer $B/run --keep-height --measure=2,3
+python3 tools/cut_sprite_sheet.py $S/base_ljtakeoff_sheet.jpg $B/ljtakeoff ljtakeoff $B/run
 python3 tools/build_characters.py

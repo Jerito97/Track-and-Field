@@ -3,7 +3,7 @@ import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {drawChar} from '../draw/character.js';
 import {POSE} from '../poses.js';
-import {drawRig,rigReady} from '../rig.js';
+import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {ATH,ME,S} from '../state.js';
 import {rec} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -66,7 +66,10 @@ export function drawField(V){
       ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
   const px=X(V.x);
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
-  const fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
+  // long jump: drawn animations where we have them (stand, run cycle, take-off), rig pieces for the rest
+  let fig=null;
+  if(ev.kind==='lj'){ const f=ljFrame(ME(),V); if(f){ drawAnim(ctx,ME(),f[0],f[1],px,GY-V.y*s,animScale(ME(),s*FIELD_H)); fig={hand:[px,GY-V.y*s-1.4*s]}; } }
+  if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
     if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=2.6*s, cx=fig.hand[0]+Math.cos(a)*.15*s, cy=fig.hand[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
@@ -109,4 +112,14 @@ function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x, b=ev.bands;
     ctx.strokeStyle=`rgba(${rgb},${on?1:.75})`; ctx.lineWidth=3;
     for(let x=x0+6;x<x1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
     ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x0-1,GY-25,3,40); });
+}
+// field athletes are drawn FIELD_H*ppm logical px tall (same height as the rig pieces at that scale)
+const FIELD_H=2.37;
+function ljFrame(C,V){
+  const a=V.act;
+  if(a&&a.k==='lj'){ if(a.u==null||a.u>=.3||!animReady(C,'ljtakeoff')) return null;
+    return ['ljtakeoff',a.u<.05?0:a.u<.12?1:a.u<.2?2:3]; }
+  if(a) return null;
+  if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
+  return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }

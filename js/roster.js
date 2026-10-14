@@ -113,6 +113,20 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "ljtakeoff": {
+    "files": [
+     "yo/ljtakeoff/ljtakeoff1.png",
+     "yo/ljtakeoff/ljtakeoff2.png",
+     "yo/ljtakeoff/ljtakeoff3.png",
+     "yo/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
+   },
    "run": {
     "files": [
      "yo/run/run1.png",
@@ -278,6 +292,20 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "ljtakeoff": {
+    "files": [
+     "santi/ljtakeoff/ljtakeoff1.png",
+     "santi/ljtakeoff/ljtakeoff2.png",
+     "santi/ljtakeoff/ljtakeoff3.png",
+     "santi/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
    },
    "run": {
     "files": [
@@ -445,6 +473,20 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "ljtakeoff": {
+    "files": [
+     "nacho/ljtakeoff/ljtakeoff1.png",
+     "nacho/ljtakeoff/ljtakeoff2.png",
+     "nacho/ljtakeoff/ljtakeoff3.png",
+     "nacho/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
+   },
    "run": {
     "files": [
      "nacho/run/run1.png",
@@ -610,6 +652,20 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "ljtakeoff": {
+    "files": [
+     "rafa/ljtakeoff/ljtakeoff1.png",
+     "rafa/ljtakeoff/ljtakeoff2.png",
+     "rafa/ljtakeoff/ljtakeoff3.png",
+     "rafa/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
    },
    "run": {
     "files": [
@@ -777,6 +833,20 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "ljtakeoff": {
+    "files": [
+     "lucho/ljtakeoff/ljtakeoff1.png",
+     "lucho/ljtakeoff/ljtakeoff2.png",
+     "lucho/ljtakeoff/ljtakeoff3.png",
+     "lucho/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
+   },
    "run": {
     "files": [
      "lucho/run/run1.png",
@@ -943,6 +1013,20 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "ljtakeoff": {
+    "files": [
+     "beto/ljtakeoff/ljtakeoff1.png",
+     "beto/ljtakeoff/ljtakeoff2.png",
+     "beto/ljtakeoff/ljtakeoff3.png",
+     "beto/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
+   },
    "run": {
     "files": [
      "beto/run/run1.png",
@@ -1108,6 +1192,20 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "ljtakeoff": {
+    "files": [
+     "tomi/ljtakeoff/ljtakeoff1.png",
+     "tomi/ljtakeoff/ljtakeoff2.png",
+     "tomi/ljtakeoff/ljtakeoff3.png",
+     "tomi/ljtakeoff/ljtakeoff4.png"
+    ],
+    "frames": 4,
+    "w": 114,
+    "h": 162,
+    "hx": 54.3,
+    "feet": 161.2,
+    "scale": 0.2953
    },
    "run": {
     "files": [

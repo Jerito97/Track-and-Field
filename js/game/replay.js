@@ -4,7 +4,7 @@ import {showRoundStandings} from '../ui/screens.js';
 import {rand} from '../utils.js';
 
 export function snap(){ return {x:S.x,y:S.y,rot:S.rot,pose:S.pose,cam:S.cam,camY:S.camY,ppm:S.ppm,landX:S.landX,bar:S.bar,v:S.v,
-  jv:S.jv?{...S.jv}:null,act:S.act?{k:S.act.k,stage:S.act.stage}:null,meter:S.meter?{...S.meter}:null,zone:S.zone}; }
+  jv:S.jv?{...S.jv}:null,act:S.act?{k:S.act.k,stage:S.act.stage,u:S.act.T?Math.min(1,S.act.t/S.act.T):null}:null,meter:S.meter?{...S.meter}:null,zone:S.zone}; }
 export function startReplay(){
   if(S.snaps.length<10){ afterAttempt(); return; }
   let i0=S.snaps.findIndex(s=>s.act); i0=Math.max(0,i0-70);
