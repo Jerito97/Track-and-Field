@@ -88,6 +88,18 @@ export const ROSTER=[
     "feet": 201.3,
     "scale": 0.2516
    },
+   "dip": {
+    "files": [
+     "yo/dip/dip1.png",
+     "yo/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
+   },
    "run": {
     "files": [
      "yo/run/run1.png",
@@ -204,6 +216,18 @@ export const ROSTER=[
     "hx": 38.7,
     "feet": 201.3,
     "scale": 0.2516
+   },
+   "dip": {
+    "files": [
+     "santi/dip/dip1.png",
+     "santi/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
    },
    "run": {
     "files": [
@@ -322,6 +346,18 @@ export const ROSTER=[
     "feet": 201.3,
     "scale": 0.2516
    },
+   "dip": {
+    "files": [
+     "nacho/dip/dip1.png",
+     "nacho/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
+   },
    "run": {
     "files": [
      "nacho/run/run1.png",
@@ -438,6 +474,18 @@ export const ROSTER=[
     "hx": 38.7,
     "feet": 201.3,
     "scale": 0.2516
+   },
+   "dip": {
+    "files": [
+     "rafa/dip/dip1.png",
+     "rafa/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
    },
    "run": {
     "files": [
@@ -556,6 +604,18 @@ export const ROSTER=[
     "feet": 201.3,
     "scale": 0.2516
    },
+   "dip": {
+    "files": [
+     "lucho/dip/dip1.png",
+     "lucho/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
+   },
    "run": {
     "files": [
      "lucho/run/run1.png",
@@ -673,6 +733,18 @@ export const ROSTER=[
     "feet": 201.3,
     "scale": 0.2516
    },
+   "dip": {
+    "files": [
+     "beto/dip/dip1.png",
+     "beto/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
+   },
    "run": {
     "files": [
      "beto/run/run1.png",
@@ -789,6 +861,18 @@ export const ROSTER=[
     "hx": 38.7,
     "feet": 201.3,
     "scale": 0.2516
+   },
+   "dip": {
+    "files": [
+     "tomi/dip/dip1.png",
+     "tomi/dip/dip2.png"
+    ],
+    "frames": 2,
+    "w": 142,
+    "h": 182,
+    "hx": 69.5,
+    "feet": 181.8,
+    "scale": 0.2421
    },
    "run": {
     "files": [

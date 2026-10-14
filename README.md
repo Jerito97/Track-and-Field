@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run, start, cheer; cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer, dip; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>/          animaciones de cada atleta (generadas o propias)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
@@ -72,8 +72,9 @@ En los 100 m todos los atletas usan animaciones dibujadas, recoloreadas para cad
 - `run`: ciclo de carrera de 8 cuadros.
 - `start`: "en sus marcas" y "listos".
 - `cheer`: cuadro 1 de frente parado y cuadro 4 de frente con el brazo arriba (para el podio); cuadros 2 y 3 de perfil saltando (festejo en la pista al terminar).
+- `dip`: inclinación y cabezazo en la meta.
 
-El cabezazo y el tropezón siguen con piezas.
+El tropezón sigue con piezas.
 
 Para agregar o cambiar una animación con una hoja nueva (figuras sobre fondo blanco, de perfil mirando a la derecha). El último argumento iguala el tamaño del personaje con la carrera:
 
