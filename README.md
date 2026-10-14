@@ -22,7 +22,7 @@ css/styles.css          estilos de los menús y tablas
 assets/characters/
   characters.json       atletas: id, nombre y paleta (lo editás vos)
   base/*.png            personaje base en piezas (de él salen todos los rivales)
-  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland; cuadros + meta.json
+  base/<anim>/          animaciones del base: run, start, cheer, dip, trip, stand, hurdle, ljtakeoff, ljflight, ljstretch, ljland, javstand; cuadros + meta.json
   <id>/*.png            piezas de cada atleta (generadas o propias)
   <id>/<anim>/          animaciones de cada atleta (generadas o propias)
   yo/sprites/*.png      sprites viejos de cuerpo entero de Yo (desactivados)
@@ -90,6 +90,7 @@ En los 100 m y los 110 m con vallas todos los atletas usan animaciones dibujadas
 - `ljflight`: vuelo del salto en largo (se usan los cuadros 2 a 4: brazos arriba, bajando, rodillas arriba).
 - `ljstretch`: estirarse al dar el impulso en el aire (cuadro 1 un instante, después el 2; el 3 no se usa).
 - `ljland`: caída en la arena (talones, deslizarse, sentado).
+- `javstand`: parado con la jabalina antes de arrancar (la jabalina viene en el dibujo).
 
 El salto en largo ya va todo con dibujos; solo el nulo (pisar la tabla) sigue con piezas.
 

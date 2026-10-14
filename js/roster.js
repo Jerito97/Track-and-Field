@@ -113,6 +113,18 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javstand": {
+    "files": [
+     "yo/javstand/javstand1.png",
+     "yo/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
+   },
    "ljflight": {
     "files": [
      "yo/ljflight/ljflight1.png",
@@ -332,6 +344,18 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javstand": {
+    "files": [
+     "santi/javstand/javstand1.png",
+     "santi/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
    },
    "ljflight": {
     "files": [
@@ -553,6 +577,18 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javstand": {
+    "files": [
+     "nacho/javstand/javstand1.png",
+     "nacho/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
+   },
    "ljflight": {
     "files": [
      "nacho/ljflight/ljflight1.png",
@@ -772,6 +808,18 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javstand": {
+    "files": [
+     "rafa/javstand/javstand1.png",
+     "rafa/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
    },
    "ljflight": {
     "files": [
@@ -993,6 +1041,18 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javstand": {
+    "files": [
+     "lucho/javstand/javstand1.png",
+     "lucho/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
+   },
    "ljflight": {
     "files": [
      "lucho/ljflight/ljflight1.png",
@@ -1213,6 +1273,18 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javstand": {
+    "files": [
+     "beto/javstand/javstand1.png",
+     "beto/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
+   },
    "ljflight": {
     "files": [
      "beto/ljflight/ljflight1.png",
@@ -1432,6 +1504,18 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javstand": {
+    "files": [
+     "tomi/javstand/javstand1.png",
+     "tomi/javstand/javstand2.png"
+    ],
+    "frames": 2,
+    "w": 170,
+    "h": 177,
+    "hx": 103.0,
+    "feet": 176.2,
+    "scale": 0.2846
    },
    "ljflight": {
     "files": [

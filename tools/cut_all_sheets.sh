@@ -16,4 +16,6 @@ python3 tools/cut_sprite_sheet.py $S/base_ljtakeoff_sheet.jpg $B/ljtakeoff ljtak
 python3 tools/cut_sprite_sheet.py $S/base_ljflight_sheet.jpg $B/ljflight ljflight $B/run
 python3 tools/cut_sprite_sheet.py $S/base_ljstretch_sheet.jpg $B/ljstretch ljstretch $B/run
 python3 tools/cut_sprite_sheet.py $S/base_ljland_sheet.jpg $B/ljland ljland $B/run
+# javelin: the white javelin throws off the size measures; matched by eye to the standing pose
+python3 tools/cut_sprite_sheet.py $S/base_javstand_sheet.jpg $B/javstand javstand $B/run --adjust=1.19
 python3 tools/build_characters.py
