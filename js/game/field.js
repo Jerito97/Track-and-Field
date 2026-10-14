@@ -26,7 +26,7 @@ export function updateField(dt){
       else if(ev.kind==='pv'){ S.meter={k:'pole',p:0}; bothCue(); }
       else S.cue={type:'hold',t:0};
     }
-    const sp=(S.zone&&ev.kind==='jav')?Math.min(S.v,5.5):S.v;
+    const sp=S.v;
     S.x+=sp*dt; S.legP+=sp*dt*2.4;
     if(S.zone&&ev.kind==='jav'){
       S.pose=S.meter?POSE.javBack:runPose(S.legP,Math.min(1,sp/4),'jav');

@@ -7,7 +7,7 @@ import {ME,S} from '../state.js';
 import {drawBoards,drawBottomAds,drawStands,hurdle,shadow} from './scenery.js';
 import {txt} from './text.js';
 
-const LANES=7;
+const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
 const YO_H=60, YO_K=YO_H/144, RIV_K=YO_H/(2.09*24); // 2.09: drawChar height in units of s
 // drawn animations (100 m): the run cycle figure is RUN_H px tall, one full cycle (two steps) every STRIDE metres
