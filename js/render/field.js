@@ -144,9 +144,13 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
-// pole vault: drawn frames where we have them (standing, running, also while lowering the pole); rig pieces for the rest
+// pole vault: drawn frames where we have them (standing, running, also while lowering the pole, planting); rig pieces for the rest
 function pvFrame(C,V){
-  if(V.act) return null;
+  const a=V.act;
+  // planting the pole: last step, arms up, take-off, hanging from the pole as the rise starts
+  if(a&&a.k==='pv'&&(a.stage==='plant'||a.stage==='rise'&&(a.t||0)<.12)){ const t=a.stage==='plant'?a.t||0:1;
+    return animReady(C,'pvplant')?['pvplant',t<.05?0:t<.11?1:t<.17?2:3]:null; }
+  if(a) return null;
   if((V.v||0)>.2) return animReady(C,'pvrun')?['pvrun',Math.floor(V.x/4*C.anims.pvrun.frames)]:null;
   return animReady(C,'pvstand')?['pvstand',Math.floor(S.clock*1.2)%2]:null;
 }

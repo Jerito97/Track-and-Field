@@ -30,4 +30,6 @@ python3 tools/cut_sprite_sheet.py $S/base_javafter_sheet.jpg $B/javafter javafte
 python3 tools/cut_sprite_sheet.py $S/base_pvstand_sheet.jpg $B/pvstand pvstand $B/run --adjust=1.1 "--hands=126,543,414,445;905,543,1175,448"
 python3 tools/cut_sprite_sheet.py $S/base_pvrun_sheet.jpg $B/pvrun pvrun $B/run \
   "--hands=148,425,222,400;390,460,410,452;615,440,632,405;795,350,822,340;995,410,1015,400;1190,375,1222,365"
+python3 tools/cut_sprite_sheet.py $S/base_pvplant_sheet.jpg $B/pvplant pvplant $B/run --keep-height --adjust=1.08 \
+  "--hands=115,528,352,410;636,128,600,100;900,90,782,70;1133,68,1058,50"
 python3 tools/build_characters.py
