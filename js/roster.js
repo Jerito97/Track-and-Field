@@ -113,6 +113,19 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javafter": {
+    "files": [
+     "yo/javafter/javafter1.png",
+     "yo/javafter/javafter2.png",
+     "yo/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
+   },
    "javpull": {
     "files": [
      "yo/javpull/javpull1.png",
@@ -435,6 +448,19 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javafter": {
+    "files": [
+     "santi/javafter/javafter1.png",
+     "santi/javafter/javafter2.png",
+     "santi/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
    },
    "javpull": {
     "files": [
@@ -759,6 +785,19 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javafter": {
+    "files": [
+     "nacho/javafter/javafter1.png",
+     "nacho/javafter/javafter2.png",
+     "nacho/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
+   },
    "javpull": {
     "files": [
      "nacho/javpull/javpull1.png",
@@ -1081,6 +1120,19 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javafter": {
+    "files": [
+     "rafa/javafter/javafter1.png",
+     "rafa/javafter/javafter2.png",
+     "rafa/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
    },
    "javpull": {
     "files": [
@@ -1405,6 +1457,19 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javafter": {
+    "files": [
+     "lucho/javafter/javafter1.png",
+     "lucho/javafter/javafter2.png",
+     "lucho/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
+   },
    "javpull": {
     "files": [
      "lucho/javpull/javpull1.png",
@@ -1728,6 +1793,19 @@ export const ROSTER=[
     "feet": 157.3,
     "scale": 0.2694
    },
+   "javafter": {
+    "files": [
+     "beto/javafter/javafter1.png",
+     "beto/javafter/javafter2.png",
+     "beto/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
+   },
    "javpull": {
     "files": [
      "beto/javpull/javpull1.png",
@@ -2050,6 +2128,19 @@ export const ROSTER=[
     "hx": 59.5,
     "feet": 157.3,
     "scale": 0.2694
+   },
+   "javafter": {
+    "files": [
+     "tomi/javafter/javafter1.png",
+     "tomi/javafter/javafter2.png",
+     "tomi/javafter/javafter3.png"
+    ],
+    "frames": 3,
+    "w": 103,
+    "h": 172,
+    "hx": 52.3,
+    "feet": 171.9,
+    "scale": 0.2143
    },
    "javpull": {
     "files": [

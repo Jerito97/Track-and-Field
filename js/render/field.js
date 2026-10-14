@@ -134,10 +134,15 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
-// javelin: drawn frames where we have them (standing, running, drawing the javelin back, throwing); rig pieces for the rest
+// javelin: drawn frames for the whole attempt (standing, running, drawing the javelin back, throwing, after the throw);
+// rig pieces for the foul
 function javFrame(C,V){
   // the throw: arm back, javelin overhead, then the follow-through once it's gone (sheet frame 1, front view, unused)
-  if(V.act&&V.act.k==='jav'&&V.jv) return animReady(C,'javthrow')?['javthrow',!V.jv.held?3:(V.act.t||0)<.22?1:2]:null;
+  if(V.act&&V.act.k==='jav'&&V.jv){
+    if(V.jv.held||(V.jv.t||0)<.25) return animReady(C,'javthrow')?['javthrow',!V.jv.held?3:(V.act.t||0)<.22?1:2]:null;
+    // after the throw: recovery step while slowing down, watching the flight, a fist up once it sticks
+    const f=V.jv.stuck&&V.landX!=null?2:(V.v||0)>.6?0:1;
+    return animReady(C,'javafter')?['javafter',f]:null; }
   if(V.act||V.jv) return null;
   // holding the button: drawing the javelin back over the last steps
   if(V.meter&&V.meter.k==='jav'){ const p=V.meter.p; return animReady(C,'javpull')?['javpull',p<.15?0:p<.35?1:p<.6?2:3]:null; }
