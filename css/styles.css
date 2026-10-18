@@ -103,7 +103,15 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:#fff;bo
 .m-help p{margin:0;font-size:clamp(.72rem,2.9vh,1rem);line-height:1.4;color:#e6ecf7;max-width:80ch}
 .m-help b{color:var(--sun)}
 
-.m-evs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(5px,1vw,10px);background:rgba(255,255,255,.92);padding:clamp(4px,1vh,8px);border-radius:12px}
+/* event cards: a carousel; about 5.5 cards in view so the next one peeks out and shows there are more */
+.m-evw{position:relative;background:rgba(255,255,255,.92);border-radius:12px;padding:clamp(4px,1vh,8px)}
+.m-evs{--vis:5.5;--gap:clamp(5px,1vw,10px);display:flex;gap:var(--gap);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding:0 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-radius:9px}
+.m-evs::-webkit-scrollbar{display:none}
+.m-evs>.m-ev{flex:0 0 calc((100% - var(--gap)*(var(--vis) - .5))/var(--vis));scroll-snap-align:start}
+.m-arr{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:clamp(26px,9vh,40px);height:clamp(26px,9vh,40px);border-radius:50%;border:2px solid #fff;background:var(--red);color:#fff;font:inherit;font-size:clamp(1rem,4vh,1.5rem);line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 3px 8px rgba(0,0,0,.35);padding:0}
+.m-arr.l{left:-6px}.m-arr.r{right:-6px}
+.m-arr[hidden]{display:none}
+.m-ev.new i{background:#2fd166;color:var(--ink)}
 .m-ev{position:relative;font:inherit;border:0;border-radius:9px;cursor:pointer;color:#fff;overflow:hidden;height:clamp(72px,22vh,180px);padding:0;display:flex;flex-direction:column;
   background:linear-gradient(180deg,#3d6fb8 0 58%,#1e3566 58%);box-shadow:0 3px 0 #0e1a34}
 .m-ev canvas{flex:1;min-height:0;width:100%;object-fit:contain}
@@ -129,11 +137,11 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:#fff;bo
 .m-face.on::after{content:"✓";position:absolute;top:clamp(20px,7.5vh,46px);right:-2px;width:1.25em;height:1.25em;border-radius:50%;background:var(--sun);color:var(--ink);font-weight:800;font-size:clamp(.55rem,2.3vh,.8rem);display:grid;place-items:center}
 .m-snd{flex:none;font:inherit;width:clamp(34px,11vh,56px);height:clamp(34px,11vh,56px);border-radius:10px;border:1px solid var(--edge);background:var(--panel2);color:#fff;cursor:pointer;display:grid;place-items:center}
 .m-snd svg{width:58%;height:58%}
-.m-play:focus-visible,.m-how:focus-visible,.m-ev:focus-visible,.m-face:focus-visible,.m-snd:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.m-arr:focus-visible,.m-play:focus-visible,.m-how:focus-visible,.m-ev:focus-visible,.m-face:focus-visible,.m-snd:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 @media (max-width:620px){
   .m-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);height:auto;padding:8px 10px 8px 0}
   .m-stats{display:none}
-  .m-evs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .m-evs{--vis:3.5}
 }
 
 /* ===== Other screens (event card, tables, final result) in the menu's style: dark panel, red badge, yellow accents ===== */

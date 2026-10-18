@@ -22,7 +22,7 @@ export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c
   if(head){ const sh=head.h*.9, sc=Math.min(c.width/head.w,c.height/sh); g.drawImage(head.im,0,0,head.w,sh,(c.width-head.w*sc)/2,(c.height-sh*sc)/2,head.w*sc,sh*sc); return; }
   g.scale(d,d); drawHead(g,px*1.25,px*.5,px*.56,C,false,Math.max(1,px*.04)); }
 export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.height=px*d; const g=c.getContext('2d'); g.scale(d,d);
-  const C=ME(), s=px*.36, ox=px*.46, oy=px*.86, k=i<5?EVENTS[i].id:'tour';
+  const C=ME(), s=px*.36, ox=px*.46, oy=px*.86, k=i<EVENTS.length?EVENTS[i].id:'tour';
   if(k==='tour'){ g.fillStyle='#ffd23a'; g.strokeStyle=INK; g.lineWidth=2; g.beginPath(); g.moveTo(px*.3,px*.2); g.lineTo(px*.7,px*.2); g.quadraticCurveTo(px*.7,px*.6,px*.5,px*.62); g.quadraticCurveTo(px*.3,px*.6,px*.3,px*.2); g.fill(); g.stroke(); g.fillRect(px*.44,px*.62,px*.12,px*.14); g.strokeRect(px*.44,px*.62,px*.12,px*.14); g.fillRect(px*.32,px*.76,px*.36,px*.08); g.strokeRect(px*.32,px*.76,px*.36,px*.08); return; }
   if(k==='pv'&&!STYLE.stick){ g.strokeStyle=INK; g.lineWidth=3; g.beginPath(); g.moveTo(px*.15,px*.95); g.lineTo(px*.55,px*.12); g.stroke(); g.strokeStyle='#7ccf3a'; g.lineWidth=1.6; g.stroke(); }
   if(C.sprite&&(k==='100'||k==='110h')){ const sp=SPR[k==='100'?'run1':'hurdle']; const draw=()=>{ const sc=Math.min(px*.9/sp.w,px*.9/sp.h); g.drawImage(sp.im,(px-sp.w*sc)/2,(px-sp.h*sc)/2,sp.w*sc,sp.h*sc); }; if(sp.im.complete) draw(); else sp.im.addEventListener('load',draw); return; }
@@ -36,7 +36,9 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
   if(k==='jav'){ g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=4; g.beginPath(); g.moveTo(px*.04,px*.36); g.lineTo(px*.92,px*.1); g.stroke(); g.strokeStyle='#fff'; g.lineWidth=2; g.stroke(); g.restore(); }
 }
 // main menu: selected event (0-4) or tournament (5), remembered between visits
-let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<=5?v:0; })();
+// the tournament card comes after the events (index TOUR)
+const TOUR=EVENTS.length;
+let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<=TOUR?v:0; })();
 const ICON={
   medal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h4l1 5-3 2zM17 2h-4l-1 5 3 2z" fill="#e8262d"/><circle cx="12" cy="15" r="6.5" fill="#ffd23a" stroke="#a8740c" stroke-width="1.5"/><path d="M12 11.6l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#a8740c"/></svg>',
   cup:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0zM5 4h2v3a2 2 0 0 1-2-2zM19 4h-2v3a2 2 0 0 0 2-2zM11 12h2v4h-2zM8 17h8v3H8z" fill="currentColor"/></svg>',
@@ -49,12 +51,13 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 export function showMenu(){
   if(!player()){ showCreate(true); return; }
   setS(null); setScreen('menu');
-  const tour=menuSel===5, ev=EVENTS[menuSel];
+  const tour=menuSel===TOUR, ev=EVENTS[menuSel];
   const stats=tour
-    ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>5</b></div>`
+    ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
     :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${wrText(ev)}</b></div>`;
-  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b></button>`).join('')
-    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="5" aria-pressed="${tour}"><canvas data-pict="5"></canvas><b>TORNEO</b></button>`;
+  // events marked nueva:true in config.js (invented ones) get a small NUEVA tag
+  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
+    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="${TOUR}" aria-pressed="${tour}"><canvas data-pict="${TOUR}"></canvas><b>TORNEO</b></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><span class="m-ic">${ICON.medal}</span>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
@@ -64,12 +67,25 @@ export function showMenu(){
     <div class="m-stats">${stats}</div>
     ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
   </section>
-  <nav class="m-evs" aria-label="Pruebas">${cards}</nav>
+  <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   <footer class="m-bot">
     <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
+  initCarousel();
 }
+// carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
+let evScroll=0;
+function initCarousel(){
+  const row=OV.querySelector('.m-evs'); if(!row) return;
+  const [l,r]=OV.querySelectorAll('.m-arr');
+  const arrows=()=>{ evScroll=row.scrollLeft; l.hidden=row.scrollLeft<4; r.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4; };
+  row.scrollLeft=evScroll;
+  const on=row.querySelector('.m-ev.on');
+  if(on){ const a=on.offsetLeft-row.offsetLeft, b=a+on.offsetWidth; if(a<row.scrollLeft) row.scrollLeft=a; else if(b>row.scrollLeft+row.clientWidth) row.scrollLeft=b-row.clientWidth; }
+  row.addEventListener('scroll',arrows,{passive:true}); arrows();
+}
+
 // ---- players ----
 let newColor=COLORS[0];
 const swatches=sel=>`<div class="p-colors">${COLORS.map(c=>`<button class="p-sw${c===sel?' on':''}" data-act="color" data-c="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${c===sel}"></button>`).join('')}</div>`;
@@ -114,7 +130,7 @@ export const rivalsFaces=()=>`<div class="faces">${ATH.filter(a=>!a.me).map(a=>`
 export function showEventCard(){
   const ev=EVENTS[G.evIdx]; setS(null); setScreen('menu');
   const tour=G.mode==='tour';
-  showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/5`:''}</h2></div><div class="body">
+  showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/${EVENTS.length}`:''}</h2></div><div class="body">
     <div class="row2"><canvas class="pict" data-pict="${G.evIdx}"></canvas>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="wr"><span>Récord mundial</span><b>${wrText(ev)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
@@ -177,8 +193,9 @@ OV.addEventListener('click',e=>{
   else if(a==='color'){ pickColor(b.dataset.c); }
   else if(a==='create'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(!name){ n.focus(); n.classList.add('bad'); return; } createPlayer(name,newColor); showMenu(); }
   else if(a==='rename'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(name){ updatePlayer({name}); showProfile(); } }
+  else if(a==='scroll'){ const row=OV.querySelector('.m-evs'); row.scrollBy({left:+b.dataset.d*row.clientWidth*.8,behavior:'smooth'}); }
   else if(a==='sel'){ menuSel=+b.dataset.i; store.set('odb-menusel',menuSel); showMenu(); }
-  else if(a==='go'){ if(menuSel===5){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
+  else if(a==='go'){ if(menuSel===TOUR){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
     else { G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); } }
   else if(a==='howto'){ const h=$('help'); if(h) h.hidden=!h.hidden; }
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
