@@ -18,10 +18,13 @@ export const POSE={
   javBack:{hip:.78,lean:-.28,legs:[{a:.55,b:.3},{a:-.45,b:.2}],arms:[{a:-2.0,b:.05},{a:1.0,b:.5}]},
   javRel:{hip:.78,lean:.38,legs:[{a:.65,b:.1},{a:-.55,b:.5}],arms:[{a:2.5,b:.1},{a:-.7,b:.6}]}
 };
+// run cycle at phase p (radians, one stride = 2π), amp 0 (walk) .. 1 (sprint); run:true marks it as continuous
+// motion for the stickman's pose blending. The body bobs twice per stride (lowest when a foot lands), the knee folds
+// up behind on the swing, and the elbows open a little on the back swing.
 export function runPose(p,amp,arms){
-  const leg=q=>({a:.9*amp*Math.sin(q),b:.2+amp*1.5*Math.max(0,Math.cos(q))});
-  const arm=q=>({a:-.9*amp*Math.sin(q),b:1.3});
-  const J={hip:.8-.04*amp,lean:.08+.26*amp,legs:[leg(p),leg(p+Math.PI)],arms:[arm(p),arm(p+Math.PI)]};
+  const leg=q=>({a:.9*amp*Math.sin(q),b:.2+amp*(1.5*Math.max(0,Math.cos(q))+.35*Math.max(0,-Math.sin(q))*Math.max(0,-Math.cos(q)))});
+  const arm=q=>({a:-.9*amp*Math.sin(q),b:1.3-.35*amp*Math.max(0,Math.sin(q))});
+  const J={run:true,hip:.8-.04*amp+.035*amp*Math.cos(2*p),lean:.08+.26*amp+.03*amp*Math.cos(2*p),legs:[leg(p),leg(p+Math.PI)],arms:[arm(p),arm(p+Math.PI)]};
   if(arms==='jav') J.arms=[{a:-2.4,b:.55},arm(p+Math.PI)];
   if(arms==='pole'){ J.arms=[{a:1.05,b:1.25},{a:.75,b:1.5}]; J.lean=.05+.15*amp; }
   return J;

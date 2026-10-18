@@ -26,9 +26,28 @@ export function drawHead(c,s,hx,hy,C,effort,ow){
   c.restore();
 }
 const STICK_K=1.15;
+// smooth stickman: when the pose changes kind (run -> jump, jump -> landing...), blend from what was on screen to
+// the new pose over BLEND_T s; continuous motion (the run cycle) passes straight through. One state per athlete
+// and canvas.
+const BLEND_T=.16, BLENDS=new WeakMap();
+const flat=(J,rot)=>[J.hip,J.lean,...J.legs.flatMap(l=>[l.a,l.b]),...J.arms.flatMap(l=>[l.a,l.b]),rot||0];
+const unflat=v=>({hip:v[0],lean:v[1],legs:[{a:v[2],b:v[3]},{a:v[4],b:v[5]}],arms:[{a:v[6],b:v[7]},{a:v[8],b:v[9]}],rot:v[10]});
+function blendPose(c,C,J,rot){
+  let m=BLENDS.get(c); if(!m){ m=new Map(); BLENDS.set(c,m); }
+  const now=performance.now()/1000, cur=flat(J,rot), e=m.get(C.id);
+  if(!e||now-e.t>.5){ m.set(C.id,{t:now,tgt:cur,run:!!J.run,out:cur,from:null,t0:0}); return {J,rot}; }
+  const changed=e.run!==!!J.run||(!J.run&&cur.some((v,i)=>Math.abs(v-e.tgt[i])>.02));
+  if(changed){ e.from=e.out; e.t0=now; }
+  const w=e.from?Math.max(0,1-(now-e.t0)/BLEND_T):0, k=w*w*(3-2*w);  // smoothstep ease
+  const out=k>0?cur.map((v,i)=>v+(e.from[i]-v)*k):cur;
+  if(k<=0) e.from=null;
+  Object.assign(e,{t:now,tgt:cur,run:!!J.run,out});
+  const P=unflat(out); return {J:P,rot:P.rot};
+}
 // stickman: thick round lines and a filled head, all in the athlete's colour (far limbs a bit darker);
 // same skeleton, origin and return value as drawChar
 export function drawStick(c,s,ox,oy,alt,J,C,rot){
+  ({J,rot}=blendPose(c,C,J,rot));
   oy-=alt*s; s*=STICK_K;  // a bit bigger than the vector doll, as tall as the drawn characters
   const hip=[0,J.hip], sl=Math.sin(J.lean), cl=Math.cos(J.lean);
   const sh=[hip[0]+.44*sl,hip[1]+.44*cl], head=[sh[0]+.27*sl,sh[1]+.27*cl];
