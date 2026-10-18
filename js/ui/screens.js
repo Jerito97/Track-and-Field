@@ -67,7 +67,6 @@ export function showMenu(){
   <nav class="m-evs" aria-label="Pruebas">${cards}</nav>
   <footer class="m-bot">
     <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
-    <div class="m-ctrl"><span class="m-lbl">Controles</span><p>Celular en horizontal: tocá los botones de la pantalla. Compu: <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd> y <kbd>Espacio</kbd>.</p></div>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
 }

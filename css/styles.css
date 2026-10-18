@@ -127,18 +127,13 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:#fff;bo
 .m-face b{font-family:var(--f-display);font-weight:400;font-size:clamp(.62rem,2.5vh,.95rem);letter-spacing:.05em;text-transform:uppercase}
 .m-face.on span{border:3px solid var(--sun);box-shadow:0 0 0 2px rgba(255,210,58,.35)}
 .m-face.on::after{content:"✓";position:absolute;top:clamp(20px,7.5vh,46px);right:-2px;width:1.25em;height:1.25em;border-radius:50%;background:var(--sun);color:var(--ink);font-weight:800;font-size:clamp(.55rem,2.3vh,.8rem);display:grid;place-items:center}
-.m-ctrl{flex:0 1 30ch;min-width:0;border-left:1px solid var(--edge);padding-left:clamp(8px,1.6vw,18px)}
-.m-ctrl p{margin:0;font-size:clamp(.62rem,2.4vh,.85rem);line-height:1.35;color:#c9d4ea}
-.m-ctrl kbd{background:#2a4377;border-color:#3d5a92;color:#fff;font-size:.68rem;padding:0 4px}
 .m-snd{flex:none;font:inherit;width:clamp(34px,11vh,56px);height:clamp(34px,11vh,56px);border-radius:10px;border:1px solid var(--edge);background:var(--panel2);color:#fff;cursor:pointer;display:grid;place-items:center}
 .m-snd svg{width:58%;height:58%}
 .m-play:focus-visible,.m-how:focus-visible,.m-ev:focus-visible,.m-face:focus-visible,.m-snd:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
-@media (max-width:720px){ .m-ctrl{display:none} }
 @media (max-width:620px){
   .m-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);height:auto;padding:8px 10px 8px 0}
   .m-stats{display:none}
   .m-evs{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .m-ctrl{display:none}
 }
 
 /* ===== Other screens (event card, tables, final result) in the menu's style: dark panel, red badge, yellow accents ===== */
