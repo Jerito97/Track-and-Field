@@ -5,7 +5,6 @@ import {S} from '../state.js';
 import {drawField} from './field.js';
 import {drawHud} from './hud.js';
 import {drawPodium} from './podium.js';
-import {drawBoards,drawStands} from './scenery.js';
 import {drawSprint} from './sprint.js';
 
 export function view(){
@@ -21,11 +20,20 @@ export function frame(){
   else drawIdle();
   ctx.restore();
 }
-// menus: the stadium behind the panels, still (no panning, fans not moving)
-export function drawIdle(){ const t=0, cam=0;
-  const sky=ctx.createLinearGradient(0,0,0,LH*.55); sky.addColorStop(0,'#5aa8e6'); sky.addColorStop(1,'#cfe8f8'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
-  drawStands(cam,26,176,.7,t); drawBoards(cam,176,14,24);
-  ctx.fillStyle='#a6c94a'; ctx.fillRect(0,190,LW,10);
-  ctx.fillStyle='#2f7fd6'; ctx.fillRect(0,200,LW,LH-200);
-  ctx.fillStyle='rgba(255,255,255,.85)'; for(let l=0;l<5;l++) ctx.fillRect(0,200+l*30,LW,2);
+// menus: dark navy background with the curves of a running track (no stadium), in the menu's colours
+export function drawIdle(){
+  const g=ctx.createLinearGradient(0,0,LW,LH); g.addColorStop(0,'#0b1730'); g.addColorStop(.55,'#14284f'); g.addColorStop(1,'#1d3a72');
+  ctx.fillStyle=g; ctx.fillRect(0,0,LW,LH);
+  // track bend at the bottom right: lanes as concentric arcs, red-orange surface faded into the navy
+  const cx=LW*.86, cy=LH*1.18, r0=LH*.55, lane=LH*.075;
+  ctx.save(); ctx.globalAlpha=.32; ctx.fillStyle='#c4472c'; ctx.beginPath(); ctx.arc(cx,cy,r0+lane*6,0,Math.PI*2); ctx.arc(cx,cy,r0,0,Math.PI*2,true); ctx.fill(); ctx.restore();
+  ctx.strokeStyle='rgba(255,255,255,.22)'; ctx.lineWidth=1.5;
+  for(let k=0;k<=6;k++){ ctx.beginPath(); ctx.arc(cx,cy,r0+lane*k,Math.PI*.95,Math.PI*1.75); ctx.stroke(); }
+  // a second, fainter bend at the top left
+  ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.lineWidth=1.2;
+  for(let k=0;k<=6;k++){ ctx.beginPath(); ctx.arc(LW*.08,-LH*.35,LH*.5+lane*k,Math.PI*.05,Math.PI*.8); ctx.stroke(); }
+  // diagonal speed stripes in the menu's red
+  ctx.save(); ctx.globalAlpha=.10; ctx.fillStyle='#e8262d';
+  [[.18,.06],[.32,.03],[.62,.05]].forEach(([x,w])=>{ ctx.beginPath(); ctx.moveTo(LW*x,0); ctx.lineTo(LW*(x+w),0); ctx.lineTo(LW*(x+w-.22),LH); ctx.lineTo(LW*(x-.22),LH); ctx.closePath(); ctx.fill(); });
+  ctx.restore();
 }
