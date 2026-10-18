@@ -66,7 +66,7 @@ js/
 
 ## Jugadores
 
-La primera vez que se abre el juego hay que crear un jugador: nombre y color del stickman, sin contraseña. Cada jugador guarda sus récords, sus 5 mejores marcas por prueba, el historial de pruebas (marca, puesto, fecha) y los torneos. Desde el menú (abajo, **Jugador**) se abre el perfil: cambiar nombre y color, ver las marcas y el historial, o cambiar de jugador / crear otro para jugar con amigos en el mismo celular. El récord mundial es la mejor marca de cualquier jugador del celular, con su nombre.
+La primera vez que se abre el juego hay que crear un jugador: nombre y color del stickman, sin contraseña. Cada jugador guarda sus récords, sus 5 mejores marcas por prueba, el historial de pruebas (marca, puesto, fecha) y los torneos. Desde el menú (abajo, **Jugador**) se abre el perfil: cambiar nombre y color, ver el récord de cada prueba, o cambiar de jugador / crear otro para jugar con amigos en el mismo celular. El récord mundial es la mejor marca de cualquier jugador del celular, con su nombre.
 
 Todo se guarda en el navegador (`localStorage`, clave `odb-players`; ver `js/storage.js`). Cada jugador tiene un id único y su historial queda listo para subirlo a un servidor cuando haya torneos con otra gente.
 

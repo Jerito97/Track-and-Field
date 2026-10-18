@@ -90,19 +90,16 @@ export function showCreate(first){
   </div></div>`);
   $('pname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="create"]').click(); });
 }
-const fdate=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
 export function showProfile(){
   const p=player(); if(!p){ showCreate(true); return; } setS(null); setScreen('menu'); newColor=p.color;
-  const evName=id=>(EVENTS.find(e=>e.id===id)||{}).name||id;
-  const tops=EVENTS.map(ev=>{ const l=p.best[ev.id]||[]; return `<div class="p-top"><b>${ev.name}</b>${l.length?`<ol>${l.map(x=>`<li>${fmt(ev,x.v)} <small>${fdate(x.date)}</small></li>`).join('')}</ol>`:'<p class="small">Todavía no jugaste esta prueba.</p>'}</div>`; }).join('');
-  const hist=p.history.slice(0,15).map(h=>{ const ev=EVENTS.find(e=>e.id===h.ev); return `<tr><td>${fdate(h.date)}</td><td class="nm">${evName(h.ev)}${h.mode==='tour'?' <small>torneo</small>':''}</td><td class="sub">${h.place?h.place+'º de '+h.of:'—'}</td><td>${ev?fmt(ev,h.mark):h.mark}</td></tr>`; }).join('');
+  // best mark of each event
+  const bests=EVENTS.map(ev=>`<div><b>${p.rec[ev.id]==null?'—':fmt(ev,p.rec[ev.id])}</b><span>${ev.name}</span></div>`).join('');
   showOv(`<div class="card p-prof"><div class="head"><div class="logo">PERFIL</div><h2>${esc(p.name)}</h2></div><div class="body">
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(p.name)}" autocomplete="off"><button class="btn alt" data-act="rename">Guardar</button></span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
     <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div></div>
-    <span class="lbl">Tus 5 mejores marcas</span><div class="p-tops">${tops}</div>
-    <span class="lbl">Historial</span>${hist?`<table><tbody>${hist}</tbody></table>`:'<p class="small">Todavía no jugaste.</p>'}
+    <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button></div>
   </div></div>`);
   $('pname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="rename"]').click(); });

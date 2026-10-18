@@ -209,3 +209,5 @@ tr.me td{background:var(--red)}
 .p-pl b{flex:1;font-family:var(--f-display);font-weight:400;font-size:1.2rem;letter-spacing:.04em;text-transform:uppercase}
 .p-pl small{color:#aab8d8}
 .p-pl.on{border-color:var(--sun)}
+.p-recs{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:560px){ .p-recs{grid-template-columns:repeat(3,minmax(0,1fr))} }
