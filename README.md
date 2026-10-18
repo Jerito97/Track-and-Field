@@ -66,6 +66,8 @@ js/
 
 En el menú, el botón **ESTILO** cambia entre los dibujos y stickmen dibujados con código (`drawStick` en `js/draw/character.js`): líneas gruesas y cabeza rellena, del color de la musculosa de cada atleta, sobre el mismo esqueleto y las mismas poses (`js/poses.js`). Se recuerda entre partidas.
 
+Los movimientos del stickman están en `js/stick.js`: cada momento (valla, llegada, tropezón, despegue y vuelo del largo, lanzamiento de jabalina, salto con garrocha, caídas, festejos) tiene 3 o 4 poses clave y el stickman pasa suave entre ellas según el avance real del movimiento. Al cambiar de movimiento, la pose se transforma en 0,16 s; parado respira y en el podio festeja.
+
 ## Atletas
 
 Todos los atletas se dibujan con piezas sobre el mismo esqueleto: cabeza, musculosa, short, brazo, antebrazo, muslo y pierna con zapatilla.

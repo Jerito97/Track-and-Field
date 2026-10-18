@@ -4,13 +4,15 @@ import {INK} from '../config.js';
 import {POSE} from '../poses.js';
 import {animReady,animScale,drawAnim,drawAthlete,drawSprite} from '../rig.js';
 import {ATH,G,S} from '../state.js';
+import {podiumPose} from '../stick.js';
+import {STYLE} from '../storage.js';
 import {drawBoards,drawStands} from './scenery.js';
 import {txt} from './text.js';
 
 // front view from the drawn celebration (frame 0 standing, 3 arm up) when loaded; s as in drawChar
 function podiumAthlete(C,s,x,feet,up){
   if(animReady(C,'cheer')){ drawAnim(ctx,C,'cheer',up?3:0,x,feet,animScale(C,s*2.05)); return true; }
-  drawAthlete(ctx,s,x,feet,0,up?POSE.cheer:POSE.stand,C,false); return false;
+  drawAthlete(ctx,s,x,feet,0,STYLE.stick?podiumPose(up,performance.now()/1000,x*.05):up?POSE.cheer:POSE.stand,C,false); return false;
 }
 export function drawPodium(){
   const p=S.podium;

@@ -4,6 +4,8 @@ import {HURDLES,INK} from '../config.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,animScale,drawAnim,drawAthlete,drawSprite} from '../rig.js';
 import {ME,S} from '../state.js';
+import {sprintPose} from '../stick.js';
+import {STYLE} from '../storage.js';
 import {drawBoards,drawBottomAds,drawStands,hurdle,shadow} from './scenery.js';
 import {txt} from './text.js';
 
@@ -58,13 +60,13 @@ export function drawSprint(V){
       }
       if(!drawn){ const blocks=S.phase==='set'||(S.phase==='wait'&&!S.t), f=animFrame(ME(),ev,{blocks,setStage:S.setStage,running:V.v>.3&&!(S.stumble>0)&&!(S.dip>0),cheer:S.finished&&V.v<=.3&&!(S.dip>0),dipT:S.dip>0?S.dipT:null,tripT:S.stumble>0?S.stumble+.05:0,airU:S.air>0?1-S.air/S.airT:null,standing:!(S.stumble>0)&&!(S.air>0),x:V.x,lane:0});
         if(f){ drawAnim(ctx,ME(),f[0],f[1],px,feet-V.y*s,animScale(ME(),RUN_H)); drawn=true; } }
-      if(!drawn) drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,V.pose||POSE.stand,ME(),V.v>5);
+      if(!drawn) drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,STYLE.stick?sprintPose({blocks:S.phase==='set'||(S.phase==='wait'&&!S.t),setStage:S.setStage,airU:S.air>0?1-S.air/S.airT:null,dipT:S.dip>0?S.dipT:null,tripT:S.stumble>0?S.stumble:0,cheer:S.finished&&V.v<=.3&&!(S.dip>0),running:V.v>.3,legP:S.legP,v:V.v,clock:S.clock,lane:0}):V.pose||POSE.stand,ME(),V.v>5);
       ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; const ty=feet-V.y*s-YO_H-4; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue; const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
       let J; if(r.t<=r.react) J=S.setStage>=1?POSE.set:POSE.crouch; else if(r.air>0) J=POSE.hurdle; else if(r.tripT>0) J=POSE.stumble; else if(r.final!=null&&r.v<.5) J=POSE.cheer; else J=r.v>.2?runPose(r.legP,Math.min(1,r.v/4)):POSE.stand;
       const f=animFrame(r.a.C,ev,{blocks:r.t<=r.react,setStage:S.setStage,running:r.t>r.react&&!(r.air>0)&&!(r.tripT>0)&&!(r.final!=null&&r.v<.5)&&r.v>.2,cheer:r.final!=null&&r.v<.5,tripT:r.tripT,airU:r.air>0?1-r.air/r.airT:null,standing:!(r.air>0),x:r.x,lane:l});
       if(f) drawAnim(ctx,r.a.C,f[0],f[1],x,feet-r.y*s,animScale(r.a.C,RUN_H));
-      else drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,J,r.a.C,r.v>5); }
+      else drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,STYLE.stick?sprintPose({blocks:r.t<=r.react,setStage:S.setStage,airU:r.air>0?1-r.air/r.airT:null,tripT:r.tripT,cheer:r.final!=null&&r.v<.5,running:r.v>.2,legP:r.legP,v:r.v,clock:S.clock,lane:l}):J,r.a.C,r.v>5); }
   }
   drawStarter(X(5.5));
   drawBottomAds();
