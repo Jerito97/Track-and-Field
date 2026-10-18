@@ -48,8 +48,7 @@ export function drawField(V){
     ctx.fillStyle='#e8262d'; ctx.fillRect(p0,nb+15,p1-p0,3);
     for(let m=1;m<=10.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     const bx=X(ev.line); ctx.fillStyle='#fff'; ctx.fillRect(bx-.25*s,GY-4,.25*s,14); ctx.fillStyle='#e8262d'; ctx.fillRect(bx-1,GY-4,3,14);
-    // take-off footprints: this attempt's, and fainter ones from earlier rounds; how far from the board
-    (S.prints||[]).forEach(p=>{ if(p.round!==S.round) footprint(X(p.x),GY,s,.35); });
+    // take-off footprint of this attempt, and how far from the board
     if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); }
     rivalFlags(V,X,GY);
   }
