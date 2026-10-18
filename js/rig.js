@@ -3,10 +3,11 @@ import {ANIMS,RIGS,SPR} from './assets.js';
 import {ctx} from './canvas.js';
 import {drawChar} from './draw/character.js';
 import {POSE} from './poses.js';
+import {STYLE} from './storage.js';
 
 export const RIG={head:.72,torso:.64,shorts:.4,uarm:.34,farm:.36,thigh:.38,shin:.46,T:.52,UA:.27,K:1.25,AW:1.6,LW:1.5};
 // true once every part of C's rig has loaded (a missing or broken image keeps the vector fallback)
-export function rigReady(C){ const R=C&&RIGS[C.id]; return !!R&&['head','torso','shorts','uarm','farm','thigh','shin'].every(k=>R[k]&&R[k].im.complete&&R[k].im.naturalWidth>0&&R[k].dark); }
+export function rigReady(C){ if(STYLE.stick) return false; const R=C&&RIGS[C.id]; return !!R&&['head','torso','shorts','uarm','farm','thigh','shin'].every(k=>R[k]&&R[k].im.complete&&R[k].im.naturalWidth>0&&R[k].dark); }
 // cartoon rig: image parts on the same skeleton as drawChar
 export function drawRig(c,s,ox,oy,alt,J,C,rot){
   s*=RIG.K; oy-=alt*s/RIG.K;
@@ -43,7 +44,7 @@ export function drawAthlete(c,s,ox,oy,alt,J,C,effort,rot){
   return drawChar(c,s,ox,oy,alt,J,C,effort,rot);
 }
 // animation frames (run cycle, start, ...): true once all of C's frames for that animation loaded
-export function animReady(C,name){ const A=C&&ANIMS[C.id]&&ANIMS[C.id][name]; return !!A&&A.im.complete&&A.im.naturalWidth>0; }
+export function animReady(C,name){ if(STYLE.stick) return false; const A=C&&ANIMS[C.id]&&ANIMS[C.id][name]; return !!A&&A.im.complete&&A.im.naturalWidth>0; }
 // frame i of C's animation, hip at x, lowest point at feet; K = logical px per image px (same for every animation)
 export function drawAnim(c,C,name,i,x,feet,K){ const A=ANIMS[C.id][name], n=A.frames;
   c.drawImage(A.im,(((i%n)+n)%n)*A.w,0,A.w,A.h,x-A.hx*K,feet-A.feet*K,A.w*K,A.h*K); }

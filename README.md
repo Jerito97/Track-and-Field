@@ -62,6 +62,10 @@ js/
 - **Récords:** el récord mundial arranca vacío y lo pone el primero que haga una marca (solo cuentan las personas, no las máquinas).
 - **Participantes:** 6 por prueba, vos y 5 rivales sorteados entre los otros atletas (en el torneo son los mismos en las cinco pruebas).
 
+## Estilo stickman
+
+En el menú, el botón **ESTILO** cambia entre los dibujos y stickmen dibujados con código (`drawStick` en `js/draw/character.js`): líneas gruesas y cabeza rellena, del color de la musculosa de cada atleta, sobre el mismo esqueleto y las mismas poses (`js/poses.js`). Se recuerda entre partidas.
+
 ## Atletas
 
 Todos los atletas se dibujan con piezas sobre el mismo esqueleto: cabeza, musculosa, short, brazo, antebrazo, muslo y pierna con zapatilla.

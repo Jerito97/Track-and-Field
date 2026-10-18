@@ -10,13 +10,14 @@ import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,myChar,S,setMyChar,setS,setScreen} from '../state.js';
-import {rec,saveRec,saveWr,store,wrec} from '../storage.js';
+import {rec,saveRec,saveWr,setStick,store,STYLE,wrec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
   const f=OV.querySelector('[data-focus]'); if(f) try{f.focus({preventScroll:true});}catch(e){} }
 export function paintOv(){ OV.querySelectorAll('canvas[data-face]').forEach(c=>paintFace(c,CHARS.find(x=>x.id===c.dataset.face))); OV.querySelectorAll('canvas[data-pict]').forEach(c=>paintPict(c,+c.dataset.pict)); }
-export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c.height=px*d; const g=c.getContext('2d'); if(C.sprite&&SPR.face){ const draw=()=>{ g.clearRect(0,0,c.width,c.height); g.drawImage(SPR.face.im,0,0,c.width,c.height); }; if(SPR.face.im.complete) draw(); else SPR.face.im.onload=draw; return; } const head=rigReady(C)&&RIGS[C.id].head;
+export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c.height=px*d; const g=c.getContext('2d');
+  if(STYLE.stick){ g.fillStyle=C.j; g.beginPath(); g.arc(c.width/2,c.height*.42,c.width*.26,0,Math.PI*2); g.fill(); g.strokeStyle=C.j; g.lineWidth=c.width*.12; g.lineCap='round'; g.beginPath(); g.moveTo(c.width/2,c.height*.6); g.lineTo(c.width/2,c.height); g.stroke(); return; } if(C.sprite&&SPR.face){ const draw=()=>{ g.clearRect(0,0,c.width,c.height); g.drawImage(SPR.face.im,0,0,c.width,c.height); }; if(SPR.face.im.complete) draw(); else SPR.face.im.onload=draw; return; } const head=rigReady(C)&&RIGS[C.id].head;
   if(head){ const sh=head.h*.9, sc=Math.min(c.width/head.w,c.height/sh); g.drawImage(head.im,0,0,head.w,sh,(c.width-head.w*sc)/2,(c.height-sh*sc)/2,head.w*sc,sh*sc); return; }
   g.scale(d,d); drawHead(g,px*1.25,px*.5,px*.56,C,false,Math.max(1,px*.04)); }
 export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.height=px*d; const g=c.getContext('2d'); g.scale(d,d);
@@ -60,6 +61,7 @@ export function showMenu(){
   <footer class="m-bot">
     <div class="m-ath"><span class="m-lbl">Tu atleta</span><div class="m-faces">${CHARS.map(c=>`<button class="m-face${c.id===myChar?' on':''}" data-act="pick" data-id="${c.id}" aria-pressed="${c.id===myChar}"><span><canvas data-face="${c.id}"></canvas></span><b>${c.name}</b></button>`).join('')}</div></div>
     <div class="m-ctrl"><span class="m-lbl">Controles</span><p>Celular en horizontal: tocá los botones de la pantalla. Compu: <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd> y <kbd>Espacio</kbd>.</p></div>
+    <button class="m-snd m-style" data-act="style" aria-label="Estilo de los atletas: ${STYLE.stick?'stickman':'dibujos'}"><b>${STYLE.stick?'STICK':'DIBUJO'}</b><span>estilo</span></button>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
 }
@@ -131,6 +133,7 @@ OV.addEventListener('click',e=>{
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='help'){ const h=$('help'); h.hidden=!h.hidden; }
   else if(a==='menu') showMenu();
+  else if(a==='style'){ setStick(!STYLE.stick); showMenu(); }
   else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')) showMenu(); else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
   else if(a==='evdone') endEvent(S.marks.map(bestOf));

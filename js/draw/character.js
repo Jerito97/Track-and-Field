@@ -1,5 +1,6 @@
 // Vector cartoon characters
 import {INK} from '../config.js';
+import {STYLE} from '../storage.js';
 
 export const shadeHex=(hex,k)=>{ const n=parseInt(hex.slice(1),16); return `rgb(${Math.round((n>>16)*k)},${Math.round((n>>8&255)*k)},${Math.round((n&255)*k)})`; };
 export function drawHead(c,s,hx,hy,C,effort,ow){
@@ -24,8 +25,29 @@ export function drawHead(c,s,hx,hy,C,effort,ow){
   else { c.beginPath(); c.arc(R*.55,-R*.35,.07,-1.9,-.6,false); c.lineWidth=.03; c.strokeStyle=INK; c.stroke(); }
   c.restore();
 }
+const STICK_K=1.15;
+// stickman: thick round lines and a filled head, all in the athlete's colour (far limbs a bit darker);
+// same skeleton, origin and return value as drawChar
+export function drawStick(c,s,ox,oy,alt,J,C,rot){
+  oy-=alt*s; s*=STICK_K;  // a bit bigger than the vector doll, as tall as the drawn characters
+  const hip=[0,J.hip], sl=Math.sin(J.lean), cl=Math.cos(J.lean);
+  const sh=[hip[0]+.44*sl,hip[1]+.44*cl], head=[sh[0]+.27*sl,sh[1]+.27*cl];
+  const limb=(o,L1,L2,a,b,sg)=>{ const k=[o[0]+L1*Math.sin(a),o[1]-L1*Math.cos(a)], a2=a+sg*b; return [k,[k[0]+L2*Math.sin(a2),k[1]-L2*Math.cos(a2)]]; };
+  const legs=J.legs.map(l=>limb(hip,.4,.4,l.a,l.b,-1)), arms=J.arms.map(l=>limb(sh,.27,.25,l.a,l.b,1));
+  const hipS=[ox,oy-J.hip*s];
+  const rp=(x,y)=>{ let px=ox+x*s, py=oy-y*s; if(rot){ const dx=px-hipS[0], dy=py-hipS[1], co=Math.cos(rot), si=Math.sin(rot); px=hipS[0]+dx*co-dy*si; py=hipS[1]+dx*si+dy*co; } return [px,py]; };
+  const w=Math.max(2.6,s*.13), col=C.j, back=shadeHex(C.j,.72);
+  c.lineCap='round'; c.lineJoin='round'; c.lineWidth=w;
+  const seg=(pts,cl)=>{ c.strokeStyle=cl; c.beginPath(); c.moveTo(...rp(...pts[0])); for(let i=1;i<pts.length;i++) c.lineTo(...rp(...pts[i])); c.stroke(); };
+  seg([sh,arms[1][0],arms[1][1]],back); seg([hip,legs[1][0],legs[1][1]],back);
+  seg([hip,sh,head],col);
+  const hp=rp(...head); c.fillStyle=col; c.beginPath(); c.arc(hp[0],hp[1],s*.21,0,Math.PI*2); c.fill();
+  seg([hip,legs[0][0],legs[0][1]],col); seg([sh,arms[0][0],arms[0][1]],col);
+  return {hand:rp(...arms[0][1])};
+}
 // figure with feet origin at (ox,oy); alt in meters; rot rotates around the hip
 export function drawChar(c,s,ox,oy,alt,J,C,effort,rot){
+  if(STYLE.stick) return drawStick(c,s,ox,oy,alt,J,C,rot);
   oy-=alt*s;
   const hip=[0,J.hip], sl=Math.sin(J.lean), cl=Math.cos(J.lean);
   const sh=[hip[0]+.42*sl,hip[1]+.42*cl], head=[sh[0]+.36*sl,sh[1]+.36*cl];
