@@ -132,9 +132,6 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:#fff;bo
 .m-ctrl kbd{background:#2a4377;border-color:#3d5a92;color:#fff;font-size:.68rem;padding:0 4px}
 .m-snd{flex:none;font:inherit;width:clamp(34px,11vh,56px);height:clamp(34px,11vh,56px);border-radius:10px;border:1px solid var(--edge);background:var(--panel2);color:#fff;cursor:pointer;display:grid;place-items:center}
 .m-snd svg{width:58%;height:58%}
-.m-style{width:auto;padding:0 10px;display:flex;flex-direction:column;justify-content:center;gap:1px;line-height:1}
-.m-style b{font-family:var(--f-display);font-weight:400;font-size:clamp(.8rem,3.2vh,1.15rem);letter-spacing:.04em}
-.m-style span{font-size:.62rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em}
 .m-play:focus-visible,.m-how:focus-visible,.m-ev:focus-visible,.m-face:focus-visible,.m-snd:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 @media (max-width:720px){ .m-ctrl{display:none} }
 @media (max-width:620px){

@@ -10,7 +10,7 @@ import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,myChar,S,setMyChar,setS,setScreen} from '../state.js';
-import {rec,saveRec,saveWr,setStick,store,STYLE,wrec} from '../storage.js';
+import {rec,saveRec,saveWr,store,STYLE,wrec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
@@ -23,11 +23,13 @@ export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c
 export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.height=px*d; const g=c.getContext('2d'); g.scale(d,d);
   const C=ME(), s=px*.36, ox=px*.46, oy=px*.86, k=i<5?EVENTS[i].id:'tour';
   if(k==='tour'){ g.fillStyle='#ffd23a'; g.strokeStyle=INK; g.lineWidth=2; g.beginPath(); g.moveTo(px*.3,px*.2); g.lineTo(px*.7,px*.2); g.quadraticCurveTo(px*.7,px*.6,px*.5,px*.62); g.quadraticCurveTo(px*.3,px*.6,px*.3,px*.2); g.fill(); g.stroke(); g.fillRect(px*.44,px*.62,px*.12,px*.14); g.strokeRect(px*.44,px*.62,px*.12,px*.14); g.fillRect(px*.32,px*.76,px*.36,px*.08); g.strokeRect(px*.32,px*.76,px*.36,px*.08); return; }
-  if(k==='pv'){ g.strokeStyle=INK; g.lineWidth=3; g.beginPath(); g.moveTo(px*.15,px*.95); g.lineTo(px*.55,px*.12); g.stroke(); g.strokeStyle='#7ccf3a'; g.lineWidth=1.6; g.stroke(); }
+  if(k==='pv'&&!STYLE.stick){ g.strokeStyle=INK; g.lineWidth=3; g.beginPath(); g.moveTo(px*.15,px*.95); g.lineTo(px*.55,px*.12); g.stroke(); g.strokeStyle='#7ccf3a'; g.lineWidth=1.6; g.stroke(); }
   if(C.sprite&&(k==='100'||k==='110h')){ const sp=SPR[k==='100'?'run1':'hurdle']; const draw=()=>{ const sc=Math.min(px*.9/sp.w,px*.9/sp.h); g.drawImage(sp.im,(px-sp.w*sc)/2,(px-sp.h*sc)/2,sp.w*sc,sp.h*sc); }; if(sp.im.complete) draw(); else sp.im.addEventListener('load',draw); return; }
   // a drawn frame (run cycle knee up, hurdle clearance, long jump flight, javelin drawn back), fitted to the canvas
   const PICT={'100':['run',3],'110h':['hurdle',1],'lj':['ljflight',1],'jav':['javpull',1]}[k];
   if(PICT&&animReady(C,PICT[0])){ const A=ANIMS[C.id][PICT[0]], sc=Math.min(px*.92/A.w,px*.92/A.h); g.drawImage(A.im,PICT[1]*A.w,0,A.w,A.h,(px-A.w*sc)/2,(px-A.h*sc)/2,A.w*sc,A.h*sc); return; }
+  // pole vault (stickman): planting the pole, arms up, pole down to the box
+  if(k==='pv'&&STYLE.stick){ const h=drawAthlete(g,s*.82,px*.4,oy,0,POSE.pvPlant,C,true).hand; g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=3.4; g.beginPath(); g.moveTo(h[0],h[1]); g.lineTo(px*.95,oy); g.stroke(); g.strokeStyle='#ffd23a'; g.lineWidth=1.8; g.stroke(); g.restore(); return; }
   const J=k==='100'?runPose(.8,1):k==='lj'?POSE.ljAir:k==='110h'?POSE.hurdle:k==='pv'?POSE.pvSwing:POSE.javBack;
   drawAthlete(g,s,ox,oy-(k==='lj'?s*.35:0)-(k==='pv'?s*.9:0),0,J,C,true,k==='pv'?-2.4:0);
   if(k==='jav'){ g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=4; g.beginPath(); g.moveTo(px*.04,px*.36); g.lineTo(px*.92,px*.1); g.stroke(); g.strokeStyle='#fff'; g.lineWidth=2; g.stroke(); g.restore(); }
@@ -61,7 +63,6 @@ export function showMenu(){
   <footer class="m-bot">
     <div class="m-ath"><span class="m-lbl">Tu atleta</span><div class="m-faces">${CHARS.map(c=>`<button class="m-face${c.id===myChar?' on':''}" data-act="pick" data-id="${c.id}" aria-pressed="${c.id===myChar}"><span><canvas data-face="${c.id}"></canvas></span><b>${c.name}</b></button>`).join('')}</div></div>
     <div class="m-ctrl"><span class="m-lbl">Controles</span><p>Celular en horizontal: tocá los botones de la pantalla. Compu: <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd> y <kbd>Espacio</kbd>.</p></div>
-    <button class="m-snd m-style" data-act="style" aria-label="Estilo de los atletas: ${STYLE.stick?'stickman':'dibujos'}"><b>${STYLE.stick?'STICK':'DIBUJO'}</b><span>estilo</span></button>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
 }
@@ -133,7 +134,6 @@ OV.addEventListener('click',e=>{
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='help'){ const h=$('help'); h.hidden=!h.hidden; }
   else if(a==='menu') showMenu();
-  else if(a==='style'){ setStick(!STYLE.stick); showMenu(); }
   else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')) showMenu(); else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
   else if(a==='evdone') endEvent(S.marks.map(bestOf));

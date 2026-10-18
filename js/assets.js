@@ -1,6 +1,7 @@
 // Image assets. Rig pieces: assets/characters/<id>/<piece>.png, listed in js/roster.js by tools/build_characters.py.
 // Optional full-body sprites (only Yo has them): assets/characters/yo/sprites/<name>.png, manifest below.
 import {CHARS} from './config.js';
+import {STYLE} from './storage.js';
 
 // sprites: w,h = image size; hx = hip x in image px (feet are the bottom edge)
 const BASE=new URL('../assets/characters/',import.meta.url);
@@ -38,9 +39,10 @@ export function loadAssets(){
     // darker copy for the far-side limbs
     im.addEventListener('load',()=>{ const c=document.createElement('canvas'); c.width=v.w; c.height=v.h; const g=c.getContext('2d'); g.drawImage(im,0,0); g.globalCompositeOperation='source-atop'; g.fillStyle='rgba(20,10,30,.28)'; g.fillRect(0,0,v.w,v.h); P.dark=c; });
     load(im,src); };
-  CHARS.forEach(C=>{ if(!C.parts) return; const set=RIGS[C.id]={};
+  // stickman style: the drawn characters' images aren't needed
+  if(!STYLE.stick) CHARS.forEach(C=>{ if(!C.parts) return; const set=RIGS[C.id]={};
     Object.entries(C.parts).forEach(([k,v])=>rigPart(set,k,v,new URL(v.file,BASE).href)); });
-  CHARS.forEach(C=>{ const set=ANIMS[C.id]={};
+  if(!STYLE.stick) CHARS.forEach(C=>{ const set=ANIMS[C.id]={};
     Object.entries(C.anims).forEach(([name,{file,...meta}])=>{ const im=new Image(); load(im,new URL(file,BASE).href); set[name]={...meta,im}; }); });
   load(JAV_ART,new URL('../assets/javelin.png',import.meta.url).href);
   load(POLE_ART,new URL('../assets/pole.png',import.meta.url).href);
