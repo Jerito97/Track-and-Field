@@ -8,9 +8,9 @@ import {clamp,rand} from '../utils.js';
 import {armsFor,bothCue,judge,pop} from './core.js';
 import {startReplay} from './replay.js';
 
-// pole vault (as in the original): hold both buttons to lower the pole (the star runs it in POLE_T s; let go and
-// it comes back up), it plants itself PV_REACH m before the box if you're still holding; then release both at the
-// top of the swing
+// pole vault (as in the original): the pole lowers by itself, timed so the star reaches its tip (in POLE_T s) about
+// PV_REACH m before the box; press and hold both buttons when the star is at the tip to plant it (the closer, the
+// higher), keep holding up the swing and let go when the star reaches the other end
 const POLE_T=1.0, PV_REACH=3.5;
 export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
@@ -27,7 +27,7 @@ export function updateField(dt){
       S.zone=true; S.cue=null; tone(880,.08,'triangle',.05);
       S.pops.push({text:'¡PREPARATE!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true});
       if(ev.kind==='lj') bothCue();
-      else if(ev.kind==='pv'){ S.meter={k:'pole',p:0,held:false}; S.cue={type:'both',hold:true,t:0}; }
+      else if(ev.kind==='pv') S.meter={k:'pole',p:0,on:false,wasHeld:!!S.held2};
       else S.cue={type:'hold',t:0};
     }
     const sp=S.v;
@@ -37,9 +37,10 @@ export function updateField(dt){
       if(S.meter){ S.meter.p+=dt/.7; if(S.meter.p>=1.2) javThrow(); }
     } else {
       S.pose=S.v>.2?runPose(S.legP,Math.min(1,S.v/4),armsFor()):S.pose;
-      if(S.zone&&ev.kind==='pv'){ const m=S.meter; m.held=!!S.held2;
-        m.p=m.held?Math.min(1.25,m.p+dt/POLE_T):Math.max(0,m.p-dt/POLE_T*1.5);
-        if(m.held&&m.p>0&&ev.line-S.x<=PV_REACH) plantPole(); }
+      if(S.zone&&ev.kind==='pv'){ const m=S.meter, held=!!S.held2;
+        if(!m.on&&ev.line-S.x<=PV_REACH+S.v*POLE_T){ m.on=true; S.cue={type:'both',hold:true,t:0}; tone(500,.06,'triangle',.04); }
+        if(m.on){ m.p=Math.min(1.25,m.p+dt/POLE_T); if(held&&!m.wasHeld){ m.wasHeld=held; plantPole(); return; } }
+        m.wasHeld=held; }
     }
     if(S.phase==='run'&&S.x>=ev.line){ S.x=ev.line; fieldFoul(); }
     return;
