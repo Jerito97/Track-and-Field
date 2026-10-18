@@ -21,8 +21,8 @@ export function frame(){
   else drawIdle();
   ctx.restore();
 }
-// menus: the stadium behind the panels, panning slowly
-export function drawIdle(){ const t=performance.now()/1000, cam=t*1.2;
+// menus: the stadium behind the panels, still (no panning, fans not moving)
+export function drawIdle(){ const t=0, cam=0;
   const sky=ctx.createLinearGradient(0,0,0,LH*.55); sky.addColorStop(0,'#5aa8e6'); sky.addColorStop(1,'#cfe8f8'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
   drawStands(cam,26,176,.7,t); drawBoards(cam,176,14,24);
   ctx.fillStyle='#a6c94a'; ctx.fillRect(0,190,LW,10);
