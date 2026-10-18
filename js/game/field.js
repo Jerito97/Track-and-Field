@@ -18,6 +18,10 @@ export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
 export const stretchQ=u=>Math.max(0,Math.min(1,1-(Math.abs(u-.5)-.06)/.24));
 // distance without the air push, and what a perfect push adds (m)
 const LJ_NOPUSH=-.6, LJ_PUSH=1.4;
+// long jump: the front foot is about LJ_FOOT m ahead of the hip; it's the foot that must not pass the board
+const LJ_FOOT=.35;
+// where the athlete (hip) fouls: the foot reaching the board's edge (long jump), the line itself otherwise
+const foulX=ev=>ev.kind==='lj'?ev.line-LJ_FOOT:ev.line;
 export function updateField(dt){
   const ev=S.ev;
   if(S.phase==='ready'){ const k=armsFor(); S.pose=k==='jav'?{...POSE.stand,arms:[{a:-2.4,b:.55},POSE.stand.arms[1]]}:(k==='pole'?{...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]}:POSE.stand); return; }
@@ -42,7 +46,7 @@ export function updateField(dt){
         if(m.on){ m.p=Math.min(1.25,m.p+dt/POLE_T); if(held&&!m.wasHeld){ m.wasHeld=held; plantPole(); return; } }
         m.wasHeld=held; }
     }
-    if(S.phase==='run'&&S.x>=ev.line){ S.x=ev.line; fieldFoul(); }
+    if(S.phase==='run'&&S.x>=foulX(ev)){ S.x=foulX(ev); fieldFoul(); }
     return;
   }
   if(S.phase==='act') updateAct(dt);
@@ -50,6 +54,7 @@ export function updateField(dt){
 }
 export function fieldFoul(){
   const ev=S.ev; S.cue=null; S.meter=null; S.foul=true; S.marks[0].push(null); tone(160,.45,'sawtooth',.06);
+  if(ev.kind==='lj') S.pops.push({text:'¡PISASTE LA TABLA!',t:0,dur:.9,col:'#ff5a3c',sub:'',big:.6,small:true});
   S.act={k:ev.kind+'foul',t:0,v:S.v}; S.phase='act';
 }
 export function fieldAction(){
@@ -61,7 +66,7 @@ export function fieldAction(){
   }
   if(S.phase!=='run'||!S.zone) return;
   S.cue=null;
-  const d=Math.max(0,ev.line-S.x), v=S.v;
+  const d=Math.max(0,foulX(ev)-S.x), v=S.v;  // foot to the board
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=Math.max(.5,base+LJ_NOPUSH);
     S.act={k:'lj',t:0,T,x0:S.x,x1:ev.line+mark,base,mark,h,q2:0};
@@ -92,8 +97,9 @@ export function updateAct(dt){
     if(u>=1&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); }
     if(u>=1){ S.y=0; S.pose=a.q2>.5?POSE.sit:POSE.lie; S.landX=S.x; sand(S.x); S.meter=null; landed(Math.floor(a.mark*100)/100); }
   } else if(a.k==='ljfoul'){
-    S.x+=a.v*Math.max(0,1-a.t*1.5)*dt; S.pose=POSE.stumble;
-    if(a.t>.7){ S.pose=POSE.sit; sand(S.x); landed(null); }
+    // stepped over the board: stumbles to a stop just past it (not into the sand)
+    S.x+=a.v*Math.max(0,1-a.t*8)*dt; S.pose=POSE.stumble;
+    if(a.t>.7){ S.pose=POSE.sit; landed(null); }
   } else if(a.k==='pv'){
     if(a.stage==='plant'){ S.x+=S.v*dt*.8; S.pose=POSE.pvPlant; if(a.t>.22){ a.stage='rise'; a.t=0; a.xs=S.x; a.Trise=.75+a.H*.035; S.meter={k:'rise',p:0}; S.cue={type:'both',hold:true,release:true,t:0}; } }
     else if(a.stage==='rise'){
