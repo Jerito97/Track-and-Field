@@ -16,9 +16,10 @@ export const EVENTS=[
  {id:'pv',name:'Garrocha',tag:'GARROCHA',type:'field',kind:'pv',line:60,zone:18,bands:[18,12,6],ref:5.5,
   help:'Tocá los <b>botones verdes</b> para correr. Antes del cajón el piso se pinta de <b>verde, amarillo y rojo</b> (ahí ya no hay botones verdes). La garrocha <b>baja sola</b> y una <b>estrellita</b> la recorre hasta la punta: cuando llegue a la punta, <b>apretá y mantené los dos botones naranjas</b> (dos dedos, o Espacio) para clavarla. Cuanto más cerca de la punta, más impulso. Seguí apretando mientras subís y <b>soltá</b> cuando la estrellita llegue a la otra punta. Si llegás al cajón sin clavarla, es nulo. Tenés 3 rondas.'},
  {id:'jav',name:'Jabalina',tag:'JABALINA',type:'field',kind:'jav',line:57,zone:18,bands:[18,12,6],ref:80,
-  help:'Tocá los <b>botones verdes</b> para tomar carrera. Antes de la línea el piso se pinta de <b>verde, amarillo y rojo</b>: desde el verde ya no hay botones verdes y mantenés la velocidad. Cuando quieras, <b>mantené apretado</b> y unas <b>chispitas</b> recorren la jabalina desde atrás hasta la punta: soltá lo más cerca posible de la punta, antes de pisar la línea. Si la pisás, es <b>nulo</b>. Tenés 3 rondas.'}
+  help:'Tocá los <b>botones verdes</b> para tomar carrera. Antes de la línea el piso se pinta de <b>verde, amarillo y rojo</b>: desde el verde ya no hay botones verdes y mantenés la velocidad. Cuando quieras, <b>mantené apretado</b> y unas <b>chispitas</b> recorren la jabalina desde atrás hasta la punta: soltá lo más cerca posible de la punta. Después de soltar seguís avanzando unos metros: si pasás la línea, aunque ya la hayas tirado, es <b>nulo</b>. Tenés 3 rondas.'}
 ];
-export const HURDLES=Array.from({length:10},(_,i)=>13.72+9.14*i);
+// 10 hurdles, a bit more spread out than the real 9.14 m so there's time for the 1-2-3 between them
+export const HURDLES=Array.from({length:10},(_,i)=>13.72+9.7*i);
 export const FAN_SHIRTS=['#e8262d','#2f6fd6','#ffd23a','#1f9e54','#ffffff','#ff8a1f','#8e4fd6','#8fd0f5','#f05a9c'];
 export const SKINS=['#f6d0b0','#e9c09a','#c88d63','#8a5a3b','#5e3b26'];
 export const HAIRS=['#141414','#5a3a22','#ffd94a','#c46a2a','#9aa0ad','#2b1a12'];

@@ -119,12 +119,14 @@ export function updateAct(dt){
       if(S.x>=ev.line){ S.x=ev.line; S.jv=null; S.act=null; S.phase='run'; fieldFoul(); return; }
       if(a.t>=.3){ S.jv.held=false; a.T=1.5+.045*a.R; S.jv.x=S.x+.4; S.jv.x0=S.jv.x; S.jv.t=0; noise(.25,.12,2500); tone(300,.3,'triangle',.04,.5); }
     } else {
-      S.v=Math.max(0,S.v-S.v*3*dt); S.x+=S.v*dt; S.pose=POSE.javRel;
+      S.v=Math.max(0,S.v-S.v*2*dt); S.x+=S.v*dt; S.pose=POSE.javRel;  // ~3.5 m forward after letting go
+      // still carried forward after letting go: crossing the line makes the throw a foul (shown when it lands)
+      if(!a.over&&S.x>ev.line){ a.over=true; tone(160,.45,'sawtooth',.06); S.pops.push({text:'¡PISASTE!',t:0,dur:1,col:'#ff5a3c',sub:'',big:.6,small:true}); }
       if(!S.jv.stuck){
         S.jv.t+=dt; const u=Math.min(1,S.jv.t/a.T), top=a.R*.16;
         S.jv.x=S.jv.x0+a.R*u; S.jv.y=1.9*(1-u)+4*top*u*(1-u); S.jv.a=Math.atan2(-1.9+4*top*(1-2*u),a.R);
         S.ppm+=(16-S.ppm)*Math.min(1,dt*1.6);
-        if(u>=1){ S.jv.stuck=true; S.jv.y=0; S.jv.a=Math.min(S.jv.a,-.5); S.landX=S.jv.x; tone(140,.12,'square',.05); landed(Math.floor((S.jv.x-ev.line)*100)/100); }
+        if(u>=1){ S.jv.stuck=true; S.jv.y=0; S.jv.a=Math.min(S.jv.a,-.5); S.landX=S.jv.x; tone(140,.12,'square',.05); landed(a.over?null:Math.floor((S.jv.x-ev.line)*100)/100); }
       }
     }
   } else if(a.k==='javfoul'){ S.v=Math.max(0,S.v-S.v*3*dt); S.x+=S.v*dt; S.pose=POSE.stumble; if(a.t>.8) landed(null); }
