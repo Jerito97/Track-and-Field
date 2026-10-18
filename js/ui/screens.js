@@ -9,13 +9,14 @@ import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
-import {ATH,buildAthletes,G,ME,myChar,S,setMyChar,setS,setScreen} from '../state.js';
-import {rec,saveRec,saveWr,store,STYLE,wrec} from '../storage.js';
+import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
+import {COLORS,createPlayer,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
   const f=OV.querySelector('[data-focus]'); if(f) try{f.focus({preventScroll:true});}catch(e){} }
-export function paintOv(){ OV.querySelectorAll('canvas[data-face]').forEach(c=>paintFace(c,CHARS.find(x=>x.id===c.dataset.face))); OV.querySelectorAll('canvas[data-pict]').forEach(c=>paintPict(c,+c.dataset.pict)); }
+// data-face="yo" is you (your colour); data-color paints a stickman head in that colour (player lists, colour preview)
+export function paintOv(){ OV.querySelectorAll('canvas[data-face]').forEach(c=>paintFace(c,c.dataset.face==='yo'?ME():CHARS.find(x=>x.id===c.dataset.face))); OV.querySelectorAll('canvas[data-color]').forEach(c=>paintFace(c,{j:c.dataset.color})); OV.querySelectorAll('canvas[data-pict]').forEach(c=>paintPict(c,+c.dataset.pict)); }
 export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c.height=px*d; const g=c.getContext('2d');
   if(STYLE.stick){ g.fillStyle=C.j; g.beginPath(); g.arc(c.width/2,c.height*.42,c.width*.26,0,Math.PI*2); g.fill(); g.strokeStyle=C.j; g.lineWidth=c.width*.12; g.lineCap='round'; g.beginPath(); g.moveTo(c.width/2,c.height*.6); g.lineTo(c.width/2,c.height); g.stroke(); return; } if(C.sprite&&SPR.face){ const draw=()=>{ g.clearRect(0,0,c.width,c.height); g.drawImage(SPR.face.im,0,0,c.width,c.height); }; if(SPR.face.im.complete) draw(); else SPR.face.im.onload=draw; return; } const head=rigReady(C)&&RIGS[C.id].head;
   if(head){ const sh=head.h*.9, sc=Math.min(c.width/head.w,c.height/sh); g.drawImage(head.im,0,0,head.w,sh,(c.width-head.w*sc)/2,(c.height-sh*sc)/2,head.w*sc,sh*sc); return; }
@@ -42,12 +43,16 @@ const ICON={
   globe:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
   snd:on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on?'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg>`
 };
+// world record: best of any player on this device, with who set it
+const wrText=ev=>{ const w=worldRec(ev); return w?`${fmt(ev,w.v)} <small>${esc(w.name)}</small>`:'—'; };
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 export function showMenu(){
+  if(!player()){ showCreate(true); return; }
   setS(null); setScreen('menu');
   const tour=menuSel===5, ev=EVENTS[menuSel];
   const stats=tour
     ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>5</b></div>`
-    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${wrec[ev.id]==null?'—':fmt(ev,wrec[ev.id])}</b></div>`;
+    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${wrText(ev)}</b></div>`;
   const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${i===menuSel?'<i>Elegida</i>':''}</button>`).join('')
     +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="5" aria-pressed="${tour}"><canvas data-pict="5"></canvas><b>TORNEO</b>${tour?'<i>Elegido</i>':''}</button>`;
   showOv(`<div class="mm">
@@ -61,10 +66,53 @@ export function showMenu(){
   </section>
   <nav class="m-evs" aria-label="Pruebas">${cards}</nav>
   <footer class="m-bot">
-    <div class="m-ath"><span class="m-lbl">Tu atleta</span><div class="m-faces">${CHARS.map(c=>`<button class="m-face${c.id===myChar?' on':''}" data-act="pick" data-id="${c.id}" aria-pressed="${c.id===myChar}"><span><canvas data-face="${c.id}"></canvas></span><b>${c.name}</b></button>`).join('')}</div></div>
+    <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
     <div class="m-ctrl"><span class="m-lbl">Controles</span><p>Celular en horizontal: tocá los botones de la pantalla. Compu: <kbd>←</kbd> <kbd>→</kbd> <kbd>↓</kbd> y <kbd>Espacio</kbd>.</p></div>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
+}
+// ---- players ----
+let newColor=COLORS[0];
+const swatches=sel=>`<div class="p-colors">${COLORS.map(c=>`<button class="p-sw${c===sel?' on':''}" data-act="color" data-c="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${c===sel}"></button>`).join('')}</div>`;
+// picking a colour: on the create screen it's kept for the new player, on the profile it changes yours right away
+function pickColor(c){ newColor=c; OV.querySelectorAll('.p-sw').forEach(b=>{ b.classList.toggle('on',b.dataset.c===c); b.setAttribute('aria-pressed',b.dataset.c===c); });
+  if(OV.querySelector('.p-create')){ const cv=OV.querySelector('canvas[data-color]'); cv.dataset.color=c; paintFace(cv,{j:c}); }
+  else { updatePlayer({color:c}); OV.querySelectorAll('canvas[data-face="yo"]').forEach(cv=>paintFace(cv,ME())); } }
+// first time (no players yet) or a new player for someone else on this device
+export function showCreate(first){
+  setS(null); setScreen('menu'); const used=players().map(p=>p.color); newColor=COLORS.find(c=>!used.includes(c))||COLORS[0];
+  showOv(`<div class="card p-create"><div class="head"><div class="logo">TRACK &amp; FIELD</div><h2>${first?'Creá tu jugador':'Nuevo jugador'}</h2></div><div class="body">
+    ${first?'<p class="small">Tu jugador guarda tus marcas, tus récords y el historial de todo lo que jugás. No hace falta contraseña.</p>':''}
+    <div class="p-row"><span class="p-av"><canvas data-color="${newColor}"></canvas></span>
+      <label class="p-name"><span class="lbl">Nombre</span><input id="pname" maxlength="14" autocomplete="off" placeholder="Tu nombre" data-focus></label></div>
+    <span class="lbl">Color del stickman</span>${swatches(newColor)}
+    <div class="btns"><button class="btn" data-act="create">Crear</button>${first?'':'<button class="btn alt" data-act="players">Cancelar</button>'}</div>
+  </div></div>`);
+  $('pname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="create"]').click(); });
+}
+const fdate=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
+export function showProfile(){
+  const p=player(); if(!p){ showCreate(true); return; } setS(null); setScreen('menu'); newColor=p.color;
+  const evName=id=>(EVENTS.find(e=>e.id===id)||{}).name||id;
+  const tops=EVENTS.map(ev=>{ const l=p.best[ev.id]||[]; return `<div class="p-top"><b>${ev.name}</b>${l.length?`<ol>${l.map(x=>`<li>${fmt(ev,x.v)} <small>${fdate(x.date)}</small></li>`).join('')}</ol>`:'<p class="small">Todavía no jugaste esta prueba.</p>'}</div>`; }).join('');
+  const hist=p.history.slice(0,15).map(h=>{ const ev=EVENTS.find(e=>e.id===h.ev); return `<tr><td>${fdate(h.date)}</td><td class="nm">${evName(h.ev)}${h.mode==='tour'?' <small>torneo</small>':''}</td><td class="sub">${h.place?h.place+'º de '+h.of:'—'}</td><td>${ev?fmt(ev,h.mark):h.mark}</td></tr>`; }).join('');
+  showOv(`<div class="card p-prof"><div class="head"><div class="logo">PERFIL</div><h2>${esc(p.name)}</h2></div><div class="body">
+    <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
+      <label class="p-name"><span class="lbl">Nombre</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(p.name)}" autocomplete="off"><button class="btn alt" data-act="rename">Guardar</button></span></label></div>
+    <span class="lbl">Color del stickman</span>${swatches(p.color)}
+    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div></div>
+    <span class="lbl">Tus 5 mejores marcas</span><div class="p-tops">${tops}</div>
+    <span class="lbl">Historial</span>${hist?`<table><tbody>${hist}</tbody></table>`:'<p class="small">Todavía no jugaste.</p>'}
+    <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button></div>
+  </div></div>`);
+  $('pname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="rename"]').click(); });
+}
+export function showPlayers(){
+  setS(null); setScreen('menu'); const cur=player();
+  showOv(`<div class="card"><div class="head"><div class="logo">JUGADORES</div><h2>¿Quién juega?</h2></div><div class="body">
+    <div class="p-list">${players().map(p=>`<button class="p-pl${cur&&p.id===cur.id?' on':''}" data-act="switch" data-id="${p.id}"><span class="p-av sm"><canvas data-color="${p.color}"></canvas></span><b>${esc(p.name)}</b><small>${p.history.length} pruebas</small></button>`).join('')}</div>
+    <div class="btns"><button class="btn" data-act="newplayer">+ Nuevo jugador</button>${cur?'<button class="btn alt" data-act="profile">Volver</button>':''}</div>
+  </div></div>`);
 }
 export const rivalsFaces=()=>`<div class="faces">${ATH.filter(a=>!a.me).map(a=>`<canvas data-face="${a.C.id}"></canvas>`).join('')}</div>`;
 export function showEventCard(){
@@ -73,7 +121,7 @@ export function showEventCard(){
   showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/5`:''}</h2></div><div class="body">
     <div class="row2"><canvas class="pict" data-pict="${G.evIdx}"></canvas>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
-        <div class="wr"><span>Récord mundial</span><b>${wrec[ev.id]==null?'—':fmt(ev,wrec[ev.id])}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
+        <div class="wr"><span>Récord mundial</span><b>${wrText(ev)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
         <div class="menu"><button class="mi play" data-act="play" data-focus>Jugar</button><button class="mi" data-act="help">Instrucciones</button>${tour?'':'<button class="mi" data-act="menu">Otra prueba</button>'}</div>
       </div></div>
     <p class="help" id="help" hidden>${ev.help}</p>
@@ -85,7 +133,7 @@ export function showEventCard(){
 const place=(rows,i,valFmt)=>{ let j=i; while(j>0&&valFmt(rows[j-1])===valFmt(rows[i])) j--; return j+1; };
 export function table(tag,title,rows,valFmt,subFmt,btn){
   return `<div class="card"><div class="head"><div class="logo">${tag}</div><h2>${title}</h2></div><div class="body">
-    <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${place(rows,i,valFmt)}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}</td>${subFmt?`<td class="sub">${subFmt(r)}</td>`:''}<td>${valFmt(r)}</td></tr>`).join('')}</tbody></table>
+    <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${place(rows,i,valFmt)}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${esc(r.a.name)}</td>${subFmt?`<td class="sub">${subFmt(r)}</td>`:''}<td>${valFmt(r)}</td></tr>`).join('')}</tbody></table>
     <button class="ok" data-act="${btn}" data-focus>OK</button></div></div>`;
 }
 export function showRoundStandings(){
@@ -94,9 +142,9 @@ export function showRoundStandings(){
 }
 export function endEvent(vals){
   const ev=S.ev; G.res[ev.id]=vals;
-  const mine=vals[0]; let newRec=false;
-  if(mine!=null&&(rec[ev.id]==null||(ev.type==='sprint'?mine<rec[ev.id]:mine>rec[ev.id]))){ rec[ev.id]=mine; newRec=true; saveRec(); }
-  if(mine!=null&&(wrec[ev.id]==null||(ev.type==='sprint'?mine<wrec[ev.id]:mine>wrec[ev.id]))){ wrec[ev.id]=mine; saveWr(); }
+  // your result goes to your player's history, top 5 and records
+  const mine=vals[0], rows=sortRows(ev,vals), mi=rows.findIndex(r=>r.a.me);
+  const newRec=recordEvent(ev,mine,mine==null?null:place(rows,mi,r=>fmt(ev,r.v)),ATH.length,G.mode);
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   showOv(table(ev.tag,newRec?'¡Nuevo récord!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
@@ -114,10 +162,10 @@ export function showStandings(){
 export function showFinalTable(){
   const rows=ATH.map((a,i)=>({a,i,v:G.total[i]||0})).sort((x,y)=>y.v-x.v);
   const mi=rows.findIndex(r=>r.a.me), me=place(rows,mi,q=>String(q.v)), myPts=rows[mi].v;
-  if(myPts>(rec.tour||0)){ rec.tour=myPts; saveRec(); }
+  recordTour(myPts,me);
   setS(null);
   showOv(`<div class="card"><div class="head"><div class="logo">TORNEO</div><h2>Resultado final</h2></div><div class="body">
-    <table><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.v)); return `<tr class="${r.a.me?'me':''}"><td>${pl}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}${pl<=3?' · '+['oro','plata','bronce'][pl-1]:''}</td><td>${r.v}</td></tr>`; }).join('')}</tbody></table>
+    <table><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.v)); return `<tr class="${r.a.me?'me':''}"><td>${pl}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${esc(r.a.name)}${pl<=3?' · '+['oro','plata','bronce'][pl-1]:''}</td><td>${r.v}</td></tr>`; }).join('')}</tbody></table>
     <p class="small" style="text-align:center">${me===1?'¡Ganaste el torneo!':`Terminaste en el puesto ${me}.`} Tu mejor torneo: ${rec.tour||0} puntos.</p>
     <div class="btns"><button class="btn" data-act="tour" data-focus>Jugar otro torneo</button><button class="btn alt" data-act="menu">Menú</button></div></div></div>`);
 }
@@ -126,7 +174,13 @@ OV.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b) return; unlockAudio(); const a=b.dataset.act;
   if(a==='event'){ G.mode='single'; G.evIdx=+b.dataset.i; buildAthletes(); showEventCard(); }
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
-  else if(a==='pick'){ setMyChar(b.dataset.id); buildAthletes(); showMenu(); }
+  else if(a==='profile') showProfile();
+  else if(a==='players') showPlayers();
+  else if(a==='newplayer') showCreate(false);
+  else if(a==='switch'){ switchPlayer(b.dataset.id); showMenu(); }
+  else if(a==='color'){ pickColor(b.dataset.c); }
+  else if(a==='create'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(!name){ n.focus(); n.classList.add('bad'); return; } createPlayer(name,newColor); showMenu(); }
+  else if(a==='rename'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(name){ updatePlayer({name}); showProfile(); } }
   else if(a==='sel'){ menuSel=+b.dataset.i; store.set('odb-menusel',menuSel); showMenu(); }
   else if(a==='go'){ if(menuSel===5){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
     else { G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); } }

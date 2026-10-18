@@ -64,6 +64,12 @@ js/
 - **Zoom:** carreras a 29 px por metro (atletas de 72 px), pruebas de campo a 41 px por metro (`SPRINT_PPM` y `FIELD_PPM` en `js/game/core.js`).
 - **Participantes:** 6 por prueba, vos y 5 rivales sorteados entre los otros atletas (en el torneo son los mismos en las cinco pruebas).
 
+## Jugadores
+
+La primera vez que se abre el juego hay que crear un jugador: nombre y color del stickman, sin contraseña. Cada jugador guarda sus récords, sus 5 mejores marcas por prueba, el historial de pruebas (marca, puesto, fecha) y los torneos. Desde el menú (abajo, **Jugador**) se abre el perfil: cambiar nombre y color, ver las marcas y el historial, o cambiar de jugador / crear otro para jugar con amigos en el mismo celular. El récord mundial es la mejor marca de cualquier jugador del celular, con su nombre.
+
+Todo se guarda en el navegador (`localStorage`, clave `odb-players`; ver `js/storage.js`). Cada jugador tiene un id único y su historial queda listo para subirlo a un servidor cuando haya torneos con otra gente.
+
 ## Estilo stickman
 
 El juego usa stickmen dibujados con código (`drawStick` en `js/draw/character.js`): líneas gruesas y cabeza rellena, del color de la musculosa de cada atleta, sobre el mismo esqueleto y las mismas poses (`js/poses.js`). Los personajes dibujados (piezas y tiras de animación en `assets/characters/`) quedan guardados pero desactivados: para volver a usarlos, poné `stick:false` en `STYLE` (`js/storage.js`); recién ahí se cargan sus imágenes.

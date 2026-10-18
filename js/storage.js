@@ -1,10 +1,48 @@
-// localStorage wrapper and personal records
+// localStorage wrapper, players (profiles) and records
 export const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
-export let rec=store.get('odb-rec3',{})||{};
-export const saveRec=()=>store.set('odb-rec3',rec);
 // art style: the game uses stickmen drawn in code. The drawn characters (image pieces and animation strips under
 // assets/characters/) are kept but switched off: set stick to false to bring them back (their images then load too).
 export const STYLE={stick:true};
-// world records: empty until someone sets one (only people count, not the machines)
-export let wrec=store.get('odb-wr',{})||{};
-export const saveWr=()=>store.set('odb-wr',wrec);
+
+// ---- players ----
+// Players on this device, no password. Each one keeps its own records and history, so it can be sent to a server
+// as is when there are online tournaments: {id, name, color, created, rec:{evId:best, tour:points},
+// best:{evId:[{v,date}, ...top 5]}, history:[{ev,mark,place,of,mode,date}, ...newest first], tours:[{pts,place,date}]}
+const KEY='odb-players', HISTORY_MAX=200, TOP=5;
+export const COLORS=['#e8262d','#2f6fe0','#ffd23a','#1f9e54','#8e4fd6','#ff7a1a','#2bc4e0','#ff5fa2','#8bd13a','#8a5a3b','#1c2a55','#2b2c2d'];
+const DB=(()=>{ const d=store.get(KEY,null); return d&&Array.isArray(d.list)?d:{list:[],cur:null}; })();
+const save=()=>store.set(KEY,DB);
+const newId=()=>{ try{ return globalThis.crypto.randomUUID(); }catch(e){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); } };
+export const players=()=>DB.list;
+export const player=()=>DB.list.find(p=>p.id===DB.cur)||null;
+// records of the current player (live: reassigned when the player changes)
+export let rec={};
+const bind=()=>{ const p=player(); rec=p?p.rec:{}; };
+bind();
+export const saveRec=save;
+export function createPlayer(name,color){
+  const p={id:newId(),name,color,created:Date.now(),rec:{},best:{},history:[],tours:[]};
+  // the first player takes over the records kept before there were players
+  if(!DB.list.length){ const old=store.get('odb-rec3',null); if(old) Object.assign(p.rec,old); }
+  DB.list.push(p); DB.cur=p.id; save(); bind(); return p;
+}
+export function switchPlayer(id){ if(DB.list.some(p=>p.id===id)){ DB.cur=id; save(); bind(); } }
+export function updatePlayer(fields){ const p=player(); if(!p) return; Object.assign(p,fields); save(); }
+export function deletePlayer(id){ DB.list=DB.list.filter(p=>p.id!==id); if(DB.cur===id) DB.cur=DB.list[0]?.id||null; save(); bind(); }
+const better=(sprint,a,b)=>sprint?a<b:a>b;
+// an event finished: history, top 5 and personal record; returns true for a new personal record
+export function recordEvent(ev,mark,place,of,mode){
+  const p=player(); if(!p) return false;
+  p.history.unshift({ev:ev.id,mark,place,of,mode,date:Date.now()}); p.history.length=Math.min(p.history.length,HISTORY_MAX);
+  if(mark==null){ save(); return false; }
+  const sprint=ev.type==='sprint', list=(p.best[ev.id]||[]).concat({v:mark,date:Date.now()});
+  list.sort((x,y)=>sprint?x.v-y.v:y.v-x.v); p.best[ev.id]=list.slice(0,TOP);
+  const isRec=p.rec[ev.id]==null||better(sprint,mark,p.rec[ev.id]); if(isRec) p.rec[ev.id]=mark;
+  save(); return isRec;
+}
+export function recordTour(pts,place){ const p=player(); if(!p) return;
+  p.tours.unshift({pts,place,date:Date.now()}); if(pts>(p.rec.tour||0)) p.rec.tour=pts; save(); }
+// world record of an event: the best mark of any player on this device (machines don't count), with who set it
+export function worldRec(ev){ let best=null;
+  DB.list.forEach(p=>{ const v=p.rec[ev.id]; if(v!=null&&(!best||better(ev.type==='sprint',v,best.v))) best={v,name:p.name}; });
+  return best; }
