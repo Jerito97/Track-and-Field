@@ -31,7 +31,7 @@ export function resetAttempt(){
 // camera zoom (logical px per metre): sprints, field events
 export const SPRINT_PPM=29, FIELD_PPM=41;
 export const camLead=()=>LW*.36/S.ppm;
-export const CUEPOS={L:()=>[50,150],C:()=>[LW/2,150],R:()=>[LW-50,150]};
+export const CUEPOS={L:()=>[64,150],C:()=>[LW/2,150],R:()=>[LW-64,150]};
 // hurdle numbers: higher up and closer together; NUM_DX = gap between neighbours (logical px)
 export const NUM_DX=()=>Math.round(LW*.24), NUM_Y=108;
 export const NUMPOS={L:()=>[LW/2-NUM_DX(),NUM_Y],C:()=>[LW/2,NUM_Y],R:()=>[LW/2+NUM_DX(),NUM_Y]};

@@ -14,6 +14,8 @@ export function view(){
 export function frame(){
   ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle='#0b1730'; ctx.fillRect(0,0,SW,SH);
   ctx.setTransform(SC*DPR,0,0,SC*DPR,OX*DPR,OY*DPR);
+  // menus: the background fills the whole screen (also behind the camera island); the game stays in the safe area
+  if(!(S&&(S.phase==='podium'||S.ev))){ ctx.setTransform(DPR*SW/LW,0,0,DPR*SH/LH,0,0); drawIdle(); return; }
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,LW,LH); ctx.clip();
   if(S&&S.phase==='podium') drawPodium();
   else if(S&&S.ev){ const Vw=view(); if(S.ev.type==='sprint') drawSprint(Vw); else drawField(Vw); drawHud(Vw); }
