@@ -113,11 +113,11 @@ export function showStandings(){
 }
 export function showFinalTable(){
   const rows=ATH.map((a,i)=>({a,i,v:G.total[i]||0})).sort((x,y)=>y.v-x.v);
-  const me=rows.findIndex(r=>r.a.me)+1, myPts=rows[me-1].v;
+  const mi=rows.findIndex(r=>r.a.me), me=place(rows,mi,q=>String(q.v)), myPts=rows[mi].v;
   if(myPts>(rec.tour||0)){ rec.tour=myPts; saveRec(); }
   setS(null);
   showOv(`<div class="card"><div class="head"><div class="logo">TORNEO</div><h2>Resultado final</h2></div><div class="body">
-    <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${i+1}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}${i<3?' · '+['oro','plata','bronce'][i]:''}</td><td>${r.v}</td></tr>`).join('')}</tbody></table>
+    <table><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.v)); return `<tr class="${r.a.me?'me':''}"><td>${pl}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${r.a.me?'Vos':r.a.name}${pl<=3?' · '+['oro','plata','bronce'][pl-1]:''}</td><td>${r.v}</td></tr>`; }).join('')}</tbody></table>
     <p class="small" style="text-align:center">${me===1?'¡Ganaste el torneo!':`Terminaste en el puesto ${me}.`} Tu mejor torneo: ${rec.tour||0} puntos.</p>
     <div class="btns"><button class="btn" data-act="tour" data-focus>Jugar otro torneo</button><button class="btn alt" data-act="menu">Menú</button></div></div></div>`);
 }

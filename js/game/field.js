@@ -100,7 +100,7 @@ export function updateAct(dt){
     if(u>=1){ S.y=0; S.pose=a.q2>.5?POSE.sit:POSE.lie; S.landX=S.x; sand(S.x); S.meter=null; landed(Math.floor(a.mark*100)/100); }
   } else if(a.k==='ljfoul'){
     // stepped over the board: stumbles to a stop just past it (not into the sand)
-    S.x+=a.v*Math.max(0,1-a.t*8)*dt; S.pose=POSE.stumble;
+    S.x=Math.min(S.x+a.v*Math.max(0,1-a.t*8)*dt,ev.line-LJ_FOOT+.1); S.pose=POSE.stumble;
     if(a.t>.7){ S.pose=POSE.sit; landed(null); }
   } else if(a.k==='pv'){
     if(a.stage==='plant'){ S.x+=S.v*dt*.8; S.pose=POSE.pvPlant; if(a.t>.22){ a.stage='rise'; a.t=0; a.xs=S.x; a.Trise=.75+a.H*.035; S.meter={k:'rise',p:0}; S.cue={type:'both',hold:true,release:true,t:0}; } }

@@ -26,7 +26,7 @@ export function drawPodium(){
   [2,1,0].forEach((k,idx)=>{ const a=p.order[k]; if(!a) return; const sp=spots[k], shown=p.step>=idx+1;
     let front=false;
     if(!(a.C.sprite&&drawSprite(shown?'cheer':'stand',cx+sp.dx,gy-sp.h))) front=podiumAthlete(a.C,s,cx+sp.dx,gy-sp.h,shown);
-    if(shown){ ctx.fillStyle=['#ffd23a','#d9dde6','#e0975a'][k]; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx+sp.dx+(front?0:2),gy-sp.h-(front?1.3:1.02)*s,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); } });
+    if(shown){ ctx.fillStyle=['#ffd23a','#d9dde6','#e0975a'][k]; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx+sp.dx+(front?0:2),gy-sp.h-(front||STYLE.stick?1.3:1.02)*s,5,0,Math.PI*2); ctx.fill(); ctx.stroke(); } });
   for(let i=0;i<LW/36;i++){ const x=18+i*36; ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(x,314,10,Math.PI,0); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,305,11,3,0,0,Math.PI*2); ctx.fill(); ctx.fillRect(x-5,297,10,7); }
   ctx.fillStyle='#14284f'; ctx.fillRect(0,0,LW,20); txt('TORNEO',LW-8,11,'#e8262d',14,{align:'right',stroke:null});
   if(p.step>=1&&p.step<=3){ const k=3-p.step, a=p.order[k]; const names=['MEDALLA DE ORO','MEDALLA DE PLATA','MEDALLA DE BRONCE'];

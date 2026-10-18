@@ -34,7 +34,7 @@ const DIP=[[0,P(.78,.45,[.5,.6],[-.6,.5],[.6,1.2],[-.7,1.1])],[.18,P(.72,.85,[-.
 const TRIP=[[0,P(.66,.95,[.5,1.2],[-.6,.6],[1.6,.3],[1.2,.5])],[.45,P(.52,1.3,[.35,1.3],[-.5,.7],[2.0,.2],[1.5,.3])],[1,P(.76,.5,[.6,1.0],[-.4,.6],[.8,1.2],[-.6,1.1])]];
 // o: {blocks,setStage,airU,dipT,tripT,cheer,running,legP,v,clock,lane}
 export function sprintPose(o){
-  if(o.blocks) return tag(o.setStage>=1?POSE.set:POSE.crouch,'blocks');
+  if(o.blocks) return o.setStage>=1?tag(POSE.set,'set'):tag(POSE.crouch,'crouch');
   if(o.airU!=null) return track('hurdle',HURDLE,o.airU);
   if(o.dipT!=null) return track('dip',DIP,o.dipT);
   if(o.tripT>0) return track('trip',TRIP,clamp01(1-o.tripT/.42));
@@ -70,7 +70,7 @@ const PV_MAT=[[0,P(.25,-1.45,[2.5,.1],[2.4,.15],[-2.6,.2],[-2.4,.3])],[.35,P(.25
 
 export function fieldPose(V){
   const ev=V.ev, a=V.act, t=V.clock||0, k=ev.kind;
-  if(a&&/foul$/.test(a.k)) return tag(a.t>.7&&k!=='jav'?(k==='lj'?POSE.sit:POSE.lie):POSE.stumble,'foul');
+  if(a&&/foul$/.test(a.k)) return a.t>.7&&k!=='jav'?tag(k==='lj'?POSE.sit:POSE.lie,'foulend'):tag(POSE.stumble,'foul');
   if(k==='lj'){
     if(a&&a.k==='lj'&&a.u!=null){
       if(a.pt!=null) return track('ljland',LJ_LAND,a.pt);

@@ -71,4 +71,4 @@ export function initInput(){
 }
 // back arrow (bottom left): not while buttons are up (it sits in the left tap zone), nor once the result is in
 export function backHit(e){ const lx=(e.clientX-OX)/SC, ly=(e.clientY-OY)/SC;
-  if(lx>0&&lx<36&&ly>286&&ly<322&&!S.cue&&S.phase!=='wait'&&S.phase!=='post'&&!S.replay){ showEventCard(); return true; } return false; }
+  if(lx>0&&lx<36&&ly>286&&ly<322&&!S.cue&&!S.meter&&!S.finished&&!(S.renum>0)&&S.phase!=='act'&&S.phase!=='wait'&&S.phase!=='post'&&!S.replay){ showEventCard(); return true; } return false; }
