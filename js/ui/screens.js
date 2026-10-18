@@ -53,13 +53,13 @@ export function showMenu(){
   const stats=tour
     ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>5</b></div>`
     :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${wrText(ev)}</b></div>`;
-  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${i===menuSel?'<i>Elegida</i>':''}</button>`).join('')
-    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="5" aria-pressed="${tour}"><canvas data-pict="5"></canvas><b>TORNEO</b>${tour?'<i>Elegido</i>':''}</button>`;
+  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b></button>`).join('')
+    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="5" aria-pressed="${tour}"><canvas data-pict="5"></canvas><b>TORNEO</b></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><span class="m-ic">${ICON.medal}</span>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
-    <div class="m-info"><span class="m-tag">${tour?'Modo torneo':'Prueba elegida'}</span><h1>${tour?'Torneo':ev.name}</h1>
+    <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
       <div class="m-acts"><button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>${tour?'':'<button class="m-how" data-act="howto">Cómo se juega</button>'}</div></div>
     <div class="m-stats">${stats}</div>
     ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
