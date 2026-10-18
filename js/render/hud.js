@@ -47,6 +47,6 @@ export function drawCue(cue){
   if(cue.type==='side') at(cue.side,'#2fd166','');
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
-  else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ APRETADO',LW/2,150,'#fff',18,{lw:4}); }
+  else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='num') cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=NUMPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } });
 }

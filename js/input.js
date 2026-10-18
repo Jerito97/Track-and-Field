@@ -47,13 +47,15 @@ export function bothHit(){
 }
 export let holdN=0;
 let kbHold=false;
-// pole vault holds both buttons: two fingers on the screen, or Space/Enter
-const setHeld2=()=>{ if(S) S.held2=kbHold||holdN>=2; };
-export function holdStart(){ setHeld2(); if(screen!=='play'||!S) return; if(S.phase==='run'&&S.zone&&S.ev.kind==='jav'&&!S.meter){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
-export function holdEnd(){ setHeld2(); if(S&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
+// javelin and pole vault hold BOTH buttons: a finger on each half of the screen, or Space/Enter
+const down=new Map();  // pointerId -> 'L' / 'R'
+const setHeld2=()=>{ const v=[...down.values()]; if(S) S.held2=kbHold||(v.includes('L')&&v.includes('R')); };
+export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) return; if(S.phase==='run'&&S.zone&&S.ev.kind==='jav'&&!S.meter){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
+// letting go of either button throws
+export function holdEnd(){ setHeld2(); if(S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
 export function initInput(){
-  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&backHit(e)) return; const three=!!(S&&S.cue&&S.cue.type==='num'); onTap(zoneOf(e.clientX,three)); holdN++; holdStart(); },{passive:false});
-  const relHold=()=>{ holdN=Math.max(0,holdN-1); setHeld2(); if(holdN===0) holdEnd(); };
+  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&backHit(e)) return; const three=!!(S&&S.cue&&S.cue.type==='num'); onTap(zoneOf(e.clientX,three)); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
+  const relHold=e=>{ holdN=Math.max(0,holdN-1); down.delete(e.pointerId); holdEnd(); };
   addEventListener('pointerup',relHold); addEventListener('pointercancel',relHold);
   addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter'){ kbHold=false; holdEnd(); } });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
