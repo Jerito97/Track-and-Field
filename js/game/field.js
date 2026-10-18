@@ -95,12 +95,12 @@ export function updateAct(dt){
     S.x+=a.v*Math.max(0,1-a.t*1.5)*dt; S.pose=POSE.stumble;
     if(a.t>.7){ S.pose=POSE.sit; sand(S.x); landed(null); }
   } else if(a.k==='pv'){
-    if(a.stage==='plant'){ S.x+=S.v*dt*.8; S.pose=POSE.pvPlant; if(a.t>.22){ a.stage='rise'; a.t=0; a.xs=S.x; a.Trise=1.0+a.H*.05; S.meter={k:'rise',p:0}; S.cue={type:'both',hold:true,release:true,t:0}; } }
+    if(a.stage==='plant'){ S.x+=S.v*dt*.8; S.pose=POSE.pvPlant; if(a.t>.22){ a.stage='rise'; a.t=0; a.xs=S.x; a.Trise=.75+a.H*.035; S.meter={k:'rise',p:0}; S.cue={type:'both',hold:true,release:true,t:0}; } }
     else if(a.stage==='rise'){
       const u=Math.min(1,a.t/a.Trise), e=1-Math.pow(1-u,2);
       S.x=a.xs+(ev.line+.25-a.xs)*e; S.y=(a.H-.9)*e; S.rot=-Math.PI*e*.95; S.pose=POSE.pvSwing;
       // let go of both buttons at the top (star at the end of the pole); holding on too long = no push
-      if(S.meter&&S.meter.k==='rise'&&!a.pushed){ S.meter.p=a.t/(a.Trise*.85);
+      if(S.meter&&S.meter.k==='rise'&&!a.pushed){ S.meter.p=a.t/(a.Trise*.7);  // star at the end in ~.7 s
         if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
       if(a.pushed&&a.t>=Math.max(a.Trise*.7,.5)||a.t>a.Trise+.35){ S.cue=null; S.meter=null; a.stage='over'; a.t=0; a.yo=S.y; a.bonus=.7*(a.q2||0)-.25; }
     } else if(a.stage==='over'){
