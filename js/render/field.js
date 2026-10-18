@@ -48,6 +48,9 @@ export function drawField(V){
     ctx.fillStyle='#e8262d'; ctx.fillRect(p0,nb+15,p1-p0,3);
     for(let m=1;m<=10.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     const bx=X(ev.line); ctx.fillStyle='#fff'; ctx.fillRect(bx-.25*s,GY-4,.25*s,14); ctx.fillStyle='#e8262d'; ctx.fillRect(bx-1,GY-4,3,14);
+    // take-off footprints: this attempt's, and fainter ones from earlier rounds; how far from the board
+    (S.prints||[]).forEach(p=>{ if(p.round!==S.round) footprint(X(p.x),GY,s,.35); });
+    if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); }
     rivalFlags(V,X,GY);
   }
   if(ev.kind==='jav') rivalFlags(V,X,GY);
@@ -140,6 +143,10 @@ function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x, b=ev.bands;
     for(let x=x0+6;x<x1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
     ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x0-1,GY-25,3,40); });
 }
+// a shoe print on the track (toe to the right), at alpha a
+function footprint(x,y,s,a){ ctx.save(); ctx.globalAlpha=a; ctx.fillStyle='rgba(20,20,40,.55)';
+  ctx.beginPath(); ctx.ellipse(x-.06*s,y+4,.1*s,.045*s,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x-.2*s,y+4,.055*s,.04*s,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
 // field athletes are drawn FIELD_H*ppm logical px tall (same height as the rig pieces at that scale)
 const FIELD_H=2.37;
 // javelin length in metres (as long as the sheets draw it when it's whole)

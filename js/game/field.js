@@ -70,6 +70,8 @@ export function fieldAction(){
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=Math.max(.5,base+LJ_NOPUSH);
     S.act={k:'lj',t:0,T,x0:S.x,x1:ev.line+mark,base,mark,h,q2:0};
+    // footprint where the foot took off (stays for the next rounds, see prints)
+    S.print=S.x+LJ_FOOT; S.prints=(S.prints||[]).filter(p=>p.round!==S.round).concat({x:S.print,round:S.round});
     judge(1-d/ev.zone); noise(.12,.15); S.cueDelay=.12;
   }
   S.phase='act';

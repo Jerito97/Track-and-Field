@@ -3,6 +3,7 @@ import {ctx,LW} from '../canvas.js';
 import {HURDLES,INK} from '../config.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,animScale,drawAnim,drawAthlete,drawSprite} from '../rig.js';
+import {SPRINT_PPM} from '../game/core.js';
 import {ME,S} from '../state.js';
 import {sprintPose} from '../stick.js';
 import {STYLE} from '../storage.js';
@@ -11,7 +12,7 @@ import {txt} from './text.js';
 
 const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
-const YO_H=60, YO_K=YO_H/144, RIV_K=YO_H/(2.09*24); // 2.09: drawChar height in units of s
+const YO_H=72, YO_K=YO_H/144, RIV_K=YO_H/(2.09*SPRINT_PPM); // 2.09: drawChar height in units of s
 // drawn animations (100 m): the run cycle figure is RUN_H px tall, one full cycle (two steps) every STRIDE metres
 const STRIDE=4, RUN_H=YO_H*.97;
 // frame of a drawn animation for a runner: start (marks/set) or run cycle at distance x; null = use the rig

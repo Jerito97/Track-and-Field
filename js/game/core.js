@@ -12,7 +12,7 @@ import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js'
 
 export function newEvent(idx){
   const ev=EVENTS[idx];
-  setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ev.type==='sprint'?24:34,
+  setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,
      cue:null,last:null,streak:0,pend:null,fx:[],pops:[],clock:0,rot:0,fs:0,
      round:1,marks:ATH.map(()=>[]),snaps:[],replay:null});
   if(ev.type==='sprint'){
@@ -25,9 +25,11 @@ export function resetAttempt(){
   const ev=S.ev;
   Object.assign(S,{t:0,x:0,y:0,v:0,legP:0,cue:null,last:null,streak:0,pend:null,rot:0,pose:null,
     hk:0,armed:false,air:0,airT:.4,knocked:new Set(),stumble:0,finished:false,final:null,after:0,nextBoth:0,smoke:null,
-    act:null,jv:null,landX:null,bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,ppm:ev.type==='sprint'?24:34,camY:0,dip:0});
+    act:null,jv:null,landX:null,print:null,bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,camY:0,dip:0});
   S.cam=S.x-camLead();
 }
+// camera zoom (logical px per metre): sprints, field events
+export const SPRINT_PPM=29, FIELD_PPM=41;
 export const camLead=()=>LW*.36/S.ppm;
 export const CUEPOS={L:()=>[50,150],C:()=>[LW/2,150],R:()=>[LW-50,150]};
 // hurdle numbers: higher up and closer together; NUM_DX = gap between neighbours (logical px)

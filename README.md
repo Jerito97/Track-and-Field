@@ -60,6 +60,8 @@ js/
 
 - **Garrocha y jabalina:** semáforo más largo que el del largo (verde 18 a 12 m, amarillo 12 a 6 m, rojo últimos 6 m). Desde el verde no hay botones verdes y mantenés la velocidad; la acción se puede empezar en cualquier momento del semáforo. Garrocha (como la app original): la garrocha baja sola y la estrellita la recorre en 1 s, calculado para llegar a la punta a unos 3,5 m del cajón; apretar y mantener los dos botones naranjas (dos dedos, o Espacio) la clava, y cuanto más cerca de la punta esté la estrellita, más alto. Arriba, soltar cuando la estrellita llega a la otra punta. Jabalina: mantener apretados los dos botones, un dedo en cada mitad de la pantalla o Espacio (las chispitas recorren la jabalina en 0,7 s) y soltar cerca de la punta; con un solo dedo no arranca y levantar cualquiera de los dos lanza. Después de soltar el atleta sigue avanzando unos 3,5 m: si pasa la línea, el tiro es nulo aunque la jabalina ya esté en el aire. En las dos, llegar a la tabla o la línea sin terminar es nulo.
 - **Récords:** el récord mundial arranca vacío y lo pone el primero que haga una marca (solo cuentan las personas, no las máquinas).
+- **Huella en el largo:** donde despegaste queda una huella en la pista, con la distancia a la tabla; las de los intentos anteriores quedan más claras.
+- **Zoom:** carreras a 29 px por metro (atletas de 72 px), pruebas de campo a 41 px por metro (`SPRINT_PPM` y `FIELD_PPM` en `js/game/core.js`).
 - **Participantes:** 6 por prueba, vos y 5 rivales sorteados entre los otros atletas (en el torneo son los mismos en las cinco pruebas).
 
 ## Estilo stickman
