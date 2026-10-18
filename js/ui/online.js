@@ -1,0 +1,109 @@
+// Online tournament screens: create / join with a code, the tournament board (events to play, standings), and
+// playing an event for it. Everyone plays each event once, whenever they want.
+import {$,OV} from '../canvas.js';
+import {EVENTS} from '../config.js';
+import {newEvent,startPlay} from '../game/core.js';
+import {fmt,pts} from '../game/scoring.js';
+import {cleanCode,createTournament,getTournament,inviteLink,joinTournament,myTournaments,sendResult} from '../online.js';
+import {buildAthletes,G,setS,setScreen} from '../state.js';
+import {player,store} from '../storage.js';
+import {esc,place,showOv} from './screens.js';
+
+const evById=id=>EVENTS.find(e=>e.id===id);
+const card=(logo,title,body)=>`<div class="card o-card"><div class="head"><div class="logo">${logo}</div><h2>${title}</h2></div><div class="body">${body}</div></div>`;
+const err=msg=>`<p class="o-err" role="alert">${esc(msg)}</p>`;
+let busy=false;
+
+// hub: create, join, your tournaments
+export function showOnline(msg){
+  setS(null); setScreen('menu');
+  const mine=myTournaments();
+  showOv(card('ONLINE','Torneos con amigos',`
+    <p class="small">Creá un torneo y pasales el código a tus amigos. Cada uno juega las pruebas cuando quiera; al final gana el que suma más puntos.</p>
+    ${msg?err(msg):''}
+    <div class="o-two">
+      <div class="o-box"><span class="lbl">Crear torneo</span>
+        <input id="oname" maxlength="30" placeholder="Nombre (opcional)" autocomplete="off">
+        <div class="o-evs">${EVENTS.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}" checked> ${e.name}</label>`).join('')}</div>
+        <button class="btn" data-act="ocreate">Crear</button></div>
+      <div class="o-box"><span class="lbl">Unirme con un código</span>
+        <input id="ocode" maxlength="8" placeholder="Ej: K7Q4P" autocomplete="off" autocapitalize="characters">
+        <button class="btn" data-act="ojoin">Entrar</button>
+        ${mine.length?`<span class="lbl">Mis torneos</span><div class="o-list">${mine.map(c=>`<button class="o-item" data-act="oopen" data-code="${c}"><b>${c}</b><span>Ver ›</span></button>`).join('')}</div>`:''}
+      </div>
+    </div>
+    <div class="btns"><button class="btn alt" data-act="menu">Volver</button></div>`));
+  $('ocode').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="ojoin"]').click(); });
+}
+const loading=t=>showOv(card('ONLINE',t,'<p class="small o-wait">Cargando…</p>'));
+
+async function guard(fn){ if(busy) return; busy=true; try{ await fn(); } finally{ busy=false; } }
+export const onCreate=()=>guard(async()=>{
+  const events=[...OV.querySelectorAll('input[name="oev"]:checked')].map(i=>i.value), name=$('oname').value.trim();
+  if(!events.length){ showOnline('Elegí al menos una prueba.'); return; }
+  loading('Creando torneo');
+  try{ const code=await createTournament(name,events); await showTournament(code); }catch(e){ showOnline(e.message); }
+});
+export const onJoin=(raw)=>guard(async()=>{
+  const code=cleanCode(raw??$('ocode').value); if(code.length<4){ showOnline('Escribí el código que te pasaron.'); return; }
+  loading('Entrando');
+  try{ await joinTournament(code); await showTournament(code); }catch(e){ showOnline(e.message); }
+});
+
+// results waiting to be sent (no connection when the event ended): retried when the board opens
+const PENDING='odb-online-pending';
+const pending=()=>store.get(PENDING,[]);
+async function flush(){ const left=[];
+  for(const p of pending()){ try{ await sendResult(p.code,p.ev,p.mark); }catch(e){ if(!/ya jugaste|no existe|no estás/.test(e.message)) left.push(p); } }
+  store.set(PENDING,left); }
+
+// standings: points per event as in the solo tournament, summed; equal totals share the place
+function standings(data){
+  const evs=data.tournament.events.map(evById).filter(Boolean);
+  return data.entries.map(en=>{ const mine=data.results.filter(r=>r.player_id===en.player_id), marks={};
+    mine.forEach(r=>{ marks[r.ev]=r.mark; });
+    const total=evs.reduce((s,ev)=>s+(ev.id in marks?pts(ev,marks[ev.id]):0),0);
+    return {...en,marks,played:mine.length,total,done:mine.length>=evs.length}; }).sort((a,b)=>b.total-a.total);
+}
+let shown=null;  // code of the board on screen
+export const shownCode=()=>shown;
+export async function showTournament(code,msg){
+  code=cleanCode(code); shown=code; setS(null); setScreen('menu'); loading('Torneo '+code);
+  await flush();
+  let data; try{ data=await getTournament(code); }catch(e){ showOnline(e.message); return; }
+  if(shown!==code) return;
+  const p=player(), evs=data.tournament.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id);
+  if(!meRow){ try{ await joinTournament(code); }catch(e){ showOnline(e.message); return; } return showTournament(code,msg); }
+  const allDone=rows.length>1&&rows.every(r=>r.done);
+  const myEvs=evs.map(ev=>{ const played=ev.id in meRow.marks;
+    return `<div class="o-ev${played?' done':''}"><b>${ev.name}</b>${played?`<span>${fmt(ev,meRow.marks[ev.id])} · ${pts(ev,meRow.marks[ev.id])} pts</span>`:`<button class="btn" data-act="oplay" data-ev="${ev.id}">Jugar</button>`}</div>`; }).join('');
+  const table=`<table class="o-table"><thead><tr><th></th><th></th>${evs.map(ev=>`<th>${ev.tag}</th>`).join('')}<th>Pts</th></tr></thead><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.total));
+    return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}.${allDone&&pl<=3?' '+['🥇','🥈','🥉'][pl-1]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td>${evs.map(ev=>`<td class="sub">${ev.id in r.marks?fmt(ev,r.marks[ev.id]):'·'}</td>`).join('')}<td>${r.total}</td></tr>`; }).join('')}</tbody></table>`;
+  showOv(card('TORNEO',esc(data.tournament.name),`
+    ${msg?err(msg):''}
+    <div class="o-code"><div><span class="lbl">Código</span><b>${code}</b></div><button class="btn" data-act="oshare" data-code="${code}">Invitar</button></div>
+    ${allDone?'<p class="small o-final"><b>¡Torneo terminado!</b> Todos jugaron todas las pruebas.</p>':`<p class="small">Cada prueba se juega <b>una sola vez</b>: si salís a la mitad, cuenta como nulo.${rows.length<2?' Pasales el código a tus amigos para que se sumen.':''}</p>`}
+    <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
+    <span class="lbl">Tabla</span>${table}
+    <div class="btns"><button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button><button class="btn alt" data-act="online">Volver</button></div>`));
+}
+export async function onShare(code){
+  const url=inviteLink(code), text=`¡Sumate a mi torneo de Track & Field! Código: ${code}`;
+  try{ if(navigator.share){ await navigator.share({title:'Track & Field',text,url}); return; } }catch(e){ return; }
+  try{ await navigator.clipboard.writeText(`${text} ${url}`); showTournament(code,'Copiado: pegalo en WhatsApp o donde quieras.'); }
+  catch(e){ showTournament(code,`Pasales el código ${code} o este link: ${url}`); }
+}
+// play an event for the tournament (against the machines, as usual; only your mark counts)
+export function playOnline(code,evId){
+  G.mode='online'; G.code=code; G.evIdx=EVENTS.findIndex(e=>e.id===evId); G.sent=false;
+  buildAthletes(); newEvent(G.evIdx); startPlay();
+}
+// the event ended (mark, or null for a foul / leaving halfway): send it, keep it for later if offline
+export async function finishOnline(mark){
+  if(G.sent) return; G.sent=true; const code=G.code, ev=EVENTS[G.evIdx].id;
+  try{ await sendResult(code,ev,mark); }catch(e){ if(!/ya jugaste/.test(e.message)) store.set(PENDING,pending().concat({code,ev,mark})); }
+}
+export async function leaveOnline(){ await finishOnline(null); showTournament(G.code); }
+// opened with ?t=CODE (invite link): join once there's a player
+export function inviteFromUrl(){ const c=new URLSearchParams(location.search).get('t'); return c?cleanCode(c):null; }
+export function clearInvite(){ try{ history.replaceState(null,'',location.pathname); }catch(e){ /* ignore */ } }

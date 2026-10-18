@@ -74,6 +74,12 @@ La primera vez que se abre el juego hay que crear un jugador: nombre y color del
 
 Todo se guarda en el navegador (`localStorage`, clave `odb-players`; ver `js/storage.js`). Cada jugador tiene un id único y su historial queda listo para subirlo a un servidor cuando haya torneos con otra gente.
 
+## Torneos online
+
+En el menú, tarjeta **Torneo → Con amigos**: crear un torneo (nombre y pruebas) da un código de 5 letras; el botón **Invitar** comparte el código y un link (`?t=CÓDIGO`) que abre el juego directo en el torneo (si es la primera vez, primero se crea el jugador). Cada uno juega cada prueba **una sola vez**, cuando quiere; salir a la mitad cuenta como nulo. La tabla suma los puntos de cada prueba como en el torneo contra la máquina.
+
+Cómo funciona: el juego está publicado en **Vercel**; `api/t.js` es una función de Vercel que guarda torneos, jugadores y resultados en **Neon** (Postgres). La conexión la pone la integración de Neon en Vercel (variable `DATABASE_URL`); las tablas se crean solas la primera vez. La función valida lo que recibe (pruebas del torneo, marcas posibles, un resultado por prueba). Si no hay conexión al terminar una prueba, el resultado queda guardado y se manda la próxima vez que se abre el torneo.
+
 ## Estilo stickman
 
 El juego usa stickmen dibujados con código (`drawStick` en `js/draw/character.js`): líneas gruesas y cabeza rellena, del color de la musculosa de cada atleta, sobre el mismo esqueleto y las mismas poses (`js/poses.js`). Los personajes dibujados (piezas y tiras de animación en `assets/characters/`) quedan guardados pero desactivados: para volver a usarlos, poné `stick:false` en `STYLE` (`js/storage.js`); recién ahí se cargan sus imágenes.

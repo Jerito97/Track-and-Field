@@ -5,7 +5,8 @@ import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,startRun} fro
 import {fieldAction,javThrow} from './game/field.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
-import {S,screen} from './state.js';
+import {G,S,screen} from './state.js';
+import {leaveOnline} from './ui/online.js';
 import {showEventCard} from './ui/screens.js';
 
 export function zoneOf(clientX,three){ const f=clientX/SW;
@@ -71,4 +72,4 @@ export function initInput(){
 }
 // back arrow (bottom left): not while buttons are up (it sits in the left tap zone), nor once the result is in
 export function backHit(e){ const lx=(e.clientX-OX)/SC, ly=(e.clientY-OY)/SC;
-  if(lx>0&&lx<36&&ly>286&&ly<322&&!S.cue&&!S.meter&&!S.finished&&!(S.renum>0)&&S.phase!=='act'&&S.phase!=='wait'&&S.phase!=='post'&&!S.replay){ showEventCard(); return true; } return false; }
+  if(lx>0&&lx<36&&ly>286&&ly<322&&!S.cue&&!S.meter&&!S.finished&&!(S.renum>0)&&S.phase!=='act'&&S.phase!=='wait'&&S.phase!=='post'&&!S.replay){ if(G.mode==='online') leaveOnline(); else showEventCard(); return true; } return false; }

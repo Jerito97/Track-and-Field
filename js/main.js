@@ -7,14 +7,18 @@ import {POSE,runPose} from './poses.js';
 import {frame} from './render/frame.js';
 import {drawRig} from './rig.js';
 import {buildAthletes,G,ME,S,screen} from './state.js';
+import {clearInvite,inviteFromUrl,onJoin} from './ui/online.js';
 import {initScreens,paintOv,showMenu} from './ui/screens.js';
+import {player} from './storage.js';
 
 addEventListener('resize',resize); resize();
 buildAthletes();
 initInput();
 initScreens();
 await loadAssets();
-showMenu();
+// invite link (?t=CODE): straight into the tournament (a new player is created first, then joins)
+const inv=inviteFromUrl();
+if(inv&&player()){ clearInvite(); onJoin(inv); } else showMenu();
 let lastT=performance.now();
 function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);

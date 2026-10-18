@@ -1,0 +1,9 @@
+{
+  "name": "track-and-field",
+  "private": true,
+  "type": "module",
+  "description": "Juego de atletismo para el navegador. La carpeta api/ son funciones de Vercel (torneos online, base Neon).",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}

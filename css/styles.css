@@ -214,3 +214,32 @@ tr.me td{background:var(--red)}
 .p-pl.on{border-color:var(--sun)}
 .p-recs{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media (max-width:560px){ .p-recs{grid-template-columns:repeat(3,minmax(0,1fr))} }
+
+/* ===== Online tournaments ===== */
+.m-play.alt{background:#2a4377;box-shadow:0 4px 0 #14284f}
+.o-card{max-width:760px}
+.o-err{margin:0;background:rgba(232,38,45,.18);border:1px solid var(--red);border-radius:8px;padding:6px 10px;font-size:.9rem}
+.o-wait{text-align:center;padding:20px 0}
+.o-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:620px){ .o-two{grid-template-columns:1fr} }
+.o-box{background:rgba(255,255,255,.06);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.o-box input[type=text],.o-box input:not([type]){font:inherit;font-size:1.05rem;padding:7px 10px;border-radius:8px;border:2px solid rgba(255,255,255,.25);background:#0e1d3d;color:#fff;min-width:0}
+#ocode{font-family:var(--f-display);letter-spacing:.2em;text-transform:uppercase;font-size:1.4rem}
+.o-evs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.88rem}
+.o-evs input{accent-color:var(--red)}
+.o-box .btn{font-size:1.1rem;padding:6px 12px}
+.o-list{display:flex;flex-direction:column;gap:4px}
+.o-item{font:inherit;color:#fff;background:#22407a;border:0;border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;cursor:pointer}
+.o-item b{font-family:var(--f-display);font-weight:400;letter-spacing:.15em}
+.o-item span{color:var(--sun);font-size:.85rem}
+.o-code{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 12px}
+.o-code b{display:block;font-family:var(--f-display);font-weight:400;font-size:2.2rem;letter-spacing:.25em;color:var(--sun);line-height:1}
+.o-evlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.o-ev{background:rgba(255,255,255,.06);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.o-ev b{font-family:var(--f-display);font-weight:400;letter-spacing:.04em;text-transform:uppercase}
+.o-ev span{font-size:.85rem;color:var(--sun)}
+.o-ev .btn{font-size:1rem;padding:4px 12px;box-shadow:0 3px 0 var(--red-d)}
+.o-ev.done{opacity:.85}
+.o-table th{font-family:var(--f-display);font-weight:400;font-size:.8rem;letter-spacing:.04em;color:#aab8d8;text-align:center;padding:0 4px}
+.o-table td.sub{text-align:center;font-size:.8rem}
+.o-final b{color:var(--sun)}

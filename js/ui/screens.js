@@ -7,6 +7,7 @@ import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
+import {clearInvite,finishOnline,inviteFromUrl,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
@@ -47,7 +48,7 @@ const ICON={
 };
 // world record: best of any player on this device, with who set it
 const wrText=ev=>{ const w=worldRec(ev); return w?`${fmt(ev,w.v)} <small>${esc(w.name)}</small>`:'—'; };
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 export function showMenu(){
   if(!player()){ showCreate(true); return; }
   setS(null); setScreen('menu');
@@ -63,7 +64,7 @@ export function showMenu(){
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
     <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts"><button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>${tour?'':'<button class="m-how" data-act="howto">Cómo se juega</button>'}</div></div>
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button><button class="m-how" data-act="howto">Cómo se juega</button>'}</div></div>
     <div class="m-stats">${stats}</div>
     ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
   </section>
@@ -142,7 +143,7 @@ export function showEventCard(){
   </div></div>`);
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
-const place=(rows,i,valFmt)=>{ let j=i; while(j>0&&valFmt(rows[j-1])===valFmt(rows[i])) j--; return j+1; };
+export const place=(rows,i,valFmt)=>{ let j=i; while(j>0&&valFmt(rows[j-1])===valFmt(rows[i])) j--; return j+1; };
 export function table(tag,title,rows,valFmt,subFmt,btn){
   return `<div class="card"><div class="head"><div class="logo">${tag}</div><h2>${title}</h2></div><div class="body">
     <table><tbody>${rows.map((r,i)=>`<tr class="${r.a.me?'me':''}"><td>${place(rows,i,valFmt)}.</td><td class="nm"><canvas data-face="${r.a.C.id}"></canvas>${esc(r.a.name)}</td>${subFmt?`<td class="sub">${subFmt(r)}</td>`:''}<td>${valFmt(r)}</td></tr>`).join('')}</tbody></table>
@@ -159,10 +160,12 @@ export function endEvent(vals){
   const newRec=recordEvent(ev,mine,mine==null?null:place(rows,mi,r=>fmt(ev,r.v)),ATH.length,G.mode);
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
+  if(G.mode==='online') finishOnline(mine);
   showOv(table(ev.tag,newRec?'¡Nuevo récord!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
 }
 export function afterResults(){
   const ev=S.ev;
+  if(G.mode==='online'){ showTournament(G.code); return; }
   if(G.mode!=='tour'){ showEventCard(); return; }
   const p=G.pts[ev.id];
   showOv(table(ev.tag,'Puntos',ATH.map((a,i)=>({a,i,v:p[i]})).sort((x,y)=>y.v-x.v),r=>String(r.v),null,'standings'));
@@ -186,12 +189,18 @@ OV.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b) return; unlockAudio(); const a=b.dataset.act;
   if(a==='event'){ G.mode='single'; G.evIdx=+b.dataset.i; buildAthletes(); showEventCard(); }
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
+  else if(a==='online') showOnline();
+  else if(a==='ocreate') onCreate();
+  else if(a==='ojoin') onJoin();
+  else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
+  else if(a==='oshare') onShare(b.dataset.code);
+  else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='profile') showProfile();
   else if(a==='players') showPlayers();
   else if(a==='newplayer') showCreate(false);
   else if(a==='switch'){ switchPlayer(b.dataset.id); showMenu(); }
   else if(a==='color'){ pickColor(b.dataset.c); }
-  else if(a==='create'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(!name){ n.focus(); n.classList.add('bad'); return; } createPlayer(name,newColor); showMenu(); }
+  else if(a==='create'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(!name){ n.focus(); n.classList.add('bad'); return; } createPlayer(name,newColor); const inv=inviteFromUrl(); if(inv){ clearInvite(); onJoin(inv); } else showMenu(); }
   else if(a==='rename'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(name){ updatePlayer({name}); showProfile(); } }
   else if(a==='scroll'){ const row=OV.querySelector('.m-evs'); row.scrollBy({left:+b.dataset.d*row.clientWidth*.8,behavior:'smooth'}); }
   else if(a==='sel'){ menuSel=+b.dataset.i; store.set('odb-menusel',menuSel); showMenu(); }
