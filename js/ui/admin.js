@@ -6,14 +6,16 @@ import {EVENTS} from '../config.js';
 import {fmt} from '../game/scoring.js';
 import {adminOp} from '../online.js';
 import {setS,setScreen} from '../state.js';
-import {player} from '../storage.js';
+import {player,store} from '../storage.js';
 import {esc,paintOv,showOv} from './screens.js';
 
-let allowed=null;  // player id the server said yes for
+// player id the server said yes for (kept on the phone, so it also works without connection)
+let allowed=store.get('odb-admin',null);
 export const isAdmin=()=>allowed!=null&&allowed===player()?.id;
-// asked once per player (quietly): shows the button in the profile when it answers yes
-export function checkAdmin(then){ const p=player(); if(!p?.token||allowed===p.id) return;
-  adminOp('check').then(()=>{ if(player()?.id===p.id){ allowed=p.id; then?.(); } },()=>{}); }
+// asked once per player (quietly): shows the admin things (profile button, events in testing) when it answers yes
+let asked=null;
+export function checkAdmin(then){ const p=player(); if(!p?.token||allowed===p.id||asked===p.id) return; asked=p.id;
+  adminOp('check').then(()=>{ if(player()?.id===p.id){ allowed=p.id; store.set('odb-admin',allowed); then?.(); } },()=>{}); }
 
 const card=(title,body,btns)=>`<div class="card a-card"><div class="head"><div class="logo">ADMIN</div><h2>${title}</h2></div><div class="body">${body}<div class="btns">${btns}</div></div></div>`;
 const day=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});

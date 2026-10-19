@@ -18,8 +18,12 @@ export const EVENTS=[
  {id:'jav',name:'Jabalina',tag:'JABALINA',type:'field',kind:'jav',line:57,zone:18,bands:[18,12,6],ref:80,
   help:'Tocá los <b>botones verdes</b> para tomar carrera. Antes de la línea el piso se pinta de <b>verde, amarillo y rojo</b>: desde el verde ya no hay botones verdes y mantenés la velocidad. Cuando quieras, <b>mantené apretados los dos botones</b> (un dedo en cada uno, o Espacio) y unas <b>chispitas</b> recorren la jabalina desde atrás hasta la punta: soltá lo más cerca posible de la punta. Después de soltar seguís avanzando unos metros: si pasás la línea, aunque ya la hayas tirado, es <b>nulo</b>. Tenés 3 rondas.'}
 ];
-// 10 hurdles, a bit more spread out than the real 9.14 m so there's time for the 1-2-3 between them
 // 9 hurdles 11.3 m apart (more time than the real 10 x 9.14 m to tap the three numbers at full speed); the last one 7 m before the line
+// events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
+// tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
+export const BETA=[];
+// an event by index: EVENTS first, then BETA
+export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];
 export const HURDLES=Array.from({length:9},(_,i)=>12.5+11.3*i);
 export const FAN_SHIRTS=['#e8262d','#2f6fd6','#ffd23a','#1f9e54','#ffffff','#ff8a1f','#8e4fd6','#8fd0f5','#f05a9c'];
 export const SKINS=['#f6d0b0','#e9c09a','#c88d63','#8a5a3b','#5e3b26'];

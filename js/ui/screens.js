@@ -2,7 +2,7 @@
 import {ANIMS,RIGS,SPR} from '../assets.js';
 import {soundOn,toggleSound,unlockAudio} from '../audio.js';
 import {$,OV} from '../canvas.js';
-import {CHARS,EVENTS,INK} from '../config.js';
+import {BETA,CHARS,evAt,EVENTS,INK} from '../config.js';
 import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {startLap} from '../game/lap.js';
@@ -31,7 +31,7 @@ export function paintFace(c,C){ const px=c.clientWidth||34, d=2; c.width=px*d; c
   if(head){ const sh=head.h*.9, sc=Math.min(c.width/head.w,c.height/sh); g.drawImage(head.im,0,0,head.w,sh,(c.width-head.w*sc)/2,(c.height-sh*sc)/2,head.w*sc,sh*sc); return; }
   g.scale(d,d); drawHead(g,px*1.25,px*.5,px*.56,C,false,Math.max(1,px*.04)); }
 export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.height=px*d; const g=c.getContext('2d'); g.scale(d,d);
-  const C=ME(), s=px*.36, ox=px*.46, oy=px*.86, k=i<EVENTS.length?EVENTS[i].id:'tour';
+  const C=ME(), s=px*.36, ox=px*.46, oy=px*.86, k=i<EVENTS.length+BETA.length?evAt(i).id:'tour';
   if(k==='tour'){ g.fillStyle='#ffd23a'; g.strokeStyle=INK; g.lineWidth=2; g.beginPath(); g.moveTo(px*.3,px*.2); g.lineTo(px*.7,px*.2); g.quadraticCurveTo(px*.7,px*.6,px*.5,px*.62); g.quadraticCurveTo(px*.3,px*.6,px*.3,px*.2); g.fill(); g.stroke(); g.fillRect(px*.44,px*.62,px*.12,px*.14); g.strokeRect(px*.44,px*.62,px*.12,px*.14); g.fillRect(px*.32,px*.76,px*.36,px*.08); g.strokeRect(px*.32,px*.76,px*.36,px*.08); return; }
   if(k==='pv'&&!STYLE.stick){ g.strokeStyle=INK; g.lineWidth=3; g.beginPath(); g.moveTo(px*.15,px*.95); g.lineTo(px*.55,px*.12); g.stroke(); g.strokeStyle='#7ccf3a'; g.lineWidth=1.6; g.stroke(); }
   if(C.sprite&&(k==='100'||k==='110h')){ const sp=SPR[k==='100'?'run1':'hurdle']; const draw=()=>{ const sc=Math.min(px*.9/sp.w,px*.9/sp.h); g.drawImage(sp.im,(px-sp.w*sc)/2,(px-sp.h*sc)/2,sp.w*sc,sp.h*sc); }; if(sp.im.complete) draw(); else sp.im.addEventListener('load',draw); return; }
@@ -47,11 +47,13 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
 // illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
 export const THUMBS={'100':'34% 30%','lj':'44% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','tour':'52% 30%','surv':'50% 35%'};
-const thumbKey=i=>i<EVENTS.length?EVENTS[i].id:'tour';
+const thumbKey=i=>i>=0&&i<EVENTS.length+BETA.length?evAt(i).id:'tour';
+// the events on the events screen: the published ones, and for the admin also the ones in testing
+const shownEvents=()=>isAdmin()?EVENTS.concat(BETA):EVENTS;
 export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.jpg" alt="" style="object-position:${pos}"">`:`<canvas data-pict="${i}"></canvas>`; };
 // events screen: the chosen event, remembered between visits (the tournament has its own screen now)
 const TOUR=-1;
-let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length?v:0; })();
+let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length+BETA.length?v:0; })();
 const ICON={
   medal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h4l1 5-3 2zM17 2h-4l-1 5 3 2z" fill="#e8262d"/><circle cx="12" cy="15" r="6.5" fill="#ffd23a" stroke="#a8740c" stroke-width="1.5"/><path d="M12 11.6l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#a8740c"/></svg>',
   cup:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0zM5 4h2v3a2 2 0 0 1-2-2zM19 4h-2v3a2 2 0 0 0 2-2zM11 12h2v4h-2zM8 17h8v3H8z" fill="currentColor"/></svg>',
@@ -66,16 +68,16 @@ export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 function heroArt(){ const k=thumbKey(menuSel);
   return Object.entries(THUMBS).map(([id,pos])=>`<img class="m-th${id===k?' on':''}" data-k="${id}" src="assets/thumbs/${id}.jpg" alt="" style="object-position:${pos}">`).join('')
     +(THUMBS[k]?'':`<canvas data-pict="${menuSel}"></canvas>`); }
-function heroInfo(){ const tour=menuSel===TOUR, ev=EVENTS[menuSel];
+function heroInfo(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return `<h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`}</div>`; }
-function heroStats(){ const tour=menuSel===TOUR, ev=EVENTS[menuSel];
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)}</div>`; }
+function heroStats(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return tour
     ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
     :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b id="wr">${wrText(ev)}</b></div>`; }
 // world record of the chosen event, once the server answers
-function loadWr(){ if(menuSel===TOUR) return; const ev=EVENTS[menuSel];
-  syncMarks().then(()=>loadTop(ev.id)).then(()=>{ const el=$('wr'); if(el&&EVENTS[menuSel]===ev) el.innerHTML=wrText(ev); },()=>{}); }
+function loadWr(){ if(menuSel===TOUR||evAt(menuSel).beta) return; const ev=evAt(menuSel);
+  syncMarks().then(()=>loadTop(ev.id)).then(()=>{ const el=$('wr'); if(el&&evAt(menuSel)===ev) el.innerHTML=wrText(ev); },()=>{}); }
 // choosing another card: only the hero and the cards' highlight change
 function selectEvent(i){
   menuSel=i; store.set('odb-menusel',menuSel);
@@ -122,9 +124,11 @@ export function showTours(){
 // events: the chosen event in big, the carousel of events below
 export function showEvents(){
   setS(null); setScreen('menu');
-  // events marked nueva:true in config.js (invented ones) get a small NUEVA tag
-  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}">${art(i,true)}<b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
-;
+  if(menuSel>=shownEvents().length) menuSel=0;
+  // the admin: events in testing show up once the server confirms (the screen redraws)
+  checkAdmin(()=>{ if(BETA.length&&OV.querySelector('.m-evs')) showEvents(); });
+  // events marked nueva:true in config.js (invented ones) get a small NUEVA tag; events in testing, EN PRUEBA
+  const cards=shownEvents().map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva||e.beta?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}">${art(i,true)}<b>${e.tag}</b>${e.beta?'<i class="beta">En prueba</i>':e.nueva?'<i>Nueva</i>':''}</button>`).join('');
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><button class="m-back" data-act="menu" aria-label="Volver al menú">‹</button>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
@@ -189,7 +193,7 @@ export function showPlayers(){
   </div></div>`);
 }
 export function showEventCard(){
-  const ev=EVENTS[G.evIdx]; setS(null); setScreen('menu');
+  const ev=evAt(G.evIdx); setS(null); setScreen('menu');
   const tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/${EVENTS.length}`:''}</h2></div><div class="body">
     <div class="row2"><div class="pict${THUMBS[ev.id]?' img':''}">${art(G.evIdx)}</div>

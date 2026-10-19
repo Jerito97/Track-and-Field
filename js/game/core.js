@@ -1,7 +1,7 @@
 // Event setup, cues, popups and the per-frame update dispatcher
 import {tone} from '../audio.js';
 import {LW} from '../canvas.js';
-import {EVENTS} from '../config.js';
+import {evAt} from '../config.js';
 import {POSE,runPose} from '../poses.js';
 import {ATH,S,setS,setScreen} from '../state.js';
 import {hideOv} from '../ui/screens.js';
@@ -11,7 +11,7 @@ import {snap,updateReplay} from './replay.js';
 import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js';
 
 export function newEvent(idx){
-  const ev=EVENTS[idx];
+  const ev=evAt(idx);
   setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,
      cue:null,last:null,streak:0,pend:null,fx:[],pops:[],clock:0,rot:0,fs:0,
      round:1,marks:ATH.map(()=>[]),snaps:[],replay:null});

@@ -439,3 +439,4 @@ tr.me td{background:var(--red)}
   .row2{grid-template-columns:1fr}
   .s-final{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+.m-ev i.beta{background:#ff7a1a;color:#fff}
