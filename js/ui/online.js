@@ -108,12 +108,27 @@ function standings(data){
 }
 let shown=null;  // code of the board on screen
 export const shownCode=()=>shown;
-export async function showTournament(code,msg){
-  code=cleanCode(code); shown=code; setS(null); setScreen('menu'); loading('Torneo '+code);
+// while a board of a tournament in play is open (and the phone screen on), it updates itself every few seconds:
+// only redrawn when something changed, keeping the scroll and without the «Cargando» in between
+const AUTO=15000;
+let auto=null, lastSig='';
+const onBoard=code=>!!OV.querySelector(`[data-act="orefresh"][data-code="${code}"]`);
+function autoRefresh(code){ clearTimeout(auto);
+  auto=setTimeout(()=>{ if(shown!==code||!onBoard(code)) return;
+    // not while about to end it (the confirm would be lost) or while the screen is off
+    if(document.visibilityState!=='visible'||OV.querySelector('.o-close[data-sure]')) return autoRefresh(code);
+    showTournament(code,null,true); },AUTO); }
+export async function showTournament(code,msg,silent){
+  code=cleanCode(code);
+  if(silent&&(shown!==code||!onBoard(code))) return;
+  if(!silent){ shown=code; lastSig=''; setS(null); setScreen('menu'); loading('Torneo '+code); }
   if(G.sending) await G.sending;
   await flush();
-  let data; try{ data=await getTournament(code); }catch(e){ showOnline(e.message); return; }
+  let data; try{ data=await getTournament(code); }catch(e){ if(silent) return autoRefresh(code); showOnline(e.message); return; }
   if(shown!==code) return;
+  if(silent){ if(!onBoard(code)) return; const sig=JSON.stringify([data.entries,data.results,data.tournament.finished]); if(sig===lastSig) return autoRefresh(code); }
+  lastSig=JSON.stringify([data.entries,data.results,data.tournament.finished]);
+  const keepY=silent?OV.scrollTop:0;
   // your results still waiting for connection count as played here
   const mine=pending().filter(q=>q.pid===player().id&&q.code===code&&!data.results.some(r=>r.player_id===q.pid&&r.ev===q.ev));
   data.results=data.results.concat(mine.map(q=>({player_id:q.pid,ev:q.ev,mark:q.mark})));
@@ -134,6 +149,8 @@ export async function showTournament(code,msg){
     <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
     <span class="lbl">Tabla${fin?' final':''}</span>${table}
     <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
+  if(silent) OV.scrollTop=keepY;
+  if(!fin) autoRefresh(code);
 }
 // who created it can end it now (asks once more first)
 export async function onClose(b){
