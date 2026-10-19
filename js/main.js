@@ -10,7 +10,7 @@ import {buildAthletes,G,ME,S,screen} from './state.js';
 import {player} from './storage.js';
 import {syncMarks} from './ui/board.js';
 import {clearInvite,flush,inviteFromUrl,onJoin} from './ui/online.js';
-import {initScreens,paintOv,showMenu} from './ui/screens.js';
+import {initScreens,paintOv,showMenu,showPause} from './ui/screens.js';
 
 addEventListener('resize',resize); resize();
 buildAthletes();
@@ -34,6 +34,8 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
 }
 // back online: records made without connection go up to the world top 10, waiting tournament results are sent
 addEventListener('online',()=>{ syncMarks(); flush(); });
+// leaving the app (or locking the phone) in the middle of an event pauses it
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&screen==='play'&&S&&S.ev&&!S.replay) showPause(); });
 let lastT=performance.now();
 function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);

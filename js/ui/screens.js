@@ -9,7 +9,7 @@ import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
-import {playSurv,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
+import {playSurv,resumeSurvival,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
 import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
@@ -95,14 +95,14 @@ export function showMenu(){
   if(!player()){ showAccount('first'); return; }
   if(!player().token&&!skipProtect){ showAccount('protect'); return; }
   setS(null); setScreen('menu');
-  const sb=player().survBest;
+  const sb=player().survBest, sv=store.get('odb-surv-'+player().id,null);
   const mode=(act,img,pos,name,sub,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.jpg" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b><small>${sub}</small></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí cómo jugar <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas',`Las ${EVENTS.length} pruebas, de a una`)}
     ${mode('tours','tour',THUMBS.tour,'Torneos','Con amigos o contra la máquina')}
-    ${mode('surv',null,'','Supervivencia',sb?`Tu mejor: ${sb.pts} pts`:'Ganale a la máquina',' surv')}
+    ${mode('surv',null,'','Supervivencia',sv?`Partida guardada: ronda ${sv.round} · ${sv.pts} pts`:sb?`Tu mejor: ${sb.pts} pts`:'Ganale a la máquina',' surv')}
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
@@ -201,7 +201,7 @@ export function showPause(){
   if(!S||!S.ev) return;
   const online=G.mode==='online', tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">PAUSA</div><h2>${S.ev.name}</h2></div><div class="body">
-    ${online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, se termina la partida (tus puntos se guardan).</p>':''}
+    ${online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, la partida queda guardada y la seguís después desde esta prueba.</p>':''}
     <div class="btns"><button class="btn" data-act="resume" data-focus>Reanudar</button><button class="btn alt" data-act="quit">Volver al menú</button></div></div></div>`,'pause');
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
@@ -286,12 +286,13 @@ OV.addEventListener('click',e=>{
   else if(a==='tours') showTours();
   else if(a==='surv') showSurvival();
   else if(a==='sstart') startSurvival();
+  else if(a==='sresume') resumeSurvival();
   else if(a==='splay') playSurv();
   else if(a==='snext') survNext();
-  else if(a==='squit') survQuit();
+  else if(a==='squit') survQuit(b);
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='resume'){ hideOv(); setScreen('play'); }
-  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else if(G.mode==='surv') survQuit(); else showMenu(); }
+  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else showMenu(); }
   else if(a==='menu') showMenu();
   else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')){ b.innerHTML=ICON.snd(on); b.setAttribute('aria-label','Sonido '+(on?'activado':'apagado')); } else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
