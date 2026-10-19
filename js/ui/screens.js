@@ -9,6 +9,7 @@ import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
+import {playSurv,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
 import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
@@ -42,13 +43,12 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
 }
 // illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
-const THUMBS={'100':'34% 30%','lj':'44% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','tour':'52% 30%'};
+export const THUMBS={'100':'34% 30%','lj':'44% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','tour':'52% 30%'};
 const thumbKey=i=>i<EVENTS.length?EVENTS[i].id:'tour';
-const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.jpg" alt="" style="object-position:${pos}"">`:`<canvas data-pict="${i}"></canvas>`; };
-// main menu: selected event (0-4) or tournament (5), remembered between visits
-// the tournament card comes after the events (index TOUR)
-const TOUR=EVENTS.length;
-let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<=TOUR?v:0; })();
+export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.jpg" alt="" style="object-position:${pos}"">`:`<canvas data-pict="${i}"></canvas>`; };
+// events screen: the chosen event, remembered between visits (the tournament has its own screen now)
+const TOUR=-1;
+let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length?v:0; })();
 const ICON={
   medal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h4l1 5-3 2zM17 2h-4l-1 5 3 2z" fill="#e8262d"/><circle cx="12" cy="15" r="6.5" fill="#ffd23a" stroke="#a8740c" stroke-width="1.5"/><path d="M12 11.6l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#a8740c"/></svg>',
   cup:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0zM5 4h2v3a2 2 0 0 1-2-2zM19 4h-2v3a2 2 0 0 0 2-2zM11 12h2v4h-2zM8 17h8v3H8z" fill="currentColor"/></svg>',
@@ -76,7 +76,7 @@ function loadWr(){ if(menuSel===TOUR) return; const ev=EVENTS[menuSel];
 // choosing another card: only the hero and the cards' highlight change
 function selectEvent(i){
   menuSel=i; store.set('odb-menusel',menuSel);
-  const art=OV.querySelector('.mm .m-art'); if(!art){ showMenu(); return; }
+  const art=OV.querySelector('.mm .m-art'); if(!art){ showEvents(); return; }
   const k=thumbKey(i);
   art.querySelectorAll('canvas').forEach(c=>c.remove());
   if(THUMBS[k]){ art.classList.add('img'); art.querySelectorAll('.m-th').forEach(im=>im.classList.toggle('on',im.dataset.k===k)); }
@@ -85,27 +85,53 @@ function selectEvent(i){
   OV.querySelectorAll('.m-evs .m-ev').forEach(b=>{ const on=+b.dataset.i===i; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
   paintOv(); keepInView(); loadWr();
 }
+// main menu: three modes (events, tournaments, survival), the player and the players below
+const footer=()=>`<footer class="m-bot">
+    <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
+    <button class="m-people" data-act="people"><span class="m-lbl">Jugadores</span><span class="u-row">${peopleStrip()}</span></button>
+    <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
+  </footer>`;
 export function showMenu(){
   if(!player()){ showAccount('first'); return; }
   if(!player().token&&!skipProtect){ showAccount('protect'); return; }
   setS(null); setScreen('menu');
-  const tour=menuSel===TOUR;
+  const sb=player().survBest;
+  const mode=(act,img,pos,name,sub,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.jpg" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b><small>${sub}</small></button>`;
+  showOv(`<div class="mm">
+  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí cómo jugar <span class="m-ic">${ICON.cup}</span></div></header>
+  <section class="m-modes">
+    ${mode('events','100',THUMBS['100'],'Pruebas',`Las ${EVENTS.length} pruebas, de a una`)}
+    ${mode('tours','tour',THUMBS.tour,'Torneos','Con amigos o contra la máquina')}
+    ${mode('surv',null,'','Supervivencia',sb?`Tu mejor: ${sb.pts} pts`:'Ganale a la máquina',' surv')}
+  </section>
+  ${footer()}</div>`,'menu');
+  OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
+}
+// tournaments: with friends (online) or against the machines (all 5 events in a row)
+export function showTours(){
+  setS(null); setScreen('menu');
+  showOv(`<div class="card t-card"><div class="head"><div class="logo">TORNEOS</div><h2>Elegí tu torneo</h2></div><div class="body">
+    <div class="t-two">
+      <button class="t-opt" data-act="online"><b>Con amigos</b><span>Creá un torneo, pasá el código y cada uno juega cuando quiere.</span></button>
+      <button class="t-opt" data-act="tour"><b>Contra la máquina</b><span>Las ${EVENTS.length} pruebas seguidas contra 5 máquinas. Tu mejor torneo: ${rec.tour?rec.tour+' pts':'—'}.</span></button>
+    </div>
+    <div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div></div></div>`);
+}
+// events: the chosen event in big, the carousel of events below
+export function showEvents(){
+  setS(null); setScreen('menu');
   // events marked nueva:true in config.js (invented ones) get a small NUEVA tag
   const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}">${art(i,true)}<b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
-    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="${TOUR}" aria-pressed="${tour}">${art(TOUR,true)}<b>TORNEO</b></button>`;
+;
   showOv(`<div class="mm">
-  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
+  <header class="m-top"><div class="m-logo"><button class="m-back" data-act="menu" aria-label="Volver al menú">‹</button>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
     <div class="m-art${THUMBS[thumbKey(menuSel)]?' img':''}">${heroArt()}</div>
     <div class="m-info">${heroInfo()}</div>
     <div class="m-stats">${heroStats()}</div>
   </section>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
-  <footer class="m-bot">
-    <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
-    <button class="m-people" data-act="people"><span class="m-lbl">Jugadores</span><span class="u-row">${peopleStrip()}</span></button>
-    <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
-  </footer></div>`,'menu');
+  ${footer()}</div>`,'menu');
   initCarousel(); refreshStrip(); loadWr();
 }
 // carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
@@ -144,7 +170,7 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div></div>
+    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia</span></div></div>
     <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button></div>
   </div></div>`);
@@ -175,7 +201,7 @@ export function showPause(){
   if(!S||!S.ev) return;
   const online=G.mode==='online', tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">PAUSA</div><h2>${S.ev.name}</h2></div><div class="body">
-    ${online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':''}
+    ${online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, se termina la partida (tus puntos se guardan).</p>':''}
     <div class="btns"><button class="btn" data-act="resume" data-focus>Reanudar</button><button class="btn alt" data-act="quit">Volver al menú</button></div></div></div>`,'pause');
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
@@ -203,6 +229,7 @@ export function endEvent(vals){
 export function afterResults(){
   const ev=S.ev;
   if(G.mode==='online'){ showTournament(G.code); return; }
+  if(G.mode==='surv'){ survAfterEvent(); return; }
   if(G.mode!=='tour'){ showEventCard(); return; }
   const p=G.pts[ev.id];
   showOv(table(ev.tag,'Puntos',ATH.map((a,i)=>({a,i,v:p[i]})).sort((x,y)=>y.v-x.v),r=>String(r.v),null,'standings'));
@@ -254,13 +281,19 @@ OV.addEventListener('click',e=>{
   else if(a==='rename') onRename();
   else if(a==='scroll'){ const row=OV.querySelector('.m-evs'); row.scrollBy({left:+b.dataset.d*row.clientWidth*.8,behavior:'smooth'}); }
   else if(a==='sel') selectEvent(+b.dataset.i);
-  else if(a==='go'){ if(menuSel===TOUR){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
-    else { G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); } }
+  else if(a==='go'){ G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); }
+  else if(a==='events') showEvents();
+  else if(a==='tours') showTours();
+  else if(a==='surv') showSurvival();
+  else if(a==='sstart') startSurvival();
+  else if(a==='splay') playSurv();
+  else if(a==='snext') survNext();
+  else if(a==='squit') survQuit();
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='resume'){ hideOv(); setScreen('play'); }
-  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else showMenu(); }
+  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else if(G.mode==='surv') survQuit(); else showMenu(); }
   else if(a==='menu') showMenu();
-  else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')) showMenu(); else b.textContent='Sonido: '+(on?'activado':'apagado'); }
+  else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')){ b.innerHTML=ICON.snd(on); b.setAttribute('aria-label','Sonido '+(on?'activado':'apagado')); } else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
   else if(a==='evdone') endEvent(S.marks.map(bestOf));
   else if(a==='afterres') afterResults();

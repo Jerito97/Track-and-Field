@@ -17,7 +17,7 @@ export function newEvent(idx){
      round:1,marks:ATH.map(()=>[]),snaps:[],replay:null});
   if(ev.type==='sprint'){
     S.plLane=3;
-    const lanes=[0,1,2,4,5];
+    const lanes=ATH.length===2?[2]:[0,1,2,4,5];  // a single rival runs right next to you
     S.rivals=ATH.filter(a=>!a.me).map((a,i)=>({a,lane:lanes[i]}));
   }
 }

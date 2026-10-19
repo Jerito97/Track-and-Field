@@ -66,7 +66,11 @@ js/
 
 ## Menú
 
-Las pruebas son un carrusel: se deslizan con el dedo (o con las flechas rojas) y se ven unas 5 y media a la vez, así se nota que hay más. El torneo va al final. Para agregar una prueba alcanza con sumarla a `EVENTS` en `js/config.js`; con `nueva:true` su tarjeta muestra la etiqueta NUEVA. Cada prueba tiene su ilustración en `assets/thumbs/` (`<id>.jpg` arriba, `<id>-sm.jpg` en la tarjeta; en `THUMBS` de `js/ui/screens.js` va dónde está el atleta para que el recorte no lo corte). Una prueba sin ilustración muestra el stickman dibujado.
+El menú principal tiene tres modos: **Pruebas** (la prueba elegida en grande y el carrusel de pruebas, que se desliza con el dedo o las flechas rojas), **Torneos** (con amigos o contra la máquina) y **Supervivencia**. Para agregar una prueba alcanza con sumarla a `EVENTS` en `js/config.js`; con `nueva:true` su tarjeta muestra la etiqueta NUEVA. Cada prueba tiene su ilustración en `assets/thumbs/` (`<id>.jpg` arriba, `<id>-sm.jpg` en la tarjeta; en `THUMBS` de `js/ui/screens.js` va dónde está el atleta para que el recorte no lo corte). Una prueba sin ilustración muestra el stickman dibujado.
+
+## Supervivencia
+
+Las 5 pruebas en orden al azar contra una sola máquina; cada ronda de 5 la máquina mejora (sus marcas por ronda en `targets()` de `js/ui/survival.js`: fácil en la ronda 1, muy difícil hacia la 9 y un poco mejor cada ronda después). Hay que ganarle o empatarle en cada prueba (en largo, garrocha y jabalina, el mejor de 3 intentos); la primera que se pierde termina la partida. Cada prueba ganada suma sus puntos (la tabla de los torneos). La mejor partida queda en el perfil y en el Top 10 mundial (pestaña Supervivencia de Récords), con la ronda a la que llegó.
 
 ## Jugadores
 

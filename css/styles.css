@@ -339,3 +339,46 @@ tr.me td{background:var(--red)}
 .o-ok{margin:0;background:rgba(31,158,84,.2);border:1px solid #1f9e54;border-radius:8px;padding:6px 10px;font-size:.9rem}
 .p-hint{display:block;margin-top:4px;color:#aab8d8;font-size:.78rem}
 .btn:disabled{opacity:.45;cursor:default}
+/* main menu: three modes */
+.m-modes{height:clamp(150px,56vh,440px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,1.6vw,16px)}
+.m-mode{position:relative;font:inherit;color:#fff;border:0;border-radius:12px;overflow:hidden;padding:0;cursor:pointer;display:flex;flex-direction:column;background:#14284f;text-align:left;min-height:0}
+.m-mode::after{content:"";position:absolute;inset:0;border:4px solid #14284f;border-radius:inherit;pointer-events:none}
+.m-mode:hover::after,.m-mode:focus-visible::after{border-color:var(--sun)}
+.m-mode:focus-visible{outline:none}
+.m-mode:active{transform:translateY(2px)}
+.m-mart{flex:1;min-height:0;position:relative;display:block;background:#3d8fe0}
+.m-mart img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.m-mode b{font-family:var(--f-display);font-weight:400;font-style:italic;letter-spacing:.05em;font-size:clamp(1.1rem,5.6vh,2.2rem);line-height:1;padding:.2em .5em 0;text-transform:uppercase}
+.m-mode small{display:block;padding:.15em .75em .55em;font-size:clamp(.62rem,2.5vh,.9rem);color:var(--sun);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-mode.surv{background:#3a0f14}
+.m-mode.surv::after{border-color:#5a1820}
+.m-mode.surv .m-mart{background:radial-gradient(circle at 50% 60%,#ff5a3d 0,#c41d2a 45%,#5a0d16 100%);display:grid;place-items:center}
+.m-mode.surv .m-mart i{font-family:var(--f-display);font-style:italic;font-size:clamp(2.4rem,16vh,6rem);color:#fff;text-shadow:0 4px 0 #6b0f17;letter-spacing:.04em}
+.m-back{font:inherit;font-family:var(--f-display);font-size:1.3em;line-height:1;color:#fff;background:rgba(0,0,0,.18);border:0;border-radius:6px;padding:0 .35em .08em;margin-right:.1em;cursor:pointer}
+/* tournaments screen */
+.t-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.t-opt{font:inherit;color:#fff;text-align:left;background:#22407a;border:3px solid #22407a;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.t-opt:hover,.t-opt:focus-visible{border-color:var(--sun);outline:none}
+.t-opt b{font-family:var(--f-display);font-weight:400;font-style:italic;letter-spacing:.05em;font-size:1.6rem;text-transform:uppercase}
+.t-opt span{font-size:.88rem;color:#d6e0f5}
+@media (max-width:520px){ .t-two{grid-template-columns:1fr} }
+/* survival */
+.s-best{display:flex;flex-direction:column;align-items:flex-start;background:rgba(255,255,255,.06);border-radius:10px;padding:6px 12px}
+.s-best b{font-family:var(--f-display);font-weight:400;font-size:2rem;line-height:1.05;color:var(--sun)}
+.s-best small{color:#c9d4ea;font-size:.8rem}
+.s-side{display:flex;flex-direction:column;gap:8px;min-width:0}
+.s-steps{display:flex;flex-wrap:wrap;gap:4px}
+.s-step{font-family:var(--f-display);font-size:.8rem;letter-spacing:.04em;padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.08);color:#aab8d8}
+.s-step.ok{background:#1f9e54;color:#fff}
+.s-step.now{background:var(--sun);color:var(--ink)}
+.s-vs{display:flex;align-items:center;justify-content:center;gap:14px;background:rgba(255,255,255,.06);border-radius:10px;padding:8px}
+.s-vs>div{display:flex;flex-direction:column;align-items:center;min-width:110px}
+.s-vs b{font-family:var(--f-display);font-weight:400;font-size:1.7rem;line-height:1.1}
+.s-vs i{font-family:var(--f-display);color:var(--sun);font-size:1.3rem}
+.s-verdict{margin:0;text-align:center;font-family:var(--f-display);font-size:1.6rem;letter-spacing:.04em;color:var(--sun)}
+.s-verdict.lost{color:#ff6b6b}
+.s-up b{color:var(--sun)}
+.s-final{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.s-final>div{background:rgba(255,255,255,.06);border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center}
+.s-final b{font-family:var(--f-display);font-weight:400;font-size:2rem;line-height:1;color:var(--sun)}
+.s-final span{font-size:.8rem;color:#c9d4ea}

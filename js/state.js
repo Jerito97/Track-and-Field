@@ -11,12 +11,13 @@ const colorDist=(a,b)=>{ const x=rgb(a), y=rgb(b); return Math.hypot(x[0]-y[0],x
 
 export let ATH=[];
 // solo: only you (races of a tournament with friends: nobody else on the track)
-export function buildAthletes(solo){
+// rival: a single machine instead of five (survival), {name, C, target:{evId: its mark}} decides what it does
+export function buildAthletes(solo,rival){
   // 6 athletes per event: you + 5 rivals; of the other 6 athletes, the one whose colour is closest to yours sits out
   const sk=[1.03,1.0,.985,.965,.945].sort(()=>Math.random()-.5), me=ME();
   const pool=CHARS.filter(c=>c.id!=='yo').sort((a,b)=>colorDist(b.j,me.j)-colorDist(a.j,me.j)).slice(0,5);
   const others=pool.sort((a,b)=>CHARS.indexOf(a)-CHARS.indexOf(b));
-  ATH=[{C:me,me:true,name:me.name||'Vos',sk:1}].concat(solo?[]:others.map((C,i)=>({C,me:false,name:C.name,sk:sk[i]})));
+  ATH=[{C:me,me:true,name:me.name||'Vos',sk:1}].concat(rival?[{C:rival.C||others[0],me:false,name:rival.name,sk:1.03,target:rival.target}]:solo?[]:others.map((C,i)=>({C,me:false,name:C.name,sk:sk[i]})));
 }
 export const G={mode:'single',evIdx:0,res:{},pts:{},total:{}};
 export let S=null;

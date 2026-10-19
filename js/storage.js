@@ -44,7 +44,10 @@ export function linkPlayer(remote){ const p=player(); if(!p) return;
   Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token,expired:false}); DB.cur=p.id; save(); bind(); }
 // best marks kept on the server (logging in on another phone or app): the better of each stays as personal record
 export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(marks)) return;
-  marks.forEach(m=>{ const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;
+  marks.forEach(m=>{
+    if(m.ev==='surv'){ if(Number.isFinite(m.mark)&&(p.rec.surv==null||m.mark>p.rec.surv)){ p.rec.surv=m.mark; p.survBest={pts:m.mark,rounds:m.rounds||0,date:Date.parse(m.date)||Date.now()}; }
+      if(Number.isFinite(m.mark)) p.sent={...p.sent,surv:Math.max(m.mark,p.rec.surv)===m.mark?m.mark:p.sent?.surv}; return; }
+    const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;
     const sprint=ev.type==='sprint', date=Date.parse(m.date)||Date.now(), list=p.best[ev.id]||[];
     if(!list.some(b=>b.v===m.mark)){ list.push({v:m.mark,date}); list.sort((x,y)=>sprint?x.v-y.v:y.v-x.v); p.best[ev.id]=list.slice(0,TOP); }
     if(p.rec[ev.id]==null||better(sprint,m.mark,p.rec[ev.id])) p.rec[ev.id]=m.mark;
@@ -63,6 +66,9 @@ export function recordEvent(ev,mark,place,of,mode){
   const isRec=p.rec[ev.id]==null||better(sprint,mark,p.rec[ev.id]); if(isRec) p.rec[ev.id]=mark;
   save(); return isRec;
 }
+// a survival run ended: best points (and how many rounds it got through); returns true for a new best
+export function recordSurv(pts,rounds){ const p=player(); if(!p) return false;
+  const best=pts>0&&(p.rec.surv==null||pts>p.rec.surv); if(best){ p.rec.surv=pts; p.survBest={pts,rounds,date:Date.now()}; } save(); return best; }
 export function recordTour(pts,place){ const p=player(); if(!p) return;
   p.tours.unshift({pts,place,date:Date.now()}); if(pts>(p.rec.tour||0)) p.rec.tour=pts; save(); }
 // world record of an event: the best mark of any player on this device (machines don't count), with who set it
