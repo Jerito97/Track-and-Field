@@ -3,8 +3,9 @@
 // Type a name -> if it's free, pick a colour and create a code; if it's taken, type its code to enter as that player.
 // Without connection a player can still be made for this device only (protected later, from the menu).
 import {$,OV} from '../canvas.js';
+import {EVENTS} from '../config.js';
 import {loginPlayer,nameExists,registerPlayer} from '../online.js';
-import {COLORS,createPlayer,linkPlayer,player,players} from '../storage.js';
+import {COLORS,createPlayer,linkPlayer,mergeMarks,player,players} from '../storage.js';
 import {setS,setScreen} from '../state.js';
 import {clearInvite,inviteFromUrl,onJoin} from './online.js';
 import {esc,paintOv,showMenu,showOv} from './screens.js';
@@ -89,6 +90,7 @@ export function onLocal(){ createPlayer(name,color); skipProtect=true; after(); 
 function done(r){
   const remote={id:r.player.id,token:r.token};
   if(mode==='protect') linkPlayer({...r.player,token:r.token}); else createPlayer(r.player.name,r.player.color,remote);
+  mergeMarks(r.marks,EVENTS);  // your records follow you to any phone
   after();
 }
 function after(){ const inv=inviteFromUrl(); if(inv){ clearInvite(); onJoin(inv); } else showMenu(); }

@@ -52,7 +52,7 @@ export async function showBoard(i){
   showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'));
   await syncMarks();
   let top, note='';
-  try{ top=await loadTop(ev.id); }catch(e){ top=localTop(ev); note='<p class="small">Sin conexión: se ven solo los jugadores de este celular.</p>'; }
+  try{ top=await loadTop(ev.id); }catch(e){ top=localTop(ev); note='<p class="small">No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.</p>'; }
   if(shownEv!==ev.id||!OV.querySelector('.b-card')) return;  // left the board meanwhile
   const y=OV.scrollTop; showOv(card(note+rows(top))); OV.scrollTop=y;
 }

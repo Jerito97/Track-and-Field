@@ -2,7 +2,7 @@
 //   GET  /api/t?code=K7Q4                                   -> {tournament, entries, results}
 //   POST {action:'check', name}                             -> {exists}
 //   POST {action:'register', name, pin, color}              -> {player:{id,name,color}, token}
-//   POST {action:'login', name, pin}                        -> {player, token}
+//   POST {action:'login', name, pin}                        -> {player, token, marks:[{ev,mark,date}]}  (your best marks)
 //   POST {action:'update', token, name?, color?}            -> {player}
 //   POST {action:'create', token, name, events}             -> {code}
 //   POST {action:'join', token, code}                       -> {ok}
@@ -110,7 +110,8 @@ async function act(sql,b){
       // a fresh token per login; earlier devices keep theirs until the next login
       const token=randomBytes(24).toString('base64url');
       await sql`update users set fails=0, locked_until=null, token_hash=${sha(token)} where id=${u.id}`;
-      return {player:pub(u),token};
+      const marks=await sql`select ev,mark,made_at as date from marks where player_id=${u.id}`;
+      return {player:pub(u),token,marks};
     }
     case 'update': {
       const u=await auth(sql,b.token); let name=u.name, color=u.color;

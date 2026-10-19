@@ -34,6 +34,14 @@ export function createPlayer(name,color,remote){
 export function switchPlayer(id){ if(DB.list.some(p=>p.id===id)){ DB.cur=id; save(); bind(); } }
 // a local player now protected on the server: takes the server's id and token
 export function linkPlayer(remote){ const p=player(); if(!p) return; Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token}); DB.cur=p.id; save(); bind(); }
+// best marks kept on the server (logging in on another phone or app): the better of each stays as personal record
+export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(marks)) return;
+  marks.forEach(m=>{ const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;
+    const sprint=ev.type==='sprint', date=Date.parse(m.date)||Date.now(), list=p.best[ev.id]||[];
+    if(!list.some(b=>b.v===m.mark)){ list.push({v:m.mark,date}); list.sort((x,y)=>sprint?x.v-y.v:y.v-x.v); p.best[ev.id]=list.slice(0,TOP); }
+    if(p.rec[ev.id]==null||better(sprint,m.mark,p.rec[ev.id])) p.rec[ev.id]=m.mark;
+    p.sent={...p.sent,[ev.id]:m.mark}; });  // what the server has: only a better local record is sent again
+  save(); }
 export function updatePlayer(fields){ const p=player(); if(!p) return; Object.assign(p,fields); save(); }
 export function deletePlayer(id){ DB.list=DB.list.filter(p=>p.id!==id); if(DB.cur===id) DB.cur=DB.list[0]?.id||null; save(); bind(); }
 const better=(sprint,a,b)=>sprint?a<b:a>b;
