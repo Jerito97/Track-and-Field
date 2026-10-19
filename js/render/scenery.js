@@ -1,10 +1,25 @@
 // Stadium scenery and props
 import {ctx,LW} from '../canvas.js';
 import {BOARDS,FAN_SHIRTS,HAIRS,INK,SKINS} from '../config.js';
-import {JAV_ART} from '../assets.js';
+import {JAV_ART,SCENE} from '../assets.js';
 import {hash} from '../utils.js';
 import {txt} from './text.js';
 
+// colours of the track and grass, as in the event illustrations
+export const TARTAN='#d9563f', TARTAN_D='#c94a35', GRASS='#7cc24a', GRASS_L='#8ccf55';
+// grandstand backdrop (assets/scene/stands.jpg: sky, roof, crowd and the barrier wall at the bottom), off = how far
+// it has scrolled (logical px); repeated sideways with every other copy mirrored, so the copies always meet cleanly.
+// false when the picture isn't there (then the stands are drawn in code)
+export function drawBackdrop(off,top,bot){
+  const im=SCENE.stands; if(!im.naturalWidth) return false;
+  const h=bot-top, w=h*im.naturalWidth/im.naturalHeight;
+  for(let n=Math.floor(off/w);n*w-off<LW;n++){ const x=n*w-off;
+    if(n&1){ ctx.save(); ctx.translate(x+w,top); ctx.scale(-1,1); ctx.drawImage(im,-.5,0,w+1,h); ctx.restore(); }
+    else ctx.drawImage(im,x-.5,top,w+1,h); }
+  // a light haze: the crowd stays behind, the athletes and the buttons stand out
+  ctx.fillStyle='rgba(225,238,255,.2)'; ctx.fillRect(0,top,LW,h);
+  return true;
+}
 export function drawStands(cam,top,bot,excite,clock){
   const rows=5, rowH=(bot-top)/rows, off=cam*.35*24, sp=15;
   ctx.fillStyle='#c4cad6'; ctx.fillRect(0,top,LW,bot-top);
@@ -32,12 +47,14 @@ export function drawBoards(cam,y,h,ppm){
     ctx.font=`${Math.round(h*.68)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=fg; ctx.fillText(word,x+(bw*ppm-2)/2,y+h/2+1,bw*ppm-10);
   }
 }
+// bottom of the screen: a grass strip, and the pause button at the left
 export function drawBottomAds(){
-  ctx.fillStyle='#ffffff'; ctx.fillRect(0,300,LW,20);
-  const n=Math.max(1,Math.floor((LW-40)/96)), bw=(LW-40)/n;
-  for(let i=0;i<n;i++){ const [bg,fg,w]=BOARDS[(i+2)%BOARDS.length]; const x=40+i*bw; ctx.fillStyle=bg; ctx.fillRect(x,302,bw-4,16); ctx.font='12px Bangers, Impact, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=fg; ctx.fillText(w,x+(bw-4)/2,310.5); }
+  ctx.fillStyle='#fff'; ctx.fillRect(0,300,LW,2); ctx.fillStyle=GRASS; ctx.fillRect(0,302,LW,18);
+  ctx.fillStyle=GRASS_L; for(let x=0;x<LW;x+=48) ctx.fillRect(x,302,24,18);
+  drawPauseBtn();
+}
+export function drawPauseBtn(){
   ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(18,304,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  // pause: two bars
   ctx.fillStyle='#fff'; ctx.fillRect(12.5,298,4,12); ctx.fillRect(19.5,298,4,12);
 }
 export function hurdle(px,py,s,down){ ctx.save(); ctx.translate(px,py); if(down) ctx.rotate(1.25);
@@ -48,7 +65,7 @@ export function hurdle(px,py,s,down){ ctx.save(); ctx.translate(px,py); if(down)
 export function shadow(px,py,alt,s){ ctx.fillStyle='rgba(0,0,40,.25)'; ctx.beginPath(); ctx.ellipse(px+.1*s,py+1.5,Math.max(3,(.4-alt*.08)*s),.08*s,0,0,Math.PI*2); ctx.fill(); }
 export function flag(x,y,col,letter){ ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-22); ctx.stroke();
   ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(x,y-22); ctx.lineTo(x+13,y-18); ctx.lineTo(x,y-13); ctx.closePath(); ctx.fill(); ctx.stroke(); if(letter) txt(letter,x+4.5,y-17.5,INK,8,{stroke:null}); }
-export function upright(x,y,s){ ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(x-2.5,y-7.2*s,5,7.2*s); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,y,9,3,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
+export function upright(x,y,s){ ctx.fillStyle='#d5dbe4'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(x-2.5,y-7.2*s,5,7.2*s); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(x,y,9,3,0,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
 // javelin centred at cx,cy, angle a (up is positive), len logical px long: the drawn javelin, or a vector one until it loads
 export function javelin(cx,cy,a,len){
   if(JAV_ART.complete&&JAV_ART.naturalWidth){ const h=len*.034; ctx.save(); ctx.translate(cx,cy); ctx.rotate(-a); ctx.drawImage(JAV_ART,-len/2,-h/2,len,h); ctx.restore(); return; }

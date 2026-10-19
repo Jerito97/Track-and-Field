@@ -7,7 +7,8 @@ import {SPRINT_PPM} from '../game/core.js';
 import {ME,S} from '../state.js';
 import {sprintPose} from '../stick.js';
 import {STYLE} from '../storage.js';
-import {drawBoards,drawBottomAds,drawStands,hurdle,shadow} from './scenery.js';
+import {SCENE} from '../assets.js';
+import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 
 const LANES=6;
@@ -35,15 +36,15 @@ export function drawSprint(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s;
   const TT=176, TB=298, lh=(TB-TT)/LANES;
   ctx.fillStyle='#bcd3ea'; ctx.fillRect(0,0,LW,TT);
-  drawStands(V.cam,20,140,S.phase==='run'?1:.3,S.clock);
-  drawBoards(V.cam,140,14,s);
-  ctx.fillStyle='#a6c94a'; ctx.fillRect(0,154,LW,TT-154);
-  for(let i=Math.floor(V.cam/6)-1;i<V.cam/6+LW/(6*s)+2;i+=2){ ctx.fillStyle='#b4d457'; ctx.fillRect(X(i*6),154,6*s,TT-154); }
+  // grandstand picture (slower than the track: further away); without it, the stands drawn in code
+  if(!drawBackdrop(V.cam*s*.45,0,154)){ drawStands(V.cam,20,140,S.phase==='run'?1:.3,S.clock); drawBoards(V.cam,140,14,s); }
+  ctx.fillStyle=GRASS; ctx.fillRect(0,154,LW,TT-154);
+  for(let i=Math.floor(V.cam/6)-1;i<V.cam/6+LW/(6*s)+2;i+=2){ ctx.fillStyle=GRASS_L; ctx.fillRect(X(i*6),154,6*s,TT-154); }
   const sbx=X(-2); if(sbx>-80&&sbx<LW+20){ ctx.fillStyle='#3a2a12'; ctx.fillRect(sbx,151,54,22); ctx.fillStyle='#ffcb3a'; ctx.fillRect(sbx+3,154,48,16); txt(ev.tag,sbx+27,162.5,INK,11,{stroke:null}); }
-  ctx.fillStyle='#2f7fd6'; ctx.fillRect(0,TT,LW,TB-TT);
-  ctx.fillStyle='rgba(255,255,255,.05)'; for(let y=TT+4;y<TB;y+=6) ctx.fillRect(0,y,LW,2);
+  ctx.fillStyle=TARTAN; ctx.fillRect(0,TT,LW,TB-TT);
+  ctx.fillStyle=TARTAN_D; for(let l=0;l<LANES;l++) ctx.fillRect(0,TT+lh*l+lh*.55,LW,lh*.45);
   ctx.fillStyle='#fff'; for(let l=0;l<=LANES;l++) ctx.fillRect(0,Math.round(TT+lh*l)-1,LW,2);
-  ctx.fillStyle='#e8262d'; ctx.fillRect(0,TB+1,LW,2);
+  ctx.fillStyle=TARTAN; ctx.fillRect(0,TB+1,LW,301-TB);
   const sx=X(0); if(sx>-60&&sx<LW+60){ ctx.fillStyle='#fff'; ctx.fillRect(sx-1.5,TT,3,TB-TT);
     for(let l=0;l<LANES;l++){ const y=TT+lh*(l+.5); ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=1; ctx.fillRect(X(-1.1),y-3,10,7); ctx.strokeRect(X(-1.1),y-3,10,7); txt(String(l+1),X(1.1),y+1,'#fff',lh*.7,{stroke:null}); } }
   for(let m=10;m<ev.dist;m+=10){ const x=X(m); if(x>-30&&x<LW+30){ ctx.fillStyle='rgba(255,255,255,.75)'; ctx.fillRect(x-1,TT,2,5); txt(String(m),x,TT+10,'rgba(255,255,255,.85)',10,{stroke:null}); } }
@@ -69,10 +70,17 @@ export function drawSprint(V){
       if(f) drawAnim(ctx,r.a.C,f[0],f[1],x,feet-r.y*s,animScale(r.a.C,RUN_H));
       else drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,STYLE.stick?sprintPose({blocks:r.t<=r.react,setStage:S.setStage,airU:r.air>0?1-r.air/r.airT:null,tripT:r.tripT,cheer:r.final!=null&&r.v<.5,running:r.v>.2,legP:r.legP,v:r.v,clock:S.clock,lane:l}):J,r.a.C,r.v>5); }
   }
-  drawStarter(X(5.5));
-  drawBottomAds();
+  drawBottomAds(); drawStarter(X(5.5)); drawPauseBtn();
 }
+// the race starter, standing on the grass below the lanes: arm up with the pistol, then firing (smoke) at the gun
+const ST_H=84, ST_FEET=.297;  // figure height (logical px) and where the feet are across the picture
 export function drawStarter(x){
+  if(x<-120||x>LW+120) return;
+  const im=SCENE.starter[S.smoke!=null&&S.smoke<1?1:0];
+  if(im.naturalWidth){ const w=ST_H*im.naturalWidth/im.naturalHeight; ctx.drawImage(im,x-w*ST_FEET,319-ST_H,w,ST_H); return; }
+  drawStarterVector(x);
+}
+function drawStarterVector(x){
   if(x<-120||x>LW+120) return;
   const s=34, base=330, P=(a,b)=>[x+a*s,base-b*s];
   ctx.lineCap='round'; ctx.lineJoin='round';

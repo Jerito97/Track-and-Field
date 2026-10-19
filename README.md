@@ -153,3 +153,7 @@ Los sprites de cuerpo entero de antes siguen en `assets/characters/yo/sprites/` 
 ## Ícono y pantalla de inicio
 
 El juego se puede instalar como app (en iPhone: Safari → Compartir → *Agregar a inicio*; en Android: Chrome → menú → *Instalar app* / *Agregar a la pantalla principal*). El ícono y el logo de la pantalla de inicio están en `assets/icons/` (`manifest.webmanifest` describe la app: pantalla completa y horizontal). Al abrir el juego se ve el logo un momento (tocando se saltea).
+
+## Escenario de las pruebas
+
+La tribuna de fondo es una imagen (`assets/scene/stands.jpg`): se repite de costado, una copia normal y la siguiente espejada, así siempre empalman; se mueve más lento que la pista para dar profundidad. El largador son dos imágenes recortadas (`assets/scene/starter0.png` listo, `starter1.png` disparando). La pista, el pasto, la arena, la colchoneta y la jabalina se dibujan en código con los colores de las ilustraciones (`TARTAN`, `GRASS` en `js/render/scenery.js`). Si falta alguna imagen, se dibuja la versión anterior en código.

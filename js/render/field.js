@@ -10,39 +10,39 @@ import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
 import {drawStar,target} from './hud.js';
-import {drawBoards,drawBottomAds,drawStands,flag,javelin,shadow,upright} from './scenery.js';
+import {drawBackdrop,drawBoards,drawPauseBtn,drawStands,flag,GRASS,GRASS_L,javelin,shadow,TARTAN,TARTAN_D,upright} from './scenery.js';
 import {txt} from './text.js';
 
 export function drawField(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s, sh=V.camY*s;
   const GY=264+sh;
   const excite=(S.phase==='act'||S.phase==='post'||V.replay)?1:.35;
-  const sky=ctx.createLinearGradient(0,0,0,LH); sky.addColorStop(0,'#7fc4f0'); sky.addColorStop(1,'#d5ecfa'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
+  const sky=ctx.createLinearGradient(0,0,0,LH); sky.addColorStop(0,'#3f9be6'); sky.addColorStop(1,'#8fcdf5'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
   if(sh>2){ ctx.fillStyle='#fff'; for(let i=0;i<5;i++){ const W2=LW+200, cx=((i*173-V.cam*2)%W2+W2)%W2-100, cy=50+i*26-sh*.15; ctx.beginPath(); ctx.ellipse(cx,cy,34,10,0,0,Math.PI*2); ctx.ellipse(cx+18,cy-6,20,10,0,0,Math.PI*2); ctx.fill(); } }
   const stTop=24+sh, stBot=170+sh;
-  ctx.fillStyle='#e6e9ef'; ctx.fillRect(0,stTop-8,LW,8); ctx.fillStyle='#a9b0bd'; ctx.fillRect(0,stTop-2,LW,2);
-  drawStands(V.cam*(s/34),stTop,stBot,excite,S.clock);
-  drawBoards(V.cam,stBot,14,s);
+  // grandstand picture (sky, roof, crowd, barrier wall), slower than the field; without it, the stands drawn in code
+  if(!drawBackdrop(V.cam*s*.45,sh,stBot+14)){
+    ctx.fillStyle='#e6e9ef'; ctx.fillRect(0,stTop-8,LW,8); ctx.fillStyle='#a9b0bd'; ctx.fillRect(0,stTop-2,LW,2);
+    drawStands(V.cam*(s/34),stTop,stBot,excite,S.clock); drawBoards(V.cam,stBot,14,s); }
   const apTop=stBot+14;
-  ctx.fillStyle='#3d9be0'; ctx.fillRect(0,apTop,LW,LH-apTop);
-  ctx.fillStyle='rgba(255,255,255,.06)'; for(let y=apTop+4;y<LH;y+=6) ctx.fillRect(0,y,LW,2);
+  ctx.fillStyle=GRASS; ctx.fillRect(0,apTop,LW,LH-apTop);
+  ctx.fillStyle=GRASS_L; for(let m=Math.floor(V.cam/12)*12;X(m)<LW;m+=12) ctx.fillRect(X(m),apTop,6*s,LH-apTop);
+  // the runway (red, like the track) up to the line; the javelin field beyond it is grass
+  const rw=ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
+  ctx.fillStyle=TARTAN; ctx.fillRect(0,GY-26,rw,44); ctx.fillStyle=TARTAN_D; ctx.fillRect(0,GY-4,rw,22);
   if(ev.kind==='jav'){
     const lx=X(ev.line);
-    ctx.fillStyle='#8cc63f'; ctx.fillRect(Math.max(0,lx),apTop,LW,LH-apTop);
-    for(let m=0;m<130;m+=10){ const a=X(ev.line+m), b=X(ev.line+m+5); if(b<0||a>LW) continue; ctx.fillStyle='#99d04a'; ctx.fillRect(Math.max(a,lx),apTop,b-Math.max(a,lx),LH-apTop); }
     ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,apTop); ctx.quadraticCurveTo(lx+14,(apTop+LH)/2,lx,LH); ctx.stroke();
     for(let m=10;m<=120;m+=10){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,apTop,2,LH-apTop); txt(m+' m',x,apTop+12,'#fff',13); }
     if(lx>0){ ctx.fillStyle='#fff'; ctx.fillRect(0,GY+16,lx,2); ctx.fillRect(0,GY-26,lx,2); }
   } else {
     ctx.fillStyle='#fff'; ctx.fillRect(0,GY-26,LW,2); ctx.fillRect(0,GY+16,LW,2);
-    ctx.fillStyle='#e8262d'; ctx.fillRect(0,GY+19,LW,3);
-    ctx.fillStyle='#e6e9ef'; ctx.fillRect(0,GY+22,LW,LH);
     for(let m=0;m<ev.line;m+=5){ const x=X(m); if(x>-20&&x<LW+20){ ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(x-1,GY+12,2,4); } }
   }
   if(ev.kind==='lj'){
     const p0=X(ev.line+.5), p1=X(ev.line+11), sd=26;
-    ctx.fillStyle='#f3ead2'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,sd); ctx.fill(); ctx.stroke();
-    ctx.fillStyle='rgba(160,130,70,.25)'; for(let k=0;k<110;k++) ctx.fillRect(X(ev.line+1+hash(k)*9.8),GY-3+hash(k+50)*(sd-4),2,1.5);
+    ctx.fillStyle='#ecd096'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,sd); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(170,120,50,.35)'; for(let k=0;k<110;k++) ctx.fillRect(X(ev.line+1+hash(k)*9.8),GY-3+hash(k+50)*(sd-4),2,1.5);
     // distance board along the pit: a mark every half metre, numbers every metre
     const nb=GY-48; ctx.fillStyle='#fff'; ctx.fillRect(p0,nb,p1-p0,18); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(p0,nb,p1-p0,18);
     ctx.fillStyle='#e8262d'; ctx.fillRect(p0,nb+15,p1-p0,3);
@@ -58,8 +58,8 @@ export function drawField(V){
     ctx.fillStyle='#555'; ctx.beginPath(); ctx.moveTo(bx-.5*s,GY); ctx.lineTo(bx,GY+4); ctx.lineTo(bx,GY); ctx.closePath(); ctx.fill();
     upright(ux-6,GY-10,s);
     const m0=X(ev.line+.3), m1=X(ev.line+5.5), mh=.85*s;
-    ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(m0,GY-mh,m1-m0,mh); ctx.fill(); ctx.stroke();
-    ctx.fillStyle='#2f6fd6'; ctx.fillRect(m0+2,GY-mh+2,m1-m0-4,mh*.35);
+    ctx.fillStyle='#e8402d'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(m0,GY-mh,m1-m0,mh); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#f4f4f4'; ctx.fillRect(m0+2,GY-mh*.42,m1-m0-4,mh*.1); ctx.fillStyle='#2f5fc0'; ctx.fillRect(m0+2,GY-mh*.32,m1-m0-4,mh*.32-1);
     for(let h=2;h<=7;h++){ txt(h+' m',ux+16,GY-h*s,'#fff',11); }
     if(V.bar){ const by=GY-V.bar*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ux-12,by); ctx.lineTo(ux+12,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke(); }
   }
@@ -96,7 +96,7 @@ export function drawField(V){
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
   S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle='#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill(); });
-  drawBottomAds();
+  drawPauseBtn();
 }
 export function rivalFlags(V,X,GY){
   ATH.forEach((a,i)=>{ if(a.me) return; const b=S.marks[i].filter(m=>m!=null); if(!b.length) return; flag(X(V.ev.line+Math.max(...b)),GY+14,a.C.j,a.name[0]); });
@@ -137,7 +137,9 @@ const LJ_COLORS=['31,190,90','255,205,40','240,60,50'];
 function ljBands(V,X,GY){ const ev=V.ev, d=ev.line-V.x, b=ev.bands;
   [[b[0],b[1],LJ_COLORS[0]],[b[1],b[2],LJ_COLORS[1]],[b[2],0,LJ_COLORS[2]]].forEach(([from,to,rgb])=>{ const x0=X(ev.line-from), x1=X(ev.line-to); if(x1<-10||x0>LW+10) return;
     const on=d<=from&&d>to;
-    ctx.fillStyle=`rgba(${rgb},${on?.65:.3})`; ctx.fillRect(x0,GY-25,x1-x0,40);
+    // a white base first, so the colours read on the red runway
+    ctx.fillStyle=`rgba(255,255,255,${on?.55:.4})`; ctx.fillRect(x0,GY-25,x1-x0,40);
+    ctx.fillStyle=`rgba(${rgb},${on?.6:.35})`; ctx.fillRect(x0,GY-25,x1-x0,40);
     ctx.strokeStyle=`rgba(${rgb},${on?1:.75})`; ctx.lineWidth=3;
     for(let x=x0+6;x<x1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
     ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x0-1,GY-25,3,40); });
