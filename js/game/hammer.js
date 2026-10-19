@@ -1,7 +1,8 @@
-// Hammer throw: four turns in the circle from the start, tapping the green buttons as in the 100 m (each good tap
-// spins faster, a wrong one slows down, not tapping slowly loses speed). Then, as with the javelin: hold both buttons
-// and a star runs along the cable from the hands to the ball; let go when it reaches the ball. Far too early the ball
-// hits the cage's net, too late it lands outside the sector: no mark.
+// Hammer throw, in three parts: three turns tapping the green buttons as in the 100 m (each good tap spins faster, a
+// wrong one slows down, not tapping slowly loses speed); the last, fast turn: RUSH_T s to tap as fast as you can (any
+// button), each tap adding to the throw; then aim, as with the javelin: hold both buttons and a star runs along a bar
+// over the athlete; let go when it reaches the circle at its end. Far too early the ball hits the cage's net, too late
+// it lands outside the sector: no mark.
 import {noise,tone} from '../audio.js';
 import {POSE} from '../poses.js';
 import {S} from '../state.js';
@@ -18,7 +19,9 @@ export const HAM_CIRCLE=1.07, HAM_CAGE=3.2;
 const SH=1.42, ARM=.7;
 // turning speed (radians/s): slowest, and what each m/s of tapping speed adds
 const W_MIN=TAU/1.25, W_PER_V=.7;
-const TURNS=4;
+const TURNS=3;
+// the last turn: how long (s), what each tap adds to the throw (share), and the most it can add
+const RUSH_T=1.5, RUSH_TAP=.014, RUSH_MAX=.3;
 // seconds for the star to reach the ball; let go before EARLY (of the way) = into the net, after LATE = out
 const HAM_T=.6, EARLY=.45, LATE=1.25, LAG=.03;
 // without holding, the throw goes off on its own after this long (s)
@@ -39,6 +42,10 @@ export function hamHands(x,b){ const dx=b[0]-x, dy=b[1]-SH, d=Math.hypot(dx,dy)|
 function spinPose(a,b){ const dx=b[0]-S.x, dy=b[1]-SH, arm=Math.atan2(dx,-dy), f=.3*Math.sin(a.phi);
   return {kind:'hamspin',hip:.76,lean:-.12,legs:[{a:.2+f,b:.35},{a:-.15-f,b:.3}],arms:[{a:arm,b:.05},{a:arm+.08,b:.12}]}; }
 
+const rushBonus=a=>Math.min(RUSH_MAX,(a.taps||0)*RUSH_TAP);
+// the last turn's taps: any button
+export function hamRush(){ const a=S.act; if(S.phase!=='act'||!a||a.k!=='ham'||a.stage!=='rush') return false;
+  a.taps++; tone(500+Math.min(400,a.taps*18),.03,'triangle',.035); return true; }
 export function startHammer(){ S.v=0; S.act={k:'ham',stage:'turn',t:0,phi:0,w:W_MIN,lows:0}; S.phase='act'; S.lastTap=S.clock; sideCue(); tone(600,.06,'triangle',.04); }
 export function updateHammer(dt){
   const a=S.act;
@@ -51,10 +58,17 @@ export function updateHammer(dt){
   }
   a.phi+=a.w*dt;
   while(a.phi>=lowAt(a.lows+1)){ a.lows++;
-    if(a.lows===TURNS){ a.stage='final'; a.t=0; a.v=S.v; S.cue={type:'hamhold',t:0}; tone(500,.06,'triangle',.04); } }
+    if(a.lows===TURNS){ a.stage='rush'; a.t=0; a.v=S.v; a.taps=0; S.cue={type:'rush',t:0}; tone(700,.08,'square',.04); } }
+  if(a.stage==='rush'){
+    // spins faster with every tap
+    a.w+=(W_MIN+W_PER_V*a.v*(1+2.5*rushBonus(a))-a.w)*Math.min(1,dt*8);
+    if(a.t>=RUSH_T){ a.stage='final'; a.t=0; a.free=!S.held2; S.cue={type:'hamhold',t:0}; tone(500,.06,'triangle',.04); }
+  }
   if(a.stage==='final'){
     const m=S.meter;
-    if(!m&&S.held2){ S.meter={k:'ham',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
+    // a fresh hold: fingers still down from the fast taps don't start it
+    if(!S.held2) a.free=true;
+    if(!m&&S.held2&&a.free){ S.meter={k:'ham',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
     else if(m){ m.p+=dt/HAM_T; if(!S.held2||m.p>=LATE) release(a); }
     else if(a.t>WAIT) release(a);
   }
@@ -71,7 +85,7 @@ function release(a){
     S.pops.push({text:a.early?'¡A LA RED!':'¡AFUERA DEL SECTOR!',t:0,dur:1.4,col:'#ff5a3c',sub:'',big:.6,small:true}); tone(160,.45,'sawtooth',.06);
   } else {
     const q=qPole(p-LAG/HAM_T); judge(q);
-    a.stage='fly'; a.R=Math.max(8,HAM_K*a.v*(.6+.4*q)-(b[0]-S.ev.line)); a.T=1.4+.035*a.R;
+    a.stage='fly'; a.R=Math.max(8,HAM_K*a.v*(1+rushBonus(a))*(.6+.4*q)-(b[0]-S.ev.line)); a.T=1.4+.035*a.R;
   }
   a.t=0; a.wf=a.w;
 }

@@ -84,7 +84,7 @@ Ahora en prueba: **Salto triple** y **Martillo**.
 
 **Salto triple**. Carrera y pique como en largo, pero la arena está a 13 m de la tabla: en el aire aparece un botón naranja del lado del pie que apoya (primero el derecho, después el izquierdo) que se toca justo cuando el pie toca la pista; cuanto más justo, más impulso y uno malo (apurado, tarde o del otro lado) hace trastabillar y acorta el salto siguiente. El último salto es como en largo, con la estirada en el punto más alto. La marca se mide desde la tabla.
 
-**Martillo** (`js/game/hammer.js`): sin carrera. Cuatro giros en el círculo, desde el arranque, con la jaula atrás. En los giros se tocan los botones verdes como en los 100 m (cada acierto gira más rápido, cada error frena, sin tocar se pierde velocidad). Después, como en jabalina: se mantienen los dos botones y arriba del atleta una estrellita recorre una barra; hay que soltar cuando llega al círculo de la punta. Muy temprano pega en la red y pasado cae afuera del sector: nulo. La marca se mide desde el borde del círculo.
+**Martillo** (`js/game/hammer.js`): sin carrera, en el círculo con la jaula atrás, en tres partes. Tres giros tocando los botones verdes como en los 100 m (cada acierto gira más rápido, cada error frena, sin tocar se pierde velocidad). Un giro final de 1,5 s para tocar lo más rápido posible, cualquier botón: cada toque suma distancia (hasta un 30%). Y la puntería, como en jabalina: se mantienen los dos botones y arriba del atleta una estrellita recorre una barra; hay que soltar cuando llega al círculo de la punta. Muy temprano pega en la red y pasado cae afuera del sector: nulo. La marca se mide desde el borde del círculo.
 
 ## Supervivencia
 

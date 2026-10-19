@@ -3,6 +3,7 @@ import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
 import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,footTap,javThrow} from './game/field.js';
+import {hamRush} from './game/hammer.js';
 import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -31,6 +32,9 @@ export function onTap(pos){
     // triple jump: the side of the foot that touches down
     if(pos!=='L'&&pos!=='R') return;
     if(footTap(pos)==='x'){ addX(pos); tone(160,.2,'sawtooth',.04); } else addRing(pos);
+  } else if(cue.type==='rush'){
+    // hammer's last turn: any button, as fast as you can
+    if(hamRush()) addRing(pos==='R'?'R':'L');
   } else if(cue.type==='num'){
     if(S.stumble>0||pos==='B') return;
     const want=cue.order[cue.next];
