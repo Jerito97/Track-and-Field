@@ -7,6 +7,7 @@ import {rec} from '../storage.js';
 import {clamp,rand} from '../utils.js';
 import {armsFor,bothCue,judge,pop} from './core.js';
 import {startHammer,updateHammer} from './hammer.js';
+import {startShot,updateShot} from './shot.js';
 import {startReplay} from './replay.js';
 
 // pole vault (as in the original): the pole lowers by itself, timed so the star reaches its tip (in POLE_T s) about
@@ -47,6 +48,7 @@ export function updateField(dt){
   if(S.phase==='ready'){ const k=armsFor(); S.pose=k==='jav'?{...POSE.stand,arms:[{a:-2.4,b:.55},POSE.stand.arms[1]]}:(k==='pole'?{...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]}:POSE.stand); return; }
   // hammer: no run-up, the turns start right away
   if(S.phase==='run'&&ev.kind==='ham'){ startHammer(); return; }
+  if(S.phase==='run'&&ev.kind==='sp'){ startShot(); return; }
   if(S.phase==='run'){
     if(ev.bands&&!S.prep&&ev.line-S.x<=ev.bands[0]){ S.prep=true; S.cue=null; tone(520,.06,'triangle',.04); }
     if(!S.zone&&ev.line-S.x<=ev.zone){
@@ -154,6 +156,7 @@ function footDown(a){
 }
 export function updateAct(dt){
   if(S.act.k==='ham'){ updateHammer(dt); return; }
+  if(S.act.k==='sp'){ updateShot(dt); return; }
   const ev=S.ev, a=S.act; a.t+=dt;
   if(a.k==='tj'&&(a.stage==='hop'||a.stage==='step')){
     const u=Math.min(1,a.t/a.T);

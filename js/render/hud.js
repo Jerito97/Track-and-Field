@@ -46,6 +46,10 @@ export function drawCue(cue){
   const at=(p,col,label)=>{ const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
   if(cue.type==='side') at(cue.side,'#2fd166','');
   else if(cue.type==='foot') at(cue.side,'#ff8a1e','');
+  else if(cue.type==='beat'){ at(cue.side,'#2fd166','');
+    // the ring closing on the button: it reaches it at the beat
+    const [x,y]=CUEPOS[cue.side](), k=Math.max(0,(cue.at-(S.act?S.act.t:0))/.6), r=29+70*k;
+    ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke(); ctx.strokeStyle='rgba(14,26,52,.6)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,r+3,0,Math.PI*2); ctx.stroke(); }
   else if(cue.type==='rush'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); const k=1+.12*Math.abs(Math.sin(S.clock*18)); ctx.save(); ctx.translate(LW/2,104); ctx.scale(k,k); txt('¡TOCÁ RÁPIDO!',0,0,'#ffd23a',24,{lw:5}); ctx.restore(); }
   else if(cue.type==='hamhold'){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); if(!S.held2) txt('MANTENÉ LOS DOS',LW/2,104,'#fff',18,{lw:4}); }
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }

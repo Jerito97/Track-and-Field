@@ -8,6 +8,7 @@ import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
 import {TJ_PIT,TJ_SAND} from '../game/field.js';
 import {HAM_CAGE,HAM_CIRCLE,hamBall,hamHands} from '../game/hammer.js';
+import {SP_BEST,SP_GREEN,SP_MAX} from '../game/shot.js';
 import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -31,9 +32,9 @@ export function drawField(V){
   ctx.fillStyle=GRASS; ctx.fillRect(0,apTop,LW,LH-apTop);
   ctx.fillStyle=GRASS_L; for(let m=Math.floor(V.cam/12)*12;X(m)<LW;m+=12) ctx.fillRect(X(m),apTop,6*s,LH-apTop);
   // the runway (red, like the track) up to the line; the javelin field beyond it is grass
-  const rw=ev.kind==='ham'?0:ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
+  const rw=ev.kind==='ham'||ev.kind==='sp'?0:ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
   ctx.fillStyle=TARTAN; ctx.fillRect(0,GY-26,rw,44); ctx.fillStyle=TARTAN_D; ctx.fillRect(0,GY-4,rw,22);
-  if(ev.kind==='ham') hamField(V,X,GY,apTop);
+  if(ev.kind==='ham'||ev.kind==='sp') hamField(V,X,GY,apTop,ev.kind==='ham');
   else if(ev.kind==='jav'){
     const lx=X(ev.line);
     ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,apTop); ctx.quadraticCurveTo(lx+14,(apTop+LH)/2,lx,LH); ctx.stroke();
@@ -54,7 +55,7 @@ export function drawField(V){
     for(let m=Math.ceil(a0*2)/2;m<=a1-.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     rivalFlags(V,X,GY);
   }
-  if(ev.kind==='jav'||ev.kind==='ham') rivalFlags(V,X,GY);
+  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp') rivalFlags(V,X,GY);
   if(ev.kind==='pv'){
     const bx=X(ev.line), ux=X(ev.line+.6);
     ctx.fillStyle='#555'; ctx.beginPath(); ctx.moveTo(bx-.5*s,GY); ctx.lineTo(bx,GY+4); ctx.lineTo(bx,GY); ctx.closePath(); ctx.fill();
@@ -76,7 +77,7 @@ export function drawField(V){
     // triple jump: the hop's and the step's footprints too
     (V.prints||[]).forEach(x=>footprint(X(x),GY,s,1));
     if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); } }
-  if(!ev.bands&&ev.kind!=='ham'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
+  if(!ev.bands&&ev.kind!=='ham'&&ev.kind!=='sp'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
       ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
       ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
@@ -102,6 +103,7 @@ export function drawField(V){
   if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,STYLE.stick?fieldPose({...V,clock:S.clock}):V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
   if(hb&&!hb.far) hb.draw();
   if(hb&&hb.arc) hb.arc();
+  if(ev.kind==='sp') spDraw(V,X,GY,fig);
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
     if(!V.jv&&V.meter&&V.meter.k==='jav'&&fig.jav){ if(!V.replay){ const [tx,ty,hx,hy]=fig.jav; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
@@ -158,11 +160,14 @@ export function drawPole(V,X,GY,fig){
 }
 // hammer: grass all over, distance lines every 10 m from the circle's front edge, the concrete circle and the cage's
 // net behind it
-function hamField(V,X,GY,top){
-  const s=V.ppm, ev=V.ev;
-  for(let m=10;m<=120;m+=10){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,top,2,LH-top); txt(m+' m',x,top+12,'#fff',13); }
+function hamField(V,X,GY,top,cage){
+  const s=V.ppm, ev=V.ev, step=cage?10:5;
+  for(let m=step;m<=120;m+=step){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,top,2,LH-top); txt(m+' m',x,top+12,'#fff',13); }
   const cx=X(0), back=X(-HAM_CAGE), front=X(HAM_CIRCLE+.5), nt=GY-5*s;
   if(front<-20||back>LW+20) return;
+  if(!cage){ circle(cx,s,GY);
+    // shot put: the toe board, a white curved block at the front edge
+    const bx=X(HAM_CIRCLE); ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(bx-3,GY-6,8,14,3); ctx.fill(); ctx.stroke(); return; }
   // the net: poles and a fine mesh, behind the circle and along its far side
   ctx.fillStyle='rgba(30,40,60,.12)'; ctx.fillRect(back,nt,front-back,GY-nt-6);
   ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=1;
@@ -170,7 +175,10 @@ function hamField(V,X,GY,top){
   for(let y=nt;y<=GY-6;y+=6){ ctx.beginPath(); ctx.moveTo(back,y); ctx.lineTo(front,y); ctx.stroke(); }
   ctx.fillStyle='#d5dbe4'; ctx.strokeStyle=INK; ctx.lineWidth=1.5;
   [back,X(-HAM_CAGE*.4),front].forEach(x=>{ ctx.beginPath(); ctx.rect(x-2.5,nt-4,5,GY-nt-2); ctx.fill(); ctx.stroke(); });
-  // the circle: concrete, white rim, seen from a little above
+  circle(cx,s,GY);
+}
+// the throwing circle: concrete, white rim, seen from a little above
+function circle(cx,s,GY){
   const r=HAM_CIRCLE*s;
   ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(cx,GY+3,r+3,13,0,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.stroke();
   ctx.fillStyle='#9aa0aa'; ctx.beginPath(); ctx.ellipse(cx,GY+3,r,10.5,0,0,Math.PI*2); ctx.fill();
@@ -196,6 +204,26 @@ function hamDraw(V,X,GY){
     ctx.strokeStyle='#fff'; ctx.lineWidth=7; ctx.stroke(); ctx.strokeStyle='rgba(47,209,102,.9)'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+(x1-x0)*Math.min(1,p),y); ctx.stroke();
     target(x1,y); drawStar(x0+(x1-x0)*p,y,10,p,true);
     if(!m.hit) txt('SOLTÁ EN EL CÍRCULO',cx,y-22,'#fff',16,{lw:4}); }};
+}
+// shot put: the shot in the hand (or flying, or landed); holding both, the angle gauge beside the athlete with its
+// green zone and the needle
+function spDraw(V,X,GY,fig){
+  const s=V.ppm, R=Math.max(4,.11*s);
+  const ball=(x,y)=>{ ctx.fillStyle='#3a3f4a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(x-R*.35,y-R*.35,R*.3,0,Math.PI*2); ctx.fill(); };
+  if(V.jv&&V.jv.ham){ const x=X(V.jv.x), y=GY-V.jv.y*s; if(V.jv.stuck){ ctx.fillStyle='rgba(90,60,30,.5)'; ctx.beginPath(); ctx.ellipse(x,GY+3,10,3.5,0,0,Math.PI*2); ctx.fill(); } ball(x,y); }
+  else if(fig&&fig.hand) ball(fig.hand[0]+2,fig.hand[1]-2);
+  // the gauge stays a moment after letting go (where the needle stopped), not during the flight
+  const m=V.meter; if(V.replay||!m||m.k!=='sp'||V.jv&&V.jv.t>.3) return;
+  const ox=X(V.x)+.9*s, oy=GY-1.2*s, rr=62, deg=d=>d*Math.PI/180, at=d=>[ox+Math.cos(deg(d))*rr,oy-Math.sin(deg(d))*rr];
+  ctx.save(); ctx.lineCap='round';
+  const arc=(d0,d1,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.arc(ox,oy,rr,-deg(d1),-deg(d0)); ctx.stroke(); };
+  arc(0,SP_MAX,INK,14); arc(0,SP_MAX,'#fff',9); arc(SP_BEST-SP_GREEN,SP_BEST+SP_GREEN,'#2fd166',9);
+  [0,20,40,60,80].forEach(d=>{ const [x,y]=at(d); txt(d+'°',ox+(x-ox)*1.32,oy+(y-oy)*1.32,'#fff',11); });
+  const d=Math.min(m.hit??m.p,SP_MAX), [nx,ny]=at(d);
+  ctx.strokeStyle=INK; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(nx,ny); ctx.stroke(); ctx.strokeStyle='#ffd23a'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill(); ctx.restore();
+  if(m.hit==null) txt('SOLTÁ EN LO VERDE',ox+20,oy-rr-26,'#fff',16,{lw:4});
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.
