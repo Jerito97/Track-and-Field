@@ -307,6 +307,10 @@ tr.me td{background:var(--red)}
 .u-item .u-nm b{font-size:1.05rem}
 /* chosen card: a frame drawn on top of the picture and the label, following the rounded corners exactly
    (an outline went under the picture and, on iPhone, didn't follow the corners) */
+.m-ev{box-shadow:none}
 .m-ev.on{outline:none}
-.m-ev.on::after{content:"";position:absolute;inset:0;border:4px solid var(--sun);border-radius:inherit;pointer-events:none;z-index:2}
+/* every card has the same frame (no lip underneath), so the chosen one only changes its colour */
+.m-ev::after{content:"";position:absolute;inset:0;border:4px solid #14284f;border-radius:inherit;pointer-events:none;z-index:2}
+.m-ev.tour::after{border-color:#d89a0c}
+.m-ev.on::after{border-color:var(--sun)}
 .m-ev.tour.on::after{border-color:var(--red)}
