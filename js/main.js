@@ -9,7 +9,7 @@ import {drawRig} from './rig.js';
 import {buildAthletes,G,ME,S,screen} from './state.js';
 import {player} from './storage.js';
 import {syncMarks} from './ui/board.js';
-import {clearInvite,inviteFromUrl,onJoin} from './ui/online.js';
+import {clearInvite,flush,inviteFromUrl,onJoin} from './ui/online.js';
 import {initScreens,paintOv,showMenu} from './ui/screens.js';
 
 addEventListener('resize',resize); resize();
@@ -19,7 +19,9 @@ initScreens();
 await loadAssets();
 // invite link (?t=CODE): straight into the tournament (a new player is created first, then joins)
 const inv=inviteFromUrl();
-if(inv&&player()){ clearInvite(); onJoin(inv); } else showMenu();
+// (without a session the menu asks to enter first; the invite waits in the address and joins right after)
+if(inv&&player()?.token){ clearInvite(); onJoin(inv); } else showMenu();
+flush();  // tournament results waiting from last time
 // splash: the logo stays at least a moment (tap to skip), then fades out; removed when it's done
 const splash=document.getElementById('splash');
 if(splash){ const hide=()=>{ splash.classList.add('out'); setTimeout(()=>splash.remove(),500); };
@@ -30,8 +32,8 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     const urls=performance.getEntriesByType('resource').map(r=>r.name).filter(u=>u.startsWith(location.origin)&&!u.includes('/api/')||/fonts\.(googleapis|gstatic)/.test(u));
     reg.active?.postMessage({cache:[location.href.split('?')[0],...urls]}); }).catch(()=>{});
 }
-// back online: records made without connection go up to the world top 10
-addEventListener('online',()=>{ syncMarks(); });
+// back online: records made without connection go up to the world top 10, waiting tournament results are sent
+addEventListener('online',()=>{ syncMarks(); flush(); });
 let lastT=performance.now();
 function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);

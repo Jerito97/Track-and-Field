@@ -33,7 +33,15 @@ export function createPlayer(name,color,remote){
 }
 export function switchPlayer(id){ if(DB.list.some(p=>p.id===id)){ DB.cur=id; save(); bind(); } }
 // a local player now protected on the server: takes the server's id and token
-export function linkPlayer(remote){ const p=player(); if(!p) return; Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token,expired:false}); DB.cur=p.id; save(); bind(); }
+// (another account: its records go up again; the same account already on this device: both merge into one)
+export function linkPlayer(remote){ const p=player(); if(!p) return;
+  if(p.id!==remote.id) p.sent={};
+  const twin=DB.list.find(q=>q!==p&&q.id===remote.id);
+  if(twin){ p.history=p.history.concat(twin.history).sort((a,b)=>b.date-a.date).slice(0,HISTORY_MAX); p.tours=p.tours.concat(twin.tours);
+    Object.entries(twin.rec).forEach(([k,v])=>{ const sprint=k==='100'||k==='110h'; if(p.rec[k]==null||(k==='tour'?v>p.rec[k]:better(sprint,v,p.rec[k]))) p.rec[k]=v; });
+    Object.entries(twin.best).forEach(([k,l])=>{ p.best[k]=(p.best[k]||[]).concat(l); });
+    DB.list=DB.list.filter(q=>q!==twin); }
+  Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token,expired:false}); DB.cur=p.id; save(); bind(); }
 // best marks kept on the server (logging in on another phone or app): the better of each stays as personal record
 export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(marks)) return;
   marks.forEach(m=>{ const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;

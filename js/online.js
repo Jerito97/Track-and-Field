@@ -13,7 +13,7 @@ async function call(method,body,query=''){
   if(r.headers.get('x-offline')&&data&&typeof data==='object') data.offline=true;
   // the session is no longer valid: the game asks for the code again (records stay on this phone)
   if(r.status===401&&body?.token&&player()?.token===body.token) updatePlayer({token:null,expired:true});
-  if(!r.ok) throw new Error(data.error||(r.status===404?'No se encontró el servidor de torneos.':'Error del servidor.'));
+  if(!r.ok){ const e=new Error(data.error||(r.status===404?'No se encontró el servidor de torneos.':'Error del servidor.')); e.status=r.status; throw e; }
   return data;
 }
 export const cleanCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
@@ -28,7 +28,8 @@ export const closeTournament=code=>call('POST',{action:'close',code:cleanCode(co
 // every tournament you're in, with players and results (from any phone)
 export const getMyTours=async()=>(await call('POST',{action:'mytours',token:tok()})).tours;
 export async function joinTournament(code){ code=cleanCode(code); await call('POST',{action:'join',code,token:tok()}); remember(code); return code; }
-export const sendResult=(code,ev,mark)=>call('POST',{action:'result',code,ev,mark,token:tok()});
+// token: whose result it is (the current player unless given)
+export const sendResult=(code,ev,mark,token=tok())=>call('POST',{action:'result',code,ev,mark,token});
 
 // tournaments of the current player, newest first
 const KEY=()=>'odb-online-'+(player()?.id||'');

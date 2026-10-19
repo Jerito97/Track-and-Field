@@ -129,6 +129,8 @@ function pickColor(c){ OV.querySelectorAll('.p-sw').forEach(b=>{ b.classList.tog
 // rename: names are unique on the server, so it has to accept it first
 async function onRename(){ const name=$('pname').value.replace(/\s+/g,' ').trim().slice(0,14);
   if(name===player().name) return;
+  // with the session closed the server can't check the name: enter again first
+  if(player().expired&&!player().token){ showProfile('Para cambiar el nombre, primero volvé a entrar con tu código.',false,name); return; }
   if(name.length<2){ showProfile('El nombre tiene que tener al menos 2 letras.',false,name); return; }
   if(player().token){ try{ await updateRemote({name}); }catch(e){ showProfile(e.message,false,name); return; } }
   updatePlayer({name}); showProfile(`Listo: ahora sos «${name}».`,true); }
@@ -140,7 +142,7 @@ export function showProfile(msg,ok,draft){
     ${msg?`<p class="${ok?'o-ok':'o-err'}" role="alert">${esc(msg)}</p>`:''}
     ${p.token?'':p.expired?'<div class="o-code"><p class="small">Se cerró tu sesión: tus récords no se suben al Top 10 hasta que vuelvas a entrar.</p><button class="btn" data-act="protect">Entrar</button></div>':'<div class="o-code"><p class="small">Tu jugador todavía no tiene código: cualquiera podría usar tu nombre.</p><button class="btn" data-act="protect">Poner código</button></div>'}
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
-      <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.</span></label></div>
+      <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
     <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div></div>
     <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>

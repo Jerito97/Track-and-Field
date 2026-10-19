@@ -94,5 +94,6 @@ function done(r){
   mergeMarks(r.marks,EVENTS);  // your records follow you to any phone
   after();
 }
-function after(){ const inv=inviteFromUrl(); if(inv){ clearInvite(); onJoin(inv); } else showMenu(); }
+// a pending invite joins once there's a session (a player made offline keeps it for after entering with a code)
+function after(){ const inv=inviteFromUrl(); if(inv&&player()?.token){ clearInvite(); onJoin(inv); } else showMenu(); }
 export function onSkip(){ skipProtect=true; showMenu(); }

@@ -149,12 +149,18 @@ async function act(sql,b){
     case 'login': {
       const u=(await sql`select * from users where name_key=${nameKey(b.name)}`)[0];
       if(!u) throw new Bad(404,'No existe ese jugador.');
-      if(u.locked_until&&new Date(u.locked_until)>new Date()) throw new Bad(429,`Demasiados intentos. Probá de nuevo en ${LOCK_MIN} minutos.`);
+      // the attempt is counted first, in one step in the database, so many requests at once can't get around the lock
+      const att=(await sql`update users set fails=case when locked_until is not null and locked_until<=now() then 1 else fails+1 end, locked_until=null
+        where id=${u.id} and (locked_until is null or locked_until<=now()) returning fails`)[0];
+      const locked=`Demasiados intentos. Probá de nuevo en ${LOCK_MIN} minutos.`;
+      if(!att) throw new Bad(429,locked);
+      const lockNow=()=>sql`update users set fails=0, locked_until=${new Date(Date.now()+LOCK_MIN*60000).toISOString()} where id=${u.id}`;
+      if(att.fails>MAX_FAILS){ await lockNow(); throw new Bad(429,locked); }
       const got=Buffer.from(pinHash(String(b.pin||''),u.pin_salt),'hex'), want=Buffer.from(u.pin_hash,'hex');
       if(!okPin(b.pin)||!timingSafeEqual(got,want)){
-        const fails=u.fails+1, lock=fails>=MAX_FAILS;
-        await sql`update users set fails=${lock?0:fails}, locked_until=${lock?new Date(Date.now()+LOCK_MIN*60000).toISOString():null} where id=${u.id}`;
-        throw new Bad(403,lock?`Código incorrecto. Probá de nuevo en ${LOCK_MIN} minutos.`:`Código incorrecto (te ${MAX_FAILS-fails===1?'queda 1 intento':`quedan ${MAX_FAILS-fails} intentos`}).`);
+        const left=MAX_FAILS-att.fails;
+        if(left<=0){ await lockNow(); throw new Bad(403,`Código incorrecto. Probá de nuevo en ${LOCK_MIN} minutos.`); }
+        throw new Bad(403,`Código incorrecto (te ${left===1?'queda 1 intento':`quedan ${left} intentos`}).`);
       }
       // a new session per login; the other phones keep theirs
       const token=randomBytes(24).toString('base64url');
@@ -211,8 +217,10 @@ async function act(sql,b){
       const inT=(await sql`select 1 from entries where code=${code} and player_id=${u.id}`).length>0;
       if(b.action==='join'){
         if(!inT&&t.finished) throw new Bad(409,'Este torneo ya terminó.');
-        if(!inT){ const n=(await sql`select count(*)::int as n from entries where code=${code}`)[0].n; if(n>=MAX_PLAYERS) throw new Bad(409,'El torneo está lleno.');
-          await sql`insert into entries(code,player_id,name,color) values(${code},${u.id},${u.name},${u.color}) on conflict do nothing`; }
+        // only while there's room (checked in the same step, so two joining at once can't go over)
+        if(!inT){ const ins=await sql`insert into entries(code,player_id,name,color) select ${code},${u.id},${u.name},${u.color}
+            where (select count(*) from entries where code=${code})<${MAX_PLAYERS} on conflict do nothing returning player_id`;
+          if(!ins.length) throw new Bad(409,'El torneo está lleno.'); }
         return {ok:true};
       }
       const ev=String(b.ev||''); if(!t.events.includes(ev)) throw new Bad(400,'Esa prueba no está en el torneo.');
@@ -245,10 +253,12 @@ export default async function handler(req,res){
       return res.status(200).json(v);
     }
     if(req.method!=='POST') throw new Bad(405,'Método no permitido.');
-    const b=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
+    const b=(typeof req.body==='string'?JSON.parse(req.body||'{}'):req.body)||{};
     return res.status(200).json(await act(sql,b));
   }catch(e){
     if(e instanceof Bad) return res.status(e.status).json({error:e.message});
+    // two requests at once taking the same name: the database refuses the second one
+    if(e?.code==='23505') return res.status(409).json({error:'Ese nombre ya está usado.'});
     console.error(e);
     return res.status(500).json({error:e.message==='no database configured'?'Falta conectar la base de datos.':'Error del servidor.'});
   }

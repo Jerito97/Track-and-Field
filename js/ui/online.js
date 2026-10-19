@@ -5,8 +5,8 @@ import {EVENTS} from '../config.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {fmt,pts} from '../game/scoring.js';
 import {cleanCode,closeTournament,createTournament,getMyTours,getTournament,inviteLink,joinTournament,myTournaments,sendResult} from '../online.js';
-import {buildAthletes,G,setS,setScreen} from '../state.js';
-import {player,store} from '../storage.js';
+import {buildAthletes,G,screen,setS,setScreen} from '../state.js';
+import {player,players,store} from '../storage.js';
 import {esc,place,showOv} from './screens.js';
 
 const evById=id=>EVENTS.find(e=>e.id===id);
@@ -16,7 +16,8 @@ let busy=false;
 
 // hub: create (name, events, how long it lasts), join with a code, your tournaments being played, and the history
 const DAYS=[[1,'1 día'],[3,'3 días'],[7,'1 semana']];
-let days=7, tours=null;  // your tournaments, as the server sent them last
+let days=7, tours=null, toursPid=null;  // your tournaments as the server sent them last, and whose they are
+const ownTours=()=>{ if(toursPid!==player().id){ tours=null; toursPid=player().id; } };
 const day=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
 function timeLeft(t){ const ms=new Date(t.ends_at)-Date.now(), h=ms/3600000;
   return h>=48?`termina en ${Math.round(h/24)} días`:h>=1?`termina en ${Math.round(h)} h`:`termina en ${Math.max(1,Math.round(ms/60000))} min`; }
@@ -29,7 +30,7 @@ function activeList(){
     return `<button class="o-item o-tour" data-act="oopen" data-code="${t.code}"><span class="o-tn"><b>${esc(t.name)}</b><small>${rows.length} ${rows.length===1?'jugador':'jugadores'} · ${timeLeft(t)}</small></span><span>Ver ›</span></button>`; }).join('')}</div>`;
 }
 export function showOnline(msg){
-  setS(null); setScreen('menu');
+  setS(null); setScreen('menu'); ownTours(); const pid=player().id;
   const draw=()=>{ const fin=finishedTours().length;
     showOv(card('ONLINE','Torneos con amigos',`
     <p class="small">Creá un torneo y pasales el código a tus amigos. Cada uno juega las pruebas cuando quiera; al final gana el que suma más puntos.</p>
@@ -50,20 +51,20 @@ export function showOnline(msg){
     <div class="btns"><button class="btn alt" data-act="menu">Volver</button></div>`));
     $('ocode').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="ojoin"]').click(); }); };
   draw(); hubOpen=true;
-  getMyTours().then(t=>{ tours=t; if(hubOpen&&OV.querySelector('#oact')){ const keep={name:$('oname').value,code:$('ocode').value}; draw(); $('oname').value=keep.name; $('ocode').value=keep.code; } },()=>{ const el=OV.querySelector('#oact'); if(el&&!tours) el.innerHTML=activeList()||'<p class="small">Sin conexión.</p>'; });
+  getMyTours().then(t=>{ if(player().id!==pid) return; tours=t; if(hubOpen&&OV.querySelector('#oact')){ const keep={name:$('oname').value,code:$('ocode').value}; draw(); $('oname').value=keep.name; $('ocode').value=keep.code; } },()=>{ const el=OV.querySelector('#oact'); if(el&&!tours) el.innerHTML=activeList()||'<p class="small">Sin conexión.</p>'; });
 }
 let hubOpen=false;
 export function onDays(d){ days=+d; OV.querySelectorAll('.o-day').forEach(b=>{ const on=+b.dataset.d===days; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); }
 // history: finished tournaments, newest first, with the winner and your place
 export async function showHistory(){
-  hubOpen=false; setS(null); setScreen('menu');
+  hubOpen=false; setS(null); setScreen('menu'); ownTours(); const pid=player().id;
   const draw=msg=>{ const fin=finishedTours(), me=player().id;
     showOv(card('HISTORIAL',`Torneos terminados${tours?` (${fin.length})`:''}`,msg||(fin.length?`<div class="o-list">${fin.map(d=>{ const t=d.tournament, rows=standings(d), i=rows.findIndex(r=>r.player_id===me), pl=i<0?null:place(rows,i,q=>String(q.total)), win=rows.filter((r,k)=>place(rows,k,q=>String(q.total))===1).map(r=>esc(r.name)).join(' y ');
       return `<button class="o-item o-tour" data-act="oopen" data-code="${t.code}"><span class="o-tn"><b>${esc(t.name)}</b><small>${day(t.closed_at||t.ends_at)} · ${rows.length} jugadores · Ganó ${win}</small></span><span class="o-pl">${pl==null?'':`${pl<=3?['🥇','🥈','🥉'][pl-1]+' ':''}${pl}º`}</span></button>`; }).join('')}</div>`
       :'<p class="small">Todavía no terminó ningún torneo tuyo.</p>'))+'');
     OV.querySelector('.o-card .body').insertAdjacentHTML('beforeend','<div class="btns"><button class="btn alt" data-act="online" data-focus>Volver</button></div>'); };
   draw(tours?'':'<p class="small o-wait">Cargando…</p>');
-  try{ tours=await getMyTours(); draw(); }catch(e){ if(!tours) draw(err(e.message)); }
+  try{ const t=await getMyTours(); if(player().id!==pid) return; tours=t; draw(); }catch(e){ if(!tours) draw(err(e.message)); }
 }
 const loading=t=>showOv(card('ONLINE',t,'<p class="small o-wait">Cargando…</p>'));
 
@@ -80,11 +81,21 @@ export const onJoin=(raw)=>guard(async()=>{
   try{ await joinTournament(code); tours=null; await showTournament(code); }catch(e){ showOnline(e.message); }
 });
 
-// results waiting to be sent (no connection when the event ended): retried when the board opens
-const PENDING='odb-online-pending';
-const pending=()=>store.get(PENDING,[]);
-async function flush(){ const left=[];
-  for(const p of pending()){ try{ await sendResult(p.code,p.ev,p.mark); }catch(e){ if(!/ya jugaste|no existe|no estás|terminó/.test(e.message)) left.push(p); } }
+// results waiting to be sent (no connection when the event ended), each with whose it is: sent with that player's
+// session when there's connection (board opened, back online, game opened). An event left halfway by closing the game
+// (marked as started and never finished) is sent as a foul. Kept only while it can still go through: no connection,
+// session to renew, or a server failure; anything the server refuses (already played, finished...) is dropped.
+const PENDING='odb-online-pending', STARTED='odb-online-started';
+const pending=()=>store.get(PENDING,[]).filter(p=>p.pid);
+const keep=e=>!e.status||e.status===401||e.status>=500;
+let flushing=null;
+export function flush(){ if(!flushing) flushing=flushNow().finally(()=>{ flushing=null; }); return flushing; }
+async function flushNow(){
+  const st=store.get(STARTED,null);
+  if(st&&!(screen==='play'&&G.mode==='online')){ store.set(STARTED,null); store.set(PENDING,pending().concat({...st,mark:null})); }
+  const left=[];
+  for(const p of pending()){ const tk=players().find(q=>q.id===p.pid)?.token; if(!tk){ left.push(p); continue; }
+    try{ await sendResult(p.code,p.ev,p.mark,tk); }catch(e){ if(keep(e)) left.push(p); } }
   store.set(PENDING,left); }
 
 // standings: points per event as in the solo tournament, summed; equal totals share the place
@@ -99,9 +110,14 @@ let shown=null;  // code of the board on screen
 export const shownCode=()=>shown;
 export async function showTournament(code,msg){
   code=cleanCode(code); shown=code; setS(null); setScreen('menu'); loading('Torneo '+code);
+  if(G.sending) await G.sending;
   await flush();
   let data; try{ data=await getTournament(code); }catch(e){ showOnline(e.message); return; }
   if(shown!==code) return;
+  // your results still waiting for connection count as played here
+  const mine=pending().filter(q=>q.pid===player().id&&q.code===code&&!data.results.some(r=>r.player_id===q.pid&&r.ev===q.ev));
+  data.results=data.results.concat(mine.map(q=>({player_id:q.pid,ev:q.ev,mark:q.mark})));
+  const note=(data.offline?'<p class="small">Sin conexión: esta es la última tabla que viste.</p>':'')+(mine.length?`<p class="small">${mine.length===1?'Tenés 1 resultado que se envía':`Tenés ${mine.length} resultados que se envían`} cuando vuelva la conexión.</p>`:'');
   const t=data.tournament, p=player(), evs=t.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id), fin=t.finished;
   if(!meRow){ if(fin){ showOnline('Este torneo ya terminó.'); return; } try{ await joinTournament(code); }catch(e){ showOnline(e.message); return; } return showTournament(code,msg); }
   const myEvs=evs.map(ev=>{ const played=ev.id in meRow.marks;
@@ -111,7 +127,7 @@ export async function showTournament(code,msg){
   const why={all:'Todos jugaron todas las pruebas.',time:'Se terminó el tiempo: las pruebas que no se jugaron cuentan 0.',host:'Lo terminó quien lo creó: las pruebas que no se jugaron cuentan 0.'}[t.reason]||'';
   const host=t.host_id===p.id;
   showOv(card('TORNEO',esc(t.name),`
-    ${msg?err(msg):''}
+    ${msg?err(msg):''}${note}
     ${fin?`<p class="small o-final"><b>¡Torneo terminado!</b> ${why}</p>`
       :`<div class="o-code"><div><span class="lbl">Código</span><b>${code}</b></div><button class="btn" data-act="oshare" data-code="${code}">Invitar</button></div>
     <p class="small">Cada prueba se juega <b>una sola vez</b>: si salís a la mitad, cuenta como nulo. El torneo ${timeLeft(t)} (${day(t.ends_at)}).${rows.length<2?' Pasales el código a tus amigos para que se sumen.':''}</p>`}
@@ -134,13 +150,16 @@ export async function onShare(code){
 }
 // play an event for the tournament (against the machines, as usual; only your mark counts)
 export function playOnline(code,evId){
-  G.mode='online'; G.code=code; G.evIdx=EVENTS.findIndex(e=>e.id===evId); G.sent=false;
+  G.mode='online'; G.code=code; G.evIdx=EVENTS.findIndex(e=>e.id===evId); G.sent=false; G.sending=null;
+  store.set(STARTED,{pid:player().id,code,ev:evId});
   buildAthletes(); newEvent(G.evIdx); startPlay();
 }
 // the event ended (mark, or null for a foul / leaving halfway): send it, keep it for later if offline
-export async function finishOnline(mark){
-  if(G.sent) return; G.sent=true; const code=G.code, ev=EVENTS[G.evIdx].id;
-  try{ await sendResult(code,ev,mark); }catch(e){ if(!/ya jugaste|terminó/.test(e.message)) store.set(PENDING,pending().concat({code,ev,mark})); }
+export function finishOnline(mark){
+  if(G.sent) return G.sending; G.sent=true; const code=G.code, ev=EVENTS[G.evIdx].id, pid=player().id;
+  store.set(STARTED,null);
+  G.sending=sendResult(code,ev,mark).catch(e=>{ if(keep(e)) store.set(PENDING,pending().concat({pid,code,ev,mark})); });
+  return G.sending;
 }
 export async function leaveOnline(){ await finishOnline(null); showTournament(G.code); }
 // opened with ?t=CODE (invite link): join once there's a player
