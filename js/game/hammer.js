@@ -49,6 +49,9 @@ const rushBonus=a=>Math.min(RUSH_MAX,(a.taps||0)*RUSH_TAP);
 // the last turn's taps: any button
 export function hamRush(){ const a=S.act; if(S.phase!=='act'||!a||a.k!=='ham'||a.stage!=='rush') return false;
   a.taps++; tone(500+Math.min(400,a.taps*18),.03,'triangle',.035); return true; }
+// pausing while aiming: the fingers come off to tap Resume, so the aim starts over (a fresh hold) instead of letting go
+export function hamPause(){ const a=S&&S.act; if(!a||a.k!=='ham'||a.stage!=='final'||!S.meter||S.meter.k!=='ham') return;
+  S.meter=null; a.free=false; S.cue={type:'hamhold',t:0}; }
 export function startHammer(){ S.v=0; S.act={k:'ham',stage:'turn',t:0,phi:0,w:W_MIN,lows:0}; S.phase='act'; S.lastTap=S.clock; sideCue(); tone(600,.06,'triangle',.04); }
 export function updateHammer(dt){
   const a=S.act;
