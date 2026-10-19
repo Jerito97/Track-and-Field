@@ -80,6 +80,8 @@ En el menú, tarjeta **Torneo → Con amigos**: crear un torneo (nombre y prueba
 
 Cómo funciona: el juego está publicado en **Vercel**; `api/t.js` es una función de Vercel que guarda torneos, jugadores y resultados en **Neon** (Postgres). La conexión la pone la integración de Neon en Vercel (variable `DATABASE_URL`); las tablas se crean solas la primera vez. La función valida lo que recibe (pruebas del torneo, marcas posibles, un resultado por prueba). Si no hay conexión al terminar una prueba, el resultado queda guardado y se manda la próxima vez que se abre el torneo.
 
+
+Un torneo termina cuando todos jugaron todas las pruebas, cuando se cumple el plazo que se eligió al crearlo (1 día, 3 días o 1 semana) o cuando quien lo creó lo termina a mano. Terminado, nadie más puede sumarse ni jugar y las pruebas no jugadas cuentan 0. En *Con amigos*, **En juego** lista los torneos abiertos (nombre, jugadores, cuánto falta) y **Historial de torneos** los terminados (fecha, ganador y tu puesto); la lista viene del servidor, así se ve desde cualquier celular.
 ## Estilo stickman
 
 El juego usa stickmen dibujados con código (`drawStick` en `js/draw/character.js`): líneas gruesas y cabeza rellena, del color de la musculosa de cada atleta, sobre el mismo esqueleto y las mismas poses (`js/poses.js`). Los personajes dibujados (piezas y tiras de animación en `assets/characters/`) quedan guardados pero desactivados: para volver a usarlos, poné `stick:false` en `STYLE` (`js/storage.js`); recién ahí se cargan sus imágenes.

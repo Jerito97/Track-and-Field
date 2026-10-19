@@ -4,7 +4,9 @@
 //   POST {action:'register', name, pin, color}              -> {player:{id,name,color}, token}
 //   POST {action:'login', name, pin}                        -> {player, token, marks:[{ev,mark,date}]}  (your best marks)
 //   POST {action:'update', token, name?, color?}            -> {player}
-//   POST {action:'create', token, name, events}             -> {code}
+//   POST {action:'create', token, name, events, days}       -> {code}   (days: 1, 3 or 7, how long it stays open)
+//   POST {action:'close', token, code}                      -> {ok}     (only who created it)
+//   POST {action:'mytours', token}                          -> {tours:[{tournament, entries, results}]}
 //   POST {action:'join', token, code}                       -> {ok}
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date}, ...10]}
@@ -16,6 +18,8 @@
 // Each login is a new session: every phone (or browser, or installed app) keeps its own token and stays logged in.
 // World top 10 per event: each player's best mark (one row per player and event), with the day it was made.
 // Everyone plays each tournament event once, whenever they want; standings are computed by the game.
+// A tournament ends when everyone played every event, when its time is up, or when who created it closes it;
+// then nobody can join or play any more (events not played count 0).
 // The database URL comes from the Neon integration (DATABASE_URL); tables are created on first use.
 import {Buffer} from 'node:buffer';
 import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
@@ -37,6 +41,9 @@ function db(){
       fails int not null default 0, locked_until timestamptz, created_at timestamptz not null default now())`;
     await sql`create table if not exists tournaments(code text primary key, name text not null, events text not null,
       host_id text not null, created_at timestamptz not null default now())`;
+    await sql`alter table tournaments add column if not exists ends_at timestamptz`;
+    await sql`alter table tournaments add column if not exists closed_at timestamptz`;
+    await sql`alter table tournaments add column if not exists close_reason text`;
     await sql`create table if not exists entries(code text not null references tournaments(code) on delete cascade,
       player_id text not null, name text not null, color text not null, joined_at timestamptz not null default now(),
       primary key(code,player_id))`;
@@ -73,22 +80,32 @@ async function auth(sql,token){
   if(!u) throw new Bad(401,'Tu sesión venció: entrá de nuevo con tu código.');
   return u;
 }
+// tournaments made before there were deadlines stay open a week
+const pubT=t=>({...t,events:t.events.split(','),ends_at:t.ends_at,
+  finished:!!t.closed_at||new Date(t.ends_at)<=new Date(), reason:t.close_reason||(t.closed_at?'host':new Date(t.ends_at)<=new Date()?'time':null)});
+async function getT(sql,code){
+  const t=(await sql`select code,name,events,host_id,created_at,closed_at,close_reason,coalesce(ends_at,created_at+interval '7 days') as ends_at from tournaments where code=${code}`)[0];
+  return t?pubT(t):null;
+}
 async function view(sql,code){
-  const t=(await sql`select code,name,events,host_id,created_at from tournaments where code=${code}`)[0];
+  const t=await getT(sql,code);
   if(!t) return null;
   // current name and colour of each player (they can change them in their profile)
   const entries=await sql`select e.player_id, coalesce(u.name,e.name) as name, coalesce(u.color,e.color) as color, e.joined_at
     from entries e left join users u on u.id=e.player_id where e.code=${code} order by e.joined_at`;
   const results=await sql`select player_id,ev,mark,created_at from results where code=${code}`;
-  return {tournament:{...t,events:t.events.split(',')},entries,results};
+  return {tournament:t,entries,results};
 }
-
-const okMark=(ev,m)=>EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
-async function top(sql,ev){
-  const rows=SPRINT.includes(ev)
-    ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
-    :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
-  return {top:rows};
+// every tournament a player is in (newest first), with its players and results
+async function myTours(sql,u){
+  const ts=await sql`select t.code,t.name,t.events,t.host_id,t.created_at,t.closed_at,t.close_reason,coalesce(t.ends_at,t.created_at+interval '7 days') as ends_at
+    from tournaments t join entries me on me.code=t.code and me.player_id=${u.id} order by t.created_at desc limit 60`;
+  if(!ts.length) return {tours:[]};
+  const codes=ts.map(t=>t.code);
+  const entries=await sql`select e.code,e.player_id, coalesce(u.name,e.name) as name, coalesce(u.color,e.color) as color, e.joined_at
+    from entries e left join users u on u.id=e.player_id where e.code = any(${codes}) order by e.joined_at`;
+  const results=await sql`select code,player_id,ev,mark,created_at from results where code = any(${codes})`;
+  return {tours:ts.map(t=>({tournament:pubT(t),entries:entries.filter(e=>e.code===t.code),results:results.filter(r=>r.code===t.code)}))};
 }
 
 // everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
@@ -152,9 +169,10 @@ async function act(sql,b){
       const events=[...new Set((Array.isArray(b.events)?b.events:[]).filter(e=>EVENTS.includes(e)))];
       if(!events.length) throw new Bad(400,'Elegí al menos una prueba.');
       const name=String(b.name||'').trim().slice(0,30)||`Torneo de ${u.name}`;
+      const days=[1,3,7].includes(Number(b.days))?Number(b.days):7, ends=new Date(Date.now()+days*86400000).toISOString();
       for(let i=0;i<8;i++){
         const code=newCode();
-        const ins=await sql`insert into tournaments(code,name,events,host_id) values(${code},${name},${events.join(',')},${u.id}) on conflict do nothing returning code`;
+        const ins=await sql`insert into tournaments(code,name,events,host_id,ends_at) values(${code},${name},${events.join(',')},${u.id},${ends}) on conflict do nothing returning code`;
         if(ins.length){ await sql`insert into entries(code,player_id,name,color) values(${code},${u.id},${u.name},${u.color})`; return {code}; }
       }
       throw new Bad(500,'No se pudo generar un código.');
@@ -172,22 +190,34 @@ async function act(sql,b){
       }
       return {ok:true};
     }
+    case 'mytours': return myTours(sql,await auth(sql,b.token));
+    case 'close': {
+      const u=await auth(sql,b.token), t=await getT(sql,cleanCode(b.code)); if(!t) throw new Bad(404,'No existe ese torneo.');
+      if(t.host_id!==u.id) throw new Bad(403,'Solo quien creó el torneo lo puede terminar.');
+      if(!t.finished) await sql`update tournaments set closed_at=now(), close_reason='host' where code=${t.code}`;
+      return {ok:true};
+    }
     case 'join': case 'result': {
       const u=await auth(sql,b.token), code=cleanCode(b.code); if(!code) throw new Bad(400,'Falta el código.');
-      const t=(await sql`select events from tournaments where code=${code}`)[0]; if(!t) throw new Bad(404,'No existe ese torneo.');
+      const t=await getT(sql,code); if(!t) throw new Bad(404,'No existe ese torneo.');
       const inT=(await sql`select 1 from entries where code=${code} and player_id=${u.id}`).length>0;
       if(b.action==='join'){
+        if(!inT&&t.finished) throw new Bad(409,'Este torneo ya terminó.');
         if(!inT){ const n=(await sql`select count(*)::int as n from entries where code=${code}`)[0].n; if(n>=MAX_PLAYERS) throw new Bad(409,'El torneo está lleno.');
           await sql`insert into entries(code,player_id,name,color) values(${code},${u.id},${u.name},${u.color}) on conflict do nothing`; }
         return {ok:true};
       }
-      const ev=String(b.ev||''); if(!t.events.split(',').includes(ev)) throw new Bad(400,'Esa prueba no está en el torneo.');
+      const ev=String(b.ev||''); if(!t.events.includes(ev)) throw new Bad(400,'Esa prueba no está en el torneo.');
       const mark=b.mark==null?null:Number(b.mark), r=RANGE[ev];
       if(mark!=null&&!(Number.isFinite(mark)&&mark>=r[0]&&mark<=r[1])) throw new Bad(400,'Marca imposible.');
       if(!inT) throw new Bad(403,'No estás en este torneo.');
+      if(t.finished) throw new Bad(409,'El torneo ya terminó.');
       // one go per event: the first result stays
       const ins=await sql`insert into results(code,player_id,ev,mark) values(${code},${u.id},${ev},${mark}) on conflict do nothing returning ev`;
       if(!ins.length) throw new Bad(409,'Ya jugaste esta prueba.');
+      // everyone played everything (two players or more): the tournament is over
+      const [{n}]=await sql`select count(*)::int as n from entries where code=${code}`, [{done}]=await sql`select count(*)::int as done from results where code=${code}`;
+      if(n>1&&done>=n*t.events.length) await sql`update tournaments set closed_at=now(), close_reason='all' where code=${code} and closed_at is null`;
       return {ok:true};
     }
   }

@@ -11,7 +11,7 @@ import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
-import {finishOnline,leaveOnline,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
+import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
@@ -202,6 +202,9 @@ OV.addEventListener('click',e=>{
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
   else if(a==='online'){ if(player().token) showOnline(); else showAccount('protect'); }
   else if(a==='ocreate') onCreate();
+  else if(a==='odays') onDays(b.dataset.d);
+  else if(a==='ohist') showHistory();
+  else if(a==='oclose') onClose(b);
   else if(a==='ojoin') onJoin();
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
   else if(a==='oshare') onShare(b.dataset.code);
