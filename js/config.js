@@ -31,7 +31,7 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
  {id:'sp',name:'Lanzamiento de bala',tag:'BALA',type:'field',kind:'sp',line:1.07,cpu:16,beta:true,
-  help:'Dos partes. <b>1. Impulso:</b> tu atleta arranca agachado atrás del círculo. Aparecen <b>tres botones verdes</b> (izquierda, derecha, izquierda), cada uno con un <b>aro que se va cerrando</b>: tocalo <b>justo cuando el aro llega al botón</b>. Cuanto más justo, más fuerza. <b>2. Ángulo:</b> después <b>mantené apretados los dos botones</b> (un dedo en cada uno, o Espacio): al lado del atleta una <b>aguja</b> va subiendo. <b>Soltá en la zona verde</b>, cerca de los 40°. Muy bajo, la bala pega enseguida en el pasto; muy alto, sube y cae cerca. Si tardás en mantener los dos, perdés el equilibrio, te salís del círculo y es <b>nulo</b>. Tenés 3 rondas.'}
+  help:'Tres partes. <b>1. Impulso:</b> como en los 100 metros, tocá los <b>botones verdes</b> del lado donde aparecen mientras tu atleta se desliza por el círculo: cuanto más rápido, más fuerza. <b>2. Ángulo:</b> después de una pausita aparece un <b>medidor</b> y la aguja <b>sube sola y no vuelve</b>: <b>apretá y mantené los dos botones</b> (un dedo en cada uno, o Espacio) cuando esté en la <b>zona verde</b>, cerca de los 40°. Si llega arriba sin que aprietes, es <b>nulo</b>. <b>3. Suelta:</b> sin soltar, arriba de tu atleta una <b>estrellita</b> recorre una barra: <b>soltá cuando llegue al círculo</b>. Si te pasás, te salís del círculo y es <b>nulo</b>. Tenés 3 rondas.'}
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];

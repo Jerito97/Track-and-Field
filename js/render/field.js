@@ -213,17 +213,22 @@ function spDraw(V,X,GY,fig){
     ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(x-R*.35,y-R*.35,R*.3,0,Math.PI*2); ctx.fill(); };
   if(V.jv&&V.jv.ham){ const x=X(V.jv.x), y=GY-V.jv.y*s; if(V.jv.stuck){ ctx.fillStyle='rgba(90,60,30,.5)'; ctx.beginPath(); ctx.ellipse(x,GY+3,10,3.5,0,0,Math.PI*2); ctx.fill(); } ball(x,y); }
   else if(fig&&fig.hand) ball(fig.hand[0]+2,fig.hand[1]-2);
-  // the gauge stays a moment after letting go (where the needle stopped), not during the flight
-  const m=V.meter; if(V.replay||!m||m.k!=='sp'||V.jv&&V.jv.t>.3) return;
+  // the angle gauge: the needle rising (spang), then fixed where it was caught (sp), a moment after letting go too
+  const m=V.meter; if(V.replay||!m||(m.k!=='sp'&&m.k!=='spang')||V.jv&&V.jv.t>.3) return;
   const ox=X(V.x)+.9*s, oy=GY-1.2*s, rr=62, deg=d=>d*Math.PI/180, at=d=>[ox+Math.cos(deg(d))*rr,oy-Math.sin(deg(d))*rr];
   ctx.save(); ctx.lineCap='round';
   const arc=(d0,d1,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.arc(ox,oy,rr,-deg(d1),-deg(d0)); ctx.stroke(); };
-  arc(0,SP_MAX,INK,14); arc(0,SP_MAX,'#fff',9); arc(SP_BEST-SP_GREEN,SP_BEST+SP_GREEN,'#2fd166',9);
+  arc(0,SP_MAX,INK,14); arc(0,SP_MAX,'#fff',9); arc(SP_BEST-SP_GREEN,SP_BEST+SP_GREEN,'#2fd166',9); arc(SP_MAX-4,SP_MAX,'#e8262d',9);
   [0,20,40,60,80].forEach(d=>{ const [x,y]=at(d); txt(d+'°',ox+(x-ox)*1.32,oy+(y-oy)*1.32,'#fff',11); });
-  const d=Math.min(m.hit??m.p,SP_MAX), [nx,ny]=at(d);
+  const d=m.k==='sp'?m.ang:Math.min(m.hit??m.p,SP_MAX), [nx,ny]=at(d);
   ctx.strokeStyle=INK; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(nx,ny); ctx.stroke(); ctx.strokeStyle='#ffd23a'; ctx.lineWidth=3; ctx.stroke();
   ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill(); ctx.restore();
-  if(m.hit==null) txt('SOLTÁ EN LO VERDE',ox+20,oy-rr-26,'#fff',16,{lw:4});
+  // then the release, as in the hammer: a still bar over the athlete, the star running to the circle at its end
+  if(m.k==='sp'){ const cx=X(V.x), y=GY-3.6*s, x0=cx-64, x1=cx+64, p=Math.min(m.hit??m.p,1.25);
+    ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=11; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=7; ctx.stroke(); ctx.strokeStyle='rgba(47,209,102,.9)'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+(x1-x0)*Math.min(1,p),y); ctx.stroke();
+    target(x1,y); drawStar(x0+(x1-x0)*p,y,10,p,true);
+    if(m.hit==null) txt('SOLTÁ EN EL CÍRCULO',cx,y-22,'#fff',16,{lw:4}); }
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.

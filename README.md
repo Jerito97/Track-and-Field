@@ -83,7 +83,7 @@ Solo para el jugador administrador (Jero): en su perfil aparece el botón **Admi
 
 Una prueba nueva se agrega primero a `BETA` en `js/config.js` (con `beta:true`): solo el administrador la ve, en el carrusel de Pruebas con la etiqueta EN PRUEBA, y la puede jugar. No aparece en torneos, supervivencia, Récords ni perfiles, y sus marcas no se mandan al Top 10. Para publicarla, se pasa de `BETA` a `EVENTS` (con su tabla de puntos en `POINTS`, `js/game/scoring.js`, y sus marcas posibles en `RANGE` de `api/t.js`).
 
-Ahora en prueba: **Lanzamiento de bala** (`js/game/shot.js`). En el círculo (sin jaula, con la tabla de pie adelante), en dos partes. Impulso: tres botones verdes (izquierda, derecha, izquierda), cada uno con un aro que se cierra; se toca cuando el aro llega al botón, y cuanto más justo, más fuerza. Ángulo: se mantienen los dos botones y al lado del atleta una aguja sube de 0° a 80°; hay que soltar en la zona verde (40° ± 6°). Muy bajo pega enseguida en el pasto, muy alto sube y cae cerca. Si no se mantienen los dos en 2 s, el atleta se sale del círculo: nulo. La marca se mide desde el borde del círculo.
+Ahora en prueba: **Lanzamiento de bala** (`js/game/shot.js`). En el círculo (sin jaula, con la tabla de pie adelante), en tres partes. Impulso: 2,2 s de botones verdes como en los 100 m mientras el atleta se desliza por el círculo (la velocidad que junta es la fuerza). Ángulo: tras medio segundo, una aguja sube de 0° a 80° y no vuelve; se aprietan y mantienen los dos botones en la zona verde (40° ± 6°); si llega arriba, nulo. Suelta: sin soltar, la barra con la estrellita como en martillo; se suelta al llegar al círculo, y pasarse es nulo (se sale del círculo). La marca se mide desde el borde del círculo.
 
 ## Supervivencia
 
