@@ -169,8 +169,8 @@ export async function onShare(code){
 export function playOnline(code,evId){
   G.mode='online'; G.code=code; G.evIdx=EVENTS.findIndex(e=>e.id===evId); G.sent=false; G.sending=null;
   store.set(STARTED,{pid:player().id,code,ev:evId});
-  // the races (100 m, hurdles) are run alone, without the machines; the field events keep them
-  buildAthletes(EVENTS[G.evIdx].type==='sprint'); newEvent(G.evIdx); startPlay();
+  // with friends every event is played alone, without the machines (only the friends' results matter)
+  buildAthletes(true); newEvent(G.evIdx); startPlay();
 }
 // the event ended (mark, or null for a foul / leaving halfway): send it, keep it for later if offline
 export function finishOnline(mark){

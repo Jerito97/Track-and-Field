@@ -352,9 +352,7 @@ async function act(sql,b){
       // one go per event: the first result stays
       const ins=await sql`insert into results(code,player_id,ev,mark) values(${code},${u.id},${ev},${mark}) on conflict do nothing returning ev`;
       if(!ins.length) throw new Bad(409,'Ya jugaste esta prueba.');
-      // everyone played everything (two players or more): the tournament is over
-      const [{n}]=await sql`select count(*)::int as n from entries where code=${code}`, [{done}]=await sql`select count(*)::int as done from results where code=${code}`;
-      if(n>1&&done>=n*t.events.length) await sql`update tournaments set closed_at=now(), close_reason='all' where code=${code} and closed_at is null`;
+      // it doesn't close when everyone in it has played: someone may still join; it ends at its time, or when its host ends it
       return {ok:true};
     }
   }

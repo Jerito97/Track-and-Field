@@ -72,10 +72,10 @@ function heroArt(){ const k=thumbKey(menuSel);
     +(THUMBS[k]?'':`<canvas data-pict="${menuSel}"></canvas>`); }
 function heroInfo(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return `<h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)}</div>`; }
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)}</div>`; }
 function heroStats(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return tour
-    ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${CLASSIC.length}</b></div>`
+    ?`<div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
     :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b id="wr">${wrText(ev)}</b></div>`; }
 // world record of the chosen event, once the server answers
 function loadWr(){ if(menuSel===TOUR||evAt(menuSel).beta) return; const ev=evAt(menuSel);
@@ -114,15 +114,6 @@ export function showMenu(){
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
 }
 // tournaments: with friends (online) or against the machines (all 5 events in a row)
-export function showTours(){
-  setS(null); setScreen('menu');
-  showOv(`<div class="card t-card"><div class="head"><div class="logo">TORNEOS</div><h2>Elegí tu torneo</h2></div><div class="body">
-    <div class="t-two">
-      <button class="t-opt" data-act="online"><b>Con amigos</b><span>Creá un torneo, pasá el código y cada uno juega cuando quiere.</span></button>
-      <button class="t-opt" data-act="tour"><b>Contra la máquina</b><span>Las ${CLASSIC.length} pruebas clásicas seguidas contra 5 máquinas. Tu mejor torneo: ${rec.tour?rec.tour+' pts':'—'}.</span></button>
-    </div>
-    <div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div></div></div>`);
-}
 // events: the chosen event in big, the carousel of events below
 export function showEvents(){
   setS(null); setScreen('menu');
@@ -178,7 +169,7 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia</span></div></div>
+    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia</span></div></div>
     <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
@@ -317,7 +308,7 @@ OV.addEventListener('click',e=>{
   else if(a==='sel') selectEvent(+b.dataset.i);
   else if(a==='go'){ G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); }
   else if(a==='events') showEvents();
-  else if(a==='tours') showTours();
+  else if(a==='tours'){ if(player().token) showOnline(); else showAccount('protect'); }  // tournaments: only with friends now
   else if(a==='surv') showSurvival();
   else if(a==='sstart') startSurvival();
   else if(a==='sresume') resumeSurvival();
