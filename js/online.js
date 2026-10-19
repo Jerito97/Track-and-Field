@@ -1,6 +1,6 @@
 // Online tournaments: talks to the Vercel function /api/t (see api/t.js). Codes of the tournaments you're in are kept
 // per player on this device, so the menu can list them.
-import {player,store} from './storage.js';
+import {player,store,updatePlayer} from './storage.js';
 
 const API=new URL('../api/t',import.meta.url).href;
 const tok=()=>player()?.token||null;
@@ -9,6 +9,8 @@ async function call(method,body,query=''){
   try{ r=await fetch(API+query,{method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined}); }
   catch(e){ throw new Error('Sin conexión. Probá de nuevo.'); }
   let data={}; try{ data=await r.json(); }catch(e){ /* no body */ }
+  // the session is no longer valid: the game asks for the code again (records stay on this phone)
+  if(r.status===401&&body?.token&&player()?.token===body.token) updatePlayer({token:null,expired:true});
   if(!r.ok) throw new Error(data.error||(r.status===404?'No se encontró el servidor de torneos.':'Error del servidor.'));
   return data;
 }

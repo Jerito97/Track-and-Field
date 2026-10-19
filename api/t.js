@@ -11,6 +11,7 @@
 //   POST {action:'marks', token, list:[{ev,mark,date}]}     -> {ok}   (your marks, for the world top 10)
 // Names are unique (ignoring case and accents); each player has a 4-6 digit code (stored as a salted scrypt hash).
 // Login returns a token the game keeps; tournament actions need it, so nobody can play under someone else's name.
+// Each login is a new session: every phone (or browser, or installed app) keeps its own token and stays logged in.
 // World top 10 per event: each player's best mark (one row per player and event), with the day it was made.
 // Everyone plays each tournament event once, whenever they want; standings are computed by the game.
 // The database URL comes from the Neon integration (DATABASE_URL); tables are created on first use.
@@ -40,6 +41,8 @@ function db(){
     await sql`create table if not exists results(code text not null references tournaments(code) on delete cascade,
       player_id text not null, ev text not null, mark double precision, created_at timestamptz not null default now(),
       primary key(code,player_id,ev))`;
+    await sql`create table if not exists sessions(token_hash text primary key, user_id text not null references users(id) on delete cascade,
+      created_at timestamptz not null default now())`;
     await sql`create table if not exists marks(player_id text not null references users(id) on delete cascade, ev text not null,
       mark double precision not null, made_at timestamptz not null default now(), primary key(player_id,ev))`;
   })().catch(e=>{ ready=null; throw e; });
@@ -61,7 +64,10 @@ function checkName(name){ if(name.length<2) throw new Bad(400,'El nombre tiene q
 
 async function auth(sql,token){
   if(!token) throw new Bad(401,'Tenés que entrar con tu jugador.');
-  const u=(await sql`select * from users where token_hash=${sha(String(token))}`)[0];
+  const h=sha(String(token));
+  // sessions; users.token_hash holds the session of players made before there were several
+  const u=(await sql`select u.* from sessions s join users u on u.id=s.user_id where s.token_hash=${h}`)[0]
+    ||(await sql`select * from users where token_hash=${h}`)[0];
   if(!u) throw new Bad(401,'Tu sesión venció: entrá de nuevo con tu código.');
   return u;
 }
@@ -95,6 +101,7 @@ async function act(sql,b){
       const ins=await sql`insert into users(id,name,name_key,color,pin_salt,pin_hash,token_hash)
         values(${id},${name},${nameKey(name)},${b.color},${salt},${pinHash(b.pin,salt)},${sha(token)}) on conflict(name_key) do nothing returning *`;
       if(!ins.length) throw new Bad(409,'Ese nombre ya está usado.');
+      await sql`insert into sessions(token_hash,user_id) values(${sha(token)},${id})`;
       return {player:pub(ins[0]),token};
     }
     case 'login': {
@@ -107,9 +114,10 @@ async function act(sql,b){
         await sql`update users set fails=${lock?0:fails}, locked_until=${lock?new Date(Date.now()+LOCK_MIN*60000).toISOString():null} where id=${u.id}`;
         throw new Bad(403,lock?`Código incorrecto. Probá de nuevo en ${LOCK_MIN} minutos.`:`Código incorrecto (te ${MAX_FAILS-fails===1?'queda 1 intento':`quedan ${MAX_FAILS-fails} intentos`}).`);
       }
-      // a fresh token per login; earlier devices keep theirs until the next login
+      // a new session per login; the other phones keep theirs
       const token=randomBytes(24).toString('base64url');
-      await sql`update users set fails=0, locked_until=null, token_hash=${sha(token)} where id=${u.id}`;
+      await sql`update users set fails=0, locked_until=null where id=${u.id}`;
+      await sql`insert into sessions(token_hash,user_id) values(${sha(token)},${u.id})`;
       const marks=await sql`select ev,mark,made_at as date from marks where player_id=${u.id}`;
       return {player:pub(u),token,marks};
     }

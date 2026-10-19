@@ -15,7 +15,7 @@ export let skipProtect=false;  // "Ahora no" on the protect screen: don't ask ag
 const swatches=sel=>`<div class="p-colors">${COLORS.map(c=>`<button class="p-sw${c===sel?' on':''}" data-act="acolor" data-c="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${c===sel}"></button>`).join('')}</div>`;
 const pinInput=(id,ph)=>`<input id="${id}" class="p-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="${ph}">`;
 const err=msg=>msg?`<p class="o-err" role="alert">${esc(msg)}</p>`:'';
-const title=()=>mode==='protect'?'Protegé tu jugador':mode==='add'?'Otro jugador':'Tu jugador';
+const title=()=>mode==='protect'?(player()?.expired?'Volvé a entrar':'Protegé tu jugador'):mode==='add'?'Otro jugador':'Tu jugador';
 function screen(body,focus){
   setS(null); setScreen('menu');
   showOv(`<div class="card p-create"><div class="head"><div class="logo">TRACK &amp; FIELD</div><h2>${title()}</h2></div><div class="body">${body}</div></div>`);
@@ -31,7 +31,8 @@ export function showAccount(m,msg){
   if(m&&m!=='keep'){ mode=m; name='';
     if(mode==='protect'&&p){ name=p.name; color=p.color; }
     else { const used=players().map(q=>q.color); color=COLORS.find(c=>!used.includes(c))||COLORS[0]; } }
-  screen(`${mode==='protect'?'<p class="small">Para que nadie use tu nombre, ponele un <b>código de 4 a 6 números</b>. Con tu nombre y tu código podés entrar desde cualquier celular.</p>':
+  screen(`${mode==='protect'&&p?.expired?'<p class="small">Se cerró tu sesión en este celular. Poné tu nombre y tu código para volver a entrar; tus récords siguen acá.</p>':
+      mode==='protect'?'<p class="small">Para que nadie use tu nombre, ponele un <b>código de 4 a 6 números</b>. Con tu nombre y tu código podés entrar desde cualquier celular.</p>':
       '<p class="small">Escribí tu nombre. Si ya tenés jugador, después te pide tu código; si es nuevo, creás uno.</p>'}
     ${err(msg)}
     <label class="p-name"><span class="lbl">Nombre</span><input id="aname" maxlength="14" autocomplete="off" placeholder="Tu nombre" value="${esc(name)}"></label>

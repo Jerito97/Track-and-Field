@@ -114,7 +114,7 @@ export function showProfile(msg){
   const bests=EVENTS.map(ev=>`<div><b>${p.rec[ev.id]==null?'—':fmt(ev,p.rec[ev.id])}</b><span>${ev.name}</span></div>`).join('');
   showOv(`<div class="card p-prof"><div class="head"><div class="logo">PERFIL</div><h2>${esc(p.name)}</h2></div><div class="body">
     ${msg?`<p class="o-err" role="alert">${esc(msg)}</p>`:''}
-    ${p.token?'':'<div class="o-code"><p class="small">Tu jugador todavía no tiene código: cualquiera podría usar tu nombre.</p><button class="btn" data-act="protect">Poner código</button></div>'}
+    ${p.token?'':p.expired?'<div class="o-code"><p class="small">Se cerró tu sesión: tus récords no se suben al Top 10 hasta que vuelvas a entrar.</p><button class="btn" data-act="protect">Entrar</button></div>':'<div class="o-code"><p class="small">Tu jugador todavía no tiene código: cualquiera podría usar tu nombre.</p><button class="btn" data-act="protect">Poner código</button></div>'}
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(p.name)}" autocomplete="off"><button class="btn alt" data-act="rename">Guardar</button></span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}

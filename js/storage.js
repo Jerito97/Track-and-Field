@@ -33,7 +33,7 @@ export function createPlayer(name,color,remote){
 }
 export function switchPlayer(id){ if(DB.list.some(p=>p.id===id)){ DB.cur=id; save(); bind(); } }
 // a local player now protected on the server: takes the server's id and token
-export function linkPlayer(remote){ const p=player(); if(!p) return; Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token}); DB.cur=p.id; save(); bind(); }
+export function linkPlayer(remote){ const p=player(); if(!p) return; Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token,expired:false}); DB.cur=p.id; save(); bind(); }
 // best marks kept on the server (logging in on another phone or app): the better of each stays as personal record
 export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(marks)) return;
   marks.forEach(m=>{ const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;
