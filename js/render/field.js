@@ -7,6 +7,7 @@ import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
 import {TJ_PIT,TJ_SAND} from '../game/field.js';
+import {HAM_CAGE,HAM_CIRCLE,hamArc,hamBall,hamHands} from '../game/hammer.js';
 import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -30,9 +31,10 @@ export function drawField(V){
   ctx.fillStyle=GRASS; ctx.fillRect(0,apTop,LW,LH-apTop);
   ctx.fillStyle=GRASS_L; for(let m=Math.floor(V.cam/12)*12;X(m)<LW;m+=12) ctx.fillRect(X(m),apTop,6*s,LH-apTop);
   // the runway (red, like the track) up to the line; the javelin field beyond it is grass
-  const rw=ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
+  const rw=ev.kind==='ham'?0:ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
   ctx.fillStyle=TARTAN; ctx.fillRect(0,GY-26,rw,44); ctx.fillStyle=TARTAN_D; ctx.fillRect(0,GY-4,rw,22);
-  if(ev.kind==='jav'){
+  if(ev.kind==='ham') hamField(V,X,GY,apTop);
+  else if(ev.kind==='jav'){
     const lx=X(ev.line);
     ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,apTop); ctx.quadraticCurveTo(lx+14,(apTop+LH)/2,lx,LH); ctx.stroke();
     for(let m=10;m<=120;m+=10){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,apTop,2,LH-apTop); txt(m+' m',x,apTop+12,'#fff',13); }
@@ -52,7 +54,7 @@ export function drawField(V){
     for(let m=Math.ceil(a0*2)/2;m<=a1-.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     rivalFlags(V,X,GY);
   }
-  if(ev.kind==='jav') rivalFlags(V,X,GY);
+  if(ev.kind==='jav'||ev.kind==='ham') rivalFlags(V,X,GY);
   if(ev.kind==='pv'){
     const bx=X(ev.line), ux=X(ev.line+.6);
     ctx.fillStyle='#555'; ctx.beginPath(); ctx.moveTo(bx-.5*s,GY); ctx.lineTo(bx,GY+4); ctx.lineTo(bx,GY); ctx.closePath(); ctx.fill();
@@ -74,11 +76,14 @@ export function drawField(V){
     // triple jump: the hop's and the step's footprints too
     (V.prints||[]).forEach(x=>footprint(X(x),GY,s,1));
     if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); } }
-  if(!ev.bands&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
+  if(!ev.bands&&ev.kind!=='ham'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
       ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
       ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
   const px=X(V.x);
+  // hammer on the far side of the circle: behind the athlete
+  const hb=ev.kind==='ham'?hamDraw(V,X,GY):null;
+  if(hb&&hb.far) hb.draw();
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
   // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
@@ -95,6 +100,8 @@ export function drawField(V){
         const [tx,ty,hx,hy]=fig.jav, a=Math.atan2(ty-hy,hx-tx), L=JAV_L*s; javelin(hx-Math.cos(a)*L/2,hy+Math.sin(a)*L/2,a,L); }
       drawAnim(ctx,ME(),f[0],f[1],px,feet,K); } }
   if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,STYLE.stick?fieldPose({...V,clock:S.clock}):V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
+  if(hb&&!hb.far) hb.draw();
+  if(hb&&hb.arc) hb.arc();
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
     if(!V.jv&&V.meter&&V.meter.k==='jav'&&fig.jav){ if(!V.replay){ const [tx,ty,hx,hy]=fig.jav; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
@@ -148,6 +155,45 @@ export function drawPole(V,X,GY,fig){
       target(hx,hy); drawStar(bx+tx/tl*over,by+ty/tl*over,9,p); }
     return; }
   line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L,null,null,true);
+}
+// hammer: grass all over, distance lines every 10 m from the circle's front edge, the concrete circle and the cage's
+// net behind it
+function hamField(V,X,GY,top){
+  const s=V.ppm, ev=V.ev;
+  for(let m=10;m<=120;m+=10){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,top,2,LH-top); txt(m+' m',x,top+12,'#fff',13); }
+  const cx=X(0), back=X(-HAM_CAGE), front=X(HAM_CIRCLE+.5), nt=GY-5*s;
+  if(front<-20||back>LW+20) return;
+  // the net: poles and a fine mesh, behind the circle and along its far side
+  ctx.fillStyle='rgba(30,40,60,.12)'; ctx.fillRect(back,nt,front-back,GY-nt-6);
+  ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=1;
+  for(let x=back;x<=front;x+=6){ ctx.beginPath(); ctx.moveTo(x,nt); ctx.lineTo(x,GY-6); ctx.stroke(); }
+  for(let y=nt;y<=GY-6;y+=6){ ctx.beginPath(); ctx.moveTo(back,y); ctx.lineTo(front,y); ctx.stroke(); }
+  ctx.fillStyle='#d5dbe4'; ctx.strokeStyle=INK; ctx.lineWidth=1.5;
+  [back,X(-HAM_CAGE*.4),front].forEach(x=>{ ctx.beginPath(); ctx.rect(x-2.5,nt-4,5,GY-nt-2); ctx.fill(); ctx.stroke(); });
+  // the circle: concrete, white rim, seen from a little above
+  const r=HAM_CIRCLE*s;
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(cx,GY+3,r+3,13,0,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#9aa0aa'; ctx.beginPath(); ctx.ellipse(cx,GY+3,r,10.5,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.18)'; ctx.beginPath(); ctx.ellipse(cx-r*.25,GY+1,r*.5,4,0,0,Math.PI*2); ctx.fill();
+}
+// the hammer: ball and cable (in the hands while turning, on the ground before), the release arc in the last turn;
+// returns whether it's on the far side, and how to draw it
+function hamDraw(V,X,GY){
+  const s=V.ppm, a=V.act, P=(x,y)=>[X(x),GY-y*s];
+  const ball=(x,y)=>{ ctx.fillStyle='#262a33'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,Math.max(4,.13*s),0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.45)'; ctx.beginPath(); ctx.arc(x-1.5,y-1.5,Math.max(1.2,.04*s),0,Math.PI*2); ctx.fill(); };
+  const cable=(h,b)=>{ ctx.strokeStyle='#cfd5de'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(...h); ctx.lineTo(...b); ctx.stroke();
+    ctx.fillStyle=INK; ctx.fillRect(h[0]-2.5,h[1]-2.5,5,5); };
+  // flying / landed: just the ball (and its marks in the grass)
+  if(V.jv&&V.jv.ham) return {far:false,draw:()=>{ const [x,y]=P(V.jv.x,V.jv.y); if(V.jv.stuck){ ctx.fillStyle='rgba(90,60,30,.45)'; ctx.beginPath(); ctx.ellipse(x,GY+3,9,3,0,0,Math.PI*2); ctx.fill(); } ball(x,y); }};
+  if(!a||a.k!=='ham'){ const b=[V.x-.95,.13]; return {far:true,draw:()=>{ cable(P(...hamHands(V.x,b)),P(...b)); ball(...P(...b)); }}; }
+  const b=hamBall(V.x,a.phi), h=hamHands(V.x,b);
+  return {far:b[2]>0,draw:()=>{ cable(P(...h),P(b[0],b[1])); ball(...P(b[0],b[1])); },arc:()=>{
+    // last turn: where to let go, on the ball's path (green: perfect; yellow: still in the sector)
+    const arc=!V.replay&&hamArc(S.act);
+    if(arc){ ctx.save(); ctx.lineCap='round';
+      const seg=(w,col,lw)=>{ ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.beginPath(); for(let k=0;k<=16;k++){ const p=hamBall(V.x,arc.at-w+2*w*k/16), [x,y]=P(p[0],p[1]); k?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); };
+      seg(arc.foul,INK,7); seg(arc.foul,'#ffd23a',4); seg(arc.ok,INK,9); seg(arc.ok,'#2fd166',6); ctx.restore(); } }};
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.

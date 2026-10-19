@@ -45,7 +45,8 @@ export function drawCue(cue){
   const pulse=1+.06*Math.sin(S.clock*14);
   const at=(p,col,label)=>{ const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
   if(cue.type==='side') at(cue.side,'#2fd166','');
-  else if(cue.type==='foot') at(cue.side,'#ff8a1e','');
+  else if(cue.type==='foot'||cue.type==='spin') at(cue.side,'#ff8a1e','');
+  else if(cue.type==='hamhold'){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); if(!S.held2) txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }

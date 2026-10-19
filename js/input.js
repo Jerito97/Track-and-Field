@@ -3,6 +3,7 @@ import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
 import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,footTap,javThrow} from './game/field.js';
+import {hamTap} from './game/hammer.js';
 import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -21,7 +22,7 @@ export function onTap(pos){
   if(ph==='lap'){ lapNext(); return; }
   if(ph==='set') return;
   if(ph==='ready'){ startRun(); return; }
-  if(!S.cue||S.cue.type==='hold') return;
+  if(!S.cue||S.cue.type==='hold'||S.cue.type==='hamhold') return;
   const cue=S.cue;
   if(cue.type==='side'){
     if(pos==='C'||pos==='B') return;  // Space/Enter is for the red buttons
@@ -31,6 +32,10 @@ export function onTap(pos){
     // triple jump: the side of the foot that touches down
     if(pos!=='L'&&pos!=='R') return;
     if(footTap(pos)==='x'){ addX(pos); tone(160,.2,'sawtooth',.04); } else addRing(pos);
+  } else if(cue.type==='spin'){
+    // hammer: the ball's lowest point
+    if(pos!=='L'&&pos!=='R') return;
+    if(hamTap(pos)==='x'){ addX(pos); tone(160,.2,'sawtooth',.04); } else addRing(pos);
   } else if(cue.type==='num'){
     if(S.stumble>0||pos==='B') return;
     const want=cue.order[cue.next];
