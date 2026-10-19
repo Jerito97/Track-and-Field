@@ -10,14 +10,23 @@ export const TARTAN='#d9563f', TARTAN_D='#c94a35', GRASS='#7cc24a', GRASS_L='#8c
 // grandstand backdrop (assets/scene/stands.jpg: sky, roof, crowd and the barrier wall at the bottom), off = how far
 // it has scrolled (logical px); repeated sideways with every other copy mirrored, so the copies always meet cleanly.
 // false when the picture isn't there (then the stands are drawn in code)
-export function drawBackdrop(off,top,bot){
-  const im=SCENE.stands; if(!im.naturalWidth) return false;
+export function drawBackdrop(off,top,bot,im=SCENE.stands,haze=true){
+  if(!im.naturalWidth) return false;
   const h=bot-top, w=h*im.naturalWidth/im.naturalHeight;
   for(let n=Math.floor(off/w);n*w-off<LW;n++){ const x=n*w-off;
     if(n&1){ ctx.save(); ctx.translate(x+w,top); ctx.scale(-1,1); ctx.drawImage(im,-.5,0,w+1,h); ctx.restore(); }
     else ctx.drawImage(im,x-.5,top,w+1,h); }
   // a light haze: the crowd stays behind, the athletes and the buttons stand out
-  ctx.fillStyle='rgba(225,238,255,.2)'; ctx.fillRect(0,top,LW,h);
+  if(haze){ ctx.fillStyle='rgba(225,238,255,.2)'; ctx.fillRect(0,top,LW,h); }
+  return true;
+}
+// sky picture above the grandstand (its bottom fades into the grandstand's top edge), further away so it moves less;
+// above it, the colour of its top edge. false when the picture isn't there
+export function drawSky(off,bottom){
+  const im=SCENE.sky; if(!im.naturalWidth) return false;
+  const h=330, top=bottom-h;
+  ctx.fillStyle='#57c2fc'; ctx.fillRect(0,0,LW,Math.max(0,top)+1);
+  drawBackdrop(off,top,bottom+2,im,false);
   return true;
 }
 export function drawStands(cam,top,bot,excite,clock){

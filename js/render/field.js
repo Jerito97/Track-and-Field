@@ -10,7 +10,7 @@ import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
 import {drawStar,target} from './hud.js';
-import {drawBackdrop,drawBoards,drawPauseBtn,drawStands,flag,GRASS,GRASS_L,javelin,shadow,TARTAN,TARTAN_D,upright} from './scenery.js';
+import {drawBackdrop,drawBoards,drawPauseBtn,drawSky,drawStands,flag,GRASS,GRASS_L,javelin,shadow,TARTAN,TARTAN_D,upright} from './scenery.js';
 import {txt} from './text.js';
 
 export function drawField(V){
@@ -18,8 +18,9 @@ export function drawField(V){
   const GY=264+sh;
   const excite=(S.phase==='act'||S.phase==='post'||V.replay)?1:.35;
   // sky above the grandstand picture (seen when the camera rises): ends in the colour of the picture's top edge
+  if(!drawSky(V.cam*s*.2,sh)){
   const sky=ctx.createLinearGradient(0,sh-260,0,sh); sky.addColorStop(0,'#4aa6e8'); sky.addColorStop(1,'#ade9f6'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
-  if(sh>2){ ctx.fillStyle='#fff'; for(let i=0;i<5;i++){ const W2=LW+200, cx=((i*173-V.cam*2)%W2+W2)%W2-100, cy=50+i*26-sh*.15; ctx.beginPath(); ctx.ellipse(cx,cy,34,10,0,0,Math.PI*2); ctx.ellipse(cx+18,cy-6,20,10,0,0,Math.PI*2); ctx.fill(); } }
+  if(sh>2){ ctx.fillStyle='#fff'; for(let i=0;i<5;i++){ const W2=LW+200, cx=((i*173-V.cam*2)%W2+W2)%W2-100, cy=50+i*26-sh*.15; ctx.beginPath(); ctx.ellipse(cx,cy,34,10,0,0,Math.PI*2); ctx.ellipse(cx+18,cy-6,20,10,0,0,Math.PI*2); ctx.fill(); } } }
   const stTop=24+sh, stBot=170+sh;
   // grandstand picture (sky, roof, crowd, barrier wall), slower than the field; without it, the stands drawn in code
   if(!drawBackdrop(V.cam*s*.45,sh,stBot+14)){

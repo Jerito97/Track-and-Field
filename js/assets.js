@@ -26,8 +26,9 @@ export const SPR={};
 export const JAV_ART=new Image();
 // the pole on its own (assets/pole.png, grip on the left): bent and drawn by the pole vault
 export const POLE_ART=new Image();
-// stadium scenery (assets/scene/): the grandstand backdrop and the race starter (ready / firing)
-export const SCENE={stands:new Image(),starter:[new Image(),new Image()]};
+// stadium scenery (assets/scene/): the grandstand backdrop, the sky above it (seen when the camera rises) and the race
+// starter (ready / firing)
+export const SCENE={stands:new Image(),sky:new Image(),starter:[new Image(),new Image()]};
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
 // animations per athlete id: {run:{im (strip of frames side by side), frames (count), w,h,hx,feet,scale}, start:{...}, ...}
@@ -49,6 +50,7 @@ export function loadAssets(){
   load(JAV_ART,new URL('../assets/javelin.png',import.meta.url).href);
   load(POLE_ART,new URL('../assets/pole.png',import.meta.url).href);
   load(SCENE.stands,new URL('../assets/scene/stands.jpg',import.meta.url).href);
+  load(SCENE.sky,new URL('../assets/scene/sky.jpg',import.meta.url).href);
   SCENE.starter.forEach((im,k)=>load(im,new URL(`../assets/scene/starter${k}.png`,import.meta.url).href));
   return Promise.all(waits);
 }
