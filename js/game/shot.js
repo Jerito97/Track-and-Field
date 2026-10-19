@@ -61,7 +61,7 @@ export function updateShot(dt){
     // back from a pause: the star waits for a fresh hold
     if(a.wait){ if(!S.held2) a.free=true; if(S.held2&&a.free){ a.wait=false; m.t=0; m.p=0; S.cue=null; } return; }
     m.t+=dt; m.p+=dt/STAR_T;
-    if(!S.held2&&m.t<BLIP){ a.stage='angle'; a.t=0; S.meter={k:'spang',p:a.d}; S.cue={type:'hamhold',t:0}; }
+    if(!S.held2&&m.t<BLIP){ a.stage='angle'; a.t=0; S.meter={k:'spang',p:a.d}; S.cue={type:'hamhold',label:'APRETÁ LOS DOS EN LO VERDE',t:0}; }
     else if(m.p>=LATE) foul(a,'¡TE SALISTE DEL CÍRCULO!');
     else if(!S.held2) put(a);
   } else if(a.stage==='fly') flight(dt,a);

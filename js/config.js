@@ -30,8 +30,8 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
- {id:'sp',name:'Lanzamiento de bala',tag:'BALA',type:'field',kind:'sp',line:1.07,cpu:16,beta:true,
-  help:'Tres partes. <b>1. Impulso:</b> como en los 100 metros, tocá los <b>botones verdes</b> del lado donde aparecen mientras tu atleta se desliza por el círculo: cuanto más rápido, más fuerza. <b>2. Ángulo:</b> después de una pausita aparece un <b>medidor</b> y la aguja <b>sube sola y no vuelve</b>: <b>apretá y mantené los dos botones</b> (un dedo en cada uno, o Espacio) cuando esté en la <b>zona verde</b>, cerca de los 40°. Si llega arriba sin que aprietes, es <b>nulo</b>. <b>3. Suelta:</b> sin soltar, arriba de tu atleta una <b>estrellita</b> recorre una barra: <b>soltá cuando llegue al círculo</b>. Si te pasás, te salís del círculo y es <b>nulo</b>. Tenés 3 rondas.'}
+ {id:'sp',name:'Lanzamiento de bala',tag:'BALA',type:'field',kind:'sp',line:1.07,cpu:13.5,beta:true,
+  help:'Tres partes. <b>1. Impulso:</b> como en los 100 metros, tocá los <b>botones verdes</b> del lado donde aparecen mientras tu atleta se desliza por el círculo: cuanto más rápido, más fuerza. <b>2. Ángulo:</b> después de una pausita aparece un <b>medidor</b> y la aguja <b>sube sola y no vuelve</b>: <b>apretá y mantené los dos botones</b> (un dedo en cada uno, o Espacio) cuando esté en la <b>zona verde</b> (39° a 41°, lo mejor); el <b>naranja</b> de los costados también sirve, pero un poco menos. Si llega arriba sin que aprietes, es <b>nulo</b>. <b>3. Suelta:</b> sin soltar, arriba de tu atleta una <b>estrellita</b> recorre una barra: <b>soltá cuando llegue al círculo</b>. Si te pasás, te salís del círculo y es <b>nulo</b>. Tenés 3 rondas.'}
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];
