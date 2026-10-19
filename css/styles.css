@@ -242,6 +242,11 @@ tr.me td{background:var(--red)}
 .o-ev .btn{font-size:1rem;padding:4px 12px;box-shadow:0 3px 0 var(--red-d)}
 .o-ev.done{opacity:.85}
 .o-table th{font-family:var(--f-display);font-weight:400;font-size:.8rem;letter-spacing:.04em;color:#aab8d8;text-align:center;padding:0 4px}
+@media (min-width:600px){ .o-table th{white-space:nowrap} }
+/* phone upright: narrower event columns, so the player's name shows */
+@media (max-width:599px){ .o-table th{font-size:.62rem;padding:0 2px} .o-table td.sub{font-size:.68rem;padding:3px 2px} .o-table td.nm{min-width:64px} }
+/* the tournament's rules: small, it's the least important line */
+.o-note{font-size:.7rem;line-height:1.3;margin:2px 0 0}
 .o-table td.sub{text-align:center;font-size:.8rem}
 .o-final b{color:var(--sun)}
 .p-pin{font:inherit;font-size:1.5rem;letter-spacing:.4em;padding:7px 10px;border-radius:8px;border:2px solid rgba(255,255,255,.25);background:#0e1d3d;color:#fff;width:100%;max-width:220px}
