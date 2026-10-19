@@ -68,9 +68,8 @@ export function showMenu(){
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
     <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button><button class="m-how" data-act="howto">Cómo se juega</button>'}<button class="m-how" data-act="board" data-i="${tour?0:menuSel}">Top 10</button></div></div>
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'}<button class="m-how" data-act="board" data-i="${tour?0:menuSel}">Récords</button></div></div>
     <div class="m-stats">${stats}</div>
-    ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
   </section>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   <footer class="m-bot">
@@ -213,7 +212,6 @@ OV.addEventListener('click',e=>{
   else if(a==='sel'){ menuSel=+b.dataset.i; store.set('odb-menusel',menuSel); showMenu(); }
   else if(a==='go'){ if(menuSel===TOUR){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
     else { G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); } }
-  else if(a==='howto'){ const h=$('help'); if(h) h.hidden=!h.hidden; }
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='help'){ const h=$('help'); h.hidden=!h.hidden; }
   else if(a==='menu') showMenu();

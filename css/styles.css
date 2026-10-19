@@ -101,9 +101,6 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:#fff;bo
 .m-stats .m-ic{grid-row:span 2;width:clamp(18px,6vh,34px);height:clamp(18px,6vh,34px);color:#c9d4ea}
 .m-stats span:not(.m-ic){font-size:clamp(.6rem,2.3vh,.82rem);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#aab8d8}
 .m-stats b{font-family:var(--f-display);font-weight:400;font-size:clamp(.95rem,4.2vh,1.6rem);letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
-.m-help{position:absolute;inset:0;z-index:2;background:rgba(14,26,52,.97);padding:clamp(8px,2vh,18px) clamp(12px,2vw,24px);overflow-y:auto;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.m-help p{margin:0;font-size:clamp(.72rem,2.9vh,1rem);line-height:1.4;color:#e6ecf7;max-width:80ch}
-.m-help b{color:var(--sun)}
 
 /* event cards: a carousel; about 5.5 cards in view so the next one peeks out and shows there are more */
 .m-evw{position:relative;background:rgba(255,255,255,.92);border-radius:12px;padding:clamp(4px,1vh,8px)}
