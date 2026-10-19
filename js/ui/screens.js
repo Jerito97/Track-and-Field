@@ -7,11 +7,13 @@ import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
-import {clearInvite,finishOnline,inviteFromUrl,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
+import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
+import {updateRemote} from '../online.js';
+import {finishOnline,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
-import {COLORS,createPlayer,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
+import {COLORS,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
@@ -50,7 +52,8 @@ const ICON={
 const wrText=ev=>{ const w=worldRec(ev); return w?`${fmt(ev,w.v)} <small>${esc(w.name)}</small>`:'—'; };
 export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 export function showMenu(){
-  if(!player()){ showCreate(true); return; }
+  if(!player()){ showAccount('first'); return; }
+  if(!player().token&&!skipProtect){ showAccount('protect'); return; }
   setS(null); setScreen('menu');
   const tour=menuSel===TOUR, ev=EVENTS[menuSel];
   const stats=tour
@@ -88,29 +91,22 @@ function initCarousel(){
 }
 
 // ---- players ----
-let newColor=COLORS[0];
 const swatches=sel=>`<div class="p-colors">${COLORS.map(c=>`<button class="p-sw${c===sel?' on':''}" data-act="color" data-c="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${c===sel}"></button>`).join('')}</div>`;
-// picking a colour: on the create screen it's kept for the new player, on the profile it changes yours right away
-function pickColor(c){ newColor=c; OV.querySelectorAll('.p-sw').forEach(b=>{ b.classList.toggle('on',b.dataset.c===c); b.setAttribute('aria-pressed',b.dataset.c===c); });
-  if(OV.querySelector('.p-create')){ const cv=OV.querySelector('canvas[data-color]'); cv.dataset.color=c; paintFace(cv,{j:c}); }
-  else { updatePlayer({color:c}); OV.querySelectorAll('canvas[data-face="yo"]').forEach(cv=>paintFace(cv,ME())); } }
-// first time (no players yet) or a new player for someone else on this device
-export function showCreate(first){
-  setS(null); setScreen('menu'); const used=players().map(p=>p.color); newColor=COLORS.find(c=>!used.includes(c))||COLORS[0];
-  showOv(`<div class="card p-create"><div class="head"><div class="logo">TRACK &amp; FIELD</div><h2>${first?'Creá tu jugador':'Nuevo jugador'}</h2></div><div class="body">
-    ${first?'<p class="small">Tu jugador guarda tus marcas, tus récords y el historial de todo lo que jugás. No hace falta contraseña.</p>':''}
-    <div class="p-row"><span class="p-av"><canvas data-color="${newColor}"></canvas></span>
-      <label class="p-name"><span class="lbl">Nombre</span><input id="pname" maxlength="14" autocomplete="off" placeholder="Tu nombre" data-focus></label></div>
-    <span class="lbl">Color del stickman</span>${swatches(newColor)}
-    <div class="btns"><button class="btn" data-act="create">Crear</button>${first?'':'<button class="btn alt" data-act="players">Cancelar</button>'}</div>
-  </div></div>`);
-  $('pname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="create"]').click(); });
-}
-export function showProfile(){
-  const p=player(); if(!p){ showCreate(true); return; } setS(null); setScreen('menu'); newColor=p.color;
+// picking a colour on the profile changes yours right away (and on the server, for tournaments)
+function pickColor(c){ OV.querySelectorAll('.p-sw').forEach(b=>{ b.classList.toggle('on',b.dataset.c===c); b.setAttribute('aria-pressed',b.dataset.c===c); });
+  updatePlayer({color:c}); OV.querySelectorAll('canvas[data-face="yo"]').forEach(cv=>paintFace(cv,ME()));
+  if(player().token) updateRemote({color:c}).catch(()=>{}); }
+// rename: names are unique on the server, so it has to accept it first
+async function onRename(){ const name=$('pname').value.replace(/\s+/g,' ').trim().slice(0,14); if(name.length<2) return;
+  if(player().token){ try{ await updateRemote({name}); }catch(e){ showProfile(e.message); return; } }
+  updatePlayer({name}); showProfile(); }
+export function showProfile(msg){
+  const p=player(); if(!p){ showAccount('first'); return; } setS(null); setScreen('menu');
   // best mark of each event
   const bests=EVENTS.map(ev=>`<div><b>${p.rec[ev.id]==null?'—':fmt(ev,p.rec[ev.id])}</b><span>${ev.name}</span></div>`).join('');
   showOv(`<div class="card p-prof"><div class="head"><div class="logo">PERFIL</div><h2>${esc(p.name)}</h2></div><div class="body">
+    ${msg?`<p class="o-err" role="alert">${esc(msg)}</p>`:''}
+    ${p.token?'':'<div class="o-code"><p class="small">Tu jugador todavía no tiene código: cualquiera podría usar tu nombre.</p><button class="btn" data-act="protect">Poner código</button></div>'}
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(p.name)}" autocomplete="off"><button class="btn alt" data-act="rename">Guardar</button></span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
@@ -189,7 +185,7 @@ OV.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b) return; unlockAudio(); const a=b.dataset.act;
   if(a==='event'){ G.mode='single'; G.evIdx=+b.dataset.i; buildAthletes(); showEventCard(); }
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
-  else if(a==='online') showOnline();
+  else if(a==='online'){ if(player().token) showOnline(); else showAccount('protect'); }
   else if(a==='ocreate') onCreate();
   else if(a==='ojoin') onJoin();
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
@@ -197,11 +193,18 @@ OV.addEventListener('click',e=>{
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='profile') showProfile();
   else if(a==='players') showPlayers();
-  else if(a==='newplayer') showCreate(false);
+  else if(a==='newplayer') showAccount('add');
+  else if(a==='protect') showAccount('protect');
+  else if(a==='anext') onNext();
+  else if(a==='alogin') onLogin();
+  else if(a==='aregister') onRegister();
+  else if(a==='acolor') onColor(b.dataset.c);
+  else if(a==='alocal') onLocal();
+  else if(a==='askip') onSkip();
+  else if(a==='aname') showAccount('keep');
   else if(a==='switch'){ switchPlayer(b.dataset.id); showMenu(); }
   else if(a==='color'){ pickColor(b.dataset.c); }
-  else if(a==='create'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(!name){ n.focus(); n.classList.add('bad'); return; } createPlayer(name,newColor); const inv=inviteFromUrl(); if(inv){ clearInvite(); onJoin(inv); } else showMenu(); }
-  else if(a==='rename'){ const n=$('pname'), name=n.value.trim().slice(0,14); if(name){ updatePlayer({name}); showProfile(); } }
+  else if(a==='rename') onRename();
   else if(a==='scroll'){ const row=OV.querySelector('.m-evs'); row.scrollBy({left:+b.dataset.d*row.clientWidth*.8,behavior:'smooth'}); }
   else if(a==='sel'){ menuSel=+b.dataset.i; store.set('odb-menusel',menuSel); showMenu(); }
   else if(a==='go'){ if(menuSel===TOUR){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }

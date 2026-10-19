@@ -5,8 +5,9 @@ export const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?
 export const STYLE={stick:true};
 
 // ---- players ----
-// Players on this device, no password. Each one keeps its own records and history, so it can be sent to a server
-// as is when there are online tournaments: {id, name, color, created, rec:{evId:best, tour:points},
+// Players on this device. A player registered on the server (unique name + 4-6 digit code) has the server's id and a
+// session token; one made without connection is local only (token null) until it's protected with a code.
+// {id, name, color, token, created, rec:{evId:best, tour:points},
 // best:{evId:[{v,date}, ...top 5]}, history:[{ev,mark,place,of,mode,date}, ...newest first], tours:[{pts,place,date}]}
 const KEY='odb-players', HISTORY_MAX=200, TOP=5;
 export const COLORS=['#e8262d','#2f6fe0','#ffd23a','#1f9e54','#8e4fd6','#ff7a1a','#2bc4e0','#ff5fa2','#8bd13a','#8a5a3b','#1c2a55','#2b2c2d'];
@@ -20,13 +21,19 @@ export let rec={};
 const bind=()=>{ const p=player(); rec=p?p.rec:{}; };
 bind();
 export const saveRec=save;
-export function createPlayer(name,color){
-  const p={id:newId(),name,color,created:Date.now(),rec:{},best:{},history:[],tours:[]};
+// remote: {id, token} from the server (register / login); without it the player is local only
+export function createPlayer(name,color,remote){
+  // logging in again on this device with a player that's already here: just refresh it
+  const same=remote&&DB.list.find(p=>p.id===remote.id);
+  if(same){ Object.assign(same,{name,color,token:remote.token}); DB.cur=same.id; save(); bind(); return same; }
+  const p={id:remote?remote.id:newId(),name,color,token:remote?remote.token:null,created:Date.now(),rec:{},best:{},history:[],tours:[]};
   // the first player takes over the records kept before there were players
   if(!DB.list.length){ const old=store.get('odb-rec3',null); if(old) Object.assign(p.rec,old); }
   DB.list.push(p); DB.cur=p.id; save(); bind(); return p;
 }
 export function switchPlayer(id){ if(DB.list.some(p=>p.id===id)){ DB.cur=id; save(); bind(); } }
+// a local player now protected on the server: takes the server's id and token
+export function linkPlayer(remote){ const p=player(); if(!p) return; Object.assign(p,{id:remote.id,name:remote.name,color:remote.color,token:remote.token}); DB.cur=p.id; save(); bind(); }
 export function updatePlayer(fields){ const p=player(); if(!p) return; Object.assign(p,fields); save(); }
 export function deletePlayer(id){ DB.list=DB.list.filter(p=>p.id!==id); if(DB.cur===id) DB.cur=DB.list[0]?.id||null; save(); bind(); }
 const better=(sprint,a,b)=>sprint?a<b:a>b;

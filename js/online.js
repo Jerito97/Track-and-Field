@@ -3,7 +3,7 @@
 import {player,store} from './storage.js';
 
 const API=new URL('../api/t',import.meta.url).href;
-const me=()=>{ const p=player(); return p&&{id:p.id,name:p.name,color:p.color}; };
+const tok=()=>player()?.token||null;
 async function call(method,body,query=''){
   let r;
   try{ r=await fetch(API+query,{method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined}); }
@@ -13,10 +13,15 @@ async function call(method,body,query=''){
   return data;
 }
 export const cleanCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+// players: unique names with a 4-6 digit code
+export const nameExists=async name=>(await call('POST',{action:'check',name})).exists;
+export const registerPlayer=(name,pin,color)=>call('POST',{action:'register',name,pin,color});
+export const loginPlayer=(name,pin)=>call('POST',{action:'login',name,pin});
+export const updateRemote=fields=>call('POST',{action:'update',token:tok(),...fields});
 export const getTournament=code=>call('GET',null,'?code='+encodeURIComponent(cleanCode(code)));
-export async function createTournament(name,events){ const r=await call('POST',{action:'create',name,events,player:me()}); remember(r.code); return r.code; }
-export async function joinTournament(code){ code=cleanCode(code); await call('POST',{action:'join',code,player:me()}); remember(code); return code; }
-export const sendResult=(code,ev,mark)=>call('POST',{action:'result',code,ev,mark,player:me()});
+export async function createTournament(name,events){ const r=await call('POST',{action:'create',name,events,token:tok()}); remember(r.code); return r.code; }
+export async function joinTournament(code){ code=cleanCode(code); await call('POST',{action:'join',code,token:tok()}); remember(code); return code; }
+export const sendResult=(code,ev,mark)=>call('POST',{action:'result',code,ev,mark,token:tok()});
 
 // tournaments of the current player, newest first
 const KEY=()=>'odb-online-'+(player()?.id||'');
