@@ -8,6 +8,7 @@ import {newEvent,startPlay} from '../game/core.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
+import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
 import {finishOnline,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
@@ -81,9 +82,10 @@ export function showMenu(){
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   <footer class="m-bot">
     <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
+    <button class="m-people" data-act="people"><span class="m-lbl">Jugadores</span><span class="u-row">${peopleStrip()}</span></button>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
-  initCarousel(); preload();
+  initCarousel(); preload(); refreshStrip();
   if(!tour) syncMarks().then(()=>loadTop(ev.id)).then(()=>{ const el=$('wr'); if(el&&EVENTS[menuSel]===ev) el.innerHTML=wrText(ev); },()=>{});
 }
 // carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
@@ -201,6 +203,8 @@ OV.addEventListener('click',e=>{
   else if(a==='oshare') onShare(b.dataset.code);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='board') showBoard(+b.dataset.i);
+  else if(a==='people') showPeople();
+  else if(a==='person') showPerson(b.dataset.id);
   else if(a==='profile') showProfile();
   else if(a==='players') showPlayers();
   else if(a==='newplayer') showAccount('add');

@@ -9,6 +9,8 @@
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date}, ...10]}
 //   POST {action:'marks', token, list:[{ev,mark,date}]}     -> {ok}   (your marks, for the world top 10)
+//   GET  /api/t?players=1                                   -> {players:[{id,name,color,created_at,marks}]}
+//   GET  /api/t?player=ID                                   -> {player:{id,name,color,created_at}, marks:[{ev,mark,date,rank}]}
 // Names are unique (ignoring case and accents); each player has a 4-6 digit code (stored as a salted scrypt hash).
 // Login returns a token the game keeps; tournament actions need it, so nobody can play under someone else's name.
 // Each login is a new session: every phone (or browser, or installed app) keeps its own token and stays logged in.
@@ -87,6 +89,21 @@ async function top(sql,ev){
     ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
     :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
   return {top:rows};
+}
+
+// everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
+async function people(sql){
+  const players=await sql`select u.id,u.name,u.color,u.created_at,(select count(*)::int from marks m where m.player_id=u.id) as marks
+    from users u order by u.created_at desc limit 500`;
+  return {players};
+}
+async function profile(sql,id){
+  const u=(await sql`select id,name,color,created_at from users where id=${id}`)[0];
+  if(!u) throw new Bad(404,'No existe ese jugador.');
+  const marks=await sql`select m.ev,m.mark,m.made_at as date,
+    1+(select count(*)::int from marks o where o.ev=m.ev and (case when m.ev in ('100','110h') then o.mark<m.mark else o.mark>m.mark end)) as rank
+    from marks m where m.player_id=${id}`;
+  return {player:u,marks};
 }
 
 async function act(sql,b){
@@ -182,6 +199,8 @@ export default async function handler(req,res){
   try{
     const sql=await db();
     if(req.method==='GET'){
+      if(req.query.players!=null) return res.status(200).json(await people(sql));
+      if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
       if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev)); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');

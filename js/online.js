@@ -35,3 +35,6 @@ export const inviteLink=code=>{ const u=new URL(location.href); u.search='?t='+c
 // world top 10 of an event, and your marks for it
 export const getTop=ev=>call('GET',null,'?top='+encodeURIComponent(ev));
 export const sendMarks=list=>call('POST',{action:'marks',list,token:tok()});
+// registered players, and one player's public profile
+export const getPlayers=()=>call('GET',null,'?players=1');
+export const getProfile=id=>call('GET',null,'?player='+encodeURIComponent(id));

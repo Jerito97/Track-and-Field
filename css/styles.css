@@ -276,3 +276,22 @@ tr.me td{background:var(--red)}
 .m-ev .m-th{flex:1;min-height:0;width:100%;object-fit:cover;display:block}
 .m-ev:has(.m-th){background:#3d8fe0}
 .m-ev.on .m-th{filter:saturate(1.15)}
+/* players: menu footer strip, list and profiles */
+.m-people{flex:1 1 auto;min-width:0;font:inherit;color:#fff;background:none;border:0;border-left:1px solid var(--edge);padding:0 0 0 clamp(8px,2vw,22px);cursor:pointer;text-align:left;display:flex;flex-direction:column;justify-content:center;align-self:stretch}
+.m-people:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:8px}
+.u-row{display:flex;align-items:center;gap:clamp(6px,1.4vw,12px);min-width:0}
+.u-heads{display:flex;flex:none}
+.u-h{display:block;width:clamp(28px,9vh,48px);height:clamp(28px,9vh,48px);border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 35%,#3d6fb8,#14284f);border:2px solid #fff;margin-left:calc(clamp(28px,9vh,48px)*-.28)}
+.u-h:first-child{margin-left:0;border-color:var(--sun)}
+.u-h canvas{width:100%;height:100%;display:block}
+.u-more{font-family:var(--f-display);letter-spacing:.05em;font-size:clamp(.85rem,3.4vh,1.25rem);color:var(--sun);white-space:nowrap}
+.u-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.u-item{font:inherit;color:#fff;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid var(--edge,rgba(255,255,255,.14));border-radius:10px;padding:6px 10px;cursor:pointer;text-align:left}
+.u-item.me{border-color:var(--sun)}
+.u-item i{margin-left:auto;font-style:normal;color:var(--sun);font-size:1.2rem}
+.u-nm{display:flex;flex-direction:column;min-width:0}
+.u-nm b{font-family:var(--f-display);font-weight:400;letter-spacing:.04em;font-size:1.15rem;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-nm small{color:#aab8d8;font-size:.78rem}
+.u-big{font-family:var(--f-display);font-weight:400;letter-spacing:.04em;font-size:1.6rem;text-transform:uppercase}
+.u-recs td.nm{font-weight:700;text-align:left;width:38%}
+.u-recs td.mk{width:16%}

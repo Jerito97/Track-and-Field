@@ -70,7 +70,7 @@ Las pruebas son un carrusel: se deslizan con el dedo (o con las flechas rojas) y
 
 ## Jugadores
 
-La primera vez que se abre el juego hay que crear un jugador: nombre único, color del stickman y un código de 4 a 6 números (si el nombre ya existe, se entra con su código). Cada jugador guarda sus récords, sus 5 mejores marcas por prueba, el historial de pruebas (marca, puesto, fecha) y los torneos. Desde el menú (abajo, **Jugador**) se abre el perfil: cambiar nombre y color, ver el récord de cada prueba, o cambiar de jugador / crear otro para jugar con amigos en el mismo celular. Cada récord personal nuevo se manda al Top 10 mundial (si no hay conexión, se manda después).
+La primera vez que se abre el juego hay que crear un jugador: nombre único, color del stickman y un código de 4 a 6 números (si el nombre ya existe, se entra con su código). Cada jugador guarda sus récords, sus 5 mejores marcas por prueba, el historial de pruebas (marca, puesto, fecha) y los torneos. Desde el menú (abajo, **Jugador**) se abre el perfil: cambiar nombre y color, ver el récord de cada prueba, o cambiar de jugador / crear otro para jugar con amigos en el mismo celular. Cada récord personal nuevo se manda al Top 10 mundial (si no hay conexión, se manda después). Abajo en el menú, **Jugadores** muestra a todos los registrados; tocando uno se ve su perfil: mejor marca de cada prueba, fecha y puesto en el mundo.
 
 Todo se guarda en el navegador (`localStorage`, clave `odb-players`; ver `js/storage.js`). Cada jugador tiene un id único y su historial queda listo para subirlo a un servidor cuando haya torneos con otra gente.
 
