@@ -48,9 +48,6 @@ export function drawField(V){
     const nb=GY-48; ctx.fillStyle='#fff'; ctx.fillRect(p0,nb,p1-p0,18); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(p0,nb,p1-p0,18);
     ctx.fillStyle='#e8262d'; ctx.fillRect(p0,nb+15,p1-p0,3);
     for(let m=1;m<=10.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
-    const bx=X(ev.line); ctx.fillStyle='#fff'; ctx.fillRect(bx-.25*s,GY-4,.25*s,14); ctx.fillStyle='#e8262d'; ctx.fillRect(bx-1,GY-4,3,14);
-    // take-off footprint of this attempt, and how far from the board
-    if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); }
     rivalFlags(V,X,GY);
   }
   if(ev.kind==='jav') rivalFlags(V,X,GY);
@@ -65,6 +62,14 @@ export function drawField(V){
     if(V.bar){ const by=GY-V.bar*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ux-12,by); ctx.lineTo(ux+12,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke(); }
   }
   if(ev.bands&&!V.act) ljBands(V,X,GY);
+  // long jump take-off board, on top of the coloured zones so it always stands out: a white board across the runway
+  // with a dark outline, and the foul line (red-and-white plasticine) at its front edge; then this attempt's footprint
+  if(ev.kind==='lj'){ const bx=X(ev.line), bw=Math.max(10,.3*s);
+    ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(bx-bw,GY-25,bw,41); ctx.fill(); ctx.stroke();
+    for(let y=GY-25,k=0;y<GY+16;y+=5,k++){ ctx.fillStyle=k%2?'#fff':'#e8262d'; ctx.fillRect(bx,y,4,Math.min(5,GY+16-y)); }
+    ctx.strokeStyle=INK; ctx.lineWidth=1; ctx.strokeRect(bx,GY-25,4,41);
+    if(!V.act) txt('TABLA',bx-bw/2,GY-33,'#fff',11);
+    if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); } }
   if(!ev.bands&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
       ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
