@@ -11,12 +11,19 @@
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date,rounds}, ...10]}  (top=surv: survival)
 //   POST {action:'marks', token, list:[{ev,mark,date,rounds}]} -> {ok}  (your marks for the world top 10; ev 'surv': survival points)
+//   GET  /api/t?top=100&group=ID                            -> {top:[...every member with a mark]}  (a group's board)
+//   POST {action:'groups', token}                           -> {groups:[{id,name,owner_id,members:[{id,name,color}]}]}
+//   POST {action:'gcreate', token, name}                    -> {id}
+//   POST {action:'gadd', token, group, player}              -> {ok}   (any member adds a registered player)
+//   POST {action:'gleave', token, group}                    -> {ok}   (the last one out deletes the group)
+//   POST {action:'gremove', token, group, player}           -> {ok}   (only who created it)
 //   GET  /api/t?players=1                                   -> {players:[{id,name,color,created_at,marks}]}
 //   GET  /api/t?player=ID                                   -> {player:{id,name,color,created_at}, marks:[{ev,mark,date,rank}]}
 // Names are unique (ignoring case and accents); each player has a 4-6 digit code (stored as a salted scrypt hash).
 // Login returns a token the game keeps; tournament actions need it, so nobody can play under someone else's name.
 // Each login is a new session: every phone (or browser, or installed app) keeps its own token and stays logged in.
 // World top 10 per event: each player's best mark (one row per player and event), with the day it was made.
+// Groups: friends compare their records among themselves (the same boards, only the group's members).
 // Everyone plays each tournament event once, whenever they want; standings are computed by the game.
 // A tournament ends when everyone played every event, when its time is up, or when who created it closes it;
 // then nobody can join or play any more (events not played count 0).
@@ -30,7 +37,7 @@ const SPRINT=['100','110h'];  // lower is better
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
 const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
-const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10;
+const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_GROUP=50, MAX_GROUPS=20;
 
 let sql=null, ready=null;
 function db(){
@@ -55,6 +62,9 @@ function db(){
     await sql`create table if not exists marks(player_id text not null references users(id) on delete cascade, ev text not null,
       mark double precision not null, made_at timestamptz not null default now(), primary key(player_id,ev))`;
     await sql`alter table marks add column if not exists rounds int`;
+    await sql`create table if not exists groups(id text primary key, name text not null, owner_id text not null, created_at timestamptz not null default now())`;
+    await sql`create table if not exists group_members(group_id text not null references groups(id) on delete cascade,
+      player_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(group_id,player_id))`;
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }
@@ -111,12 +121,26 @@ async function myTours(sql,u){
 
 // survival ('surv'): the best run's points, with the rounds it got through
 const okMark=(ev,m)=>ev==='surv'?Number.isInteger(m)&&m>=0&&m<=10000000:EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
-async function top(sql,ev){
-  const rows=SPRINT.includes(ev)
-    ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
-    :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
+// world top 10, or (group) every member of a group with a mark
+async function top(sql,ev,group){
+  const rows=group
+    ?(SPRINT.includes(ev)
+      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} order by m.mark asc, m.made_at asc limit ${MAX_GROUP}`
+      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} order by m.mark desc, m.made_at asc limit ${MAX_GROUP}`)
+    :SPRINT.includes(ev)
+      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
+      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
   return {top:rows};
 }
+// your groups, with their members
+async function myGroups(sql,u){
+  const gs=await sql`select g.id,g.name,g.owner_id,g.created_at from groups g join group_members me on me.group_id=g.id and me.player_id=${u.id} order by g.created_at`;
+  if(!gs.length) return {groups:[]};
+  const ids=gs.map(g=>g.id);
+  const ms=await sql`select m.group_id,u.id,u.name,u.color from group_members m join users u on u.id=m.player_id where m.group_id = any(${ids}) order by m.added_at`;
+  return {groups:gs.map(g=>({...g,members:ms.filter(m=>m.group_id===g.id).map(({id,name,color})=>({id,name,color}))}))};
+}
+async function inGroup(sql,gid,pid){ return (await sql`select 1 from group_members where group_id=${gid} and player_id=${pid}`).length>0; }
 
 // everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
 async function people(sql){
@@ -208,6 +232,41 @@ async function act(sql,b){
       return {ok:true};
     }
     case 'mytours': return myTours(sql,await auth(sql,b.token));
+    case 'groups': return myGroups(sql,await auth(sql,b.token));
+    case 'gcreate': {
+      const u=await auth(sql,b.token), name=String(b.name||'').replace(/\s+/g,' ').trim().slice(0,24);
+      if(name.length<2) throw new Bad(400,'El nombre del grupo tiene que tener al menos 2 letras.');
+      const [{n}]=await sql`select count(*)::int as n from group_members where player_id=${u.id}`;
+      if(n>=MAX_GROUPS) throw new Bad(409,`Podés estar en hasta ${MAX_GROUPS} grupos.`);
+      const id=randomUUID();
+      await sql`insert into groups(id,name,owner_id) values(${id},${name},${u.id})`;
+      await sql`insert into group_members(group_id,player_id) values(${id},${u.id})`;
+      return {id};
+    }
+    case 'gadd': case 'gleave': case 'gremove': {
+      const u=await auth(sql,b.token), gid=String(b.group||'').slice(0,64);
+      const g=(await sql`select id,owner_id from groups where id=${gid}`)[0];
+      if(!g||!await inGroup(sql,gid,u.id)) throw new Bad(404,'No estás en ese grupo.');
+      if(b.action==='gleave'){
+        await sql`delete from group_members where group_id=${gid} and player_id=${u.id}`;
+        const [{n}]=await sql`select count(*)::int as n from group_members where group_id=${gid}`;
+        if(!n) await sql`delete from groups where id=${gid}`;
+        else if(g.owner_id===u.id) await sql`update groups set owner_id=(select player_id from group_members where group_id=${gid} order by added_at limit 1) where id=${gid}`;
+        return {ok:true};
+      }
+      const pid=String(b.player||'').slice(0,64);
+      if(b.action==='gremove'){
+        if(g.owner_id!==u.id) throw new Bad(403,'Solo quien creó el grupo puede sacar gente.');
+        if(pid===u.id) throw new Bad(400,'Para irte, usá «Salir del grupo».');
+        await sql`delete from group_members where group_id=${gid} and player_id=${pid}`;
+        return {ok:true};
+      }
+      if(!(await sql`select 1 from users where id=${pid}`).length) throw new Bad(404,'No existe ese jugador.');
+      const ins=await sql`insert into group_members(group_id,player_id) select ${gid},${pid}
+        where (select count(*) from group_members where group_id=${gid})<${MAX_GROUP} on conflict do nothing returning player_id`;
+      if(!ins.length&&!await inGroup(sql,gid,pid)) throw new Bad(409,`El grupo ya tiene ${MAX_GROUP} jugadores.`);
+      return {ok:true};
+    }
     case 'close': {
       const u=await auth(sql,b.token), t=await getT(sql,cleanCode(b.code)); if(!t) throw new Bad(404,'No existe ese torneo.');
       if(t.host_id!==u.id) throw new Bad(403,'Solo quien creó el torneo lo puede terminar.');
@@ -250,7 +309,7 @@ export default async function handler(req,res){
     if(req.method==='GET'){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
-      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&ev!=='surv') throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev)); }
+      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&ev!=='surv') throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null)); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');
       return res.status(200).json(v);

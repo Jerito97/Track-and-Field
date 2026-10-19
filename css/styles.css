@@ -391,3 +391,19 @@ tr.me td{background:var(--red)}
 .m-recs .m-ic{color:var(--sun)}
 .m-recs:active{transform:translateY(2px)}
 .m-recs:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+/* records: world / groups selector */
+.b-scopes{display:flex;gap:6px;overflow-x:auto;touch-action:pan-x;padding-bottom:2px}
+.b-scope{flex:none;font:inherit;font-size:.85rem;font-weight:700;padding:4px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:#0e1d3d;color:#c9d4ea;cursor:pointer;white-space:nowrap}
+.b-scope.on{background:#fff;border-color:#fff;color:var(--ink)}
+.b-scope.add{border-style:dashed;color:var(--sun)}
+/* groups */
+.g-new{display:flex;gap:8px}
+.g-new input{flex:1;min-width:0;font:inherit;font-size:1rem;padding:7px 10px;border-radius:8px;border:2px solid rgba(255,255,255,.25);background:#0e1d3d;color:#fff}
+.g-new .btn{font-size:1.1rem;padding:6px 14px}
+.g-heads{display:flex;flex:none}
+.g-heads .p-av.sm{width:28px;height:28px;margin-left:-8px}
+.g-heads .p-av.sm:first-child{margin-left:0}
+.g-mem{cursor:default}
+.g-mem.me{border-color:var(--sun)}
+.g-x{margin-left:auto;font-size:.9rem;padding:3px 10px;box-shadow:none}
+.u-item i{font-style:normal}
