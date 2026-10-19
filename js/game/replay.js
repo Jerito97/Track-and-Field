@@ -15,8 +15,8 @@ export function endReplay(){ S.replay=null; afterAttempt(); }
 export function afterAttempt(){
   const ev=S.ev;
   ATH.forEach((a,i)=>{ if(a.me) return;
-    // ~80% of the reference mark; a machine with a set mark (survival) jumps or throws close to it
-    const m=Math.random()<(a.target?.1:ev.kind==='pv'?.15:.12)?null:Math.floor((a.target?a.target[ev.id]*(1+rand(-.035,.015)):ev.ref*.8*Math.pow(a.sk,1.6)*(1+rand(-.04,.04)))*100)/100;
+    // around the event's middle machine mark (ev.cpu), by skill; a machine with a set mark (survival) jumps or throws close to it
+    const m=Math.random()<(a.target?.1:ev.kind==='pv'?.15:.12)?null:Math.floor((a.target?a.target[ev.id]*(1+rand(-.035,.015)):ev.cpu*Math.pow(a.sk,1.6)*(1+rand(-.04,.04)))*100)/100;
     S.marks[i].push(m); });
   showRoundStandings();
 }

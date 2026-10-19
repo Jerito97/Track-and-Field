@@ -16,7 +16,7 @@ export function resetRivals(){
     // reaction to the gun; now and then a sleepy start
     let react=rand(.13,.24); if(!r.a.target&&Math.random()<.1) react+=rand(.25,.45);
     // a machine with a set mark (survival) runs close to it, without sleepy starts or trips
-    const T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.hurdles? 15.6+(1.03-r.a.sk)*20+rand(-.3,.3) : 12.6+(1.03-r.a.sk)*20+rand(-.35,.35);  // field ~12.6-14.3 s (vallas ~15.6-17.3 s): beatable with a decent run
+    const T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16+rand(-.3,.3);  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
     // flat sprint: about one in three rivals trips somewhere mid-race
     const trip=!ev.hurdles&&!r.a.target&&Math.random()<.3?rand(15,85):null;
     Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set()}); });

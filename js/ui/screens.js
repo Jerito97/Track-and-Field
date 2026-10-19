@@ -19,7 +19,7 @@ import {updateRemote} from '../online.js';
 import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
-import {ATH,buildAthletes,G,ME,S,screen,setS,setScreen} from '../state.js';
+import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
 import {COLORS,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
@@ -225,7 +225,10 @@ export function showRoundStandings(){
   showOv(table(ev.tag,`Clasificación · ronda ${S.round}`,sortRows(ev,S.marks.map(bestOf)),r=>fmt(ev,r.v),r=>{ const m=S.marks[r.i][S.round-1]; return m==null?'nulo':m.toFixed(2); },last?'evdone':'nextround'),true);
 }
 export function endEvent(vals){
-  const ev=S.ev; G.res[ev.id]=vals;
+  // once per event (the table's OK can be tapped again while the world board is asked for)
+  if(S.ending) return; S.ending=true;
+  const ev=S.ev, game=S; G.res[ev.id]=vals;
+  const okb=OV.querySelector('[data-act="evdone"]'); if(okb){ okb.disabled=true; okb.textContent='…'; }
   // your result goes to your player's history, top 5 and records
   const mine=vals[0], rows=sortRows(ev,vals), mi=rows.findIndex(r=>r.a.me);
   const sprint=ev.type==='sprint';
@@ -235,15 +238,15 @@ export function endEvent(vals){
   if(G.mode==='online') finishOnline(mine);
   const results=world=>showOv(table(ev.tag,world?'¡Récord mundial!':newRec?'¡Nuevo récord personal!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
   // world record: only a new personal best can be one, and only if it beats everyone else in the world top 10, as the
-  // server has it right now (asked before sending your mark; a moment at most). Without the board (no connection and
-  // never seen) it isn't one; events being tried out have no board
+  // server has it right now (asked before sending your mark; a moment at most, else the board loaded when the event
+  // started). Without the board (no connection and never seen) it isn't one; events being tried out have no board
   if(!newRec||mine==null||ev.beta){ results(false); if(newRec) syncMarks(); return; }
   const me=player()?.id, wait=new Promise(r=>setTimeout(()=>r(cachedTop(ev.id)),2500));
   Promise.race([loadTop(ev.id,true).catch(()=>cachedTop(ev.id)),wait]).then(top=>{
     const others=(top||[]).filter(t=>t.player_id!==me).map(t=>t.mark), wr=others.length?(sprint?Math.min(...others):Math.max(...others)):null;
     const world=!!top&&(wr==null||(sprint?mine<wr:mine>wr));
     syncMarks();
-    if(!(screen==='play'&&S&&S.ev===ev)) return;  // left the game meanwhile
+    if(S!==game) return;  // left the game meanwhile (field events end from the round's table, off the play screen)
     if(world) startLap(ev,mine,()=>results(true)); else results(false);
   });
 }
