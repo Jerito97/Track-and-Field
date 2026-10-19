@@ -1,7 +1,7 @@
 // Survival: the 5 events in a random order against a single machine, round after round; the machine gets better
 // every round. Beat it (or tie) in every event to keep going: the first event you lose ends the run. Each event won
 // adds its points (the tournament points table). The best run is kept in the profile and the world top 10.
-import {EVENTS} from '../config.js';
+import {CLASSIC,EVENTS} from '../config.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {fmt,pts} from '../game/scoring.js';
 import {buildAthletes,G,setS,setScreen} from '../state.js';
@@ -16,7 +16,7 @@ const STEPS=[1,4,8,12,16];
 const LEVELS={'100':[13.0,11.5,9.8,8.2,7.3],'110h':[16.0,14.5,13.0,11.9,11.3],lj:[6.5,7.6,9.1,10.6,11.1],pv:[5.0,6.0,6.8,7.9,8.4],jav:[65,80,90,120,132]};
 function targets(round){
   const t={};
-  EVENTS.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';
+  CLASSIC.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';
     let m;
     if(round>=STEPS[STEPS.length-1]){ const k=Math.pow(1.005,round-STEPS[STEPS.length-1]); m=sprint?L[L.length-1]/k:L[L.length-1]*k; }
     else { const i=STEPS.findIndex((r,j)=>round>=r&&round<STEPS[j+1]), u=(round-STEPS[i])/(STEPS[i+1]-STEPS[i]); m=L[i]+(L[i+1]-L[i])*u; }
@@ -46,7 +46,7 @@ export function startSurvival(){
   // a new run replaces the saved one (asks once if there is one)
   if(saved()&&!startSurvival.sure){ startSurvival.sure=true; const b=document.querySelector('[data-act="sstart"]'); if(b){ b.textContent='¿Empezar de cero? Tocá de nuevo'; return; } }
   startSurvival.sure=false;
-  G.mode='surv'; G.surv={round:1,order:shuffle(EVENTS.map((e,i)=>i)),k:0,pts:0,won:0,log:[]}; keep();
+  G.mode='surv'; G.surv={round:1,order:shuffle(CLASSIC.map((e,i)=>i)),k:0,pts:0,won:0,log:[]}; keep();
   showSurvEvent();
 }
 export function resumeSurvival(){ const sv=saved(); if(!sv) return showSurvival(); G.mode='surv'; G.surv=sv; survNext(); }
@@ -80,7 +80,7 @@ export function survAfterEvent(){
     ${roundDone?`<p class="small s-up"><b>¡Ronda ${s.round} superada!</b> En la próxima la máquina viene más fuerte.</p>`:''}
     <div class="btns"><button class="btn" data-act="snext" data-focus>${roundDone?`Ronda ${s.round+1}`:'Siguiente prueba'}</button><button class="btn alt" data-act="menu">Seguir después</button><button class="btn alt" data-act="squit">Abandonar</button></div>`));
 }
-export function survNext(){ const s=R(); if(s.k>=5){ s.round++; s.k=0; s.order=shuffle(EVENTS.map((e,i)=>i)); keep(); } showSurvEvent(); }
+export function survNext(){ const s=R(); if(s.k>=5){ s.round++; s.k=0; s.order=shuffle(CLASSIC.map((e,i)=>i)); keep(); } showSurvEvent(); }
 // the run ends (lost an event, or left): points, how far, best run saved and sent to the world top 10
 export function survQuit(b){
   if(b&&!b.dataset.sure){ b.dataset.sure='1'; b.textContent='¿Terminar la partida? Tocá de nuevo'; return; }

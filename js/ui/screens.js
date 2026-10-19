@@ -2,7 +2,7 @@
 import {ANIMS,RIGS,SPR} from '../assets.js';
 import {soundOn,toggleSound,unlockAudio} from '../audio.js';
 import {$,OV} from '../canvas.js';
-import {BETA,CHARS,evAt,EVENTS,INK} from '../config.js';
+import {BETA,CHARS,CLASSIC,evAt,EVENTS,INK} from '../config.js';
 import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {hamPause} from '../game/hammer.js';
@@ -74,7 +74,7 @@ function heroInfo(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
       <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)}</div>`; }
 function heroStats(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return tour
-    ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
+    ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${CLASSIC.length}</b></div>`
     :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b id="wr">${wrText(ev)}</b></div>`; }
 // world record of the chosen event, once the server answers
 function loadWr(){ if(menuSel===TOUR||evAt(menuSel).beta) return; const ev=evAt(menuSel);
@@ -118,7 +118,7 @@ export function showTours(){
   showOv(`<div class="card t-card"><div class="head"><div class="logo">TORNEOS</div><h2>Elegí tu torneo</h2></div><div class="body">
     <div class="t-two">
       <button class="t-opt" data-act="online"><b>Con amigos</b><span>Creá un torneo, pasá el código y cada uno juega cuando quiere.</span></button>
-      <button class="t-opt" data-act="tour"><b>Contra la máquina</b><span>Las ${EVENTS.length} pruebas seguidas contra 5 máquinas. Tu mejor torneo: ${rec.tour?rec.tour+' pts':'—'}.</span></button>
+      <button class="t-opt" data-act="tour"><b>Contra la máquina</b><span>Las ${CLASSIC.length} pruebas clásicas seguidas contra 5 máquinas. Tu mejor torneo: ${rec.tour?rec.tour+' pts':'—'}.</span></button>
     </div>
     <div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div></div></div>`);
 }
@@ -196,7 +196,7 @@ export function showPlayers(){
 export function showEventCard(){
   const ev=evAt(G.evIdx); setS(null); setScreen('menu');
   const tour=G.mode==='tour';
-  showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/${EVENTS.length}`:''}</h2></div><div class="body">
+  showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/${CLASSIC.length}`:''}</h2></div><div class="body">
     <div class="row2"><div class="pict${THUMBS[ev.id]?' img':''}">${art(G.evIdx)}</div>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="wr"><span>Récord mundial</span><b id="wr">${wrText(ev)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
@@ -256,7 +256,7 @@ export function afterResults(){
   showOv(table(ev.tag,'Puntos',ATH.map((a,i)=>({a,i,v:p[i]})).sort((x,y)=>y.v-x.v),r=>String(r.v),null,'standings'));
 }
 export function showStandings(){
-  const last=G.evIdx>=EVENTS.length-1;
+  const last=G.evIdx>=CLASSIC.length-1;
   showOv(table('TORNEO','Clasificación general',ATH.map((a,i)=>({a,i,v:G.total[i]||0})).sort((x,y)=>y.v-x.v),r=>String(r.v),null,last?'podium':'nextevent'));
 }
 export function showFinalTable(){

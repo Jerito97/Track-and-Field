@@ -38,7 +38,7 @@ export function showOnline(msg){
     <div class="o-two">
       <div class="o-box"><span class="lbl">Crear torneo</span>
         <input id="oname" maxlength="30" placeholder="Nombre (opcional)" autocomplete="off">
-        <div class="o-evs">${EVENTS.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}" checked> ${e.name}</label>`).join('')}</div>
+        <div class="o-evs">${EVENTS.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}"${e.extra?'':' checked'}> ${e.name}</label>`).join('')}</div>
         <div class="o-days"><span class="small">Dura</span>${DAYS.map(([d,t])=>`<button class="o-day${d===days?' on':''}" data-act="odays" data-d="${d}" aria-pressed="${d===days}">${t}</button>`).join('')}</div>
         <button class="btn" data-act="ocreate">Crear</button></div>
       <div class="o-box"><span class="lbl">Unirme con un código</span>

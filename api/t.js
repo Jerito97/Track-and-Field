@@ -33,10 +33,10 @@ import {Buffer} from 'node:buffer';
 import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
 import {neon} from '@neondatabase/serverless';
 
-const EVENTS=['100','lj','110h','pv','jav'];
+const EVENTS=['100','lj','110h','pv','jav','tj','ham'];
 const SPRINT=['100','110h'];  // lower is better
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
-const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250]};
+const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
 const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_GROUP=50, MAX_GROUPS=20;
 
