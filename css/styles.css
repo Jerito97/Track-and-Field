@@ -386,3 +386,8 @@ tr.me td{background:var(--red)}
 .s-hero{border-radius:10px;overflow:hidden;height:clamp(90px,30vh,200px)}
 .s-hero img{width:100%;height:100%;object-fit:cover;object-position:50% 35%;display:block}
 .m-mode b{padding:.25em .5em .3em}
+/* main menu: records button at the top right, in the place of the title */
+.m-recs{font:inherit;font-family:var(--f-display);font-style:italic;font-weight:400;letter-spacing:.05em;font-size:clamp(1.15rem,5.2vh,2.3rem);color:var(--sun);border:0;cursor:pointer;text-transform:uppercase}
+.m-recs .m-ic{color:var(--sun)}
+.m-recs:active{transform:translateY(2px)}
+.m-recs:focus-visible{outline:3px solid var(--blue);outline-offset:2px}

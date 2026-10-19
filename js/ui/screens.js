@@ -97,7 +97,7 @@ export function showMenu(){
   setS(null); setScreen('menu');
   const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.jpg" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
   showOv(`<div class="mm">
-  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí cómo jugar <span class="m-ic">${ICON.cup}</span></div></header>
+  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></header>
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}
@@ -261,7 +261,7 @@ OV.addEventListener('click',e=>{
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
   else if(a==='oshare') onShare(b.dataset.code);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
-  else if(a==='board') showBoard(+b.dataset.i);
+  else if(a==='board') showBoard(+b.dataset.i,b.dataset.back);
   else if(a==='people') showPeople();
   else if(a==='person') showPerson(b.dataset.id);
   else if(a==='profile') showProfile();

@@ -43,12 +43,14 @@ export const SURV={id:'surv',name:'Supervivencia',tag:'SUPERVIVENCIA',type:'scor
 const mk=(ev,v)=>ev===SURV?`${v} pts`:fmt(ev,v);
 const day=d=>{ if(!d) return ''; const t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}); };
 
-let shownEv=null;
-export async function showBoard(i){
+// back: where «Volver» goes (kept while changing tabs); by default the events screen, or survival for its tab
+let shownEv=null, back=null;
+export async function showBoard(i,from){
+  if(from!==undefined) back=from; else if(i!==undefined&&!document.querySelector('.b-card')) back=null;
   const ev=i===EVENTS.length?SURV:EVENTS[i]||EVENTS[0]; shownEv=ev.id; setS(null); setScreen('menu');
   const tabs=`<div class="b-tabs" role="tablist">${EVENTS.concat(SURV).map((e,j)=>`<button class="b-tab${e===ev?' on':''}" role="tab" aria-selected="${e===ev}" data-act="board" data-i="${j}">${e.tag}</button>`).join('')}</div>`;
   const card=body=>`<div class="card b-card"><div class="head"><div class="logo">RÉCORDS</div><h2>Top 10 · ${ev.name}</h2></div><div class="body">${tabs}${body}
-    <div class="btns"><button class="btn" data-act="${ev===SURV?'surv':'events'}" data-focus>Volver</button></div></div></div>`;
+    <div class="btns"><button class="btn" data-act="${back||(ev===SURV?'surv':'events')}" data-focus>Volver</button></div></div></div>`;
   const me=player()?.id;
   const rows=top=>top.length?`<table class="b-table"><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
     return `<tr class="${r.player_id===me?'me':''}"><td>${pl}.${pl<=3?' '+['🥇','🥈','🥉'][pl-1]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev===SURV?`<td class="sub">ronda ${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table>`
