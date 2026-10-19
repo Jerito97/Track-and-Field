@@ -67,6 +67,11 @@ function db(){
     await sql`create table if not exists groups(id text primary key, name text not null, owner_id text not null, created_at timestamptz not null default now())`;
     await sql`create table if not exists group_members(group_id text not null references groups(id) on delete cascade,
       player_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(group_id,player_id))`;
+    // one-time resets, each run once ever: the triple jump and the hammer start from scratch once published (the marks
+    // they had were tests made while they were being tried out)
+    await sql`create table if not exists migrations(id text primary key, done_at timestamptz not null default now())`;
+    if((await sql`insert into migrations(id) values('reset-tj-ham-1') on conflict do nothing returning id`).length)
+      await sql`delete from marks where ev in ('tj','ham')`;
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }

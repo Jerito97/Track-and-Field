@@ -13,6 +13,15 @@ const KEY='odb-players', HISTORY_MAX=200, TOP=5;
 export const COLORS=['#e8262d','#2f6fe0','#ffd23a','#1f9e54','#8e4fd6','#ff7a1a','#2bc4e0','#ff5fa2','#8bd13a','#8a5a3b','#1c2a55','#2b2c2d'];
 const DB=(()=>{ const d=store.get(KEY,null); return d&&Array.isArray(d.list)?d:{list:[],cur:null}; })();
 const save=()=>store.set(KEY,DB);
+// one-time resets: the triple jump and the hammer start from scratch once published (the marks they had were tests
+// made while they were being tried out). Each player keeps the ids of the resets already done (new players: all)
+const RESETS=[{id:'tj-ham-1',evs:['tj','ham']}];
+DB.list.forEach(p=>{ const done=p.resets||[];
+  RESETS.forEach(r=>{ if(done.includes(r.id)) return;
+    r.evs.forEach(e=>{ delete p.rec[e]; if(p.best) delete p.best[e]; if(p.sent) delete p.sent[e]; });
+    p.history=(p.history||[]).filter(h=>!r.evs.includes(h.ev)); });
+  p.resets=RESETS.map(r=>r.id); });
+if(DB.list.length) save();
 const newId=()=>{ try{ return globalThis.crypto.randomUUID(); }catch(e){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); } };
 export const players=()=>DB.list;
 export const player=()=>DB.list.find(p=>p.id===DB.cur)||null;
@@ -26,7 +35,7 @@ export function createPlayer(name,color,remote){
   // logging in again on this device with a player that's already here: just refresh it
   const same=remote&&DB.list.find(p=>p.id===remote.id);
   if(same){ Object.assign(same,{name,color,token:remote.token}); DB.cur=same.id; save(); bind(); return same; }
-  const p={id:remote?remote.id:newId(),name,color,token:remote?remote.token:null,created:Date.now(),rec:{},best:{},history:[],tours:[]};
+  const p={id:remote?remote.id:newId(),name,color,token:remote?remote.token:null,created:Date.now(),rec:{},best:{},history:[],tours:[],resets:RESETS.map(r=>r.id)};
   // the first player takes over the records kept before there were players
   if(!DB.list.length){ const old=store.get('odb-rec3',null); if(old) Object.assign(p.rec,old); }
   DB.list.push(p); DB.cur=p.id; save(); bind(); return p;
