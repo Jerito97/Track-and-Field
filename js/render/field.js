@@ -6,7 +6,7 @@ import {POSE} from '../poses.js';
 import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
-import {TJ_PIT,TJ_SAND} from '../game/field.js';
+import {HJ_BAR,HJ_MAT,TJ_PIT,TJ_SAND} from '../game/field.js';
 import {HAM_CAGE,HAM_CIRCLE,hamBall,hamHands} from '../game/hammer.js';
 import {SP_BEST,SP_GREEN,SP_MAX,SP_ORANGE} from '../game/shot.js';
 import {fieldPose} from '../stick.js';
@@ -56,6 +56,7 @@ export function drawField(V){
     rivalFlags(V,X,GY);
   }
   if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp') rivalFlags(V,X,GY);
+  if(ev.kind==='hj') hjField(V,X,GY,s);
   if(ev.kind==='pv'){
     const bx=X(ev.line), ux=X(ev.line+.6);
     ctx.fillStyle='#555'; ctx.beginPath(); ctx.moveTo(bx-.5*s,GY); ctx.lineTo(bx,GY+4); ctx.lineTo(bx,GY); ctx.closePath(); ctx.fill();
@@ -209,6 +210,19 @@ function hamDraw(V,X,GY){
     ctx.strokeStyle='#fff'; ctx.lineWidth=7; ctx.stroke(); ctx.strokeStyle='rgba(47,209,102,.9)'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+(x1-x0)*Math.min(1,p),y); ctx.stroke();
     target(x1,y); drawStar(x0+(x1-x0)*p,y,10,p,true);
     if(!m.hit) txt('SOLTÁ EN EL CÍRCULO',cx,y-22,'#fff',16,{lw:4}); }};
+}
+// high jump: the mat past the bar, the two uprights with their heights, the bar (at the height being jumped, or
+// 2 m before the first jump), and the white take-off mark on the runway with this attempt's footprint
+function hjField(V,X,GY,s){
+  const ev=V.ev, bx=X(ev.line+HJ_BAR), m0=X(ev.line+HJ_BAR+.25), m1=X(ev.line+HJ_BAR+4.2), mh=HJ_MAT*s;
+  ctx.fillStyle='#2f5fc0'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(m0,GY-mh,m1-m0,mh); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#e8402d'; ctx.fillRect(m0+2,GY-mh+2,m1-m0-4,mh*.35);
+  upright(bx-4,GY,s*.42);
+  for(let h=1.5;h<=3;h+=.5) txt(h.toFixed(1)+' m',bx+22,GY-h*s,'#fff',10);
+  const by=GY-(V.bar||2)*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(bx-14,by); ctx.lineTo(bx+14,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke();
+  const tx=X(ev.line); ctx.fillStyle='#fff'; ctx.fillRect(tx-2,GY-25,4,41);
+  if(!V.act) txt('MARCA',tx,GY-33,'#fff',11);
+  if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); }
 }
 // shot put: the shot in the hand (or flying, or landed); holding both, the angle gauge beside the athlete with its
 // green zone and the needle

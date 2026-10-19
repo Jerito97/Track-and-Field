@@ -31,7 +31,9 @@ function caption(){
   if(k==='pv'){ if(m&&m.k==='pole'&&m.on) return 'MANTENÉ LOS DOS CUANDO LA ESTRELLA LLEGUE A LA PUNTA';
     if(m&&m.k==='rise') return 'SOLTÁ CUANDO LA ESTRELLA LLEGUE A LA OTRA PUNTA'; }
   if(k==='jav'&&(m&&m.k==='jav'||S.zone&&S.phase==='run')) return 'MANTENÉ LOS DOS Y SOLTÁ CUANDO LAS CHISPAS LLEGUEN A LA PUNTA';
+  if(k==='hj'&&a&&a.k==='hj') return 'CUANDO TU ESPALDA ESTÉ SOBRE LA VARILLA, LOS DOS DE NUEVO';
   if((k==='lj'||k==='tj')&&a&&(a.k==='lj'||a.stage==='jump')) return 'EN EL PUNTO MÁS ALTO, LOS DOS DE NUEVO PARA ESTIRARTE';
+  if(k==='hj'&&S.zone&&!a) return 'EN EL ROJO, LOS DOS JUNTOS PARA PICAR PEGADO A LA MARCA';
   if((k==='lj'||k==='tj')&&S.zone) return 'EN EL ROJO, LOS DOS JUNTOS PARA SALTAR PEGADO A LA TABLA';
   if(ev.type==='field'&&S.prep&&S.phase==='run') return 'DESDE EL VERDE NO HAY BOTONES: PREPARATE';
   if(c&&c.type==='side') return ev.type==='sprint'?'TOCÁ EL VERDE DEL LADO QUE APARECE: CADA ACIERTO SUMA VELOCIDAD':'TOCÁ EL VERDE DEL LADO QUE APARECE PARA TOMAR VELOCIDAD';
@@ -47,7 +49,7 @@ export function demoStep(dt){
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
-  if((k==='lj'||k==='tj')&&c&&c.type==='both'){
+  if((k==='lj'||k==='tj'||k==='hj')&&c&&c.type==='both'){
     if(!a&&ev.line-S.x<=.4) press('B');
     if(a&&a.T&&a.t/a.T>=.36) press('B'); }
   if(k==='tj'&&c&&c.type==='foot'&&a&&(a.stage==='contact'||a.T-a.t<=-.04)) press(c.side);

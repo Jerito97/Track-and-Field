@@ -62,6 +62,11 @@ const LJ_STRETCH=[[0,P(.82,.3,[1.2,.8],[1.0,.9],[2.2,.3],[2.0,.3])],[.25,P(.82,.
 const LJ_LAND=[[0,P(.62,.72,[1.6,.05],[1.5,.1],[.9,.15],[.7,.2])],[.08,P(.4,.78,[1.55,.15],[1.45,.2],[1.1,.2],[.9,.3])],[.15,P(.3,.8,[1.5,.25],[1.4,.3],[1.5,.2],[1.3,.3])],[.45,P(.34,.45,[1.45,.4],[1.35,.5],[.9,.4],[.6,.4])],[1.1,P(.34,.3,[1.4,.5],[1.3,.6],[2.8,.3],[.4,.4])]];
 // triple jump bound (hop, step): push off, legs split wide in the air, front foot reaching down for the contact
 const TJ_BOUND=[[0,P(.8,.25,[.9,1.4],[-.7,.3],[-.7,.6],[1.0,.6])],[.4,P(.82,.2,[1.1,.6],[-.8,.9],[-.9,.5],[1.3,.4])],[1,P(.8,.25,[.4,.2],[-.6,1.1],[.8,.6],[-.7,.6])]];
+// high jump (the body turned a quarter in the air, head toward the mat): knee drive at the take-off, then over the bar
+// arched (hips up, head and legs down), the legs kicking up after it, and on the mat on the back
+const HJ_TAKE=[[0,P(.78,.15,[.2,.3],[-.6,.9],[-.6,.8],[.8,.6])],[1,P(.82,0,[1.2,1.6],[-.3,.2],[2.0,.4],[1.8,.4])]];
+const HJ_OVER=[[0,P(.82,.1,[.6,.8],[.2,.5],[2.6,.2],[2.4,.3])],[.3,P(.8,.45,[.7,1.2],[.6,1.3],[1.0,.2],[.9,.3])],[.55,P(.8,.2,[-.6,.3],[-.5,.4],[.9,.3],[.8,.3])],[1,P(.6,0,[-.9,.2],[-.8,.3],[2.6,.2],[2.4,.3])]];
+const HJ_MATP=[[0,HJ_OVER[3][1]],[.3,P(.3,.05,[-.4,.5],[-.3,.6],[2.6,.2],[2.4,.3])],[.9,P(.3,.05,[-.3,.6],[-.2,.7],[-1.7,.3],[2.4,.3])]];
 // javelin (arm 0 holds it)
 const JAV_ARM={a:-2.4,b:.55};
 const JAV_THROW=[[0,P(.78,-.28,[.55,.1],[-.6,.4],[-2.0,.05],[1.0,.5])],[.45,P(.79,.05,[.5,.05],[-.5,.6],[-3.25,.25],[.4,.8])],[1,P(.78,.4,[.55,.05],[-.35,.8],[-3.9,.1],[-.7,.6])]];
@@ -77,7 +82,15 @@ const PV_MAT=[[0,PV_FALL],[.3,P(.25,.05,[-.4,.5],[-.3,.6],[2.6,.2],[2.4,.3])],[.
 
 export function fieldPose(V){
   const ev=V.ev, a=V.act, t=V.clock||0, k=ev.kind;
-  if(a&&/foul$/.test(a.k)) return a.t>.7&&k!=='jav'?tag(k==='lj'||k==='tj'?POSE.sit:POSE.lie,'foulend'):tag(POSE.stumble,'foul');
+  if(a&&/foul$/.test(a.k)) return a.t>.7&&k!=='jav'?tag(k==='lj'||k==='tj'||k==='hj'?POSE.sit:POSE.lie,'foulend'):tag(POSE.stumble,'foul');
+  if(k==='hj'){
+    if(a&&a.k==='hj'&&a.u!=null){
+      if(a.pt!=null) return track('hjmat',HJ_MATP,a.pt);
+      if(a.u<.2) return track('hjtake',HJ_TAKE,a.u/.2);
+      return track('hjover',HJ_OVER,(a.u-.2)/.8); }
+    if((V.v||0)>.2) return run(runPhase(V),amp(V));
+    return breathe(POSE.stand,t);
+  }
   if(k==='tj'&&a&&a.k==='tj'){
     if(a.stage==='hop'||a.stage==='step') return track('tjbound',TJ_BOUND,a.u??0);
     if(a.stage==='contact') return run(runPhase(V),.6);
