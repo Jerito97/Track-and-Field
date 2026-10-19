@@ -57,6 +57,8 @@ const LJ_TAKE=[[0,P(.78,.25,[.15,.3],[-.7,1.0],[-.8,.6],[.9,.8])],[.5,P(.82,.2,[
 const LJ_FLY=[[0,LJ_TAKE[2][1]],[.35,P(.82,.05,[.1,1.0],[-.1,1.3],[2.9,.1],[2.7,.1])],[.7,P(.82,.45,[1.0,.5],[.9,.6],[1.6,.2],[1.4,.3])],[1,P(.8,.7,[1.6,.1],[1.5,.15],[.6,.2],[.4,.3])]];
 const LJ_STRETCH=[[0,P(.82,.3,[1.2,.8],[1.0,.9],[2.2,.3],[2.0,.3])],[.15,P(.82,.55,[1.65,.05],[1.55,.05],[1.4,.1],[1.25,.1])],[1,P(.8,.75,[1.6,.05],[1.5,.1],[.8,.1],[.6,.2])]];
 const LJ_LAND=[[0,P(.32,.6,[1.55,.1],[1.45,.2],[1.2,.2],[1.0,.3])],[.15,P(.3,.8,[1.5,.25],[1.4,.3],[1.5,.2],[1.3,.3])],[.45,P(.34,.45,[1.45,.4],[1.35,.5],[.9,.4],[.6,.4])],[1.1,P(.34,.3,[1.4,.5],[1.3,.6],[2.8,.3],[.4,.4])]];
+// triple jump bound (hop, step): push off, legs split wide in the air, front foot reaching down for the contact
+const TJ_BOUND=[[0,P(.8,.25,[.9,1.4],[-.7,.3],[-.7,.6],[1.0,.6])],[.4,P(.82,.2,[1.1,.6],[-.8,.9],[-.9,.5],[1.3,.4])],[1,P(.8,.25,[.4,.2],[-.6,1.1],[.8,.6],[-.7,.6])]];
 // javelin (arm 0 holds it)
 const JAV_ARM={a:-2.4,b:.55};
 const JAV_THROW=[[0,P(.78,-.28,[.55,.1],[-.6,.4],[-2.0,.05],[1.0,.5])],[.45,P(.79,.05,[.5,.05],[-.5,.6],[-3.25,.25],[.4,.8])],[1,P(.78,.4,[.55,.05],[-.35,.8],[-3.9,.1],[-.7,.6])]];
@@ -70,9 +72,13 @@ const PV_MAT=[[0,P(.25,-1.45,[2.5,.1],[2.4,.15],[-2.6,.2],[-2.4,.3])],[.35,P(.25
 
 export function fieldPose(V){
   const ev=V.ev, a=V.act, t=V.clock||0, k=ev.kind;
-  if(a&&/foul$/.test(a.k)) return a.t>.7&&k!=='jav'?tag(k==='lj'?POSE.sit:POSE.lie,'foulend'):tag(POSE.stumble,'foul');
-  if(k==='lj'){
-    if(a&&a.k==='lj'&&a.u!=null){
+  if(a&&/foul$/.test(a.k)) return a.t>.7&&k!=='jav'?tag(k==='lj'||k==='tj'?POSE.sit:POSE.lie,'foulend'):tag(POSE.stumble,'foul');
+  if(k==='tj'&&a&&a.k==='tj'){
+    if(a.stage==='hop'||a.stage==='step') return track('tjbound',TJ_BOUND,a.u??0);
+    if(a.stage==='contact') return run(runPhase(V),.6);
+  }
+  if(k==='lj'||k==='tj'){
+    if(a&&(a.k==='lj'||a.stage==='jump')&&a.u!=null){
       if(a.pt!=null) return track('ljland',LJ_LAND,a.pt);
       if(a.u<.3) return track('ljtake',LJ_TAKE,a.u/.3);
       if(a.tapU!=null) return track('ljstretch',LJ_STRETCH,(a.u-a.tapU)/Math.max(.05,1-a.tapU));

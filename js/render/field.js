@@ -6,6 +6,7 @@ import {POSE} from '../poses.js';
 import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
+import {TJ_PIT,TJ_SAND} from '../game/field.js';
 import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -40,14 +41,15 @@ export function drawField(V){
     ctx.fillStyle=LINE; ctx.fillRect(0,GY-26,LW,2); ctx.fillRect(0,GY+16,LW,2);
     for(let m=0;m<ev.line;m+=5){ const x=X(m); if(x>-20&&x<LW+20){ ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(x-1,GY+12,2,4); } }
   }
-  if(ev.kind==='lj'){
-    const p0=X(ev.line+.5), p1=X(ev.line+11), sd=26;
+  if(ev.kind==='lj'||ev.kind==='tj'){
+    // the sand: right past the board in the long jump, TJ_SAND m on in the triple jump (metres counted from the board)
+    const [a0,a1]=ev.kind==='tj'?[TJ_SAND,TJ_PIT]:[.5,11], p0=X(ev.line+a0), p1=X(ev.line+a1), sd=26;
     ctx.fillStyle='#ecd096'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,sd); ctx.fill(); ctx.stroke();
-    ctx.fillStyle='rgba(170,120,50,.35)'; for(let k=0;k<110;k++) ctx.fillRect(X(ev.line+1+hash(k)*9.8),GY-3+hash(k+50)*(sd-4),2,1.5);
+    ctx.fillStyle='rgba(170,120,50,.35)'; for(let k=0;k<110;k++) ctx.fillRect(X(ev.line+a0+.5+hash(k)*(a1-a0-1.2)),GY-3+hash(k+50)*(sd-4),2,1.5);
     // distance board along the pit: a mark every half metre, numbers every metre
     const nb=GY-48; ctx.fillStyle='#fff'; ctx.fillRect(p0,nb,p1-p0,18); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(p0,nb,p1-p0,18);
     ctx.fillStyle='#e8262d'; ctx.fillRect(p0,nb+15,p1-p0,3);
-    for(let m=1;m<=10.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
+    for(let m=Math.ceil(a0*2)/2;m<=a1-.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     rivalFlags(V,X,GY);
   }
   if(ev.kind==='jav') rivalFlags(V,X,GY);
@@ -64,11 +66,13 @@ export function drawField(V){
   if(ev.bands&&!V.act) ljBands(V,X,GY);
   // long jump take-off board, on top of the coloured zones so it always stands out: a white board across the runway
   // with a dark outline, and the foul line (red-and-white plasticine) at its front edge; then this attempt's footprint
-  if(ev.kind==='lj'){ const bx=X(ev.line), bw=Math.max(10,.3*s);
+  if(ev.kind==='lj'||ev.kind==='tj'){ const bx=X(ev.line), bw=Math.max(10,.3*s);
     ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(bx-bw,GY-25,bw,41); ctx.fill(); ctx.stroke();
     for(let y=GY-25,k=0;y<GY+16;y+=5,k++){ ctx.fillStyle=k%2?'#fff':'#e8262d'; ctx.fillRect(bx,y,4,Math.min(5,GY+16-y)); }
     ctx.strokeStyle=INK; ctx.lineWidth=1; ctx.strokeRect(bx,GY-25,4,41);
     if(!V.act) txt('TABLA',bx-bw/2,GY-33,'#fff',11);
+    // triple jump: the hop's and the step's footprints too
+    (V.prints||[]).forEach(x=>footprint(X(x),GY,s,1));
     if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); } }
   if(!ev.bands&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
@@ -78,7 +82,7 @@ export function drawField(V){
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
   // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
   let fig=null;
-  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):ev.kind==='pv'?pvFrame(ME(),V):null;
+  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='tj'?tjFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):ev.kind==='pv'?pvFrame(ME(),V):null;
     if(f){ const K=animScale(ME(),s*FIELD_H), A0=ME().anims[f[0]], fi0=((f[1]%A0.frames)+A0.frames)%A0.frames;
       // frames placed by the hip (pole vault in the air: the body turns over) or by their lowest point
       const feet=f[2]&&A0.hipy?GY-f[2].hip*s+(A0.feet-A0.hipy[fi0])*K:GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
@@ -104,7 +108,7 @@ export function drawField(V){
       if(V.jv.stuck){ cx=X(V.jv.x)-Math.cos(a)*.9*s; cy=GY+Math.sin(a)*.9*s; } javelin(cx,cy,a,JAV_L*s); }
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
-  S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle='#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill(); });
+  S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle=f.dust?'rgba(235,215,200,.8)':'#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,f.dust?1.8:2.2,0,Math.PI*2); ctx.fill(); });
   drawPauseBtn();
 }
 export function rivalFlags(V,X,GY){
@@ -181,6 +185,19 @@ function ljFrame(C,V){
   if((V.v||0)>.2) return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
   return animReady(C,'stand')?['stand',Math.floor(S.clock*1.2)%2]:null;
 }
+// triple jump: the bounds on the take-off frames (the push off) and a running stride in the air; contacts on the run
+// cycle; the last jump as a long jump
+function tjFrame(C,V){
+  const a=V.act;
+  if(a&&a.k==='tj'&&a.stage==='jump') return ljFrame(C,{...V,act:{...a,k:'lj'}});
+  if(a&&a.k==='tj'&&(a.stage==='hop'||a.stage==='step')&&a.u!=null){
+    if(a.u<.25) return animReady(C,'ljtakeoff')?['ljtakeoff',a.u<.1?1:2]:null;
+    return animReady(C,'run')?['run',a.u<.75?TJ_BOUND_F:TJ_BOUND_F+1]:null; }
+  if(a&&a.k==='tj'&&a.stage==='contact') return animReady(C,'run')?['run',Math.floor(V.x/4*C.anims.run.frames)]:null;
+  return ljFrame(C,V);
+}
+// run frame with the legs split widest (the bound in the air)
+const TJ_BOUND_F=1;
 // pole vault: drawn frames for the whole jump (standing, running, lowering the pole, planting, in the air, on the mat);
 // rig pieces for the foul
 function pvFrame(C,V){

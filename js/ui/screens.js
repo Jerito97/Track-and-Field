@@ -36,11 +36,11 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
   if(k==='pv'&&!STYLE.stick){ g.strokeStyle=INK; g.lineWidth=3; g.beginPath(); g.moveTo(px*.15,px*.95); g.lineTo(px*.55,px*.12); g.stroke(); g.strokeStyle='#7ccf3a'; g.lineWidth=1.6; g.stroke(); }
   if(C.sprite&&(k==='100'||k==='110h')){ const sp=SPR[k==='100'?'run1':'hurdle']; const draw=()=>{ const sc=Math.min(px*.9/sp.w,px*.9/sp.h); g.drawImage(sp.im,(px-sp.w*sc)/2,(px-sp.h*sc)/2,sp.w*sc,sp.h*sc); }; if(sp.im.complete) draw(); else sp.im.addEventListener('load',draw); return; }
   // a drawn frame (run cycle knee up, hurdle clearance, long jump flight, javelin drawn back), fitted to the canvas
-  const PICT={'100':['run',3],'110h':['hurdle',1],'lj':['ljflight',1],'jav':['javpull',1]}[k];
+  const PICT={'100':['run',3],'110h':['hurdle',1],'lj':['ljflight',1],'tj':['ljtakeoff',2],'jav':['javpull',1]}[k];
   if(PICT&&animReady(C,PICT[0])){ const A=ANIMS[C.id][PICT[0]], sc=Math.min(px*.92/A.w,px*.92/A.h); g.drawImage(A.im,PICT[1]*A.w,0,A.w,A.h,(px-A.w*sc)/2,(px-A.h*sc)/2,A.w*sc,A.h*sc); return; }
   // pole vault (stickman): planting the pole, arms up, pole down to the box
   if(k==='pv'&&STYLE.stick){ const h=drawAthlete(g,s*.82,px*.4,oy,0,POSE.pvPlant,C,true).hand; g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=3.4; g.beginPath(); g.moveTo(h[0],h[1]); g.lineTo(px*.95,oy); g.stroke(); g.strokeStyle='#ffd23a'; g.lineWidth=1.8; g.stroke(); g.restore(); return; }
-  const J=k==='100'?runPose(.8,1):k==='lj'?POSE.ljAir:k==='110h'?POSE.hurdle:k==='pv'?POSE.pvSwing:POSE.javBack;
+  const J=k==='100'?runPose(.8,1):k==='lj'?POSE.ljAir:k==='110h'||k==='tj'?POSE.hurdle:k==='pv'?POSE.pvSwing:POSE.javBack;
   drawAthlete(g,s,ox,oy-(k==='lj'?s*.35:0)-(k==='pv'?s*.9:0),0,J,C,true,k==='pv'?-2.4:0);
   if(k==='jav'){ g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=4; g.beginPath(); g.moveTo(px*.04,px*.36); g.lineTo(px*.92,px*.1); g.stroke(); g.strokeStyle='#fff'; g.lineWidth=2; g.stroke(); g.restore(); }
 }

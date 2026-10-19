@@ -80,6 +80,8 @@ Solo para el jugador administrador (Jero): en su perfil aparece el botón **Admi
 
 Una prueba nueva se agrega primero a `BETA` en `js/config.js` (con `beta:true`): solo el administrador la ve, en el carrusel de Pruebas con la etiqueta EN PRUEBA, y la puede jugar. No aparece en torneos, supervivencia, Récords ni perfiles, y sus marcas no se mandan al Top 10. Para publicarla, se pasa de `BETA` a `EVENTS` (con su tabla de puntos en `POINTS`, `js/game/scoring.js`, y sus marcas posibles en `RANGE` de `api/t.js`).
 
+Ahora en prueba: **Salto triple**. Carrera y pique como en largo, pero la arena está a 13 m de la tabla: en el aire aparece un botón naranja (primero a la izquierda, después a la derecha) que se toca justo cuando el pie apoya en la pista; un buen apoyo mantiene la velocidad y uno malo (apurado, tarde o del otro lado) hace trastabillar y acorta el salto siguiente. El último salto es como en largo, con la estirada en el punto más alto. La marca se mide desde la tabla.
+
 ## Supervivencia
 
 Las 5 pruebas en orden al azar contra una sola máquina; cada ronda de 5 la máquina mejora (sus marcas por ronda en `LEVELS` de `js/ui/survival.js`, medidas con jugadores simulados: ronda 1 fácil, 4 como un jugador casual, 8 como uno bueno, 12 casi experto, 16 experto y 0.5% más difícil cada ronda después). Hay que ganarle o empatarle en cada prueba (en largo, garrocha y jabalina, el mejor de 3 intentos); la primera que se pierde termina la partida. Cada prueba ganada suma sus puntos (la tabla de los torneos). La mejor partida queda en el perfil y en el Top 10 mundial (pestaña Supervivencia de Récords), con la ronda a la que llegó.

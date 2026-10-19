@@ -21,7 +21,10 @@ export const EVENTS=[
 // 9 hurdles 11.3 m apart (more time than the real 10 x 9.14 m to tap the three numbers at full speed); the last one 7 m before the line
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
-export const BETA=[];
+export const BETA=[
+ {id:'tj',name:'Salto triple',tag:'TRIPLE',type:'field',kind:'tj',line:55,zone:4,bands:[14,9,4],ref:17,beta:true,
+  help:'<b>1. Correr y despegar:</b> igual que en largo: <b>botones verdes</b> para tomar velocidad y, en el rojo, los <b>dos rojos</b> juntos lo más pegado posible a la tabla. Si la pisás, es <b>nulo</b>. <b>2. Dos apoyos:</b> la arena está lejos, así que antes de llegar apoyás dos veces. Aparece un <b>botón naranja</b>: primero del lado <b>izquierdo</b> y después del <b>derecho</b>. Tocalo <b>justo cuando el pie toca la pista</b>. Si le pegás, mantenés la velocidad; si te apurás, llegás tarde o tocás el otro lado, <b>trastabillás</b> y el siguiente salto sale corto. <b>3. El salto final:</b> como en largo, tocá los dos rojos <b>en el punto más alto</b> para estirarte. La marca se mide desde la tabla. Tenés 3 rondas.'}
+];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];
 export const HURDLES=Array.from({length:9},(_,i)=>12.5+11.3*i);
