@@ -22,6 +22,9 @@ const W_MIN=TAU/1.25, W_PER_V=.7;
 const TURNS=3;
 // the last turn: how long (s), what each tap adds to the throw (share), and the most it can add
 const RUSH_T=1.5, RUSH_TAP=.014, RUSH_MAX=.3;
+// then a moment with nothing to press before aiming (s); a hold shorter than BLIP s (fingers left over from the fast
+// taps) doesn't throw: it starts over
+const GAP=.6, BLIP=.12;
 // seconds for the star to reach the ball; let go before EARLY (of the way) = into the net, after LATE = out
 const HAM_T=.6, EARLY=.45, LATE=1.25, LAG=.03;
 // without holding, the throw goes off on its own after this long (s)
@@ -62,14 +65,17 @@ export function updateHammer(dt){
   if(a.stage==='rush'){
     // spins faster with every tap
     a.w+=(W_MIN+W_PER_V*a.v*(1+2.5*rushBonus(a))-a.w)*Math.min(1,dt*8);
-    if(a.t>=RUSH_T){ a.stage='final'; a.t=0; a.free=!S.held2; S.cue={type:'hamhold',t:0}; tone(500,.06,'triangle',.04); }
+    if(a.t>=RUSH_T){ a.stage='gap'; a.t=0; S.cue=null; S.pops.push({text:'¡AHORA APUNTÁ!',t:0,dur:GAP+.3,col:'#ffd23a',sub:'',big:.6,small:true}); }
   }
+  if(a.stage==='gap'&&a.t>=GAP){ a.stage='final'; a.t=0; a.free=!S.held2; S.cue={type:'hamhold',t:0}; tone(500,.06,'triangle',.04); }
   if(a.stage==='final'){
     const m=S.meter;
     // a fresh hold: fingers still down from the fast taps don't start it
     if(!S.held2) a.free=true;
     if(!m&&S.held2&&a.free){ S.meter={k:'ham',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
-    else if(m){ m.p+=dt/HAM_T; if(!S.held2||m.p>=LATE) release(a); }
+    else if(m){ m.p+=dt/HAM_T;
+      if(!S.held2&&m.p*HAM_T<BLIP){ S.meter=null; S.cue={type:'hamhold',t:0}; }
+      else if(!S.held2||m.p>=LATE) release(a); }
     else if(a.t>WAIT) release(a);
   }
   if(a.stage!=='fly'&&a.stage!=='foul') S.pose=spinPose(a,hamBall(S.x,a.phi));
