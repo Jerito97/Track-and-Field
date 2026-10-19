@@ -13,6 +13,10 @@ import {startReplay} from './replay.js';
 // higher), keep holding up the swing and let go when the star reaches the other end
 const POLE_T=1.0, PV_REACH=3.5;
 export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
+// pole vault timing (plant and release): a small window around the target counts as perfect, then it drops off,
+// a bit faster when late than when early; LAG: the time between touching the screen and the game noticing it
+const PV_OK=.07, PV_LAG=.03;
+export const qPole=p=>{ const d=p-1; return Math.abs(d)<=PV_OK?1:d<0?clamp(1+(d+PV_OK)/.45,0,1):clamp(1-(d-PV_OK)/.2,0,1); };
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
 // within .44-.56), fading to nothing at .2 and .8
 export const stretchQ=u=>Math.max(0,Math.min(1,1-(Math.abs(u-.5)-.06)/.24));
@@ -78,7 +82,7 @@ export function fieldAction(){
 }
 // pole vault: the pole goes into the box; how far down it was (the star on it) sets the height
 export function plantPole(){
-  const v=S.v, q1=qOf(S.meter.p); S.meter.hit=S.meter.p; judge(q1); S.cue=null;
+  const v=S.v, q1=qPole(S.meter.p-PV_LAG/POLE_T); S.meter.hit=S.meter.p; judge(q1); S.cue=null;
   S.act={k:'pv',t:0,q1,v,pushed:0,stage:'plant',H:1.0+.44*v*(.72+.28*q1)}; tone(300,.15,'triangle',.05);
   S.phase='act';
 }
@@ -109,7 +113,7 @@ export function updateAct(dt){
       S.x=a.xs+(ev.line+.25-a.xs)*e; S.y=(a.H-.9)*e; S.rot=-Math.PI*e*.95; S.pose=POSE.pvSwing;
       // let go of both buttons at the top (star at the end of the pole); holding on too long = no push
       if(S.meter&&S.meter.k==='rise'&&!a.pushed){ S.meter.p=a.t/(a.Trise*.7);  // star at the end in ~.7 s
-        if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qOf(S.meter.p); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
+        if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qPole(S.meter.p-PV_LAG/(a.Trise*.7)); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
       if(a.pushed&&a.t>=Math.max(a.Trise*.7,.5)||a.t>a.Trise+.35){ S.cue=null; S.meter=null; a.stage='over'; a.t=0; a.yo=S.y; a.bonus=.7*(a.q2||0)-.25; }
     } else if(a.stage==='over'){
       const u=Math.min(1,a.t/.45); S.y=a.yo+Math.max(0,a.bonus+.4)*Math.sin(u*Math.PI/2); S.x+=dt*1.2; S.rot=-Math.PI*.95-Math.PI*.55*u; S.pose=POSE.pvOver;

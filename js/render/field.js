@@ -136,7 +136,9 @@ export function drawPole(V,X,GY,fig){
       // most bent as the rise starts, straightening as it lifts the vaulter
       bend=dl*(a.stage==='plant'?.22:.36*clamp(1-(V.y||0)/6,0,1)), cx=mx-dy/dl*bend, cy=my+dx/dl*bend; line(tipX,tipY,hx,hy,cx,cy,true);
     if(!V.replay&&V.meter&&V.meter.k==='rise'){ const p=Math.min(V.meter.hit!=null?V.meter.hit:V.meter.p,1.25), q=Math.min(p,1), u=1-q;
-      const bx=u*u*tipX+2*u*q*cx+q*q*hx, by=u*u*tipY+2*u*q*cy+q*q*hy; target(hx,hy); drawStar(bx+(p>1?(p-1)*30:0),by-(p>1?(p-1)*30:0),9,p); }
+      // late: the star goes on past the end of the pole (along it), so being late shows
+      const bx=u*u*tipX+2*u*q*cx+q*q*hx, by=u*u*tipY+2*u*q*cy+q*q*hy, tx=hx-cx, ty=hy-cy, tl=Math.hypot(tx,ty)||1, over=p>1?(p-1)*Math.hypot(hx-tipX,hy-tipY):0;
+      target(hx,hy); drawStar(bx+tx/tl*over,by+ty/tl*over,9,p); }
     return; }
   line(tipX,tipY,tipX-Math.cos(1.2)*L,tipY-Math.sin(1.2)*L,null,null,true);
 }
