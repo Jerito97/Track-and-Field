@@ -1,4 +1,4 @@
-// Hammer throw, in three parts: three turns tapping the green buttons as in the 100 m (each good tap spins faster, a
+// Hammer throw, in three parts: three and a half turns tapping the green buttons as in the 100 m (each good tap spins faster, a
 // wrong one slows down, not tapping slowly loses speed); the last, fast turn: RUSH_T s to tap as fast as you can (any
 // button), each tap adding to the throw; then aim, as with the javelin: hold both buttons and a star runs along a bar
 // over the athlete; let go when it reaches the circle at its end. Far too early the ball hits the cage's net, too late
@@ -19,7 +19,7 @@ export const HAM_CIRCLE=1.07, HAM_CAGE=3.2;
 const SH=1.42, ARM=.7;
 // turning speed (radians/s): slowest, and what each m/s of tapping speed adds
 const W_MIN=TAU/1.25, W_PER_V=.7;
-const TURNS=3;
+const TURNS=4;  // lowest points before the fast turn: 3 turns and a half (it starts on the high side)
 // the last turn: how long (s), what each tap adds to the throw (share), and the most it can add
 const RUSH_T=1.5, RUSH_TAP=.014, RUSH_MAX=.3;
 // then a moment with nothing to press before aiming (s); a hold shorter than BLIP s (fingers left over from the fast
