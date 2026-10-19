@@ -64,7 +64,7 @@ export function showMenu(){
   const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
     +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="${TOUR}" aria-pressed="${tour}"><canvas data-pict="${TOUR}"></canvas><b>TORNEO</b></button>`;
   showOv(`<div class="mm">
-  <header class="m-top"><div class="m-logo"><span class="m-ic">${ICON.medal}</span>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
+  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
     <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
