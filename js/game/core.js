@@ -25,7 +25,7 @@ export function resetAttempt(){
   const ev=S.ev;
   Object.assign(S,{t:0,x:0,y:0,v:0,legP:0,cue:null,last:null,streak:0,pend:null,rot:0,pose:null,
     hk:0,armed:false,air:0,airT:.4,knocked:new Set(),stumble:0,finished:false,final:null,after:0,nextBoth:0,smoke:null,
-    act:null,jv:null,landX:null,print:null,bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,camY:0,dip:0});
+    act:null,jv:null,landX:null,print:null,bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,camY:0,dip:0});
   S.cam=S.x-camLead();
 }
 // camera zoom (logical px per metre): sprints, field events
@@ -53,6 +53,9 @@ export const gH=v=>1.0/(1+v/6)+2.0*Math.exp(-v/3);
 export const COMBO_K=2.1; // boost of a perfect combo, in single-tap units
 export const comboQ=dt=>clamp(1+(.55-dt)*1.1,.25,1.25);
 export function bad(){ S.v*=.86; tone(120,.12,'sawtooth',.05); }
+// hurdles: a wrong number only costs a little at once; the rest of the 14% only if that hurdle gets hit (sprint.js)
+export const HURDLE_SLIP=.97;
+export function badNum(){ S.v*=HURDLE_SLIP; S.slips=(S.slips||0)+1; tone(120,.12,'sawtooth',.05); }
 // recovery after a mistake: below the best speed of this run, good taps add more (the further below, the more), up to
 // that best speed and never past it; once back there it's the normal gain again
 export function speedUp(gain){

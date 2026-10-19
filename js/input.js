@@ -1,7 +1,7 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
-import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,speedUp,startRun} from './game/core.js';
+import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,javThrow} from './game/field.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -31,7 +31,7 @@ export function onTap(pos){
     // the three numbers are one combo: no speed per tap, one boost when the 3 lands, bigger the faster 1-2-3 went
     if(pos===want){ if(cue.next===0) cue.t0=S.clock; addRing(pos); tone(440+cue.next*110,.05,'triangle',.04); cue.next++;
       if(cue.next>=3){ const q=comboQ(S.clock-cue.t0); speedUp(COMBO_K*gH(S.v)*q); judge(Math.min(1,q)); S.armed=true; S.cue=null; } }
-    else { addX(pos); bad(); }
+    else { addX(pos); badNum(); }
   } else if(cue.type==='both'){
     if(cue.hold) return;  // pole vault: held, not tapped (see holdStart)
     if(pos==='B'){ addRing('L'); addRing('R'); bothHit(); return; }

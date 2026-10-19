@@ -6,7 +6,7 @@ import {ATH,S} from '../state.js';
 import {rec} from '../storage.js';
 import {endEvent} from '../ui/screens.js';
 import {clamp,rand} from '../utils.js';
-import {bothCue,judge,numCue,pop,sideCue} from './core.js';
+import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
 
 // seconds without a correct tap before slowing down, and how fast (fraction of speed per second)
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
@@ -45,8 +45,9 @@ export function updateSprint(dt){
     if(S.air>0){ S.air-=dt; S.y=S.air>0?1.05*Math.sin(Math.PI*(1-S.air/S.airT)):0; if(S.air<=0){ S.y=0; S.hk++; S.v*=.93; } }
     else if(S.hk<HURDLES.length&&S.stumble<=0){
       const h=HURDLES[S.hk], take=clamp(.2*S.v,1.6,2.6);
-      if(S.armed&&S.x>=h-take){ S.armed=false; S.airT=clamp(3.4/Math.max(S.v,4),.26,.6); S.air=S.airT; tone(600,.05,'triangle',.04); if(S.hk+1<HURDLES.length) numCue(); }
-      else if(!S.armed&&S.x>=h-.35){ S.knocked.add(S.hk); S.v*=.7; S.stumble=.35; S.hk++; S.cue=null; S.armed=false; noise(.2,.3); tone(110,.18,'square',.05);
+      if(S.armed&&S.x>=h-take){ S.armed=false; S.slips=0; S.airT=clamp(3.4/Math.max(S.v,4),.26,.6); S.air=S.airT; tone(600,.05,'triangle',.04); if(S.hk+1<HURDLES.length) numCue(); }
+      // hit: the rest of each wrong number's 14% (see badNum), and the knock itself
+      else if(!S.armed&&S.x>=h-.35){ S.knocked.add(S.hk); S.v*=Math.pow(.86/HURDLE_SLIP,S.slips||0)*.7; S.slips=0; S.stumble=.35; S.hk++; S.cue=null; S.armed=false; noise(.2,.3); tone(110,.18,'square',.05);
         pop('¡UY!',{col:'#ff5a3c',dur:.8}); S.renum=.35; }
     }
     if(S.renum>0){ S.renum-=dt; if(S.renum<=0&&S.hk<HURDLES.length&&!S.cue) numCue(); }
