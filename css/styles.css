@@ -274,7 +274,9 @@ tr.me td{background:var(--red)}
 .m-art.img::before{display:none}
 .m-art .m-th{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .m-ev .m-th{flex:1;min-height:0;width:100%;object-fit:cover;display:block}
-.m-ev:has(.m-th){background:#3d8fe0}
+.m-ev:has(.m-th){background:#14284f}  /* same as its label, so no other colour peeks out at the rounded corners */
+.m-ev.on:has(.m-th){background:var(--red-d)}
+.m-ev.tour:has(.m-th){background:#d89a0c}
 .m-ev.on .m-th{filter:saturate(1.15)}
 /* players: menu footer strip, list and profiles */
 .m-people{flex:1 1 auto;min-width:0;font:inherit;color:#fff;background:none;border:0;border-left:1px solid var(--edge);padding:0 0 0 clamp(8px,2vw,22px);cursor:pointer;text-align:left;display:flex;flex-direction:column;justify-content:center;align-self:stretch}
