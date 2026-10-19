@@ -18,7 +18,7 @@ import {updateRemote} from '../online.js';
 import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
-import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
+import {ATH,buildAthletes,G,ME,S,screen,setS,setScreen} from '../state.js';
 import {COLORS,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
@@ -226,16 +226,24 @@ export function endEvent(vals){
   const ev=S.ev; G.res[ev.id]=vals;
   // your result goes to your player's history, top 5 and records
   const mine=vals[0], rows=sortRows(ev,vals), mi=rows.findIndex(r=>r.a.me);
-  // world record: better than the first of the world top 10 (or, without it, the best on this device)
-  const top=cachedTop(ev.id), wr=top?(top[0]?top[0].mark:null):worldRec(ev)?.v, sprint=ev.type==='sprint';
-  const world=mine!=null&&(wr==null||(sprint?mine<wr:mine>wr));
+  const sprint=ev.type==='sprint';
   const newRec=recordEvent(ev,mine,mine==null?null:place(rows,mi,r=>fmt(ev,r.v)),ATH.length,G.mode);
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   if(G.mode==='online') finishOnline(mine);
-  if(newRec) syncMarks();
-  const results=()=>showOv(table(ev.tag,world?'¡Récord mundial!':newRec?'¡Nuevo récord personal!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
-  if(world) startLap(ev,mine,results); else results();
+  const results=world=>showOv(table(ev.tag,world?'¡Récord mundial!':newRec?'¡Nuevo récord personal!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
+  // world record: only a new personal best can be one, and only if it beats everyone else in the world top 10, as the
+  // server has it right now (asked before sending your mark; a moment at most). Without the board (no connection and
+  // never seen) it isn't one; events being tried out have no board
+  if(!newRec||mine==null||ev.beta){ results(false); if(newRec) syncMarks(); return; }
+  const me=player()?.id, wait=new Promise(r=>setTimeout(()=>r(cachedTop(ev.id)),2500));
+  Promise.race([loadTop(ev.id,true).catch(()=>cachedTop(ev.id)),wait]).then(top=>{
+    const others=(top||[]).filter(t=>t.player_id!==me).map(t=>t.mark), wr=others.length?(sprint?Math.min(...others):Math.max(...others)):null;
+    const world=!!top&&(wr==null||(sprint?mine<wr:mine>wr));
+    syncMarks();
+    if(!(screen==='play'&&S&&S.ev===ev)) return;  // left the game meanwhile
+    if(world) startLap(ev,mine,()=>results(true)); else results(false);
+  });
 }
 export function afterResults(){
   const ev=S.ev;
