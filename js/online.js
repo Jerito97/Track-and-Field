@@ -30,3 +30,6 @@ function remember(code){ const l=myTournaments().filter(c=>c!==code); l.unshift(
 export function forget(code){ store.set(KEY(),myTournaments().filter(c=>c!==code)); }
 // link that opens the game straight into the tournament
 export const inviteLink=code=>{ const u=new URL(location.href); u.search='?t='+code; u.hash=''; return u.href; };
+// world top 10 of an event, and your marks for it
+export const getTop=ev=>call('GET',null,'?top='+encodeURIComponent(ev));
+export const sendMarks=list=>call('POST',{action:'marks',list,token:tok()});

@@ -7,8 +7,11 @@
 //   POST {action:'create', token, name, events}             -> {code}
 //   POST {action:'join', token, code}                       -> {ok}
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
+//   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date}, ...10]}
+//   POST {action:'marks', token, list:[{ev,mark,date}]}     -> {ok}   (your marks, for the world top 10)
 // Names are unique (ignoring case and accents); each player has a 4-6 digit code (stored as a salted scrypt hash).
 // Login returns a token the game keeps; tournament actions need it, so nobody can play under someone else's name.
+// World top 10 per event: each player's best mark (one row per player and event), with the day it was made.
 // Everyone plays each tournament event once, whenever they want; standings are computed by the game.
 // The database URL comes from the Neon integration (DATABASE_URL); tables are created on first use.
 import {Buffer} from 'node:buffer';
@@ -16,6 +19,7 @@ import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node
 import {neon} from '@neondatabase/serverless';
 
 const EVENTS=['100','lj','110h','pv','jav'];
+const SPRINT=['100','110h'];  // lower is better
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
 const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
@@ -36,6 +40,8 @@ function db(){
     await sql`create table if not exists results(code text not null references tournaments(code) on delete cascade,
       player_id text not null, ev text not null, mark double precision, created_at timestamptz not null default now(),
       primary key(code,player_id,ev))`;
+    await sql`create table if not exists marks(player_id text not null references users(id) on delete cascade, ev text not null,
+      mark double precision not null, made_at timestamptz not null default now(), primary key(player_id,ev))`;
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }
@@ -67,6 +73,14 @@ async function view(sql,code){
     from entries e left join users u on u.id=e.player_id where e.code=${code} order by e.joined_at`;
   const results=await sql`select player_id,ev,mark,created_at from results where code=${code}`;
   return {tournament:{...t,events:t.events.split(',')},entries,results};
+}
+
+const okMark=(ev,m)=>EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
+async function top(sql,ev){
+  const rows=SPRINT.includes(ev)
+    ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
+    :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
+  return {top:rows};
 }
 
 async function act(sql,b){
@@ -119,6 +133,19 @@ async function act(sql,b){
       }
       throw new Bad(500,'No se pudo generar un código.');
     }
+    case 'marks': {
+      // only a better mark replaces the one kept; the date is the day it was made (sent by the game, never in the future)
+      const u=await auth(sql,b.token), list=(Array.isArray(b.list)?b.list:[]).slice(0,20);
+      for(const it of list){
+        const ev=String(it?.ev||''), mark=Number(it?.mark); if(!okMark(ev,mark)) continue;
+        const d=new Date(Number(it.date)||Date.now()), when=(d>new Date()||d<new Date('2025-01-01')?new Date():d).toISOString();
+        if(SPRINT.includes(ev)) await sql`insert into marks(player_id,ev,mark,made_at) values(${u.id},${ev},${mark},${when})
+          on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark<marks.mark`;
+        else await sql`insert into marks(player_id,ev,mark,made_at) values(${u.id},${ev},${mark},${when})
+          on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark>marks.mark`;
+      }
+      return {ok:true};
+    }
     case 'join': case 'result': {
       const u=await auth(sql,b.token), code=cleanCode(b.code); if(!code) throw new Bad(400,'Falta el código.');
       const t=(await sql`select events from tournaments where code=${code}`)[0]; if(!t) throw new Bad(404,'No existe ese torneo.');
@@ -146,6 +173,7 @@ export default async function handler(req,res){
   try{
     const sql=await db();
     if(req.method==='GET'){
+      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev)); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');
       return res.status(200).json(v);

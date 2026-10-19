@@ -7,6 +7,7 @@ import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
+import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
 import {finishOnline,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
@@ -48,8 +49,8 @@ const ICON={
   globe:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
   snd:on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on?'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg>`
 };
-// world record: best of any player on this device, with who set it
-const wrText=ev=>{ const w=worldRec(ev); return w?`${fmt(ev,w.v)} <small>${esc(w.name)}</small>`:'—'; };
+// world record: first of the world top 10 (server); until it's loaded, or without connection, the best on this device
+const wrText=ev=>{ const t=cachedTop(ev.id), w=t?(t[0]&&{v:t[0].mark,name:t[0].name}):worldRec(ev); return w?`${fmt(ev,w.v)} <small>${esc(w.name)}</small>`:'—'; };
 export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 export function showMenu(){
   if(!player()){ showAccount('first'); return; }
@@ -58,7 +59,7 @@ export function showMenu(){
   const tour=menuSel===TOUR, ev=EVENTS[menuSel];
   const stats=tour
     ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
-    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b>${wrText(ev)}</b></div>`;
+    :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b id="wr">${wrText(ev)}</b></div>`;
   // events marked nueva:true in config.js (invented ones) get a small NUEVA tag
   const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
     +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="${TOUR}" aria-pressed="${tour}"><canvas data-pict="${TOUR}"></canvas><b>TORNEO</b></button>`;
@@ -67,7 +68,7 @@ export function showMenu(){
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
     <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button><button class="m-how" data-act="howto">Cómo se juega</button>'}</div></div>
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button><button class="m-how" data-act="howto">Cómo se juega</button>'}<button class="m-how" data-act="board" data-i="${tour?0:menuSel}">Top 10</button></div></div>
     <div class="m-stats">${stats}</div>
     ${tour?'':`<div class="m-help" id="help" hidden><p>${ev.help}</p><button class="m-how" data-act="howto">Cerrar</button></div>`}
   </section>
@@ -77,6 +78,7 @@ export function showMenu(){
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
   initCarousel();
+  if(!tour) syncMarks().then(()=>loadTop(ev.id)).then(()=>{ const el=$('wr'); if(el&&EVENTS[menuSel]===ev) el.innerHTML=wrText(ev); },()=>{});
 }
 // carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
 let evScroll=0;
@@ -130,7 +132,7 @@ export function showEventCard(){
   showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/${EVENTS.length}`:''}</h2></div><div class="body">
     <div class="row2"><canvas class="pict" data-pict="${G.evIdx}"></canvas>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
-        <div class="wr"><span>Récord mundial</span><b>${wrText(ev)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
+        <div class="wr"><span>Récord mundial</span><b id="wr">${wrText(ev)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
         <div class="menu"><button class="mi play" data-act="play" data-focus>Jugar</button><button class="mi" data-act="help">Instrucciones</button>${tour?'':'<button class="mi" data-act="menu">Otra prueba</button>'}</div>
       </div></div>
     <p class="help" id="help" hidden>${ev.help}</p>
@@ -157,6 +159,7 @@ export function endEvent(vals){
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   if(G.mode==='online') finishOnline(mine);
+  if(newRec) syncMarks();
   showOv(table(ev.tag,newRec?'¡Nuevo récord!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
 }
 export function afterResults(){
@@ -191,6 +194,7 @@ OV.addEventListener('click',e=>{
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
   else if(a==='oshare') onShare(b.dataset.code);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
+  else if(a==='board') showBoard(+b.dataset.i);
   else if(a==='profile') showProfile();
   else if(a==='players') showPlayers();
   else if(a==='newplayer') showAccount('add');
