@@ -334,3 +334,4 @@ tr.me td{background:var(--red)}
 .o-histbtn{margin-top:auto}
 .o-np{color:#aab8d8!important}
 .o-close[data-sure]{background:var(--red);color:#fff;box-shadow:0 5px 0 var(--red-d)}
+.m-art .m-th:not(.on){visibility:hidden}
