@@ -1,5 +1,5 @@
 // HUD: header bar, cue buttons, popups, meters
-import {ctx,LW} from '../canvas.js';
+import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {CUEPOS,NUMPOS} from '../game/core.js';
 import {ME,S} from '../state.js';
@@ -13,6 +13,7 @@ export function drawHud(V){
   if(ev.type==='sprint'){ const t=S.finished?S.final:S.t; ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(LW-62,2,58,16); ctx.fill(); ctx.stroke(); txt((t||0).toFixed(2),LW-33,10.5,'#fff',14,{stroke:null}); }
   else txt(`RONDA ${S.round}/3`,LW-8,11,'#fff',14,{align:'right',stroke:null});
   if(!V.replay&&S.cue) drawCue(S.cue);
+  if(S.demo&&!V.replay) drawDemo();
   if(S.phase==='ready'&&!V.replay){ cueCircle(LW/2,150,'#ff4d2e',''); txt('TOCÁ PARA EMPEZAR',LW/2,196,'#fff',16); }
   S.fx.forEach(f=>{ if(f.k==='ring'){ const k=f.t/.45; ctx.strokeStyle=`rgba(255,255,255,${1-k})`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(f.x,f.y,28+k*16,0,Math.PI*2); ctx.stroke(); }
     else if(f.k==='x'){ const k=f.t/.45; ctx.save(); ctx.globalAlpha=1-k; ctx.translate(f.x,f.y); ctx.strokeStyle=INK; ctx.lineWidth=9; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(-14,-14); ctx.lineTo(14,14); ctx.moveTo(14,-14); ctx.lineTo(-14,14); ctx.stroke(); ctx.strokeStyle='#e8262d'; ctx.lineWidth=5.5; ctx.stroke(); ctx.restore(); } });
@@ -58,4 +59,20 @@ export function drawCue(cue){
     ctx.save(); ctx.setLineDash([7,6]); ctx.lineCap='round';
     [LW/3,LW*2/3].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,58); ctx.lineTo(x,160); ctx.strokeStyle='rgba(14,26,52,.7)'; ctx.lineWidth=5; ctx.stroke(); ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.stroke(); }); ctx.restore();
     cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=NUMPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } }); }
+}
+// the tutorial: a finger on each tap (and on both buttons while holding), what to do now at the bottom, how to leave
+function drawDemo(){
+  const finger=(x,y,k)=>{ ctx.save(); ctx.globalAlpha=k; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.strokeStyle=INK; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(x+10,y+12,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(x+4,y+14,13,34,6); ctx.fill(); ctx.stroke(); ctx.restore(); };
+  S.fingers.forEach(f=>finger(f.x,f.y,1-f.t/.35));
+  if(S.held2) [CUEPOS.L(),CUEPOS.R()].forEach(([x,y])=>finger(x,y,1));
+  txt('CÓMO SE JUEGA · TOCÁ LA PANTALLA PARA SALIR',LW/2,32,'#ffd23a',12,{lw:3});
+  const t=S.demoCaption; if(!t) return;
+  // as big as fits in the width
+  let size=18; ctx.font=`${size}px Bangers, Impact, sans-serif`; while(size>10&&ctx.measureText(t).width>LW-44){ size--; ctx.font=`${size}px Bangers, Impact, sans-serif`; }
+  const w=Math.min(LW-12,ctx.measureText(t).width+30), y=LH-48;
+  ctx.fillStyle='rgba(14,26,52,.88)'; ctx.beginPath(); ctx.roundRect((LW-w)/2,y-16,w,32,10); ctx.fill();
+  ctx.strokeStyle='#ffd23a'; ctx.lineWidth=2; ctx.stroke();
+  txt(t,LW/2,y,'#fff',size,{lw:3});
 }

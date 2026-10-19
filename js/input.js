@@ -3,6 +3,7 @@ import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
 import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,footTap,javThrow} from './game/field.js';
+import {demoTap,endDemo} from './game/demo.js';
 import {hamRush} from './game/hammer.js';
 import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
@@ -16,6 +17,8 @@ export function zoneOf(clientX,three){ const f=clientX/SW;
 export function onTap(pos){
   unlockAudio();
   if(screen!=='play'||!S) return;
+  // the tutorial plays itself: a tap of the player's own leaves it
+  if(S.demo&&!demoTap){ endDemo(); return; }
   if(S.replay){ endReplay(); return; }
   const ph=S.phase;
   if(ph==='podium'){ podiumNext(); return; }

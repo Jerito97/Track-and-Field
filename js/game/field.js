@@ -233,7 +233,7 @@ export function landed(mark){
   else {
     // the record is only saved when the event ends, so earlier attempts of this event count too
     const prev=S.marks[0].slice(0,-1).filter(m=>m!=null), best=Math.max(rec[ev.id]??-Infinity,...prev);
-    const isRec=mark>best;
+    const isRec=mark>best&&!S.demo;
     pop(mark.toFixed(2)+' m',{dur:2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(!prev.length||mark>Math.max(...prev)?'¡GENIAL!':'')});
     cheer();
   }

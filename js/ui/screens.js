@@ -7,6 +7,7 @@ import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {hamPause} from '../game/hammer.js';
 import {shotPause} from '../game/shot.js';
+import {startDemo} from '../game/demo.js';
 import {startLap} from '../game/lap.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
@@ -72,7 +73,7 @@ function heroArt(){ const k=thumbKey(menuSel);
     +(THUMBS[k]?'':`<canvas data-pict="${menuSel}"></canvas>`); }
 function heroInfo(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return `<h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)}</div>`; }
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)+'<button class="m-rec" data-act="demo">Cómo se juega</button>'}</div>`; }
 function heroStats(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return tour
     ?`<div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
@@ -308,6 +309,7 @@ OV.addEventListener('click',e=>{
   else if(a==='rename') onRename();
   else if(a==='scroll'){ const row=OV.querySelector('.m-evs'); row.scrollBy({left:+b.dataset.d*row.clientWidth*.8,behavior:'smooth'}); }
   else if(a==='sel') selectEvent(+b.dataset.i);
+  else if(a==='demo'){ const i=menuSel; buildAthletes(true); newEvent(i); startPlay(); startDemo(()=>showEvents()); }  // the tutorial: it plays itself, then back here
   else if(a==='go'){ G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); }
   else if(a==='events') showEvents();
   else if(a==='tours'){ if(player().token) showOnline(); else showAccount('protect'); }  // tournaments: only with friends now

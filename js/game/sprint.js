@@ -1,6 +1,7 @@
 // 100 m and 110 m hurdles
 import {cheer,noise,tone} from '../audio.js';
 import {HURDLES} from '../config.js';
+import {endDemo} from './demo.js';
 import {POSE,runPose} from '../poses.js';
 import {ATH,S} from '../state.js';
 import {rec} from '../storage.js';
@@ -93,4 +94,5 @@ export function rivalStep(r,dt){
     else { const i=HURDLES.findIndex(h=>h>r.x); if(i>=0&&!r.knocked.has(i)&&HURDLES[i]-r.x<clamp(.2*v,1.6,2.6)){ if(Math.random()<.5*(1.05-r.a.sk)){ r.knocked.add(i); r.slow=.6; r.tripT=.35; } else { r.airT=clamp(3.4/Math.max(v,4),.26,.6); r.air=r.airT; } } }
   }
 }
-export function finishSprintEvent(){ const ev=S.ev; const res=ATH.map(a=>{ if(a.me) return S.final; const r=S.rivals.find(r=>r.a===a); return r.final!=null?r.final:Math.ceil((r.t+(ev.dist-r.x)/Math.max(r.vmax,1))*100)/100; }); endEvent(res); }
+export function finishSprintEvent(){ if(S.demo){ endDemo(); return; }  // the tutorial ends at the line
+  const ev=S.ev; const res=ATH.map(a=>{ if(a.me) return S.final; const r=S.rivals.find(r=>r.a===a); return r.final!=null?r.final:Math.ceil((r.t+(ev.dist-r.x)/Math.max(r.vmax,1))*100)/100; }); endEvent(res); }

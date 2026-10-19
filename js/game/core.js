@@ -7,6 +7,7 @@ import {ATH,S,setS,setScreen} from '../state.js';
 import {loadTop} from '../ui/board.js';
 import {hideOv} from '../ui/screens.js';
 import {clamp,rand} from '../utils.js';
+import {demoStep} from './demo.js';
 import {updateField} from './field.js';
 import {snap,updateReplay} from './replay.js';
 import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js';
@@ -90,6 +91,7 @@ export function update(dt){
   if(S.cue) S.cue.t+=dt;
   if(S.pend&&S.clock-S.pend.t>.35){ S.pend=null; }
   if(S.replay){ updateReplay(dt); return; }
+  if(S.demo) demoStep(dt);
   if(S.phase==='wait'){ coast(dt); if(S.ev.type==='sprint'&&S.rivals) S.rivals.forEach(r=>rivalStep(r,dt)); S.wait-=dt; if(S.wait<=0){ const n=S.next; S.next=null; S.phase='idle'; n&&n(); } }
   else if(S.ev.type==='sprint') updateSprint(dt);
   else updateField(dt);

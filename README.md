@@ -67,6 +67,10 @@ js/
 - **Zoom:** carreras a 29 px por metro (atletas de 72 px), pruebas de campo a 41 px por metro (`SPRINT_PPM` y `FIELD_PPM` en `js/game/core.js`).
 - **Participantes:** 6 por prueba, vos y 5 rivales sorteados entre los otros atletas.
 
+## Cómo se juega (tutoriales)
+
+En la pantalla de Pruebas, cada prueba tiene **Cómo se juega** (`js/game/demo.js`): la prueba se juega sola un intento, como un buen jugador, con un cartel abajo que dice qué hacer en cada parte y un dedito que marca cada toque (y los dos botones mientras se mantienen). No guarda marcas ni historial; tocar la pantalla (o cualquier tecla) vuelve a Pruebas, y termina sola al final del intento.
+
 ## Menú
 
 El menú principal tiene tres modos: **Pruebas** (la prueba elegida en grande y el carrusel de pruebas, que se desliza con el dedo o las flechas rojas), **Torneos** (con amigos o contra la máquina) y **Supervivencia**. Para agregar una prueba alcanza con sumarla a `EVENTS` en `js/config.js`; con `nueva:true` su tarjeta muestra la etiqueta NUEVA. Cada prueba tiene su ilustración en `assets/thumbs/` (`<id>.jpg` arriba, `<id>-sm.jpg` en la tarjeta; en `THUMBS` de `js/ui/screens.js` va dónde está el atleta para que el recorte no lo corte). Una prueba sin ilustración muestra el stickman dibujado.
