@@ -43,14 +43,14 @@ export function updateSprint(dt){
   else { S.x+=S.v*dt; S.legP+=S.v*dt*2.4; }
   if(ev.hurdles){
     if(S.air>0){ S.air-=dt; S.y=S.air>0?1.05*Math.sin(Math.PI*(1-S.air/S.airT)):0; if(S.air<=0){ S.y=0; S.hk++; S.v*=.93; } }
-    else if(S.hk<10&&S.stumble<=0){
+    else if(S.hk<HURDLES.length&&S.stumble<=0){
       const h=HURDLES[S.hk], take=clamp(.2*S.v,1.6,2.6);
-      if(S.armed&&S.x>=h-take){ S.armed=false; S.airT=clamp(3.4/Math.max(S.v,4),.26,.6); S.air=S.airT; tone(600,.05,'triangle',.04); if(S.hk+1<10) numCue(); }
+      if(S.armed&&S.x>=h-take){ S.armed=false; S.airT=clamp(3.4/Math.max(S.v,4),.26,.6); S.air=S.airT; tone(600,.05,'triangle',.04); if(S.hk+1<HURDLES.length) numCue(); }
       else if(!S.armed&&S.x>=h-.35){ S.knocked.add(S.hk); S.v*=.7; S.stumble=.35; S.hk++; S.cue=null; S.armed=false; noise(.2,.3); tone(110,.18,'square',.05);
         pop('¡UY!',{col:'#ff5a3c',dur:.8}); S.renum=.35; }
     }
-    if(S.renum>0){ S.renum-=dt; if(S.renum<=0&&S.hk<10&&!S.cue) numCue(); }
-    if(S.hk>=10&&!S.finished&&!S.cue&&!S.dipCued&&S.air<=0&&S.stumble<=0) sideCue();
+    if(S.renum>0){ S.renum-=dt; if(S.renum<=0&&S.hk<HURDLES.length&&!S.cue) numCue(); }
+    if(S.hk>=HURDLES.length&&!S.finished&&!S.cue&&!S.dipCued&&S.air<=0&&S.stumble<=0) sideCue();
   }
   // final: red buttons = head dip at the line (no extra speed)
   if(!S.finished&&!S.dipCued&&S.x>=ev.dist-8&&S.air<=0){ S.dipCued=true; bothCue(); }
