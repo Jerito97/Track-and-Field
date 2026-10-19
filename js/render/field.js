@@ -17,7 +17,8 @@ export function drawField(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s, sh=V.camY*s;
   const GY=264+sh;
   const excite=(S.phase==='act'||S.phase==='post'||V.replay)?1:.35;
-  const sky=ctx.createLinearGradient(0,0,0,LH); sky.addColorStop(0,'#3f9be6'); sky.addColorStop(1,'#8fcdf5'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
+  // sky above the grandstand picture (seen when the camera rises): ends in the colour of the picture's top edge
+  const sky=ctx.createLinearGradient(0,sh-260,0,sh); sky.addColorStop(0,'#4aa6e8'); sky.addColorStop(1,'#ade9f6'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
   if(sh>2){ ctx.fillStyle='#fff'; for(let i=0;i<5;i++){ const W2=LW+200, cx=((i*173-V.cam*2)%W2+W2)%W2-100, cy=50+i*26-sh*.15; ctx.beginPath(); ctx.ellipse(cx,cy,34,10,0,0,Math.PI*2); ctx.ellipse(cx+18,cy-6,20,10,0,0,Math.PI*2); ctx.fill(); } }
   const stTop=24+sh, stBot=170+sh;
   // grandstand picture (sky, roof, crowd, barrier wall), slower than the field; without it, the stands drawn in code
@@ -125,7 +126,10 @@ export function drawPole(V,X,GY,fig){
     line(hx-Math.cos(ang)*back,hy+Math.sin(ang)*back,fx,fy);
     if(!V.replay&&V.meter&&V.meter.k==='pole'&&V.meter.p>0){ target(fx,fy); drawStar(hx+(fx-hx)*V.meter.p,hy+(fy-hy)*V.meter.p,8,V.meter.p); }
     return; }
-  if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, bend=a.stage==='plant'?18:Math.max(0,18-(V.y||0)*4), cx=mx-bend*.6, cy=my+bend; line(tipX,tipY,hx,hy,cx,cy,true);
+  // planted and loaded: the pole bows forward and up, away from the vaulter (the athlete hangs below the curve)
+  if(a.stage==='plant'||a.stage==='rise'){ const mx=(hx+tipX)/2, my=(hy+tipY)/2, dx=hx-tipX, dy=hy-tipY, dl=Math.hypot(dx,dy)||1,
+      // most bent as the rise starts, straightening as it lifts the vaulter
+      bend=dl*(a.stage==='plant'?.22:.36*clamp(1-(V.y||0)/6,0,1)), cx=mx-dy/dl*bend, cy=my+dx/dl*bend; line(tipX,tipY,hx,hy,cx,cy,true);
     if(!V.replay&&V.meter&&V.meter.k==='rise'){ const p=Math.min(V.meter.hit!=null?V.meter.hit:V.meter.p,1.25), q=Math.min(p,1), u=1-q;
       const bx=u*u*tipX+2*u*q*cx+q*q*hx, by=u*u*tipY+2*u*q*cy+q*q*hy; target(hx,hy); drawStar(bx+(p>1?(p-1)*30:0),by-(p>1?(p-1)*30:0),9,p); }
     return; }
