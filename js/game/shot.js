@@ -11,21 +11,26 @@ import {judge,sideCue} from './core.js';
 import {landed,qPole} from './field.js';
 
 // tapping time (s), then the pause before the needle
-const POWER_T=2.2, GAP=.5;
-// the needle: degrees per second, the top (no mark if it gets there), the best angle and the green around it
-export const SP_RATE=55, SP_MAX=80, SP_BEST=40, SP_GREEN=6;
+const POWER_T=3.7, GAP=.5;
+// the needle: degrees per second, the top (no mark if it gets there), the best angle, the green (best) and orange (good)
+// either side of it
+export const SP_RATE=70, SP_MAX=80, SP_BEST=40, SP_GREEN=1, SP_ORANGE=3;
 // the star: seconds to reach the circle; past LATE (of the way) = out of the circle
-const STAR_T=.45, LATE=1.25, LAG=.03;
+const STAR_T=.33, LATE=1.25, LAG=.03;
 // a hold shorter than BLIP s (fingers left over from the taps) doesn't count
 const BLIP=.12;
 // not tapping: as in the 100 m
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
 // throw length (m) per m/s of tapping speed, at the best angle and a perfect release
-const SP_K=1.9;
+const SP_K=1.55;
 // the athlete glides across the circle while tapping (hip from FROM to TO, m from the circle's centre)
 const FROM=-.6, TO=.35;
-// how good an angle (degrees) is: 1 at SP_BEST, nothing at 0 and at twice it
-export const angleQ=d=>Math.max(0,Math.sin(Math.PI*clamp(d/(2*SP_BEST),0,1)));
+// how good an angle (degrees) is: 1 at SP_BEST, a little less across the green, then the orange, then less and less,
+// nothing at 0 and at twice it
+export const angleQ=d=>{ const e=Math.abs(d-SP_BEST);
+  if(e<=SP_GREEN+.5) return 1-.07*e/(SP_GREEN+.5);
+  if(e<=SP_ORANGE+.5) return .88-.08*(e-SP_GREEN-.5)/(SP_ORANGE-SP_GREEN);
+  return Math.min(.75,.8*Math.max(0,Math.sin(Math.PI*clamp(d/(2*SP_BEST),0,1)))); };
 
 // crouched with the shot at the neck, sliding back to front; then the put: arm straight out at the release angle
 const GLIDE=k=>({kind:'spglide',hip:.62+.06*k,lean:.55-.35*k,legs:[{a:.5+.3*k,b:1.1-.5*k},{a:-.5,b:.6}],arms:[{a:-.35,b:2.7},{a:.9,b:.6}]});

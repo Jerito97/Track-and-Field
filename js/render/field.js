@@ -8,7 +8,7 @@ import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
 import {TJ_PIT,TJ_SAND} from '../game/field.js';
 import {HAM_CAGE,HAM_CIRCLE,hamBall,hamHands} from '../game/hammer.js';
-import {SP_BEST,SP_GREEN,SP_MAX} from '../game/shot.js';
+import {SP_BEST,SP_GREEN,SP_MAX,SP_ORANGE} from '../game/shot.js';
 import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -215,16 +215,16 @@ function spDraw(V,X,GY,fig){
   else if(fig&&fig.hand) ball(fig.hand[0]+2,fig.hand[1]-2);
   // the angle gauge: the needle rising (spang), then fixed where it was caught (sp), a moment after letting go too
   const m=V.meter; if(V.replay||!m||(m.k!=='sp'&&m.k!=='spang')||V.jv&&V.jv.t>.3) return;
-  const ox=X(V.x)+.9*s, oy=GY-1.2*s, rr=62, deg=d=>d*Math.PI/180, at=d=>[ox+Math.cos(deg(d))*rr,oy-Math.sin(deg(d))*rr];
+  const ox=X(V.x)+.9*s, oy=GY-1.2*s, rr=88, deg=d=>d*Math.PI/180, at=d=>[ox+Math.cos(deg(d))*rr,oy-Math.sin(deg(d))*rr];
   ctx.save(); ctx.lineCap='round';
   const arc=(d0,d1,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.arc(ox,oy,rr,-deg(d1),-deg(d0)); ctx.stroke(); };
-  arc(0,SP_MAX,INK,14); arc(0,SP_MAX,'#fff',9); arc(SP_BEST-SP_GREEN,SP_BEST+SP_GREEN,'#2fd166',9); arc(SP_MAX-4,SP_MAX,'#e8262d',9);
+  ctx.lineCap='butt'; arc(0,SP_MAX,INK,18); arc(0,SP_MAX,'#fff',12); arc(SP_BEST-SP_ORANGE-.5,SP_BEST+SP_ORANGE+.5,'#ff8a1e',12); arc(SP_BEST-SP_GREEN-.5,SP_BEST+SP_GREEN+.5,'#2fd166',12); arc(SP_MAX-4,SP_MAX,'#e8262d',12);
   [0,20,40,60,80].forEach(d=>{ const [x,y]=at(d); txt(d+'°',ox+(x-ox)*1.32,oy+(y-oy)*1.32,'#fff',11); });
   const d=m.k==='sp'?m.ang:Math.min(m.hit??m.p,SP_MAX), [nx,ny]=at(d);
   ctx.strokeStyle=INK; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(nx,ny); ctx.stroke(); ctx.strokeStyle='#ffd23a'; ctx.lineWidth=3; ctx.stroke();
   ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill(); ctx.restore();
   // then the release, as in the hammer: a still bar over the athlete, the star running to the circle at its end
-  if(m.k==='sp'){ const cx=X(V.x), y=GY-3.6*s, x0=cx-64, x1=cx+64, p=Math.min(m.hit??m.p,1.25);
+  if(m.k==='sp'){ const cx=X(V.x), y=GY-4.5*s, x0=cx-64, x1=cx+64, p=Math.min(m.hit??m.p,1.25);
     ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=11; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
     ctx.strokeStyle='#fff'; ctx.lineWidth=7; ctx.stroke(); ctx.strokeStyle='rgba(47,209,102,.9)'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+(x1-x0)*Math.min(1,p),y); ctx.stroke();
     target(x1,y); drawStar(x0+(x1-x0)*p,y,10,p,true);
