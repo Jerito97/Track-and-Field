@@ -48,5 +48,8 @@ export function drawCue(cue){
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
-  else if(cue.type==='num') cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=NUMPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } });
+  else if(cue.type==='num'){ // the three columns, faintly
+    ctx.save(); ctx.setLineDash([7,6]); ctx.lineCap='round';
+    [LW/3,LW*2/3].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,58); ctx.lineTo(x,160); ctx.strokeStyle='rgba(14,26,52,.7)'; ctx.lineWidth=5; ctx.stroke(); ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.stroke(); }); ctx.restore();
+    cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=NUMPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } }); }
 }

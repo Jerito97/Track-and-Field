@@ -1,7 +1,7 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
-import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,speedUp,startRun} from './game/core.js';
+import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,javThrow} from './game/field.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -9,7 +9,7 @@ import {S,screen} from './state.js';
 import {showPause} from './ui/screens.js';
 
 export function zoneOf(clientX,three){ const f=clientX/SW;
-  if(three){ const lx=(clientX-OX)/SC, h=NUM_DX()/2; return lx<LW/2-h?'L':(lx<LW/2+h?'C':'R'); }
+  if(three){ const lx=(clientX-OX)/SC; return lx<LW/3?'L':(lx<LW*2/3?'C':'R'); }
   return f<.5?'L':'R'; }
 export function onTap(pos){
   unlockAudio();
