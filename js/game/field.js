@@ -140,8 +140,8 @@ export function javThrow(){
 // HJ_NOARCH, a perfect one HJ_ARCH more; where the athlete comes down on the mat (m past the mark)
 const HJ_A=.78, HJ_V=.125, HJ_MISS=.35, HJ_NOARCH=-.2, HJ_ARCH=.35, HJ_LAND=4.4;
 // the bar (m past the mark) and the mat's height; the hip's height in the poses, and above the mat once on it
-export const HJ_BAR=2.0, HJ_MAT=.6;
-const HJ_HIP=.8, HJ_LIE=.12;
+export const HJ_BAR=2.0, HJ_MAT=.6, HJ_TURN=.15;
+const HJ_HIP=.8*1.15, HJ_LIE=.1;  // (the stickman is drawn 1.15 times the poses' size)
 const hjHeight=(base,q)=>Math.max(1,base+HJ_NOARCH+HJ_ARCH*q);
 // the long jump's flight, also the triple jump's last jump
 const isLeap=a=>a.k==='lj'||a.k==='tj'&&a.stage==='jump';
@@ -210,10 +210,11 @@ export function updateAct(dt){
     // the hip up to just over the bar at the top (K), then down onto the mat
     S.x=a.x0+(a.x1-a.x0)*ez(u);
     S.y=(u<K?HJ_HIP+(top-HJ_HIP)*Math.sin(Math.PI/2*u/K):lie+(top-lie)*Math.cos(Math.PI/2*(u-K)/(1-K)))-HJ_HIP;
-    // it turns its back to the bar right after the take-off (drawn facing the run-up), tips back to lie flat over the
-    // bar, keeps going head down as the legs come over, and flattens out as its back hits the mat
-    S.turn=Math.min(1,u/.2);
-    S.rot=u<K?-Math.PI/2*ez(u/K):u<.85?-Math.PI*(.5+.22*ez((u-K)/(.85-K))):-Math.PI*(.72-.22*ez((u-.85)/.15)); S.bar=a.mark;
+    // it turns its back to the bar right after the take-off (drawn facing the run-up: swapped while it's straight up,
+    // arms up and legs together, so the swap doesn't show), tips back to lie flat over the bar, keeps going head down
+    // as the legs come over, and flattens out as its back hits the mat
+    S.turn=u>=HJ_TURN?1:0;
+    S.rot=u<HJ_TURN?0:u<K?-Math.PI/2*ez((u-HJ_TURN)/(K-HJ_TURN)):u<.85?-Math.PI*(.5+.22*ez((u-K)/(.85-K))):-Math.PI*(.72-.22*ez((u-.85)/.15)); S.bar=a.mark;
     if(u>=1&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); }
     if(u>=1){ S.y=lie-HJ_HIP; S.rot=-Math.PI/2; S.pose=POSE.lie; S.meter=null; landed(Math.floor(a.mark*100)/100); }
   } else if(a.k==='ljfoul'||a.k==='tjfoul'){

@@ -102,11 +102,11 @@ export function drawField(V){
       if(j){ fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K];
         const [tx,ty,hx,hy]=fig.jav, a=Math.atan2(ty-hy,hx-tx), L=JAV_L*s; javelin(hx-Math.cos(a)*L/2,hy+Math.sin(a)*L/2,a,L); }
       drawAnim(ctx,ME(),f[0],f[1],px,feet,K); } }
-  // high jump: turning its back to the bar in the air, drawn as a turn about the upright (squeezed, then mirrored)
-  const turn=V.turn?Math.cos(Math.PI*V.turn):1;
-  if(turn!==1){ ctx.save(); ctx.translate(px,0); ctx.scale(Math.abs(turn)<.1?(turn<0?-.1:.1):turn,1); ctx.translate(-px,0); }
+  // high jump: back to the bar in the air, drawn facing the run-up (mirrored)
+  const turn=!!V.turn;
+  if(turn){ ctx.save(); ctx.translate(px,0); ctx.scale(-1,1); ctx.translate(-px,0); }
   if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,STYLE.stick?fieldPose({...V,clock:S.clock}):V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
-  if(turn!==1) ctx.restore();
+  if(turn) ctx.restore();
   if(hb&&!hb.far) hb.draw();
   if(hb&&hb.arc) hb.arc();
   if(ev.kind==='sp') spDraw(V,X,GY,fig);

@@ -2,6 +2,7 @@
 // (hurdle jump, take-off, flight, throw, vault...). Angles as in poses.js: limbs from straight down, positive =
 // forward; legs[0]/arms[0] = near side. Every pose carries `kind` (which movement it belongs to): drawStick blends
 // from one kind to the next, and plays a kind's own motion straight through.
+import {HJ_TURN} from './game/field.js';
 import {POSE,runPose} from './poses.js';
 
 const P=(hip,lean,l0,l1,a0,a1)=>({hip,lean,legs:[{a:l0[0],b:l0[1]},{a:l1[0],b:l1[1]}],arms:[{a:a0[0],b:a0[1]},{a:a1[0],b:a1[1]}]});
@@ -66,8 +67,9 @@ const TJ_BOUND=[[0,P(.8,.25,[.9,1.4],[-.7,.3],[-.7,.6],[1.0,.6])],[.4,P(.82,.2,[
 // run-up) and tips over backwards, so lying over the bar "forward" is up: first arched (hips up: body and legs bent
 // back, knees hanging), then once the hips are over, folded the other way (legs straight up, chin in) and it comes down
 // on its back like that; on the mat the legs come down. The hip stays at the same height (the game moves the body)
-const HJ_TAKE=[[0,P(.8,.15,[.2,.3],[-.6,.9],[-.6,.8],[.8,.6])],[1,P(.8,0,[1.2,1.6],[-.3,.2],[2.0,.4],[1.8,.4])]];
-const HJ_OVER=[[0,P(.8,-.1,[.3,.5],[-.1,.6],[2.4,.3],[2.2,.4])],[.3,P(.8,-.75,[-.6,1.3],[-.5,1.4],[-.2,.3],[-.3,.3])],[.5,P(.8,-.75,[-.6,1.3],[-.5,1.4],[-.2,.3],[-.3,.3])],
+const HJ_STRAIGHT=P(.8,0,[0,.05],[0,.05],[3.05,.05],[3.05,.05]);
+const HJ_TAKE=[[0,P(.8,.15,[.2,.3],[-.6,.9],[-.6,.8],[.8,.6])],[.5,P(.8,0,[1.2,1.6],[-.3,.2],[2.0,.4],[1.8,.4])],[1,HJ_STRAIGHT]];
+const HJ_OVER=[[0,HJ_STRAIGHT],[.12,P(.8,-.1,[-.05,.3],[0,.4],[2.6,.3],[2.4,.4])],[.3,P(.8,-.75,[-.6,1.3],[-.5,1.4],[-.2,.3],[-.3,.3])],[.5,P(.8,-.75,[-.6,1.3],[-.5,1.4],[-.2,.3],[-.3,.3])],
   [.75,P(.8,.35,[1.4,.1],[1.3,.15],[.8,.3],[.6,.3])],[1,P(.8,.35,[1.5,.05],[1.4,.1],[.9,.3],[.7,.3])]];
 const HJ_MATP=[[0,HJ_OVER[4][1]],[.25,P(.8,.3,[1.7,.1],[1.6,.15],[1.2,.3],[1.0,.3])],[.75,P(.8,.05,[.25,.4],[.15,.5],[1.6,.3],[1.3,.3])],[1.2,P(.8,.05,[.25,.4],[.15,.5],[1.6,.1],[.9,.3])]];
 // javelin (arm 0 holds it)
@@ -89,8 +91,8 @@ export function fieldPose(V){
   if(k==='hj'){
     if(a&&a.k==='hj'&&a.u!=null){
       if(a.pt!=null) return track('hjmat',HJ_MATP,a.pt);
-      if(a.u<.2) return track('hjtake',HJ_TAKE,a.u/.2);
-      return track('hjover',HJ_OVER,(a.u-.2)/.8); }
+      if(a.u<HJ_TURN) return track('hjtake',HJ_TAKE,a.u/HJ_TURN);
+      return track('hjover',HJ_OVER,(a.u-HJ_TURN)/(1-HJ_TURN)); }
     if((V.v||0)>.2) return run(runPhase(V),amp(V));
     return breathe(POSE.stand,t);
   }
