@@ -30,6 +30,7 @@ export function showSurvival(){
   setS(null); setScreen('menu');
   const b=player()?.survBest, sv=saved();
   showOv(card('SUPERVIVENCIA','Ganale a la máquina',`
+    <div class="s-hero"><img src="assets/thumbs/surv.jpg" alt=""></div>
     ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>Ronda ${sv.round} · ${sv.pts} pts</b><small>${sv.k>=5?`Ronda ${sv.round} superada: sigue la ${sv.round+1}`:`Te toca ${EVENTS[sv.order[sv.k]]?.name||''} (${sv.k+1}/5)`}</small></div><button class="btn" data-act="sresume" data-focus>Seguir</button></div>`:''}
     <p class="small">Las 5 pruebas en orden al azar contra <b>una sola máquina</b>. Cada ronda de 5 pruebas, la máquina mejora. Ganale (o empatale) en todas para seguir: <b>la primera prueba que perdés, se termina</b>. Cada prueba ganada suma sus puntos.</p>
     <div class="s-best"><span class="lbl">Tu mejor partida</span><b>${b?`${b.pts} pts`:'—'}</b>${b?`<small>Llegaste a la ronda ${b.rounds+1}</small>`:''}</div>

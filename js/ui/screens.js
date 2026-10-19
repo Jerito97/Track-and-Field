@@ -43,7 +43,7 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
 }
 // illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
-export const THUMBS={'100':'34% 30%','lj':'44% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','tour':'52% 30%'};
+export const THUMBS={'100':'34% 30%','lj':'44% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','tour':'52% 30%','surv':'50% 35%'};
 const thumbKey=i=>i<EVENTS.length?EVENTS[i].id:'tour';
 export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.jpg" alt="" style="object-position:${pos}"">`:`<canvas data-pict="${i}"></canvas>`; };
 // events screen: the chosen event, remembered between visits (the tournament has its own screen now)
@@ -102,7 +102,7 @@ export function showMenu(){
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas',`Las ${EVENTS.length} pruebas, de a una`)}
     ${mode('tours','tour',THUMBS.tour,'Torneos','Con amigos o contra la máquina')}
-    ${mode('surv',null,'','Supervivencia',sv?`Partida guardada: ronda ${sv.round} · ${sv.pts} pts`:sb?`Tu mejor: ${sb.pts} pts`:'Ganale a la máquina',' surv')}
+    ${mode('surv','surv',THUMBS.surv,'Supervivencia',sv?`Partida guardada: ronda ${sv.round} · ${sv.pts} pts`:sb?`Tu mejor: ${sb.pts} pts`:'Ganale a la máquina',' surv')}
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
