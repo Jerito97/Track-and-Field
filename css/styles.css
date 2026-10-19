@@ -253,3 +253,11 @@ tr.me td{background:var(--red)}
 .b-table td.mk{font-family:var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
 .b-table td.sub{text-align:right;font-size:.8rem;color:#aab8d8;white-space:nowrap}
 .b-empty{text-align:center;padding:14px 0}
+/* splash at start: the logo for a moment, then fades into the menu */
+#splash{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:clamp(16px,5vw,56px);
+  background:linear-gradient(180deg,#0f6fd6 0%,#3aa2ee 60%,#7cc6f6 100%);transition:opacity .45s ease}
+#splash img{height:min(78vh,78vw);aspect-ratio:976/1056;width:auto;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#splash .s-title{font-family:var(--f-display);color:#fff;font-size:clamp(2.2rem,15vh,6rem);line-height:.9;letter-spacing:.04em;font-style:italic;
+  text-shadow:0 4px 0 var(--red-d),0 8px 18px rgba(0,0,0,.3);transform:skewX(-6deg)}
+#splash.out{opacity:0;pointer-events:none}
+@media (orientation:portrait){#splash{flex-direction:column}#splash img{height:auto;width:min(70vw,52vh)}}

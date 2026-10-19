@@ -19,6 +19,10 @@ await loadAssets();
 // invite link (?t=CODE): straight into the tournament (a new player is created first, then joins)
 const inv=inviteFromUrl();
 if(inv&&player()){ clearInvite(); onJoin(inv); } else showMenu();
+// splash: the logo stays at least a moment (tap to skip), then fades out; removed when it's done
+const splash=document.getElementById('splash');
+if(splash){ const hide=()=>{ splash.classList.add('out'); setTimeout(()=>splash.remove(),500); };
+  if(navigator.webdriver) splash.remove(); else { splash.addEventListener('pointerdown',hide); setTimeout(hide,Math.max(0,1400-performance.now())); } }
 let lastT=performance.now();
 function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);

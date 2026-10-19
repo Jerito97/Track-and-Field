@@ -149,3 +149,7 @@ La carrera es la referencia de tamaño: si se cambia, va sin el último argument
 ## Sprites de Yo
 
 Los sprites de cuerpo entero de antes siguen en `assets/characters/yo/sprites/` pero no se usan. Para volver a activarlos, poné `sprite:true` en `LOOK.yo` (`js/config.js`): se usan en 100 m, vallas, podio y menú. El manifiesto (tamaño y cadera `hx` de cada uno) está en `js/assets.js`.
+
+## Ícono y pantalla de inicio
+
+El juego se puede instalar como app (en iPhone: Safari → Compartir → *Agregar a inicio*; en Android: Chrome → menú → *Instalar app* / *Agregar a la pantalla principal*). El ícono y el logo de la pantalla de inicio están en `assets/icons/` (`manifest.webmanifest` describe la app: pantalla completa y horizontal). Al abrir el juego se ve el logo un momento (tocando se saltea).
