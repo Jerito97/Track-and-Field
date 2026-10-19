@@ -1,4 +1,4 @@
-// "Cómo se juega": the event plays itself for one attempt (a good player's timing), with a caption for each part and a
+// "Cómo se juega": the event plays itself for one attempt (a normal-to-good player: not perfect, not a machine), with a caption for each part and a
 // finger showing where to tap or hold. Nothing is saved; touching the screen (or any key) leaves it.
 import {CUEPOS} from './core.js';
 import {javThrow} from './field.js';
@@ -42,16 +42,18 @@ export function demoStep(dt){
   f++; S.demoCaption=caption(); S.fingers=S.fingers.filter(x=>(x.t+=dt)<.35);
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'&&f>40){ press('L'); return; }
-  if(c&&c.type==='side'&&f%9===0) press(c.side);
-  if(c&&c.type==='num'&&f%8===0) press(c.order[c.next]);
+  // run-up taps a normal player's pace (sprints a bit faster), the timing parts close but not perfect
+  const pace=ev.type==='sprint'?14:k==='sp'?10:17;
+  if(c&&c.type==='side'&&f%pace===0) press(c.side);
+  if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
   if((k==='lj'||k==='tj')&&c&&c.type==='both'){
-    if(!a&&ev.line-S.x<=.75) press('B');
-    if(a&&a.T&&a.t/a.T>=.5) press('B'); }
-  if(k==='tj'&&c&&c.type==='foot'&&a&&(a.stage==='contact'||a.T-a.t<=.02)) press(c.side);
-  if(k==='pv'){ if(m&&m.k==='pole'&&m.on&&m.p>=.97) hold(true); if(m&&m.k==='rise'&&m.p>=.97) hold(false); }
-  if(k==='jav'){ if(S.phase==='run'&&S.zone&&ev.line-S.x<15&&!m) hold(true); if(m&&m.k==='jav'&&m.p>=.97&&S.held2){ hold(false); javThrow(); } }
-  if(k==='ham'&&a){ if(c&&c.type==='rush'&&f%4===0) press(f%8?'L':'R');
-    if(a.stage==='final'&&!m) hold(true); if(m&&m.k==='ham'&&m.p>=.97) hold(false); }
-  if(k==='sp'&&a){ if(a.stage==='angle'&&m&&m.p>=41.5) hold(true); if(a.stage==='aim'&&m&&m.p>=.97) hold(false); }
+    if(!a&&ev.line-S.x<=.4) press('B');
+    if(a&&a.T&&a.t/a.T>=.36) press('B'); }
+  if(k==='tj'&&c&&c.type==='foot'&&a&&(a.stage==='contact'||a.T-a.t<=-.04)) press(c.side);
+  if(k==='pv'){ if(m&&m.k==='pole'&&m.on&&m.p>=.92) hold(true); if(m&&m.k==='rise'&&m.p>=.92) hold(false); }
+  if(k==='jav'){ if(S.phase==='run'&&S.zone&&ev.line-S.x<15&&!m) hold(true); if(m&&m.k==='jav'&&m.p>=.92&&S.held2){ hold(false); javThrow(); } }
+  if(k==='ham'&&a){ if(c&&c.type==='rush'&&f%7===0) press(f%8?'L':'R');
+    if(a.stage==='final'&&!m) hold(true); if(m&&m.k==='ham'&&m.p>=.92) hold(false); }
+  if(k==='sp'&&a){ if(a.stage==='angle'&&m&&m.p>=44.5) hold(true); if(a.stage==='aim'&&m&&m.p>=.92) hold(false); }
 }
