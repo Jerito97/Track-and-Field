@@ -55,7 +55,8 @@ export function updateSprint(dt){
   }
   // final: red buttons = head dip at the line (no extra speed)
   // the dip buttons come about 1.1 s before the line (at least 8 m), so there's time to press both after the last taps
-  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-Math.max(8,S.v*1.1)&&S.air<=0){ S.dipCued=true; bothCue(); }
+  // (hurdles: only once the last hurdle's numbers are done, or they'd take their place)
+  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-Math.max(8,S.v*1.1)&&S.air<=0&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
   if(S.dip>0) S.dipT+=dt;
   if(S.stumble>0){}
   else if(ev.hurdles&&S.air>0) S.pose=POSE.hurdle;

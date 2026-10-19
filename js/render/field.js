@@ -107,7 +107,7 @@ export function drawField(V){
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
     if(!V.jv&&V.meter&&V.meter.k==='jav'&&fig.jav){ if(!V.replay){ const [tx,ty,hx,hy]=fig.jav; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
-    else if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=JAV_L*s, cx=fig.hand[0]+Math.cos(a)*.15*s, cy=fig.hand[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
+    else if(!V.jv&&V.meter&&V.meter.k==='jav'){ const a=.35, L=JAV_L*s, h=steadyHand(fig.hand), cx=h[0]+Math.cos(a)*.15*s, cy=h[1]-Math.sin(a)*.15*s; javelin(cx,cy,a,L);
       if(!V.replay){ const tx=cx-Math.cos(a)*L/2, ty=cy+Math.sin(a)*L/2, hx=cx+Math.cos(a)*L/2, hy=cy-Math.sin(a)*L/2; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
     else if(!V.jv){ if(!fig.drawnJav) javelin(fig.hand[0]+6,fig.hand[1]-4,.25,JAV_L*s); }
     else if(V.jv.held){ if(!fig.drawnJav){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,JAV_L*s); } }
@@ -120,12 +120,17 @@ export function drawField(V){
   S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle=f.dust?'rgba(235,215,200,.8)':'#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,f.dust?1.8:2.2,0,Math.PI*2); ctx.fill(); });
   drawPauseBtn();
 }
+// the javelin drawn back while running: it follows the hand smoothed (not every bob of the stride), so the star along
+// it moves steadily
+const held={};
+function steadyHand(h,k='jav'){ const o=held[k]; held[k]=o&&Math.abs(o[0]-h[0])<60?[o[0]+(h[0]-o[0])*.2,o[1]+(h[1]-o[1])*.2]:h; return held[k]; }
 export function rivalFlags(V,X,GY){
   ATH.forEach((a,i)=>{ if(a.me) return; const b=S.marks[i].filter(m=>m!=null); if(!b.length) return; flag(X(V.ev.line+Math.max(...b)),GY+14,a.C.j,a.name[0]); });
   if(rec[V.ev.id]!=null){ const x=X(V.ev.line+rec[V.ev.id]); ctx.setLineDash([4,4]); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,GY-30); ctx.lineTo(x,GY+16); ctx.stroke(); ctx.setLineDash([]); txt('RÉCORD',x,GY-36,'#fff',11); }
 }
 export function drawPole(V,X,GY,fig){
-  const ev=V.ev, s=V.ppm, a=V.act, L=4.6*s, [hx,hy]=fig.hand;
+  // lowering the pole (the star running along it): the grip follows the hand smoothed, so the star moves steadily
+  const ev=V.ev, s=V.ppm, a=V.act, L=4.6*s, [hx,hy]=!a&&V.meter&&V.meter.k==='pole'&&V.meter.p>0?steadyHand(fig.hand,'pole'):fig.hand;
   // pole from (x1,y1) to (x2,y2), bent through (cx,cy): the drawn pole in short straight slices along the curve
   // (grip end at x2,y2 when gripEnd), or a plain line until it loads
   const line=(x1,y1,x2,y2,cx,cy,gripEnd)=>{

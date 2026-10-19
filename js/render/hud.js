@@ -21,15 +21,18 @@ export function drawHud(V){
     txt(p.text,0,0,p.col,40,{lw:6}); if(p.sub) txt(p.sub,0,32,'#ffd23a',20,{lw:4}); ctx.restore(); });
   if(V.replay){ txt('REPETICIÓN',LW/2,36,'#fff',20); ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(LW-22,282,13,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(LW-29,276); ctx.lineTo(LW-22,282); ctx.lineTo(LW-29,288); ctx.closePath(); ctx.moveTo(LW-22,276); ctx.lineTo(LW-15,282); ctx.lineTo(LW-22,288); ctx.closePath(); ctx.fill(); }
 }
-export function target(x,y){ ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=2; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); }
+// where the star has to get to: a small ring with a dot in the middle (aim for the dot)
+export function target(x,y){ ctx.lineWidth=3; ctx.strokeStyle='rgba(14,26,52,.7)'; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.stroke();
+  ctx.lineWidth=1.6; ctx.strokeStyle='#fff'; ctx.stroke(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y,1.6,0,Math.PI*2); ctx.fill(); }
+// the star: small and steady (a slow turn, a soft glow), yellow, brighter right at the end (p .9-1.05); spark: a faint
+// halo while it runs
 export function drawStar(x,y,r,p,spark){
-  const good=p>=.9&&p<=1.05;
+  const good=p>=.9&&p<=1.05; r*=.62;
   ctx.save(); ctx.translate(x,y);
-  ctx.fillStyle=good?'rgba(255,240,120,.55)':'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(0,0,r*1.7,0,Math.PI*2); ctx.fill();
-  if(spark){ for(let i=0;i<6;i++){ const a=S.clock*9+i*1.05, d=r*(1.2+.5*Math.sin(S.clock*23+i)); ctx.fillStyle=i%2?'#fff':'#ffd23a'; ctx.fillRect(Math.cos(a)*d-1.5,Math.sin(a)*d-1.5,3,3); } }
-  ctx.rotate(S.clock*4); ctx.beginPath();
+  ctx.fillStyle=good?'rgba(255,240,120,.6)':spark?'rgba(255,255,255,.35)':'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(0,0,r*1.45,0,Math.PI*2); ctx.fill();
+  ctx.rotate(S.clock*1.5); ctx.beginPath();
   for(let i=0;i<10;i++){ const rr=i%2?r*.45:r, a=-Math.PI/2+i*Math.PI/5; ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr); }
-  ctx.closePath(); ctx.fillStyle=good?'#fff36b':'#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.fill(); ctx.stroke(); ctx.restore();
+  ctx.closePath(); ctx.fillStyle=good?'#fff36b':'#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.2; ctx.fill(); ctx.stroke(); ctx.restore();
 }
 export const CUECOL={'#2fd166':'#139a44','#ff4d2e':'#b8200f','#2f7fd6':'#1b4f9c','#ff8a1e':'#c4520a'};
 export function cueCircle(x,y,col,label){
