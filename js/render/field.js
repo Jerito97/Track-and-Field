@@ -46,7 +46,7 @@ export function drawField(V){
   }
   if(ev.kind==='lj'||ev.kind==='tj'){
     // the sand: right past the board in the long jump, TJ_SAND m on in the triple jump (metres counted from the board)
-    const [a0,a1]=ev.kind==='tj'?[TJ_SAND,TJ_PIT]:[.5,11], p0=X(ev.line+a0), p1=X(ev.line+a1), sd=26;
+    const [a0,a1]=ev.kind==='tj'?[TJ_SAND,TJ_PIT]:[.5,13], p0=X(ev.line+a0), p1=X(ev.line+a1), sd=26;
     ctx.fillStyle='#ecd096'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.rect(p0,GY-6,p1-p0,sd); ctx.fill(); ctx.stroke();
     ctx.fillStyle='rgba(170,120,50,.35)'; for(let k=0;k<110;k++) ctx.fillRect(X(ev.line+a0+.5+hash(k)*(a1-a0-1.2)),GY-3+hash(k+50)*(sd-4),2,1.5);
     // distance board along the pit: a mark every half metre, numbers every metre

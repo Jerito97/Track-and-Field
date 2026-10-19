@@ -87,7 +87,7 @@ export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
     if(a&&isLeap(a)&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.us=Math.min(1,a.t/a.T); a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
-      leapTo(a,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; }
+      a.x1o=a.x1; leapTo(a,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; }
     return;
   }
   if(S.phase!=='run'||!S.zone) return;
@@ -178,7 +178,8 @@ export function updateAct(dt){
     if(S.cueDelay>0){ S.cueDelay-=dt; if(S.cueDelay<=0&&!a.tapped) bothCue(); }
     const u=Math.min(1,a.t/a.T);
     // after the air push the jumper speeds forward to the new mark and gets a little lift
-    if(a.us!=null&&a.us<1){ const k=(u-a.us)/(1-a.us); S.x=a.xs+(a.x1-a.xs)*k; S.y=4*a.h*u*(1-u)+.35*a.q2*Math.sin(Math.PI*k); }
+    // after the push the extra distance comes in smoothly (no jump forward), with a slight lift
+    if(a.us!=null&&a.us<1){ const k=(u-a.us)/(1-a.us), e=k*k*(3-2*k); S.x=a.x0+(a.x1o-a.x0)*u+(a.x1-a.x1o)*e; S.y=4*a.h*u*(1-u)+.15*a.q2*Math.sin(Math.PI*k); }
     else { S.x=a.x0+(a.x1-a.x0)*u; S.y=4*a.h*u*(1-u); } S.pose=u<.15?POSE.hurdle:(a.tapped?{...POSE.ljAir,legs:[{a:1.75,b:.05},{a:1.65,b:.1}]}:POSE.ljAir);
     if(u>=1&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); }
     if(u>=1){ S.y=0; S.pose=a.q2>.5?POSE.sit:POSE.lie; S.landX=S.x; sand(S.x); S.meter=null; landed(Math.floor(a.mark*100)/100); }

@@ -17,7 +17,7 @@ import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {playSurv,resumeSurvival,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
-import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
+import {finishOnline,leaveOnline,onClose,onCreate,onRepeat,showRepeat,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
@@ -271,6 +271,8 @@ OV.addEventListener('click',e=>{
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
   else if(a==='online'){ if(player().token) showOnline(); else showAccount('protect'); }
   else if(a==='ocreate') onCreate();
+  else if(a==='orepeat') showRepeat(b.dataset.code);
+  else if(a==='orepeatgo') onRepeat(b.dataset.code);
   else if(a==='odays') onDays(b.dataset.d);
   else if(a==='ohist') showHistory();
   else if(a==='oclose') onClose(b);

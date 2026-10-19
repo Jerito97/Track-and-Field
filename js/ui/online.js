@@ -4,7 +4,7 @@ import {$,OV} from '../canvas.js';
 import {EVENTS} from '../config.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {fmt,pts} from '../game/scoring.js';
-import {cleanCode,closeTournament,createTournament,getMyTours,getTournament,inviteLink,joinTournament,myTournaments,sendResult} from '../online.js';
+import {cleanCode,closeTournament,createTournament,repeatTournament,getMyTours,getTournament,inviteLink,joinTournament,myTournaments,sendResult} from '../online.js';
 import {buildAthletes,G,screen,setS,setScreen} from '../state.js';
 import {player,players,store} from '../storage.js';
 import {esc,place,showOv} from './screens.js';
@@ -69,6 +69,22 @@ export async function showHistory(){
 const loading=t=>showOv(card('ONLINE',t,'<p class="small o-wait">Cargando…</p>'));
 
 async function guard(fn){ if(busy) return; busy=true; try{ await fn(); } finally{ busy=false; } }
+// repeat a finished tournament: choose the events (the same ones ticked) and how long; everyone who played it is in
+let shownT=null;
+export function showRepeat(code,msg){
+  const t=shownT&&shownT.code===code?shownT:null; if(!t){ showTournament(code); return; }
+  showOv(card('REPETIR',esc(t.name),`${msg?err(msg):''}
+    <p class="small o-note">Se arma de nuevo con <b>los mismos jugadores</b> ya anotados: les aparece en <b>En juego</b>, sin pasar el código. Elegí las pruebas y cuánto dura.</p>
+    <div class="o-evs">${EVENTS.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}"${t.events.includes(e.id)?' checked':''}> ${e.name}</label>`).join('')}</div>
+    <div class="o-days"><span class="small">Dura</span>${DAYS.map(([d,tx])=>`<button class="o-day${d===days?' on':''}" data-act="odays" data-d="${d}" aria-pressed="${d===days}">${tx}</button>`).join('')}</div>
+    <div class="btns"><button class="btn" data-act="orepeatgo" data-code="${code}" data-focus>Empezar</button><button class="btn alt" data-act="oopen" data-code="${code}">Volver</button></div>`));
+}
+export const onRepeat=code=>guard(async()=>{
+  const events=[...OV.querySelectorAll('input[name="oev"]:checked')].map(i=>i.value);
+  if(!events.length){ showRepeat(code,'Elegí al menos una prueba.'); return; }
+  loading('Armando el torneo');
+  try{ const nc=await repeatTournament(code,events,days); tours=null; await showTournament(nc); }catch(e){ showRepeat(code,e.message); }
+});
 export const onCreate=()=>guard(async()=>{
   const events=[...OV.querySelectorAll('input[name="oev"]:checked')].map(i=>i.value), name=$('oname').value.trim();
   if(!events.length){ showOnline('Elegí al menos una prueba.'); return; }
@@ -133,7 +149,8 @@ export async function showTournament(code,msg,silent){
   const mine=pending().filter(q=>q.pid===player().id&&q.code===code&&!data.results.some(r=>r.player_id===q.pid&&r.ev===q.ev));
   data.results=data.results.concat(mine.map(q=>({player_id:q.pid,ev:q.ev,mark:q.mark})));
   const note=(data.offline?'<p class="small">Sin conexión: esta es la última tabla que viste.</p>':'')+(mine.length?`<p class="small">${mine.length===1?'Tenés 1 resultado que se envía':`Tenés ${mine.length} resultados que se envían`} cuando vuelva la conexión.</p>`:'');
-  const t=data.tournament, p=player(), evs=t.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id), fin=t.finished;
+  const t=data.tournament; shownT=t;
+  const p=player(), evs=t.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id), fin=t.finished;
   if(!meRow){ if(fin){ showOnline('Este torneo ya terminó.'); return; } try{ await joinTournament(code); }catch(e){ showOnline(e.message); return; } return showTournament(code,msg); }
   const myEvs=evs.map(ev=>{ const played=ev.id in meRow.marks;
     return `<div class="o-ev${played||fin?' done':''}"><b>${ev.name}</b>${played?`<span>${fmt(ev,meRow.marks[ev.id])} · ${pts(ev,meRow.marks[ev.id])} pts</span>`:fin?'<span class="o-np">No jugada · 0 pts</span>':`<button class="btn" data-act="oplay" data-ev="${ev.id}">Jugar</button>`}</div>`; }).join('');
@@ -148,7 +165,7 @@ export async function showTournament(code,msg,silent){
     <p class="small o-note">Cada prueba se juega <b>una sola vez</b> (salir a la mitad es nulo) · El torneo ${timeLeft(t)} (${day(t.ends_at)})${rows.length<2?' · Pasales el código a tus amigos':''}</p>`}
     <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
     <span class="lbl">Tabla${fin?' final':''}</span>${table}
-    <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
+    <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
   if(silent) OV.scrollTop=keepY;
   if(!fin) autoRefresh(code);
 }

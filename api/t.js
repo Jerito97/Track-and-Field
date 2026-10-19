@@ -5,6 +5,7 @@
 //   POST {action:'login', name, pin}                        -> {player, token, marks:[{ev,mark,date}]}  (your best marks)
 //   POST {action:'update', token, name?, color?}            -> {player}
 //   POST {action:'create', token, name, events, days}       -> {code}   (days: 1, 3 or 7, how long it stays open)
+//   POST {action:'repeat', token, code, events, days}       -> {code}   (a finished one again, with the same players in)
 //   POST {action:'close', token, code}                      -> {ok}     (only who created it)
 //   POST {action:'mytours', token}                          -> {tours:[{tournament, entries, results}]}
 //   POST {action:'join', token, code}                       -> {ok}
@@ -76,6 +77,18 @@ function db(){
   return ready.then(()=>sql);
 }
 
+// a new tournament (its host already in): valid events, 1, 3 or 7 days; returns its code
+async function newTournament(sql,u,name,evs,d){
+  const events=[...new Set((Array.isArray(evs)?evs:[]).filter(e=>EVENTS.includes(e)))];
+  if(!events.length) throw new Bad(400,'Elegí al menos una prueba.');
+  const days=[1,3,7].includes(Number(d))?Number(d):7, ends=new Date(Date.now()+days*86400000).toISOString();
+  for(let i=0;i<8;i++){
+    const code=newCode();
+    const ins=await sql`insert into tournaments(code,name,events,host_id,ends_at) values(${code},${name},${events.join(',')},${u.id},${ends}) on conflict do nothing returning code`;
+    if(ins.length){ await sql`insert into entries(code,player_id,name,color) values(${code},${u.id},${u.name},${u.color})`; return code; }
+  }
+  throw new Bad(500,'No se pudo generar un código.');
+}
 class Bad extends Error{ constructor(status,msg){ super(msg); this.status=status; } }
 const cleanCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
 const cleanName=n=>String(n||'').replace(/\s+/g,' ').trim().slice(0,14);
@@ -264,16 +277,18 @@ async function act(sql,b){
     }
     case 'create': {
       const u=await auth(sql,b.token);
-      const events=[...new Set((Array.isArray(b.events)?b.events:[]).filter(e=>EVENTS.includes(e)))];
-      if(!events.length) throw new Bad(400,'Elegí al menos una prueba.');
-      const name=String(b.name||'').trim().slice(0,30)||`Torneo de ${u.name}`;
-      const days=[1,3,7].includes(Number(b.days))?Number(b.days):7, ends=new Date(Date.now()+days*86400000).toISOString();
-      for(let i=0;i<8;i++){
-        const code=newCode();
-        const ins=await sql`insert into tournaments(code,name,events,host_id,ends_at) values(${code},${name},${events.join(',')},${u.id},${ends}) on conflict do nothing returning code`;
-        if(ins.length){ await sql`insert into entries(code,player_id,name,color) values(${code},${u.id},${u.name},${u.color})`; return {code}; }
-      }
-      throw new Bad(500,'No se pudo generar un código.');
+      return {code:await newTournament(sql,u,String(b.name||'').trim().slice(0,30)||`Torneo de ${u.name}`,b.events,b.days)};
+    }
+    // play a finished tournament again: same name, the events and length chosen now, and everyone who was in it
+    // already in (no code to pass around)
+    case 'repeat': {
+      const u=await auth(sql,b.token), old=cleanCode(b.code);
+      const t=(await sql`select name from tournaments where code=${old}`)[0]; if(!t) throw new Bad(404,'No existe ese torneo.');
+      if(!(await sql`select 1 from entries where code=${old} and player_id=${u.id}`).length) throw new Bad(403,'No estabas en ese torneo.');
+      const code=await newTournament(sql,u,t.name,b.events,b.days);
+      const others=await sql`select u.id,u.name,u.color from entries e join users u on u.id=e.player_id where e.code=${old} and e.player_id<>${u.id} limit ${MAX_PLAYERS-1}`;
+      for(const p of others) await sql`insert into entries(code,player_id,name,color) values(${code},${p.id},${p.name},${p.color}) on conflict do nothing`;
+      return {code};
     }
     case 'marks': {
       // only a better mark replaces the one kept; the date is the day it was made (sent by the game, never in the future)
