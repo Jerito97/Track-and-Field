@@ -33,7 +33,7 @@ function caption(){
   if(k==='jav'&&(m&&m.k==='jav'||S.zone&&S.phase==='run')) return 'MANTENÉ LOS DOS Y SOLTÁ CUANDO LAS CHISPAS LLEGUEN A LA PUNTA';
   if(k==='hj'&&a&&a.k==='hj') return 'CUANDO TU ESPALDA ESTÉ SOBRE LA VARILLA, LOS DOS DE NUEVO';
   if((k==='lj'||k==='tj')&&a&&(a.k==='lj'||a.stage==='jump')) return 'EN EL PUNTO MÁS ALTO, LOS DOS DE NUEVO PARA ESTIRARTE';
-  if(k==='hj'&&S.zone&&!a) return 'EN EL ROJO, LOS DOS JUNTOS PARA PICAR PEGADO A LA MARCA';
+  if(k==='hj'&&S.zone&&!a) return 'LOS DOS JUNTOS CON EL PIE EN EL VERDE DE LA TABLA';
   if((k==='lj'||k==='tj')&&S.zone) return 'EN EL ROJO, LOS DOS JUNTOS PARA SALTAR PEGADO A LA TABLA';
   if(ev.type==='field'&&S.prep&&S.phase==='run') return 'DESDE EL VERDE NO HAY BOTONES: PREPARATE';
   if(c&&c.type==='side') return ev.type==='sprint'?'TOCÁ EL VERDE DEL LADO QUE APARECE: CADA ACIERTO SUMA VELOCIDAD':'TOCÁ EL VERDE DEL LADO QUE APARECE PARA TOMAR VELOCIDAD';

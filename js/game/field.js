@@ -30,6 +30,10 @@ const LJ_FOOT=.35;
 // where the athlete (hip) fouls: the foot reaching the board's edge (long jump), the line itself otherwise
 const jumps=ev=>ev.kind==='lj'||ev.kind==='tj'||ev.kind==='hj';
 const foulX=ev=>jumps(ev)?ev.line-LJ_FOOT:ev.line;
+// high jump take-off: the foot this far (m) either side of the mark is perfect, nothing left HJ_W m further; there's
+// no foul: past the far end the athlete takes off on its own (as badly as it gets)
+export const HJ_OK=.3, HJ_W=1.2;
+const hjOff=()=>S.x+LJ_FOOT-S.v*PV_LAG-S.ev.line;  // the take-off foot from the mark (counting the press's lag)
 // triple jump: the sand starts TJ_SAND m past the board (the hop and the step land on the runway before it). A step
 // that would land past TJ_SOFT m gets shorter little by little, never reaching TJ_SAND-.6 (what it loses goes into the
 // jump), so where it lands still depends on how fast you were; the jump always reaches the sand
@@ -72,7 +76,8 @@ export function updateField(dt){
         if(m.on){ m.p=Math.min(1.25,m.p+dt/POLE_T); if(held&&!m.wasHeld){ m.wasHeld=held; plantPole(); return; } }
         m.wasHeld=held; }
     }
-    if(S.phase==='run'&&S.x>=foulX(ev)+(jumps(ev)?S.v*PV_LAG:0)){ S.x=foulX(ev); fieldFoul(); }
+    if(S.phase==='run'&&ev.kind==='hj'){ if(S.zone&&hjOff()>=HJ_OK+HJ_W) fieldAction(); }
+    else if(S.phase==='run'&&S.x>=foulX(ev)+(jumps(ev)?S.v*PV_LAG:0)){ S.x=foulX(ev); fieldFoul(); }
     return;
   }
   if(S.phase==='act') updateAct(dt);
@@ -80,7 +85,7 @@ export function updateField(dt){
 }
 export function fieldFoul(){
   const ev=S.ev; S.cue=null; S.meter=null; S.foul=true; S.marks[0].push(null); tone(160,.45,'sawtooth',.06);
-  if(jumps(ev)) S.pops.push({text:ev.kind==='hj'?'¡TE PASASTE DE LA MARCA!':'¡PISASTE LA TABLA!',t:0,dur:.9,col:'#ff5a3c',sub:'',big:.6,small:true});
+  if(jumps(ev)) S.pops.push({text:'¡PISASTE LA TABLA!',t:0,dur:.9,col:'#ff5a3c',sub:'',big:.6,small:true});
   S.act={k:ev.kind+'foul',t:0,v:S.v}; S.phase='act';
 }
 export function fieldAction(){
@@ -97,7 +102,7 @@ export function fieldAction(){
   S.cue=null;
   // a take-off pressed just as the foot reached the board arrives a moment late: within that moment it counts as
   // taking off right at the board (see the foul check)
-  if(jumps(ev)&&S.x>foulX(ev)) S.x=foulX(ev);
+  if(jumps(ev)&&ev.kind!=='hj'&&S.x>foulX(ev)) S.x=foulX(ev);
   const d=Math.max(0,foulX(ev)-S.x), v=S.v;  // foot to the board
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=Math.max(.5,base+LJ_NOPUSH);
@@ -107,10 +112,10 @@ export function fieldAction(){
     judge(1-d/ev.zone); noise(.12,.15); S.cueDelay=.12;
   }
   if(ev.kind==='hj'){
-    // the height this take-off can reach (speed, and how close to the mark); the arch adds to it
-    const base=HJ_A+HJ_V*v-.06*d, T=.95+.02*v;
+    // the height this take-off can reach (speed, and how close to the mark, before or past it); the arch adds to it
+    const e=hjOff(), q1=clamp(1-(Math.abs(e)-HJ_OK)/HJ_W,0,1), base=HJ_A+HJ_V*v-HJ_MISS*(1-q1), T=.95+.02*v;
     S.act={k:'hj',t:0,T,x0:S.x,x1:ev.line+HJ_LAND,base,mark:hjHeight(base,0),q2:0};
-    S.print=S.x+LJ_FOOT; judge(1-d/ev.zone); noise(.12,.15); S.cueDelay=.12;
+    S.print=ev.line+e; judge(q1); noise(.12,.15); S.cueDelay=.12;
   }
   if(ev.kind==='tj'){
     // the hop: lands on the take-off foot as far from the board as a long jump would (taking off early costs a quarter of it)
@@ -131,11 +136,12 @@ export function javThrow(){
   S.act={k:'jav',t:.15,R:Math.max(8,9.0*S.v*(.72+.28*q))}; S.jv={held:true,x:S.x,y:1.9,a:.55}; S.v=Math.min(S.v,5.5); S.phase='act'; S.cue=null;
   setTimeout(()=>{ if(S&&S.meter&&S.meter.k==='jav') S.meter=null; },300);
 }
-// high jump: height (m) = HJ_A + HJ_V per m/s, minus a bit for taking off early, then the arch: nothing adds HJ_NOARCH,
-// a perfect one HJ_ARCH more; where the athlete comes down on the mat (m past the mark); where the bar is
-const HJ_A=.78, HJ_V=.125, HJ_NOARCH=-.2, HJ_ARCH=.35, HJ_LAND=2.6;
-// the bar (m past the mark) and the mat's height
-export const HJ_BAR=1.0, HJ_MAT=.6;
+// high jump: height (m) = HJ_A + HJ_V per m/s, minus up to HJ_MISS for missing the mark, then the arch: nothing adds
+// HJ_NOARCH, a perfect one HJ_ARCH more; where the athlete comes down on the mat (m past the mark)
+const HJ_A=.78, HJ_V=.125, HJ_MISS=.35, HJ_NOARCH=-.2, HJ_ARCH=.35, HJ_LAND=4.4;
+// the bar (m past the mark) and the mat's height; the hip's height in the poses, and above the mat once on it
+export const HJ_BAR=2.0, HJ_MAT=.6;
+const HJ_HIP=.8, HJ_LIE=.12;
 const hjHeight=(base,q)=>Math.max(1,base+HJ_NOARCH+HJ_ARCH*q);
 // the long jump's flight, also the triple jump's last jump
 const isLeap=a=>a.k==='lj'||a.k==='tj'&&a.stage==='jump';
@@ -200,13 +206,17 @@ export function updateAct(dt){
     if(u>=1){ S.y=0; S.pose=a.q2>.5?POSE.sit:POSE.lie; S.landX=S.x; sand(S.x); S.meter=null; landed(Math.floor(a.mark*100)/100); }
   } else if(a.k==='hj'){
     if(S.cueDelay>0){ S.cueDelay-=dt; if(S.cueDelay<=0&&!a.tapped) bothCue(); }
-    const u=Math.min(1,a.t/a.T), e=u*u*(3-2*u);
-    // up to the bar (over it at the top), then down onto the mat; the hip a little above the bar at the top
-    const Y=a.mark+.05-.9; S.x=a.x0+(a.x1-a.x0)*e; S.y=u<.45?Y*Math.sin(Math.PI/2*u/.45):HJ_MAT+(Y-HJ_MAT)*Math.cos(Math.PI/2*(u-.45)/.55);
-    S.rot=Math.PI/2*Math.min(1,u/.45); S.bar=a.mark;
+    const u=Math.min(1,a.t/a.T), ez=t=>t*t*(3-2*t), K=.5, top=a.mark+.05, lie=HJ_MAT+HJ_LIE;
+    // the hip up to just over the bar at the top (K), then down onto the mat
+    S.x=a.x0+(a.x1-a.x0)*ez(u);
+    S.y=(u<K?HJ_HIP+(top-HJ_HIP)*Math.sin(Math.PI/2*u/K):lie+(top-lie)*Math.cos(Math.PI/2*(u-K)/(1-K)))-HJ_HIP;
+    // it turns its back to the bar right after the take-off (drawn facing the run-up), tips back to lie flat over the
+    // bar, keeps going head down as the legs come over, and flattens out as its back hits the mat
+    S.turn=Math.min(1,u/.2);
+    S.rot=u<K?-Math.PI/2*ez(u/K):u<.85?-Math.PI*(.5+.22*ez((u-K)/(.85-K))):-Math.PI*(.72-.22*ez((u-.85)/.15)); S.bar=a.mark;
     if(u>=1&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); }
-    if(u>=1){ S.y=HJ_MAT; S.pose=POSE.lie; S.meter=null; landed(Math.floor(a.mark*100)/100); }
-  } else if(a.k==='ljfoul'||a.k==='tjfoul'||a.k==='hjfoul'){
+    if(u>=1){ S.y=lie-HJ_HIP; S.rot=-Math.PI/2; S.pose=POSE.lie; S.meter=null; landed(Math.floor(a.mark*100)/100); }
+  } else if(a.k==='ljfoul'||a.k==='tjfoul'){
     // stepped over the board: stumbles to a stop just past it (not into the sand)
     S.x=Math.min(S.x+a.v*Math.max(0,1-a.t*8)*dt,ev.line-LJ_FOOT+.1); S.pose=POSE.stumble;
     if(a.t>.7){ S.pose=POSE.sit; landed(null); }
