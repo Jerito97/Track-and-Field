@@ -45,6 +45,8 @@ export function sideCue(){
   S.streak=(n===S.last)?S.streak+1:1; S.last=n; S.cue={type:'side',side:n,t:0};
 }
 export function numCue(){ const p=['L','C','R'].sort(()=>Math.random()-.5); S.cue={type:'num',order:p,next:0,t:0}; }
+// seconds since both buttons were pressed or let go (between frames: the game notices it on the next one), at most 0.05
+export const sinceHold=()=>S.held2At==null?0:Math.max(0,Math.min(.05,(performance.now()-S.held2At)/1000));
 export function bothCue(){ S.cue={type:'both',t:0}; S.pend=null; tone(760,.05,'triangle',.03); }
 export function addRing(pos){ const [x,y]=cuePos(pos); S.fx.push({k:'ring',x,y,t:0}); }
 export function addX(pos){ const [x,y]=cuePos(pos); S.fx.push({k:'x',x,y,t:0}); }

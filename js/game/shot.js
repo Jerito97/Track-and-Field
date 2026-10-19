@@ -7,7 +7,7 @@ import {noise,tone} from '../audio.js';
 import {POSE} from '../poses.js';
 import {S} from '../state.js';
 import {clamp} from '../utils.js';
-import {judge,sideCue} from './core.js';
+import {judge,sideCue,sinceHold} from './core.js';
 import {landed,qPole} from './field.js';
 
 // tapping time (s), then the pause before the needle
@@ -54,7 +54,7 @@ export function updateShot(dt){
     // a fresh hold: fingers still down from the taps don't count
     if(!S.held2) a.free=true;
     m.p=Math.min(SP_MAX,m.p+SP_RATE*dt);
-    if(S.held2&&a.free){ a.d=clamp(m.p-LAG*SP_RATE,0,SP_MAX); judge(angleQ(a.d)); tone(700,.08,'triangle',.05); a.stage='aim'; a.t=0; S.cue=null; S.meter={k:'sp',p:0,t:0,ang:a.d}; }
+    if(S.held2&&a.free){ a.d=clamp(m.p-(sinceHold()+LAG)*SP_RATE,0,SP_MAX); judge(angleQ(a.d)); tone(700,.08,'triangle',.05); a.stage='aim'; a.t=0; S.cue=null; S.meter={k:'sp',p:0,t:0,ang:a.d}; }
     else if(m.p>=SP_MAX) foul(a,'¡TE PASASTE DE ÁNGULO!');
   } else if(a.stage==='aim'){
     const m=S.meter; S.pose=GLIDE(1);
@@ -63,7 +63,7 @@ export function updateShot(dt){
     m.t+=dt; m.p+=dt/STAR_T;
     if(!S.held2&&m.t<BLIP){ a.stage='angle'; a.t=0; S.meter={k:'spang',p:a.d}; S.cue={type:'hamhold',label:'APRETÁ LOS DOS EN LO VERDE',t:0}; }
     else if(m.p>=LATE) foul(a,'¡TE SALISTE DEL CÍRCULO!');
-    else if(!S.held2) put(a);
+    else if(!S.held2){ m.p-=sinceHold()/STAR_T; put(a); }
   } else if(a.stage==='fly') flight(dt,a);
   else if(a.stage==='out'){ S.x+=dt*1.2*Math.max(0,1-a.t*1.5); S.pose=POSE.stumble; if(a.t>.8){ a.stage='done'; landed(null); } }
 }

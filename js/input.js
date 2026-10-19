@@ -59,7 +59,8 @@ export let holdN=0;
 let kbHold=false;
 // javelin and pole vault hold BOTH buttons: a finger on each half of the screen, or Space/Enter
 const down=new Map();  // pointerId -> 'L' / 'R'
-const setHeld2=()=>{ const v=[...down.values()]; if(S) S.held2=kbHold||(v.includes('L')&&v.includes('R')); };
+// held2At: the exact moment it changed (the game checks once a frame; timing parts use it to be exact)
+const setHeld2=()=>{ const v=[...down.values()], h=kbHold||(v.includes('L')&&v.includes('R')); if(S){ if(h!==!!S.held2) S.held2At=performance.now(); S.held2=h; } };
 export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) return; if(S.phase==='run'&&S.zone&&S.ev.kind==='jav'&&!S.meter){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
 // letting go of either button throws
 export function holdEnd(){ setHeld2(); if(screen==='play'&&S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }

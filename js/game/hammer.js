@@ -6,7 +6,7 @@
 import {noise,tone} from '../audio.js';
 import {POSE} from '../poses.js';
 import {S} from '../state.js';
-import {judge,sideCue} from './core.js';
+import {judge,sideCue,sinceHold} from './core.js';
 import {landed,qPole} from './field.js';
 
 const TAU=Math.PI*2;
@@ -78,7 +78,8 @@ export function updateHammer(dt){
     if(!m&&S.held2&&a.free){ S.meter={k:'ham',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
     else if(m){ m.p+=dt/HAM_T;
       if(!S.held2&&m.p*HAM_T<BLIP){ S.meter=null; S.cue={type:'hamhold',t:0}; }
-      else if(!S.held2||m.p>=LATE) release(a); }
+      else if(!S.held2){ m.p-=sinceHold()/HAM_T; release(a); }
+      else if(m.p>=LATE) release(a); }
     else if(a.t>WAIT) release(a);
   }
   if(a.stage!=='fly'&&a.stage!=='foul') S.pose=spinPose(a,hamBall(S.x,a.phi));
