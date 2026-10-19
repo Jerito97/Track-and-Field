@@ -165,11 +165,12 @@ export async function onShare(code){
   try{ await navigator.clipboard.writeText(`${text} ${url}`); showTournament(code,'Copiado: pegalo en WhatsApp o donde quieras.'); }
   catch(e){ showTournament(code,`Pasales el código ${code} o este link: ${url}`); }
 }
-// play an event for the tournament (against the machines, as usual; only your mark counts)
+// play an event for the tournament (only your mark counts)
 export function playOnline(code,evId){
   G.mode='online'; G.code=code; G.evIdx=EVENTS.findIndex(e=>e.id===evId); G.sent=false; G.sending=null;
   store.set(STARTED,{pid:player().id,code,ev:evId});
-  buildAthletes(); newEvent(G.evIdx); startPlay();
+  // the races (100 m, hurdles) are run alone, without the machines; the field events keep them
+  buildAthletes(EVENTS[G.evIdx].type==='sprint'); newEvent(G.evIdx); startPlay();
 }
 // the event ended (mark, or null for a foul / leaving halfway): send it, keep it for later if offline
 export function finishOnline(mark){
