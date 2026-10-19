@@ -31,14 +31,14 @@ const foulX=ev=>jumps(ev)?ev.line-LJ_FOOT:ev.line;
 // triple jump: the sand starts TJ_SAND m past the board (the hop and the step land on the runway before it); the
 // step never lands closer than TJ_STEP_MAX m from the board's edge (any extra goes into the jump), and the jump always
 // reaches the sand
-export const TJ_SAND=13, TJ_PIT=28;
+export const TJ_SAND=13, TJ_PIT=30;
 const TJ_STEP_MAX=12.4;
 // hop / step contact: pressed within TJ_OK s of the foot touching down = perfect, nothing left TJ_EARLY s before or
 // TJ_LATE s after; the athlete waits on the ground (slowly) up to TJ_LATE s, then stumbles on
 const TJ_OK=.06, TJ_EARLY=.25, TJ_LATE=.18;
 export const qFoot=e=>Math.abs(e)<=TJ_OK?1:e<0?clamp(1+(e+TJ_OK)/(TJ_EARLY-TJ_OK),0,1):clamp(1-(e-TJ_OK)/(TJ_LATE-TJ_OK),0,1);
 // bound flights (hop, step): length per m/s of speed, time and height
-const TJ_BOUND={hop:{L:.6,T:v=>.42+.012*v,h:v=>.35+.02*v,side:'L'},step:{L:.48,T:v=>.36+.01*v,h:v=>.3+.015*v,side:'R'}};
+const TJ_BOUND={hop:{L:.6,T:v=>.42+.012*v,h:v=>.35+.02*v,side:'R'},step:{L:.48,T:v=>.36+.01*v,h:v=>.3+.015*v,side:'L'}};
 export function updateField(dt){
   const ev=S.ev;
   if(S.phase==='ready'){ const k=armsFor(); S.pose=k==='jav'?{...POSE.stand,arms:[{a:-2.4,b:.55},POSE.stand.arms[1]]}:(k==='pole'?{...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]}:POSE.stand); return; }
@@ -125,7 +125,7 @@ function leapTo(a,len){ const ev=S.ev; len=Math.max(.5,len);
 function bound(stage,v,len){ const B=TJ_BOUND[stage];
   S.act={k:'tj',stage,t:0,T:B.T(v),h:B.h(v),v,x0:S.x,x1:S.x+Math.max(1,len),side:B.side,extra:(S.act&&S.act.extra)||0};
   S.phase='act'; }
-// the hop / step button: the foot that touches down (left for the hop, right for the step)
+// the hop / step button: the foot that touches down (right for the hop, left for the step)
 export function footTap(side){
   const a=S.act; if(S.phase!=='act'||!a||a.k!=='tj'||a.q!=null||!(a.stage==='hop'||a.stage==='step'||a.stage==='contact')) return;
   if(side!==a.side){ a.q=0; S.cue=null; return 'x'; }
@@ -137,7 +137,7 @@ export function footTap(side){
 }
 // the contact resolved: how much speed it kept sets the next bound (or the jump)
 function footDown(a){
-  const ev=S.ev, q=a.q||0, v=q<.15?a.v*.55:a.v*(.82+.16*q);
+  const ev=S.ev, q=a.q||0, v=q<.15?a.v*.55:a.v*(.8+.24*q);  // right on time: a little more speed
   judge(q); if(q<.15){ S.pops.push({text:'¡TRASTABILLASTE!',t:0,dur:.9,col:'#ff5a3c',sub:'',big:.55,small:true}); tone(160,.3,'sawtooth',.05); }
   S.v=v; S.y=0;
   if(a.from==='hop') bound('step',v,TJ_BOUND.step.L*v);

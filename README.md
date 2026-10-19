@@ -80,7 +80,7 @@ Solo para el jugador administrador (Jero): en su perfil aparece el botón **Admi
 
 Una prueba nueva se agrega primero a `BETA` en `js/config.js` (con `beta:true`): solo el administrador la ve, en el carrusel de Pruebas con la etiqueta EN PRUEBA, y la puede jugar. No aparece en torneos, supervivencia, Récords ni perfiles, y sus marcas no se mandan al Top 10. Para publicarla, se pasa de `BETA` a `EVENTS` (con su tabla de puntos en `POINTS`, `js/game/scoring.js`, y sus marcas posibles en `RANGE` de `api/t.js`).
 
-Ahora en prueba: **Salto triple**. Carrera y pique como en largo, pero la arena está a 13 m de la tabla: en el aire aparece un botón naranja (primero a la izquierda, después a la derecha) que se toca justo cuando el pie apoya en la pista; un buen apoyo mantiene la velocidad y uno malo (apurado, tarde o del otro lado) hace trastabillar y acorta el salto siguiente. El último salto es como en largo, con la estirada en el punto más alto. La marca se mide desde la tabla.
+Ahora en prueba: **Salto triple**. Carrera y pique como en largo, pero la arena está a 13 m de la tabla: en el aire aparece un botón naranja del lado del pie que apoya (primero el derecho, después el izquierdo) que se toca justo cuando el pie toca la pista; cuanto más justo, más impulso y uno malo (apurado, tarde o del otro lado) hace trastabillar y acorta el salto siguiente. El último salto es como en largo, con la estirada en el punto más alto. La marca se mide desde la tabla.
 
 ## Supervivencia
 
