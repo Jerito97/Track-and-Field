@@ -193,11 +193,11 @@ export function updateAct(dt){
         if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qPole(S.meter.p-PV_LAG/(a.Trise*.7)); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
       if(a.pushed&&a.t>=Math.max(a.Trise*.7,.5)||a.t>a.Trise+.35){ S.cue=null; S.meter=null; a.stage='over'; a.t=0; a.yo=S.y; a.bonus=.7*(a.q2||0)-.25; }
     } else if(a.stage==='over'){
-      const u=Math.min(1,a.t/.45); S.y=a.yo+Math.max(0,a.bonus+.4)*Math.sin(u*Math.PI/2); S.x+=dt*1.2; S.rot=-Math.PI*.95+Math.PI*.3*u; S.pose=POSE.pvOver;  // upside down at the top, then rolling over the bar: feet over first, back toward the mat
+      const u=Math.min(1,a.t/.45); S.y=a.yo+Math.max(0,a.bonus+.4)*Math.sin(u*Math.PI/2); S.x+=dt*1.2; S.rot=-Math.PI*.95-Math.PI*.55*u; S.pose=POSE.pvOver;  // upside down at the top: the feet go over the bar first, then the body turns to face the pole
       if(u>=1){ a.stage='fall'; a.t=0; a.vy=0; a.peak=S.y; }
     } else if(a.stage==='fall'){
-      a.vy+=GRAV*dt; S.y-=a.vy*dt; S.x+=dt*1.6; S.rot+=(-Math.PI*.5-S.rot)*Math.min(1,dt*5); S.pose=POSE.pvOver;  // falling on the back, head toward the bar: as on the mat
-      if(S.y<=.85){ S.y=.85; S.rot=0; S.pose=POSE.lie; const m=Math.floor((a.H+a.bonus+.1)*100)/100; S.bar=m; landed(m); }
+      a.vy+=GRAV*dt; S.y-=a.vy*dt; S.x+=dt*1.6; S.rot+=(-Math.PI*1.5-S.rot)*Math.min(1,dt*5); S.pose=POSE.pvOver;  // falling on the back, feet toward the pole: as on the mat
+      if(S.y<=.85){ S.y=.85; S.rot=-Math.PI*1.5; S.pose=POSE.lie; const m=Math.floor((a.H+a.bonus+.1)*100)/100; S.bar=m; landed(m); }
     }
   } else if(a.k==='pvfoul'){
     S.x+=a.v*Math.max(0,1-a.t*1.2)*dt; S.pose=POSE.stumble; if(S.x>ev.line+.6) S.y=Math.min(.85,S.y+dt*3);
