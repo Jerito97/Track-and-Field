@@ -51,7 +51,7 @@ export function updateField(dt){
         if(m.on){ m.p=Math.min(1.25,m.p+dt/POLE_T); if(held&&!m.wasHeld){ m.wasHeld=held; plantPole(); return; } }
         m.wasHeld=held; }
     }
-    if(S.phase==='run'&&S.x>=foulX(ev)){ S.x=foulX(ev); fieldFoul(); }
+    if(S.phase==='run'&&S.x>=foulX(ev)+(ev.kind==='lj'?S.v*PV_LAG:0)){ S.x=foulX(ev); fieldFoul(); }
     return;
   }
   if(S.phase==='act') updateAct(dt);
@@ -65,12 +65,15 @@ export function fieldFoul(){
 export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
-    if(a&&a.k==='lj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,a.t/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
+    if(a&&a.k==='lj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.mark=Math.max(.5,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; a.x1=ev.line+a.mark; }
     return;
   }
   if(S.phase!=='run'||!S.zone) return;
   S.cue=null;
+  // a take-off pressed just as the foot reached the board arrives a moment late: within that moment it counts as
+  // taking off right at the board (see the foul check)
+  if(ev.kind==='lj'&&S.x>foulX(ev)) S.x=foulX(ev);
   const d=Math.max(0,foulX(ev)-S.x), v=S.v;  // foot to the board
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=Math.max(.5,base+LJ_NOPUSH);

@@ -62,6 +62,13 @@ export function drawField(V){
     if(V.bar){ const by=GY-V.bar*s; ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ux-12,by); ctx.lineTo(ux+12,by); ctx.stroke(); ctx.strokeStyle='#ffcf1f'; ctx.lineWidth=3; ctx.stroke(); }
   }
   if(ev.bands&&!V.act) ljBands(V,X,GY);
+  // long jump flight: the path of the jump (dotted), the target at its top and the star going along it; press both
+  // when the star reaches the target to stretch
+  if(ev.kind==='lj'&&V.act&&V.act.k==='lj'&&V.act.u!=null&&!V.act.tapped&&!V.replay&&V.act.u<1){ const a=V.act, up=2.3,
+      P=u=>[X(a.x0+(a.x1-a.x0)*u),GY-(4*a.h*u*(1-u)+up)*s];
+    ctx.save(); ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=2; ctx.setLineDash([4,5]); ctx.beginPath();
+    for(let k=0;k<=24;k++){ const [x,y]=P(.1+.8*k/24); k?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); ctx.restore();
+    const [tx,ty]=P(.5), [sx,sy]=P(a.u); target(tx,ty); drawStar(sx,sy,8,a.u/.5); }
   // long jump take-off board, on top of the coloured zones so it always stands out: a white board across the runway
   // with a dark outline, and the foul line (red-and-white plasticine) at its front edge; then this attempt's footprint
   if(ev.kind==='lj'){ const bx=X(ev.line), bw=Math.max(10,.3*s);
