@@ -98,7 +98,10 @@ export function drawField(V){
       if(!V.replay){ const tx=cx-Math.cos(a)*L/2, ty=cy+Math.sin(a)*L/2, hx=cx+Math.cos(a)*L/2, hy=cy-Math.sin(a)*L/2; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
     else if(!V.jv){ if(!fig.drawnJav) javelin(fig.hand[0]+6,fig.hand[1]-4,.25,JAV_L*s); }
     else if(V.jv.held){ if(!fig.drawnJav){ const a=.55; javelin(fig.hand[0]+Math.cos(a)*.5*s,fig.hand[1]-Math.sin(a)*.5*s,a,JAV_L*s); } }
-    else { let cx=X(V.jv.x), cy=GY-V.jv.y*s; if(V.jv.stuck){ cx-=Math.cos(V.jv.a)*.9*s; cy=GY+Math.sin(V.jv.a)*.9*s; } javelin(cx,cy,V.jv.a,JAV_L*s); }
+    // flying, the point follows the path (jv.x, jv.y is the point); stuck, it goes into the grass right there, where the
+    // mark and the flag are
+    else { const a=V.jv.a, h=JAV_L*s/2; let cx=X(V.jv.x)-Math.cos(a)*h, cy=GY-V.jv.y*s+Math.sin(a)*h;
+      if(V.jv.stuck){ cx=X(V.jv.x)-Math.cos(a)*.9*s; cy=GY+Math.sin(a)*.9*s; } javelin(cx,cy,a,JAV_L*s); }
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
   S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle='#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill(); });

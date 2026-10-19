@@ -14,7 +14,9 @@ import {startReplay} from './replay.js';
 const POLE_T=1.0, PV_REACH=3.5;
 // pole vault and javelin timing (plant, release, throw): a small window around the target counts as perfect, then it
 // drops off, a bit faster when late than when early; LAG: the time between touching the screen and the game noticing it
-const PV_OK=.07, PV_LAG=.03, JAV_T=.7;  // JAV_T: seconds for the star to reach the javelin's tip
+const PV_OK=.07, PV_LAG=.03, JAV_T=.7;
+// javelin's point when it leaves the hand: ahead of the athlete and up (m)
+const JAV_TIP_X=1.55, JAV_TIP_Y=2.6;  // JAV_T: seconds for the star to reach the javelin's tip
 export const qPole=p=>{ const d=p-1; return Math.abs(d)<=PV_OK?1:d<0?clamp(1+(d+PV_OK)/.45,0,1):clamp(1-(d-PV_OK)/.2,0,1); };
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
 // within .44-.56), fading to nothing at .2 and .8
@@ -133,14 +135,15 @@ export function updateAct(dt){
     if(S.jv.held){
       S.x+=S.v*dt; S.pose=a.t<.22?POSE.javBack:POSE.javRel;
       if(S.x>=ev.line){ S.x=ev.line; S.jv=null; S.act=null; S.phase='run'; fieldFoul(); return; }
-      if(a.t>=.3){ S.jv.held=false; a.T=1.5+.045*a.R; S.jv.x=S.x+.4; S.jv.x0=S.jv.x; S.jv.t=0; noise(.25,.12,2500); tone(300,.3,'triangle',.04,.5); }
+      if(a.t>=.3){ S.jv.held=false; a.T=1.5+.045*a.R; S.jv.x=S.x+JAV_TIP_X; S.jv.x0=S.jv.x; S.jv.t=0; noise(.25,.12,2500); tone(300,.3,'triangle',.04,.5); }
     } else {
       S.v=Math.max(0,S.v-S.v*2*dt); S.x+=S.v*dt; S.pose=POSE.javRel;  // ~3.5 m forward after letting go
       // still carried forward after letting go: crossing the line makes the throw a foul (shown when it lands)
       if(!a.over&&S.x>ev.line){ a.over=true; tone(160,.45,'sawtooth',.06); S.pops.push({text:'¡PISASTE!',t:0,dur:1,col:'#ff5a3c',sub:'',big:.6,small:true}); }
       if(!S.jv.stuck){
-        S.jv.t+=dt; const u=Math.min(1,S.jv.t/a.T), top=a.R*.16;
-        S.jv.x=S.jv.x0+a.R*u; S.jv.y=1.9*(1-u)+4*top*u*(1-u); S.jv.a=Math.atan2(-1.9+4*top*(1-2*u),a.R);
+        // the point's path: from the hand (the point ahead of it) to the grass, landing where it did before
+        S.jv.t+=dt; const u=Math.min(1,S.jv.t/a.T), top=a.R*.16, R=a.R-(JAV_TIP_X-.4);
+        S.jv.x=S.jv.x0+R*u; S.jv.y=JAV_TIP_Y*(1-u)+4*top*u*(1-u); S.jv.a=Math.atan2(-JAV_TIP_Y+4*top*(1-2*u),R);
         S.ppm+=(16-S.ppm)*Math.min(1,dt*1.6);
         if(u>=1){ S.jv.stuck=true; S.jv.y=0; S.jv.a=Math.min(S.jv.a,-.5); S.landX=S.jv.x; tone(140,.12,'square',.05); landed(a.over?null:Math.floor((S.jv.x-ev.line)*100)/100); }
       }
