@@ -48,7 +48,8 @@ function showSurvEvent(){
   const s=R(); setS(null); setScreen('menu');
   G.evIdx=s.order[s.k]; const ev=EVENTS[G.evIdx];
   buildAthletes(false,{name:'Máquina',target:targets(s.round)});
-  const done=s.order.map((i,k)=>`<span class="s-step${k<s.k?' ok':k===s.k?' now':''}">${EVENTS[i].tag}</span>`).join('');
+  // the round's progress: a dot per event (done, this one, still to come)
+  const done=s.order.map((i,k)=>`<span class="s-step${k<s.k?' s-done':k===s.k?' s-now':''}" title="${EVENTS[i].name}">${k<s.k?'✓':k+1}</span>`).join('');
   showOv(card(`RONDA ${s.round}`,`${ev.name} · ${s.k+1}/5`,`
     <div class="row2"><div class="pict${THUMBS[ev.id]?' img':''}">${art(G.evIdx)}</div>
       <div class="s-side"><div class="s-steps">${done}</div>
