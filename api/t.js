@@ -35,10 +35,10 @@ import {Buffer} from 'node:buffer';
 import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
 import {neon} from '@neondatabase/serverless';
 
-const EVENTS=['100','lj','110h','pv','jav','tj','ham'];
+const EVENTS=['100','lj','110h','pv','jav','tj','ham','hj','sp'];
 const SPRINT=['100','110h'];  // lower is better
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
-const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250]};
+const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250],hj:[0,5],sp:[0,60]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
 const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_GROUP=50, MAX_GROUPS=20;
 
@@ -72,11 +72,14 @@ function db(){
     // each player's best of each year and of each month (period '2026', '2026-10'), for the boards of this year and month
     await sql`create table if not exists pmarks(player_id text not null references users(id) on delete cascade, ev text not null,
       period text not null, mark double precision not null, made_at timestamptz not null default now(), rounds int, primary key(player_id,ev,period))`;
-    // one-time resets, each run once ever: the triple jump and the hammer start from scratch once published (the marks
+    // one-time resets, each run once ever: the triple jump and the hammer (and later the high jump and the shot put) start from scratch once published (the marks
     // they had were tests made while they were being tried out)
     await sql`create table if not exists migrations(id text primary key, done_at timestamptz not null default now())`;
     if((await sql`insert into migrations(id) values('reset-tj-ham-1') on conflict do nothing returning id`).length)
       await sql`delete from marks where ev in ('tj','ham')`;
+    // the same for the high jump and the shot put
+    if((await sql`insert into migrations(id) values('reset-hj-sp-1') on conflict do nothing returning id`).length){
+      await sql`delete from marks where ev in ('hj','sp')`; await sql`delete from pmarks where ev in ('hj','sp')`; }
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }

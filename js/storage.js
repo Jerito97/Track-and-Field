@@ -13,12 +13,12 @@ const KEY='odb-players', HISTORY_MAX=200, TOP=5;
 export const COLORS=['#e8262d','#2f6fe0','#ffd23a','#1f9e54','#8e4fd6','#ff7a1a','#2bc4e0','#ff5fa2','#8bd13a','#8a5a3b','#1c2a55','#2b2c2d'];
 const DB=(()=>{ const d=store.get(KEY,null); return d&&Array.isArray(d.list)?d:{list:[],cur:null}; })();
 const save=()=>store.set(KEY,DB);
-// one-time resets: the triple jump and the hammer start from scratch once published (the marks they had were tests
+// one-time resets: the triple jump and the hammer (later the high jump and the shot put) start from scratch once published (the marks they had were tests
 // made while they were being tried out). Each player keeps the ids of the resets already done (new players: all)
-const RESETS=[{id:'tj-ham-1',evs:['tj','ham']}];
+const RESETS=[{id:'tj-ham-1',evs:['tj','ham']},{id:'hj-sp-1',evs:['hj','sp']}];
 DB.list.forEach(p=>{ const done=p.resets||[];
   RESETS.forEach(r=>{ if(done.includes(r.id)) return;
-    r.evs.forEach(e=>{ delete p.rec[e]; if(p.best) delete p.best[e]; if(p.sent) delete p.sent[e]; });
+    r.evs.forEach(e=>{ delete p.rec[e]; if(p.best) delete p.best[e]; if(p.sent) delete p.sent[e]; if(p.pb) delete p.pb[e]; if(p.psent) Object.keys(p.psent).forEach(k=>{ if(k.startsWith(e+'|')) delete p.psent[k]; }); });
     p.history=(p.history||[]).filter(h=>!r.evs.includes(h.ev)); });
   p.resets=RESETS.map(r=>r.id); });
 if(DB.list.length) save();
