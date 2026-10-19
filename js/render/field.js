@@ -7,7 +7,7 @@ import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
 import {TJ_PIT,TJ_SAND} from '../game/field.js';
-import {HAM_CAGE,HAM_CIRCLE,hamArc,hamBall,hamHands} from '../game/hammer.js';
+import {HAM_CAGE,HAM_CIRCLE,hamBall,hamHands} from '../game/hammer.js';
 import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
@@ -176,8 +176,8 @@ function hamField(V,X,GY,top){
   ctx.fillStyle='#9aa0aa'; ctx.beginPath(); ctx.ellipse(cx,GY+3,r,10.5,0,0,Math.PI*2); ctx.fill();
   ctx.fillStyle='rgba(255,255,255,.18)'; ctx.beginPath(); ctx.ellipse(cx-r*.25,GY+1,r*.5,4,0,0,Math.PI*2); ctx.fill();
 }
-// the hammer: ball and cable (in the hands while turning, on the ground before), the release arc in the last turn;
-// returns whether it's on the far side, and how to draw it
+// the hammer: ball and cable (in the hands while turning, on the ground before); holding both, the star running along
+// the cable to the ball. Returns whether it's on the far side, and how to draw it
 function hamDraw(V,X,GY){
   const s=V.ppm, a=V.act, P=(x,y)=>[X(x),GY-y*s];
   const ball=(x,y)=>{ ctx.fillStyle='#262a33'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,Math.max(4,.13*s),0,Math.PI*2); ctx.fill(); ctx.stroke();
@@ -189,11 +189,9 @@ function hamDraw(V,X,GY){
   if(!a||a.k!=='ham'){ const b=[V.x-.95,.13]; return {far:true,draw:()=>{ cable(P(...hamHands(V.x,b)),P(...b)); ball(...P(...b)); }}; }
   const b=hamBall(V.x,a.phi), h=hamHands(V.x,b);
   return {far:b[2]>0,draw:()=>{ cable(P(...h),P(b[0],b[1])); ball(...P(b[0],b[1])); },arc:()=>{
-    // last turn: where to let go, on the ball's path (green: perfect; yellow: still in the sector)
-    const arc=!V.replay&&hamArc(S.act);
-    if(arc){ ctx.save(); ctx.lineCap='round';
-      const seg=(w,col,lw)=>{ ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.beginPath(); for(let k=0;k<=16;k++){ const p=hamBall(V.x,arc.at-w+2*w*k/16), [x,y]=P(p[0],p[1]); k?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); };
-      seg(arc.foul,INK,7); seg(arc.foul,'#ffd23a',4); seg(arc.ok,INK,9); seg(arc.ok,'#2fd166',6); ctx.restore(); } }};
+    const m=V.meter; if(V.replay||!m||m.k!=='ham') return;
+    const [hx,hy]=P(...h), [bx,by]=P(b[0],b[1]), p=Math.min(m.hit??m.p,1.25);
+    target(bx,by); drawStar(hx+(bx-hx)*p,hy+(by-hy)*p,8,p,true); }};
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.
