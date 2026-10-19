@@ -12,10 +12,9 @@ import {startReplay} from './replay.js';
 // PV_REACH m before the box; press and hold both buttons when the star is at the tip to plant it (the closer, the
 // higher), keep holding up the swing and let go when the star reaches the other end
 const POLE_T=1.0, PV_REACH=3.5;
-export const qOf=p=>p<=1?clamp(p,0,1):Math.max(0,1-(p-1)*5);
-// pole vault timing (plant and release): a small window around the target counts as perfect, then it drops off,
-// a bit faster when late than when early; LAG: the time between touching the screen and the game noticing it
-const PV_OK=.07, PV_LAG=.03;
+// pole vault and javelin timing (plant, release, throw): a small window around the target counts as perfect, then it
+// drops off, a bit faster when late than when early; LAG: the time between touching the screen and the game noticing it
+const PV_OK=.07, PV_LAG=.03, JAV_T=.7;  // JAV_T: seconds for the star to reach the javelin's tip
 export const qPole=p=>{ const d=p-1; return Math.abs(d)<=PV_OK?1:d<0?clamp(1+(d+PV_OK)/.45,0,1):clamp(1-(d-PV_OK)/.2,0,1); };
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
 // within .44-.56), fading to nothing at .2 and .8
@@ -42,7 +41,9 @@ export function updateField(dt){
     S.x+=sp*dt; S.legP+=sp*dt*2.4;
     if(S.zone&&ev.kind==='jav'){
       S.pose=S.meter?POSE.javBack:runPose(S.legP,Math.min(1,sp/4),'jav');
-      if(S.meter){ S.meter.p+=dt/.7; if(S.meter.p>=1.2) javThrow(); }
+      // already holding both when the zone starts: the star starts right away
+      if(!S.meter&&S.held2){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
+      if(S.meter){ S.meter.p+=dt/JAV_T; if(S.meter.p>=1.2) javThrow(); }
     } else {
       S.pose=S.v>.2?runPose(S.legP,Math.min(1,S.v/4),armsFor()):S.pose;
       if(S.zone&&ev.kind==='pv'){ const m=S.meter, held=!!S.held2;
@@ -88,7 +89,7 @@ export function plantPole(){
 }
 export function javThrow(){
   if(S.phase!=='run'||!S.meter) return;
-  const q=S.meter.p>=1.2?0:qOf(S.meter.p); S.meter.hit=S.meter.p; judge(q);
+  const q=S.meter.p>=1.2?0:qPole(S.meter.p-PV_LAG/JAV_T); S.meter.hit=S.meter.p; judge(q);
   S.act={k:'jav',t:.15,R:Math.max(8,9.0*S.v*(.72+.28*q))}; S.jv={held:true,x:S.x,y:1.9,a:.55}; S.v=Math.min(S.v,5.5); S.phase='act'; S.cue=null;
   setTimeout(()=>{ if(S&&S.meter&&S.meter.k==='jav') S.meter=null; },300);
 }
