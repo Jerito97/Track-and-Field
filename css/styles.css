@@ -409,3 +409,33 @@ tr.me td{background:var(--red)}
 .u-item i{font-style:normal}
 .a-stats{grid-template-columns:repeat(5,minmax(0,1fr))}@media (max-width:620px){.a-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}.a-del{color:#ff6b6b}
 .a-card .p-pin{letter-spacing:.1em;font-size:1.2rem}
+/* ===== phone upright: menus in a column, sizes by width ===== */
+@media (orientation:portrait){
+  #ov.menu{align-items:center}
+  .mm{gap:12px}
+  .m-top{height:auto;gap:8px}
+  .m-logo{font-size:clamp(.95rem,5.4vw,1.5rem);padding:.3em 1.2em .3em .45em;flex:1 1 auto;min-width:0}
+  .m-app{height:1.5em;width:1.5em;flex:none}
+  .m-recs{flex:none}
+  .m-title,.m-recs{font-size:clamp(.95rem,5.4vw,1.4rem);padding:.35em .6em .35em 1.1em}
+  .m-modes{height:auto;grid-template-columns:1fr;gap:10px}
+  .m-mode{flex-direction:row;height:clamp(96px,17vh,150px);align-items:stretch}
+  .m-mart{flex:0 0 52%}
+  .m-mode b{align-self:center;font-size:clamp(1.3rem,7vw,2rem);padding:0 .6em;white-space:normal;line-height:1}
+  .m-hero{grid-template-columns:1fr;height:auto;padding:0 0 12px}
+  .m-art{height:clamp(150px,26vh,240px);clip-path:none}
+  .m-info{padding:0 12px}
+  .m-info h1{font-size:clamp(2rem,10vw,3rem)}
+  .m-play{font-size:clamp(1.1rem,5.6vw,1.5rem)}
+  .m-rec{font-size:clamp(.9rem,4.4vw,1.2rem)}
+  .m-ev{height:clamp(90px,15vh,140px)}
+  .m-ev b{font-size:clamp(.85rem,4.2vw,1.2rem)}
+  .m-av{width:clamp(40px,12vw,56px);height:clamp(40px,12vw,56px)}
+  .m-nm b{font-size:clamp(1rem,5vw,1.4rem)}
+  .m-nm i,.u-more{font-size:clamp(.75rem,3.6vw,1rem)}
+  .m-lbl{font-size:clamp(.75rem,3.6vw,1rem)}
+  .u-h{width:clamp(28px,8vw,40px);height:clamp(28px,8vw,40px)}
+  .m-snd{width:clamp(40px,12vw,56px);height:clamp(40px,12vw,56px)}
+  .row2{grid-template-columns:1fr}
+  .s-final{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

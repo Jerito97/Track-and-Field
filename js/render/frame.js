@@ -1,5 +1,5 @@
 // Frame composition
-import {ctx,DPR,LH,LW,OX,OY,SC,SH,SW} from '../canvas.js';
+import {ctx,DPR,LH,LW,OX,OY,PORTRAIT,SC,SH,SW} from '../canvas.js';
 import {snap} from '../game/replay.js';
 import {S} from '../state.js';
 import {drawField} from './field.js';
@@ -21,6 +21,21 @@ export function frame(){
   else if(S&&S.ev){ const Vw=view(); if(S.ev.type==='sprint') drawSprint(Vw); else drawField(Vw); drawHud(Vw); }
   else drawIdle();
   ctx.restore();
+  if(PORTRAIT&&S&&S.ev&&S.phase!=='podium') drawPads();
+}
+// phone upright: below the game, two big buttons (left and right half of the screen, as when it's sideways); the side
+// the game asks for lights up, both when it asks for both
+function drawPads(){
+  const top=OY+LH*SC+14, bot=SH-18, h=bot-top; if(h<60) return;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const c=S.cue, on=side=>!!c&&!S.replay&&(c.type==='side'&&c.side===side||c.type==='both'||c.type==='hold');
+  const gap=12, w=(SW-gap*3)/2;
+  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&c.type==='both'?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':'#27c26a';
+    ctx.fillStyle=lit?col:'rgba(255,255,255,.07)'; ctx.strokeStyle=lit?'#fff':'rgba(255,255,255,.18)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.roundRect(x,top,w,h,22); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.font=`${Math.round(Math.min(w,h)*.28)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(side==='L'?'◀':'▶',x+w/2,top+h/2); });
+  if(c&&c.type==='num'){ ctx.fillStyle='rgba(255,255,255,.75)'; ctx.font='bold 13px Barlow, sans-serif'; ctx.textAlign='center'; ctx.fillText('Vallas: tocá los números arriba, en la pista',SW/2,top-5); }
 }
 // menus: dark navy background with the curves of a running track (no stadium), in the menu's colours
 export function drawIdle(){
