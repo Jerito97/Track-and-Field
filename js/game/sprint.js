@@ -73,7 +73,7 @@ export function updateSprint(dt){
       S.phase='wait'; S.wait=2.2;
       const rank=1+S.rivals.filter(r=>r.final!=null&&r.final<S.final).length;
       const isRec=rec[ev.id]==null||S.final<rec[ev.id];
-      pop(S.final.toFixed(2)+' s',{dur:2.2,big:1.1,sub:isRec?'¡NUEVO RÉCORD!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
+      pop(S.final.toFixed(2)+' s',{dur:2.2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
       S.next=finishSprintEvent;
     }
   } else if(S.t>40){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }

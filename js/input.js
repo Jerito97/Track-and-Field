@@ -3,6 +3,7 @@ import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
 import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,javThrow} from './game/field.js';
+import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
 import {S,screen} from './state.js';
@@ -17,6 +18,7 @@ export function onTap(pos){
   if(S.replay){ endReplay(); return; }
   const ph=S.phase;
   if(ph==='podium'){ podiumNext(); return; }
+  if(ph==='lap'){ lapNext(); return; }
   if(ph==='set') return;
   if(ph==='ready'){ startRun(); return; }
   if(!S.cue||S.cue.type==='hold') return;
@@ -54,14 +56,14 @@ export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) retur
 // letting go of either button throws
 export function holdEnd(){ setHeld2(); if(screen==='play'&&S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
 export function initInput(){
-  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&backHit(e)) return; const three=!!(S&&S.cue&&S.cue.type==='num'); onTap(zoneOf(e.clientX,three)); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
+  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&S.phase!=='lap'&&backHit(e)) return; const three=!!(S&&S.cue&&S.cue.type==='num'); onTap(zoneOf(e.clientX,three)); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
   const relHold=e=>{ holdN=Math.max(0,holdN-1); down.delete(e.pointerId); holdEnd(); };
   addEventListener('pointerup',relHold); addEventListener('pointercancel',relHold);
   addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter'){ kbHold=false; holdEnd(); } });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
   addEventListener('keydown',e=>{
     if(screen!=='play'||e.repeat) return; const k=e.key.toLowerCase();
-    if((k==='escape'||k==='p')&&S&&S.phase!=='podium'&&!S.replay){ e.preventDefault(); showPause(); return; }
+    if((k==='escape'||k==='p')&&S&&S.phase!=='podium'&&S.phase!=='lap'&&!S.replay){ e.preventDefault(); showPause(); return; }
     let pos=null;
     if(k==='arrowleft'||k==='a'||k==='z') pos='L';
     else if(k==='arrowright'||k==='d'||k==='x') pos='R';

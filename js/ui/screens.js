@@ -5,6 +5,7 @@ import {$,OV} from '../canvas.js';
 import {CHARS,EVENTS,INK} from '../config.js';
 import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
+import {startLap} from '../game/lap.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
@@ -221,12 +222,16 @@ export function endEvent(vals){
   const ev=S.ev; G.res[ev.id]=vals;
   // your result goes to your player's history, top 5 and records
   const mine=vals[0], rows=sortRows(ev,vals), mi=rows.findIndex(r=>r.a.me);
+  // world record: better than the first of the world top 10 (or, without it, the best on this device)
+  const top=cachedTop(ev.id), wr=top?(top[0]?top[0].mark:null):worldRec(ev)?.v, sprint=ev.type==='sprint';
+  const world=mine!=null&&(wr==null||(sprint?mine<wr:mine>wr));
   const newRec=recordEvent(ev,mine,mine==null?null:place(rows,mi,r=>fmt(ev,r.v)),ATH.length,G.mode);
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   if(G.mode==='online') finishOnline(mine);
   if(newRec) syncMarks();
-  showOv(table(ev.tag,newRec?'¡Nuevo récord!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
+  const results=()=>showOv(table(ev.tag,world?'¡Récord mundial!':newRec?'¡Nuevo récord personal!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
+  if(world) startLap(ev,mine,results); else results();
 }
 export function afterResults(){
   const ev=S.ev;

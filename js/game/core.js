@@ -81,7 +81,7 @@ export function update(dt){
   S.clock+=dt; S.phaseT=(S.phaseT||0)+dt;
   S.fx=S.fx.filter(f=>(f.t+=dt)<(f.k==='sand'?1.2:.45));
   S.pops=S.pops.filter(p=>{ p.t+=dt; return p.hold||p.t<p.dur; });
-  if(S.phase==='podium') return;
+  if(S.phase==='podium'||S.phase==='lap') return;
   if(S.cue) S.cue.t+=dt;
   if(S.pend&&S.clock-S.pend.t>.35){ S.pend=null; }
   if(S.replay){ updateReplay(dt); return; }
