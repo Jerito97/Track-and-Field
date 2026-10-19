@@ -78,7 +78,7 @@ Solo para el jugador administrador (Jero): en su perfil aparece el botón **Admi
 
 ## Supervivencia
 
-Las 5 pruebas en orden al azar contra una sola máquina; cada ronda de 5 la máquina mejora (sus marcas por ronda en `LEVELS` de `js/ui/survival.js`, medidas con jugadores simulados: ronda 1 fácil, 3 como un jugador casual, 5 como uno bueno, 7 casi experto, 9 experto y 1% más difícil cada ronda después). Hay que ganarle o empatarle en cada prueba (en largo, garrocha y jabalina, el mejor de 3 intentos); la primera que se pierde termina la partida. Cada prueba ganada suma sus puntos (la tabla de los torneos). La mejor partida queda en el perfil y en el Top 10 mundial (pestaña Supervivencia de Récords), con la ronda a la que llegó.
+Las 5 pruebas en orden al azar contra una sola máquina; cada ronda de 5 la máquina mejora (sus marcas por ronda en `LEVELS` de `js/ui/survival.js`, medidas con jugadores simulados: ronda 1 fácil, 4 como un jugador casual, 8 como uno bueno, 12 casi experto, 16 experto y 0.5% más difícil cada ronda después). Hay que ganarle o empatarle en cada prueba (en largo, garrocha y jabalina, el mejor de 3 intentos); la primera que se pierde termina la partida. Cada prueba ganada suma sus puntos (la tabla de los torneos). La mejor partida queda en el perfil y en el Top 10 mundial (pestaña Supervivencia de Récords), con la ronda a la que llegó.
 
 ## Jugadores
 
