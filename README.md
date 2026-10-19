@@ -66,7 +66,7 @@ js/
 
 ## Menú
 
-Las pruebas son un carrusel: se deslizan con el dedo (o con las flechas rojas) y se ven unas 5 y media a la vez, así se nota que hay más. El torneo va al final. Para agregar una prueba alcanza con sumarla a `EVENTS` en `js/config.js`; con `nueva:true` su tarjeta muestra la etiqueta NUEVA.
+Las pruebas son un carrusel: se deslizan con el dedo (o con las flechas rojas) y se ven unas 5 y media a la vez, así se nota que hay más. El torneo va al final. Para agregar una prueba alcanza con sumarla a `EVENTS` en `js/config.js`; con `nueva:true` su tarjeta muestra la etiqueta NUEVA. Cada prueba tiene su ilustración en `assets/thumbs/` (`<id>.jpg` arriba, `<id>-sm.jpg` en la tarjeta; en `THUMBS` de `js/ui/screens.js` va dónde está el atleta para que el recorte no lo corte). Una prueba sin ilustración muestra el stickman dibujado.
 
 ## Jugadores
 

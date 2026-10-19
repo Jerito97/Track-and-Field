@@ -39,6 +39,13 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
   drawAthlete(g,s,ox,oy-(k==='lj'?s*.35:0)-(k==='pv'?s*.9:0),0,J,C,true,k==='pv'?-2.4:0);
   if(k==='jav'){ g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=4; g.beginPath(); g.moveTo(px*.04,px*.36); g.lineTo(px*.92,px*.1); g.stroke(); g.strokeStyle='#fff'; g.lineWidth=2; g.stroke(); g.restore(); }
 }
+// illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
+// keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
+const THUMBS={'100':'34% 30%','lj':'44% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','tour':'52% 30%'};
+const thumbKey=i=>i<EVENTS.length?EVENTS[i].id:'tour';
+const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.jpg" alt="" style="object-position:${pos}" decoding="async">`:`<canvas data-pict="${i}"></canvas>`; };
+let preloaded=false;
+const preload=()=>{ if(preloaded) return; preloaded=true; Object.keys(THUMBS).forEach(k=>{ new Image().src=`assets/thumbs/${k}.jpg`; }); };
 // main menu: selected event (0-4) or tournament (5), remembered between visits
 // the tournament card comes after the events (index TOUR)
 const TOUR=EVENTS.length;
@@ -61,14 +68,14 @@ export function showMenu(){
     ?`<div><span class="m-ic">${ICON.medal}</span><span>Mejor torneo</span><b>${rec.tour?rec.tour+' pts':'—'}</b></div><div><span class="m-ic">${ICON.cup}</span><span>Pruebas</span><b>${EVENTS.length}</b></div>`
     :`<div><span class="m-ic">${ICON.medal}</span><span>Récord personal</span><b>${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</b></div><div><span class="m-ic">${ICON.globe}</span><span>Récord mundial</span><b id="wr">${wrText(ev)}</b></div>`;
   // events marked nueva:true in config.js (invented ones) get a small NUEVA tag
-  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"><canvas data-pict="${i}"></canvas><b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
-    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="${TOUR}" aria-pressed="${tour}"><canvas data-pict="${TOUR}"></canvas><b>TORNEO</b></button>`;
+  const cards=EVENTS.map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}">${art(i,true)}<b>${e.tag}</b>${e.nueva?'<i>Nueva</i>':''}</button>`).join('')
+    +`<button class="m-ev tour${tour?' on':''}" data-act="sel" data-i="${TOUR}" aria-pressed="${tour}">${art(TOUR,true)}<b>TORNEO</b></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
-    <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
+    <div class="m-art${THUMBS[thumbKey(menuSel)]?' img':''}">${art(menuSel)}</div>
     <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'}<button class="m-rec" data-act="board" data-i="${tour?0:menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button></div></div>
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button><button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>'}</div></div>
     <div class="m-stats">${stats}</div>
   </section>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
@@ -76,7 +83,7 @@ export function showMenu(){
     <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer></div>`,'menu');
-  initCarousel();
+  initCarousel(); preload();
   if(!tour) syncMarks().then(()=>loadTop(ev.id)).then(()=>{ const el=$('wr'); if(el&&EVENTS[menuSel]===ev) el.innerHTML=wrText(ev); },()=>{});
 }
 // carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
