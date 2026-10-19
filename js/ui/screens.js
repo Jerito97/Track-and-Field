@@ -22,7 +22,7 @@ import {finishOnline,leaveOnline,onClose,onCreate,onRepeat,showRepeat,onDays,onJ
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
-import {COLORS,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
+import {COLORS,lastPeriods,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
@@ -229,18 +229,21 @@ export function endEvent(vals){
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   if(G.mode==='online') finishOnline(mine);
-  const results=world=>showOv(table(ev.tag,world?'¡Récord mundial!':newRec?'¡Nuevo récord personal!':'Resultados',sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
-  // world record: only a new personal best can be one, and only if it beats everyone else in the world top 10, as the
-  // server has it right now (asked before sending your mark; a moment at most, else the board loaded when the event
-  // started). Without the board (no connection and never seen) it isn't one; events being tried out have no board
-  if(!newRec||mine==null||ev.beta){ results(false); if(newRec) syncMarks(); return; }
-  const me=player()?.id, wait=new Promise(r=>setTimeout(()=>r(cachedTop(ev.id)),2500));
-  Promise.race([loadTop(ev.id,true).catch(()=>cachedTop(ev.id)),wait]).then(top=>{
-    const others=(top||[]).filter(t=>t.player_id!==me).map(t=>t.mark), wr=others.length?(sprint?Math.min(...others):Math.max(...others)):null;
-    const world=!!top&&(wr==null||(sprint?mine<wr:mine>wr));
+  const lp={...lastPeriods};
+  const results=kind=>showOv(table(ev.tag,{world:'¡Récord mundial!',year:'¡Récord del año!',month:'¡Récord del mes!'}[kind]||(newRec?'¡Nuevo récord personal!':'Resultados'),sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
+  // records: world (all-time), this year's, this month's. Each only if it improved your own best of that time, and only
+  // if it beats everyone else on that board as the server has it right now (asked before sending your mark; a moment at
+  // most, else the board loaded when the event started). Without a board (no connection, never seen) it isn't one;
+  // events being tried out have no boards
+  const spans=[['',newRec],['year',lp.y],['month',lp.m]].filter(x=>x[1]).map(x=>x[0]);
+  if(mine==null||ev.beta||!spans.length){ results(); if(newRec) syncMarks(); return; }
+  const me=player()?.id, beats=top=>{ if(!top) return false; const o=top.filter(t=>t.player_id!==me).map(t=>t.mark); return !o.length||(sprint?mine<Math.min(...o):mine>Math.max(...o)); };
+  const ask=sp=>{ const wait=new Promise(r=>setTimeout(()=>r(cachedTop(ev.id,null,sp)),2500)); return Promise.race([loadTop(ev.id,true,null,sp).catch(()=>cachedTop(ev.id,null,sp)),wait]); };
+  Promise.all(spans.map(ask)).then(tops=>{
+    const won=spans.filter((sp,k)=>beats(tops[k])), kind=won.includes('')?'world':won.includes('year')?'year':won.includes('month')?'month':null;
     syncMarks();
     if(S!==game) return;  // left the game meanwhile (field events end from the round's table, off the play screen)
-    if(world) startLap(ev,mine,()=>results(true)); else results(false);
+    if(kind==='world') startLap(ev,mine,()=>results('world')); else results(kind);
   });
 }
 export function afterResults(){
@@ -281,7 +284,7 @@ OV.addEventListener('click',e=>{
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
   else if(a==='oshare') onShare(b.dataset.code);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
-  else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group);
+  else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);
   else if(a==='groups') showGroups();
   else if(a==='admin') showAdmin();
   else if(a==='auser') showAdminUser(b.dataset.id);

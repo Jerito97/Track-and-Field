@@ -65,19 +65,32 @@ export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(m
 export function updatePlayer(fields){ const p=player(); if(!p) return; Object.assign(p,fields); save(); }
 export function deletePlayer(id){ DB.list=DB.list.filter(p=>p.id!==id); if(DB.cur===id) DB.cur=DB.list[0]?.id||null; save(); bind(); }
 const better=(sprint,a,b)=>sprint?a<b:a>b;
+// the year and the month a moment belongs to, in Argentina's time (UTC-3), as the server counts them: ['2026', '2026-10']
+export const periods=t=>{ const d=new Date(t-3*3600000), y=String(d.getUTCFullYear()); return [y,y+'-'+String(d.getUTCMonth()+1).padStart(2,'0')]; };
+// your best of this year and this month in an event (pb[ev] = {y:{k,v,date,rounds}, m:{...}}); returns which improved
+function periodBest(p,id,mark,sprint,rounds){
+  const now=Date.now(), [y,m]=periods(now), pb=(p.pb||(p.pb={}))[id]||(p.pb[id]={}), out={};
+  [['y',y],['m',m]].forEach(([s,k])=>{ const o=pb[s]; if(!o||o.k!==k||better(sprint,mark,o.v)){ pb[s]={k,v:mark,date:now,rounds}; out[s]=true; } });
+  return out;
+}
+// what the last event improved, for the end of the event (this year's / this month's best)
+export let lastPeriods={};
 // an event finished: history, top 5 and personal record; returns true for a new personal record
 export function recordEvent(ev,mark,place,of,mode){
   const p=player(); if(!p) return false;
   p.history.unshift({ev:ev.id,mark,place,of,mode,date:Date.now()}); p.history.length=Math.min(p.history.length,HISTORY_MAX);
+  lastPeriods={};
   if(mark==null){ save(); return false; }
   const sprint=ev.type==='sprint', list=(p.best[ev.id]||[]).concat({v:mark,date:Date.now()});
   list.sort((x,y)=>sprint?x.v-y.v:y.v-x.v); p.best[ev.id]=list.slice(0,TOP);
   const isRec=p.rec[ev.id]==null||better(sprint,mark,p.rec[ev.id]); if(isRec) p.rec[ev.id]=mark;
+  lastPeriods=periodBest(p,ev.id,mark,sprint);
   save(); return isRec;
 }
 // a survival run ended: best points (and how many rounds it got through); returns true for a new best
 export function recordSurv(pts,rounds){ const p=player(); if(!p) return false;
-  const best=pts>0&&(p.rec.surv==null||pts>p.rec.surv); if(best){ p.rec.surv=pts; p.survBest={pts,rounds,date:Date.now()}; } save(); return best; }
+  const best=pts>0&&(p.rec.surv==null||pts>p.rec.surv); if(best){ p.rec.surv=pts; p.survBest={pts,rounds,date:Date.now()}; }
+  if(pts>0) periodBest(p,'surv',pts,false,rounds); save(); return best; }
 export function recordTour(pts,place){ const p=player(); if(!p) return;
   p.tours.unshift({pts,place,date:Date.now()}); if(pts>(p.rec.tour||0)) p.rec.tour=pts; save(); }
 // world record of an event: the best mark of any player on this device (machines don't count), with who set it

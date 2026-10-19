@@ -15,7 +15,7 @@ import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js'
 export function newEvent(idx){
   const ev=evAt(idx);
   // the world top 10 as it is before you play, ready for the end (a cold server can take seconds to answer then)
-  if(!ev.beta) loadTop(ev.id).catch(()=>{});
+  if(!ev.beta) ['','year','month'].forEach(sp=>loadTop(ev.id,false,null,sp).catch(()=>{}));
   setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,
      cue:null,last:null,streak:0,pend:null,fx:[],pops:[],clock:0,rot:0,fs:0,
      round:1,marks:ATH.map(()=>[]),snaps:[],replay:null});

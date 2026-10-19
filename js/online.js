@@ -40,7 +40,7 @@ export function forget(code){ store.set(KEY(),myTournaments().filter(c=>c!==code
 // link that opens the game straight into the tournament
 export const inviteLink=code=>{ const u=new URL(location.href); u.search='?t='+code; u.hash=''; return u.href; };
 // world top 10 of an event, and your marks for it
-export const getTop=(ev,group)=>call('GET',null,'?top='+encodeURIComponent(ev)+(group?'&group='+encodeURIComponent(group):''));
+export const getTop=(ev,group,span)=>call('GET',null,'?top='+encodeURIComponent(ev)+(group?'&group='+encodeURIComponent(group):'')+(span?'&span='+span:''));
 // groups of friends: your groups (with members), create, add a registered player, leave, remove (who created it)
 export const getGroups=async()=>(await call('POST',{action:'groups',token:tok()})).groups;
 export const createGroup=async name=>(await call('POST',{action:'gcreate',name,token:tok()})).id;

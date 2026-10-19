@@ -13,6 +13,7 @@
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date,rounds}, ...10]}  (top=surv: survival)
 //   POST {action:'marks', token, list:[{ev,mark,date,rounds}]} -> {ok}  (your marks for the world top 10; ev 'surv': survival points)
 //   GET  /api/t?top=100&group=ID                            -> {top:[...every member with a mark]}  (a group's board)
+//   GET  /api/t?top=100&span=year|month[&group=ID]          -> the same for this year / this month (Argentina's time)
 //   POST {action:'groups', token}                           -> {groups:[{id,name,owner_id,members:[{id,name,color}]}]}
 //   POST {action:'gcreate', token, name}                    -> {id}
 //   POST {action:'gadd', token, group, player}              -> {ok}   (any member adds a registered player)
@@ -68,6 +69,9 @@ function db(){
     await sql`create table if not exists groups(id text primary key, name text not null, owner_id text not null, created_at timestamptz not null default now())`;
     await sql`create table if not exists group_members(group_id text not null references groups(id) on delete cascade,
       player_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(group_id,player_id))`;
+    // each player's best of each year and of each month (period '2026', '2026-10'), for the boards of this year and month
+    await sql`create table if not exists pmarks(player_id text not null references users(id) on delete cascade, ev text not null,
+      period text not null, mark double precision not null, made_at timestamptz not null default now(), rounds int, primary key(player_id,ev,period))`;
     // one-time resets, each run once ever: the triple jump and the hammer start from scratch once published (the marks
     // they had were tests made while they were being tried out)
     await sql`create table if not exists migrations(id text primary key, done_at timestamptz not null default now())`;
@@ -193,7 +197,18 @@ async function adminOp(sql,b){
 }
 
 // world top 10, or (group) every member of a group with a mark
-async function top(sql,ev,group){
+// the year and the month a moment belongs to, in Argentina's time (UTC-3): ['2026', '2026-10']
+const periods=t=>{ const d=new Date(new Date(t).getTime()-3*3600000), y=String(d.getUTCFullYear()); return [y,y+'-'+String(d.getUTCMonth()+1).padStart(2,'0')]; };
+async function top(sql,ev,group,span){
+  // this year / this month: each player's best of that period
+  if(span==='year'||span==='month'){
+    const per=periods(Date.now())[span==='year'?0:1];
+    const rows=group
+      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} and m.period=${per}`
+      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id where m.ev=${ev} and m.period=${per}`;
+    const sp=SPRINT.includes(ev); rows.sort((a,b)=>(sp?a.mark-b.mark:b.mark-a.mark)||new Date(a.date)-new Date(b.date));
+    return {top:rows.slice(0,group?MAX_GROUP:10)};
+  }
   const rows=group
     ?(SPRINT.includes(ev)
       ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} order by m.mark asc, m.made_at asc limit ${MAX_GROUP}`
@@ -292,7 +307,7 @@ async function act(sql,b){
     }
     case 'marks': {
       // only a better mark replaces the one kept; the date is the day it was made (sent by the game, never in the future)
-      const u=await auth(sql,b.token), list=(Array.isArray(b.list)?b.list:[]).slice(0,20);
+      const u=await auth(sql,b.token), list=(Array.isArray(b.list)?b.list:[]).slice(0,40);
       for(const it of list){
         const ev=String(it?.ev||''), mark=Number(it?.mark); if(!okMark(ev,mark)) continue;
         const d=new Date(Number(it.date)||Date.now()), when=(d>new Date()||d<new Date('2025-01-01')?new Date():d).toISOString();
@@ -301,6 +316,13 @@ async function act(sql,b){
           on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark<marks.mark`;
         else await sql`insert into marks(player_id,ev,mark,made_at,rounds) values(${u.id},${ev},${mark},${when},${rounds})
           on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at, rounds=excluded.rounds where excluded.mark>marks.mark`;
+        // and the best of that year and that month (a mark can be one without being an all-time record)
+        for(const per of periods(when)){
+          if(SPRINT.includes(ev)) await sql`insert into pmarks(player_id,ev,period,mark,made_at) values(${u.id},${ev},${per},${mark},${when})
+            on conflict(player_id,ev,period) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark<pmarks.mark`;
+          else await sql`insert into pmarks(player_id,ev,period,mark,made_at,rounds) values(${u.id},${ev},${per},${mark},${when},${rounds})
+            on conflict(player_id,ev,period) do update set mark=excluded.mark, made_at=excluded.made_at, rounds=excluded.rounds where excluded.mark>pmarks.mark`;
+        }
       }
       return {ok:true};
     }
@@ -381,7 +403,7 @@ export default async function handler(req,res){
     if(req.method==='GET'){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
-      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&ev!=='surv') throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null)); }
+      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&ev!=='surv') throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');
       return res.status(200).json(v);
