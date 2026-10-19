@@ -4,7 +4,7 @@
 // Server answers that can be read (world top 10, players, tournaments) are kept too: without connection the game
 // shows the last ones seen, marked with the header x-offline. Sending things (results, records, logins) is never
 // kept: the game queues those itself and sends them when the connection is back.
-const CACHE='track-and-field-v1';  // one copy; old names are deleted on activate
+const CACHE='track-and-field-v2';  // one copy; old names are deleted on activate
 const SHELL=['./','index.html','manifest.webmanifest','css/styles.css','js/main.js'];
 
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())); });

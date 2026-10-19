@@ -5,24 +5,23 @@ import {drawChar} from '../draw/character.js';
 import {POSE} from '../poses.js';
 import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {POLE_ART} from '../assets.js';
-import {ATH,ME,S} from '../state.js';
+import {ATH,G,ME,S} from '../state.js';
 import {fieldPose} from '../stick.js';
 import {rec,STYLE} from '../storage.js';
 import {clamp,hash} from '../utils.js';
 import {drawStar,target} from './hud.js';
-import {drawBackdrop,drawBoards,drawPauseBtn,drawSky,drawStands,flag,GRASS,GRASS_L,javelin,shadow,TARTAN,TARTAN_D,upright} from './scenery.js';
+import {drawBackdrop,drawBoards,drawPauseBtn,drawStands,setTheme,flag,GRASS,GRASS_L,javelin,LINE,shadow,TARTAN,TARTAN_D,upright} from './scenery.js';
 import {txt} from './text.js';
 
 export function drawField(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s, sh=V.camY*s;
   const GY=264+sh;
   const excite=(S.phase==='act'||S.phase==='post'||V.replay)?1:.35;
-  // sky above the grandstand picture (seen when the camera rises): ends in the colour of the picture's top edge
-  if(!drawSky(V.cam*s*.2,sh)){
+  setTheme(G.mode==='surv');
+  // plain sky (only seen without the stadium pictures)
   const sky=ctx.createLinearGradient(0,sh-260,0,sh); sky.addColorStop(0,'#4aa6e8'); sky.addColorStop(1,'#ade9f6'); ctx.fillStyle=sky; ctx.fillRect(0,0,LW,LH);
-  if(sh>2){ ctx.fillStyle='#fff'; for(let i=0;i<5;i++){ const W2=LW+200, cx=((i*173-V.cam*2)%W2+W2)%W2-100, cy=50+i*26-sh*.15; ctx.beginPath(); ctx.ellipse(cx,cy,34,10,0,0,Math.PI*2); ctx.ellipse(cx+18,cy-6,20,10,0,0,Math.PI*2); ctx.fill(); } } }
   const stTop=24+sh, stBot=170+sh;
-  // grandstand picture (sky, roof, crowd, barrier wall), slower than the field; without it, the stands drawn in code
+  // grandstands and sky, slower than the field; without the pictures, the stands drawn in code
   if(!drawBackdrop(V.cam*s*.45,sh,stBot+14)){
     ctx.fillStyle='#e6e9ef'; ctx.fillRect(0,stTop-8,LW,8); ctx.fillStyle='#a9b0bd'; ctx.fillRect(0,stTop-2,LW,2);
     drawStands(V.cam*(s/34),stTop,stBot,excite,S.clock); drawBoards(V.cam,stBot,14,s); }
@@ -38,7 +37,7 @@ export function drawField(V){
     for(let m=10;m<=120;m+=10){ const x=X(ev.line+m); if(x<-40||x>LW+40) continue; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillRect(x-1,apTop,2,LH-apTop); txt(m+' m',x,apTop+12,'#fff',13); }
     if(lx>0){ ctx.fillStyle='#fff'; ctx.fillRect(0,GY+16,lx,2); ctx.fillRect(0,GY-26,lx,2); }
   } else {
-    ctx.fillStyle='#fff'; ctx.fillRect(0,GY-26,LW,2); ctx.fillRect(0,GY+16,LW,2);
+    ctx.fillStyle=LINE; ctx.fillRect(0,GY-26,LW,2); ctx.fillRect(0,GY+16,LW,2);
     for(let m=0;m<ev.line;m+=5){ const x=X(m); if(x>-20&&x<LW+20){ ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillRect(x-1,GY+12,2,4); } }
   }
   if(ev.kind==='lj'){

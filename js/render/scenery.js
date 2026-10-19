@@ -5,28 +5,32 @@ import {JAV_ART,SCENE} from '../assets.js';
 import {hash} from '../utils.js';
 import {txt} from './text.js';
 
-// colours of the track and grass, as in the event illustrations
-export const TARTAN='#d9563f', TARTAN_D='#c94a35', GRASS='#7cc24a', GRASS_L='#8ccf55';
-// grandstand backdrop (assets/scene/stands.jpg: sky, roof, crowd and the barrier wall at the bottom), off = how far
-// it has scrolled (logical px); repeated sideways with every other copy mirrored, so the copies always meet cleanly.
-// false when the picture isn't there (then the stands are drawn in code)
-export function drawBackdrop(off,top,bot,im=SCENE.stands,haze=true){
+// colours of the track and grass, as in the event illustrations; survival has its own darker stadium (setTheme)
+export let TARTAN, TARTAN_D, GRASS, GRASS_L, LINE;
+const THEMES={
+  day:{track:['#d9563f','#c94a35'],grass:['#7cc24a','#8ccf55'],line:'#fff',stands:'stands',sky:'sky',top:'#0671db',haze:'rgba(225,238,255,.12)'},
+  surv:{track:['#5b2a26','#4b221f'],grass:['#38423a','#404b41'],line:'#b9a8a4',stands:'standsSurv',sky:'skySurv',top:'#111519',haze:null}};
+let T=THEMES.day;
+export function setTheme(surv){ T=surv?THEMES.surv:THEMES.day; [TARTAN,TARTAN_D]=T.track; [GRASS,GRASS_L]=T.grass; LINE=T.line; }
+setTheme(false);
+// a picture repeated sideways (made to tile), scrolled off logical px; false when it isn't loaded
+function strip(im,off,top,h){
   if(!im.naturalWidth) return false;
-  const h=bot-top, w=h*im.naturalWidth/im.naturalHeight;
-  for(let n=Math.floor(off/w);n*w-off<LW;n++){ const x=n*w-off;
-    if(n&1){ ctx.save(); ctx.translate(x+w,top); ctx.scale(-1,1); ctx.drawImage(im,-.5,0,w+1,h); ctx.restore(); }
-    else ctx.drawImage(im,x-.5,top,w+1,h); }
-  // a light haze: the crowd stays behind, the athletes and the buttons stand out
-  if(haze){ ctx.fillStyle='rgba(225,238,255,.2)'; ctx.fillRect(0,top,LW,h); }
+  const w=h*im.naturalWidth/im.naturalHeight;
+  for(let n=Math.floor(off/w);n*w-off<LW;n++) ctx.drawImage(im,n*w-off-.5,top,w+1,h);
   return true;
 }
-// sky picture above the grandstand (its bottom fades into the grandstand's top edge), further away so it moves less;
-// above it, the colour of its top edge. false when the picture isn't there
-export function drawSky(off,bottom){
-  const im=SCENE.sky; if(!im.naturalWidth) return false;
-  const h=330, top=bottom-h;
-  ctx.fillStyle='#57c2fc'; ctx.fillRect(0,0,LW,Math.max(0,top)+1);
-  drawBackdrop(off,top,bottom+2,im,false);
+// the stadium behind the field: the sky (further away, moves less; above it, its top colour) and in front the
+// grandstands from top to bot (the sky shows above and between the railing). false when the pictures aren't there
+// (then the stands are drawn in code)
+export function drawBackdrop(off,top,bot){
+  const st=SCENE[T.stands]; if(!st.naturalWidth) return false;
+  const skyH=300, skyBot=top+(bot-top)*.25;
+  ctx.fillStyle=T.top; ctx.fillRect(0,0,LW,Math.max(0,skyBot-skyH)+1);
+  strip(SCENE[T.sky],off*.35,skyBot-skyH,skyH);
+  strip(st,off,top,bot-top);
+  // a light haze on the crowd: the athletes and the buttons stand out
+  if(T.haze){ ctx.fillStyle=T.haze; ctx.fillRect(0,top,LW,bot-top); }
   return true;
 }
 export function drawStands(cam,top,bot,excite,clock){
@@ -58,7 +62,7 @@ export function drawBoards(cam,y,h,ppm){
 }
 // bottom of the screen: a grass strip, and the pause button at the left
 export function drawBottomAds(){
-  ctx.fillStyle='#fff'; ctx.fillRect(0,300,LW,2); ctx.fillStyle=GRASS; ctx.fillRect(0,302,LW,18);
+  ctx.fillStyle=LINE; ctx.fillRect(0,300,LW,2); ctx.fillStyle=GRASS; ctx.fillRect(0,302,LW,18);
   ctx.fillStyle=GRASS_L; for(let x=0;x<LW;x+=48) ctx.fillRect(x,302,24,18);
   drawPauseBtn();
 }

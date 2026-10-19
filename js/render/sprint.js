@@ -4,11 +4,11 @@ import {HURDLES,INK} from '../config.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,animScale,drawAnim,drawAthlete,drawSprite} from '../rig.js';
 import {SPRINT_PPM} from '../game/core.js';
-import {ME,S} from '../state.js';
+import {G,ME,S} from '../state.js';
 import {sprintPose} from '../stick.js';
 import {STYLE} from '../storage.js';
 import {SCENE} from '../assets.js';
-import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,shadow,TARTAN,TARTAN_D} from './scenery.js';
+import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 
 const LANES=6;
@@ -35,6 +35,7 @@ function animFrame(C,ev,{blocks,setStage,running,cheer,dipT,tripT,airU,standing,
 export function drawSprint(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s;
   const TT=176, TB=298, lh=(TB-TT)/LANES;
+  setTheme(G.mode==='surv');
   ctx.fillStyle='#bcd3ea'; ctx.fillRect(0,0,LW,TT);
   // grandstand picture (slower than the track: further away); without it, the stands drawn in code
   if(!drawBackdrop(V.cam*s*.45,0,154)){ drawStands(V.cam,20,140,S.phase==='run'?1:.3,S.clock); drawBoards(V.cam,140,14,s); }
@@ -43,7 +44,7 @@ export function drawSprint(V){
   const sbx=X(-2); if(sbx>-80&&sbx<LW+20){ ctx.fillStyle='#3a2a12'; ctx.fillRect(sbx,151,54,22); ctx.fillStyle='#ffcb3a'; ctx.fillRect(sbx+3,154,48,16); txt(ev.tag,sbx+27,162.5,INK,11,{stroke:null}); }
   ctx.fillStyle=TARTAN; ctx.fillRect(0,TT,LW,TB-TT);
   ctx.fillStyle=TARTAN_D; for(let l=0;l<LANES;l++) ctx.fillRect(0,TT+lh*l+lh*.55,LW,lh*.45);
-  ctx.fillStyle='#fff'; for(let l=0;l<=LANES;l++) ctx.fillRect(0,Math.round(TT+lh*l)-1,LW,2);
+  ctx.fillStyle=LINE; for(let l=0;l<=LANES;l++) ctx.fillRect(0,Math.round(TT+lh*l)-1,LW,2);
   ctx.fillStyle=TARTAN; ctx.fillRect(0,TB+1,LW,301-TB);
   const sx=X(0); if(sx>-60&&sx<LW+60){ ctx.fillStyle='#fff'; ctx.fillRect(sx-1.5,TT,3,TB-TT);
     for(let l=0;l<LANES;l++){ const y=TT+lh*(l+.5); ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=1; ctx.fillRect(X(-1.1),y-3,10,7); ctx.strokeRect(X(-1.1),y-3,10,7); txt(String(l+1),X(1.1),y+1,'#fff',lh*.7,{stroke:null}); } }

@@ -162,7 +162,7 @@ El juego se puede instalar como app (en iPhone: Safari → Compartir → *Agrega
 
 ## Escenario de las pruebas
 
-La tribuna de fondo es una imagen (`assets/scene/stands.jpg`): se repite de costado, una copia normal y la siguiente espejada, así siempre empalman; se mueve más lento que la pista para dar profundidad. El largador son dos imágenes recortadas (`assets/scene/starter0.png` listo, `starter1.png` disparando). La pista, el pasto, la arena, la colchoneta y la jabalina se dibujan en código con los colores de las ilustraciones (`TARTAN`, `GRASS` en `js/render/scenery.js`). Si falta alguna imagen, se dibuja la versión anterior en código.
+La tribuna (`assets/scene/stands.webp`, transparente arriba de la baranda) y el cielo (`sky.jpg`) son tiras que se repiten de costado sin espejar; el cielo se mueve menos que la tribuna y se ve cuando la cámara sube (garrocha, jabalina). Supervivencia tiene su estadio oscuro (`stands-surv.webp`, `sky-surv.jpg`) con pista y pasto apagados (`setTheme` en `js/render/scenery.js`). El largador son dos imágenes recortadas (`starter0.png` listo, `starter1.png` disparando). Si falta alguna imagen, se dibuja la versión anterior en código.
 
 ## Sin internet
 

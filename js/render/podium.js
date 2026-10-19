@@ -6,7 +6,7 @@ import {animReady,animScale,drawAnim,drawAthlete,drawSprite} from '../rig.js';
 import {ATH,G,S} from '../state.js';
 import {podiumPose} from '../stick.js';
 import {STYLE} from '../storage.js';
-import {drawBackdrop,drawBoards,drawStands,GRASS,GRASS_L,TARTAN,TARTAN_D} from './scenery.js';
+import {drawBackdrop,drawBoards,drawStands,setTheme,GRASS,GRASS_L,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 
 // front view from the drawn celebration (frame 0 standing, 3 arm up) when loaded; s as in drawChar
@@ -16,7 +16,7 @@ function podiumAthlete(C,s,x,feet,up){
 }
 export function drawPodium(){
   const p=S.podium;
-  ctx.fillStyle='#bcd3ea'; ctx.fillRect(0,0,LW,LH);
+  setTheme(false); ctx.fillStyle='#bcd3ea'; ctx.fillRect(0,0,LW,LH);
   // the grandstand picture drifting slowly, a strip of grass and the podium on the red track (as in the illustration)
   if(!drawBackdrop(S.clock*6,0,164)){ drawStands(0,20,150,1,S.clock); drawBoards(0,150,14,24); }
   ctx.fillStyle=GRASS; ctx.fillRect(0,164,LW,34); for(let i=0;i<LW;i+=60){ ctx.fillStyle=GRASS_L; ctx.fillRect(i,164,30,34); }
