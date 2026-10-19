@@ -27,13 +27,21 @@ export function peopleStrip(){
 export function refreshStrip(){ loadPlayers().then(()=>{ const el=OV.querySelector('.m-people .u-row'); if(el){ el.innerHTML=peopleStrip(); paintOv(); } },()=>{}); }
 
 let view=null;  // what's on screen, so a late answer doesn't replace another screen
+// list: one per line, in alphabetical order, with a search box (ignores case and accents)
+const fold=t=>String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const byName=(a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'});
+function rows(l,q){ const me=player()?.id, f=fold(q.trim()), shown=l.filter(p=>!f||fold(p.name).includes(f)).sort(byName);
+  if(!shown.length) return `<p class="small u-none">${l.length?'No hay ningún jugador con ese nombre.':'Todavía no hay jugadores.'}</p>`;
+  return shown.map(p=>`<button class="u-item${p.id===me?' me':''}" data-act="person" data-id="${esc(p.id)}"><span class="p-av sm"><canvas data-color="${esc(p.color)}"></canvas></span><span class="u-nm"><b>${esc(p.name)}</b><small>${p.id===me?'Vos · ':''}${p.marks?`${p.marks} ${p.marks===1?'prueba':'pruebas'} con marca`:'Sin marcas todavía'}</small></span><i>›</i></button>`).join(''); }
+let query='';
 export async function showPeople(){
   view='list'; setS(null); setScreen('menu');
-  const draw=(l,msg)=>{ const me=player()?.id;
-    showOv(card('JUGADORES',l?`Todos los jugadores (${l.length})`:'Todos los jugadores',msg||`<div class="u-list">${l.map(p=>`<button class="u-item${p.id===me?' me':''}" data-act="person" data-id="${esc(p.id)}"><span class="p-av sm"><canvas data-color="${esc(p.color)}"></canvas></span><span class="u-nm"><b>${esc(p.name)}</b><small>${p.id===me?'Vos · ':''}${p.marks?`${p.marks} ${p.marks===1?'prueba':'pruebas'} con marca`:'Sin marcas todavía'}</small></span><i>›</i></button>`).join('')}</div>`,
-      '<button class="btn" data-act="menu" data-focus>Volver</button>')); };
-  draw(cachedPlayers()||[], cachedPlayers()?'':'<p class="small o-wait">Cargando…</p>');
-  try{ const l=await loadPlayers(true); if(view==='list') draw(l); }
+  const draw=(l,msg)=>{
+    showOv(card('JUGADORES',l?`Todos los jugadores (${l.length})`:'Todos los jugadores',msg||`<input id="usearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}"><div class="u-list">${rows(l,query)}</div>`,
+      '<button class="btn" data-act="menu" data-focus>Volver</button>'));
+    const inp=OV.querySelector('#usearch'); if(inp) inp.addEventListener('input',()=>{ query=inp.value; OV.querySelector('.u-list').innerHTML=rows(l,query); paintOv(); }); };
+  const c=cachedPlayers(); draw(c||[], c?'':'<p class="small o-wait">Cargando…</p>');
+  try{ const l=await loadPlayers(true); if(view==='list'){ const inp=OV.querySelector('#usearch'), focused=inp&&document.activeElement===inp; draw(l); if(focused){ const n=OV.querySelector('#usearch'); n.focus(); n.setSelectionRange(n.value.length,n.value.length); } } }
   catch(e){ if(view==='list') draw(null,`<p class="o-err" role="alert">${esc(e.message)}</p>`); }
 }
 export async function showPerson(id){
