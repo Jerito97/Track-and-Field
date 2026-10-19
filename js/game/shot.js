@@ -16,7 +16,7 @@ const POWER_T=3.7, GAP=.5;
 // either side of it
 export const SP_RATE=70, SP_MAX=80, SP_BEST=40, SP_GREEN=1, SP_ORANGE=3;
 // the star: seconds to reach the circle; past LATE (of the way) = out of the circle
-const STAR_T=.33, LATE=1.25, LAG=.03;
+const STAR_T=.38, LATE=1.25, LAG=.03;
 // a hold shorter than BLIP s (fingers left over from the taps) doesn't count
 const BLIP=.12;
 // not tapping: as in the 100 m
