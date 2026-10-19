@@ -30,9 +30,10 @@ const LJ_FOOT=.35;
 // where the athlete (hip) fouls: the foot reaching the board's edge (long jump), the line itself otherwise
 const jumps=ev=>ev.kind==='lj'||ev.kind==='tj'||ev.kind==='hj';
 const foulX=ev=>jumps(ev)?ev.line-LJ_FOOT:ev.line;
-// high jump take-off: the foot this far (m) either side of the mark is perfect, nothing left HJ_W m further; there's
+// high jump take-off: only the foot right on the mark (HJ_DEAD m either side) is perfect; from there it loses height
+// little by little, all of it at HJ_OK+HJ_W m (HJ_OK: the green drawn on the board, a few cm lost at its edge); there's
 // no foul: past the far end the athlete takes off on its own (as badly as it gets)
-export const HJ_OK=.3, HJ_W=1.2;
+export const HJ_DEAD=.03, HJ_OK=.12, HJ_W=1.3;
 const hjOff=()=>S.x+LJ_FOOT-S.v*PV_LAG-S.ev.line;  // the take-off foot from the mark (counting the press's lag)
 // triple jump: the sand starts TJ_SAND m past the board (the hop and the step land on the runway before it). A step
 // that would land past TJ_SOFT m gets shorter little by little, never reaching TJ_SAND-.6 (what it loses goes into the
@@ -113,7 +114,7 @@ export function fieldAction(){
   }
   if(ev.kind==='hj'){
     // the height this take-off can reach (speed, and how close to the mark, before or past it); the arch adds to it
-    const e=hjOff(), q1=clamp(1-(Math.abs(e)-HJ_OK)/HJ_W,0,1), base=HJ_A+HJ_V*v-HJ_MISS*(1-q1), T=.95+.02*v;
+    const e=hjOff(), q1=clamp(1-(Math.abs(e)-HJ_DEAD)/(HJ_OK+HJ_W-HJ_DEAD),0,1), base=HJ_A+HJ_V*v-HJ_MISS*(1-q1), T=.95+.02*v;
     S.act={k:'hj',t:0,T,x0:S.x,x1:ev.line+HJ_LAND,base,mark:hjHeight(base,0),q2:0};
     S.print=ev.line+e; judge(q1); noise(.12,.15); S.cueDelay=.12;
   }
@@ -138,7 +139,7 @@ export function javThrow(){
 }
 // high jump: height (m) = HJ_A + HJ_V per m/s, minus up to HJ_MISS for missing the mark, then the arch: nothing adds
 // HJ_NOARCH, a perfect one HJ_ARCH more; where the athlete comes down on the mat (m past the mark)
-const HJ_A=.78, HJ_V=.125, HJ_MISS=.35, HJ_NOARCH=-.2, HJ_ARCH=.35, HJ_LAND=4.4;
+const HJ_A=.78, HJ_V=.125, HJ_MISS=.55, HJ_NOARCH=-.2, HJ_ARCH=.35, HJ_LAND=4.4;
 // the bar (m past the mark) and the mat's height; the hip's height in the poses, and above the mat once on it
 export const HJ_BAR=2.0, HJ_MAT=.6, HJ_TURN=.15;
 const HJ_HIP=.8*1.15, HJ_LIE=.1;  // (the stickman is drawn 1.15 times the poses' size)

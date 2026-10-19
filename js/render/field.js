@@ -6,7 +6,7 @@ import {POSE} from '../poses.js';
 import {animReady,animScale,drawAnim,drawRig,rigReady} from '../rig.js';
 import {POLE_ART} from '../assets.js';
 import {ATH,G,ME,S} from '../state.js';
-import {HJ_BAR,HJ_MAT,HJ_OK,HJ_W,TJ_PIT,TJ_SAND} from '../game/field.js';
+import {HJ_BAR,HJ_DEAD,HJ_MAT,HJ_OK,HJ_W,TJ_PIT,TJ_SAND} from '../game/field.js';
 import {HAM_CAGE,HAM_CIRCLE,hamBall,hamHands} from '../game/hammer.js';
 import {SP_BEST,SP_GREEN,SP_MAX,SP_ORANGE} from '../game/shot.js';
 import {fieldPose} from '../stick.js';
@@ -236,7 +236,7 @@ function hjBoard(V,X,GY,s){
   ctx.fillStyle='#fff'; ctx.fillRect(at(0)-1,h[0],2,h[1]);
   if(!V.act) txt('DESPEGUE',at(0),GY-33,'#fff',11);
   if(V.print!=null){ footprint(X(V.print),GY,s,1); const e=V.print-ev.line;
-    txt(Math.abs(e)<=HJ_OK?'¡AL CENTRO!':`${Math.abs(e).toFixed(2)} m ${e<0?'antes':'pasado'}`,X(V.print),GY+22,'#fff',11); }
+    txt(Math.abs(e)<=HJ_DEAD?'¡AL CENTRO!':`${Math.round(Math.abs(e)*100)} cm ${e<0?'antes':'pasado'}`,X(V.print),GY+22,'#fff',11); }
 }
 // shot put: the shot in the hand (or flying, or landed); holding both, the angle gauge beside the athlete with its
 // green zone and the needle
