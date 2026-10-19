@@ -8,6 +8,7 @@ import {newEvent,startPlay} from '../game/core.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
+import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
 import {onAdd,onCreateGroup,onLeave,onRemove,showGroup,showGroups} from './groups.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {playSurv,resumeSurvival,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
@@ -172,8 +173,9 @@ export function showProfile(msg,ok,draft){
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
     <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia</span></div></div>
     <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>
-    <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button></div>
+    <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
+  checkAdmin(()=>{ if(OV.querySelector('.p-prof')&&!OV.querySelector('.a-btn')) OV.querySelector('.p-prof .btns').insertAdjacentHTML('beforeend','<button class="btn alt a-btn" data-act="admin">Administrador</button>'); });
   const pn=$('pname'), rb=OV.querySelector('[data-act="rename"]');
   pn.addEventListener('input',()=>{ rb.disabled=pn.value.replace(/\s+/g,' ').trim()===p.name; });
   pn.addEventListener('keydown',e=>{ if(e.key==='Enter') rb.click(); });
@@ -264,6 +266,9 @@ OV.addEventListener('click',e=>{
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group);
   else if(a==='groups') showGroups();
+  else if(a==='admin') showAdmin();
+  else if(a==='auser') showAdminUser(b.dataset.id);
+  else if(a.startsWith('a')&&['asetpin','arename','aunlock','alogout','adelmark','adeluser'].includes(a)) onAdmin(a,b);
   else if(a==='gcreate') onCreateGroup();
   else if(a==='group') showGroup(b.dataset.id);
   else if(a==='gadd') onAdd(b.dataset.id);

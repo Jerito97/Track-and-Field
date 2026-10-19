@@ -72,6 +72,10 @@ El menú principal tiene tres modos: **Pruebas** (la prueba elegida en grande y 
 
 Para compararse solo entre amigos. En Récords, arriba se elige **Mundial** o uno de tus grupos (en un grupo se ven todos sus integrantes con marca, no solo 10). **Grupos ›** abre tus grupos: crear uno con nombre, sumar jugadores ya registrados buscándolos por nombre (cualquiera del grupo puede sumar), salir. Quien lo creó puede sacar gente; si se va, el grupo pasa al siguiente, y el último en irse lo borra. Hasta 50 jugadores por grupo y 20 grupos por jugador.
 
+## Administrador
+
+Solo para el jugador administrador (Jero): en su perfil aparece el botón **Administrador**. Muestra números del juego (jugadores, nuevos de la semana, récords, torneos, grupos) y la lista de jugadores con buscador; en cada uno: **código nuevo** (si se lo olvidó; también lo desbloquea), desbloquear, cerrar sus sesiones, renombrar, borrar un récord y borrar el jugador. El permiso queda atado a la cuenta (no al nombre): la primera vez que entra el jugador «Jero» y no hay administrador, pasa a serlo; si se cambia el nombre lo conserva, y alguien nuevo que use «Jero» no lo obtiene.
+
 ## Supervivencia
 
 Las 5 pruebas en orden al azar contra una sola máquina; cada ronda de 5 la máquina mejora (sus marcas por ronda en `targets()` de `js/ui/survival.js`: fácil en la ronda 1, muy difícil hacia la 9 y un poco mejor cada ronda después). Hay que ganarle o empatarle en cada prueba (en largo, garrocha y jabalina, el mejor de 3 intentos); la primera que se pierde termina la partida. Cada prueba ganada suma sus puntos (la tabla de los torneos). La mejor partida queda en el perfil y en el Top 10 mundial (pestaña Supervivencia de Récords), con la ronda a la que llegó.

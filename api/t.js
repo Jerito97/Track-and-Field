@@ -17,6 +17,7 @@
 //   POST {action:'gadd', token, group, player}              -> {ok}   (any member adds a registered player)
 //   POST {action:'gleave', token, group}                    -> {ok}   (the last one out deletes the group)
 //   POST {action:'gremove', token, group, player}           -> {ok}   (only who created it)
+//   POST {action:'admin', token, op, ...}                   -> admin tools (only the admin player, see below)
 //   GET  /api/t?players=1                                   -> {players:[{id,name,color,created_at,marks}]}
 //   GET  /api/t?player=ID                                   -> {player:{id,name,color,created_at}, marks:[{ev,mark,date,rank}]}
 // Names are unique (ignoring case and accents); each player has a 4-6 digit code (stored as a salted scrypt hash).
@@ -62,6 +63,7 @@ function db(){
     await sql`create table if not exists marks(player_id text not null references users(id) on delete cascade, ev text not null,
       mark double precision not null, made_at timestamptz not null default now(), primary key(player_id,ev))`;
     await sql`alter table marks add column if not exists rounds int`;
+    await sql`alter table users add column if not exists admin boolean not null default false`;
     await sql`create table if not exists groups(id text primary key, name text not null, owner_id text not null, created_at timestamptz not null default now())`;
     await sql`create table if not exists group_members(group_id text not null references groups(id) on delete cascade,
       player_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(group_id,player_id))`;
@@ -121,6 +123,57 @@ async function myTours(sql,u){
 
 // survival ('surv'): the best run's points, with the rounds it got through
 const okMark=(ev,m)=>ev==='surv'?Number.isInteger(m)&&m>=0&&m<=10000000:EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
+// Admin: one player, by id. The first time the player named ADMIN_NAME (Jero) asks, and there's no admin yet, that
+// player becomes it for good: renaming later keeps it, and someone new taking the name doesn't get it.
+const ADMIN_NAME='jero';
+async function isAdmin(sql,u){
+  if(u.admin) return true;
+  if(u.name_key!==ADMIN_NAME) return false;
+  if((await sql`select 1 from users where admin`).length) return false;
+  await sql`update users set admin=true where id=${u.id}`; return true;
+}
+async function adminOp(sql,b){
+  const u=await auth(sql,b.token);
+  if(!await isAdmin(sql,u)) throw new Bad(403,'No tenés permiso.');
+  const pid=String(b.player||'').slice(0,64);
+  const target=async()=>{ const t=(await sql`select id,name,admin from users where id=${pid}`)[0]; if(!t) throw new Bad(404,'No existe ese jugador.'); return t; };
+  switch(b.op){
+    case 'check': return {ok:true};
+    case 'stats': {
+      const [r]=await sql`select (select count(*)::int from users) as players, (select count(*)::int from marks where ev<>'surv') as marks,
+        (select count(*)::int from tournaments) as tournaments, (select count(*)::int from tournaments where closed_at is null and coalesce(ends_at,created_at+interval '7 days')>now()) as open_tournaments,
+        (select count(*)::int from groups) as groups, (select count(*)::int from users where created_at>now()-interval '7 days') as new_week`;
+      return {stats:r};
+    }
+    case 'users': {
+      const users=await sql`select u.id,u.name,u.color,u.created_at,u.admin,u.locked_until>now() as locked,u.fails,
+        (select count(*)::int from sessions s where s.user_id=u.id) as sessions,
+        coalesce((select json_agg(json_build_object('ev',m.ev,'mark',m.mark)) from marks m where m.player_id=u.id),'[]') as marks
+        from users u order by lower(u.name)`;
+      return {users};
+    }
+    // forgot the code: a new one (4-6 digits); also unlocks
+    case 'setpin': { const t=await target(); if(!okPin(b.pin)) throw new Bad(400,'El código tiene que ser de 4 a 6 números.');
+      const salt=randomBytes(16).toString('hex');
+      await sql`update users set pin_salt=${salt}, pin_hash=${pinHash(b.pin,salt)}, fails=0, locked_until=null where id=${t.id}`; return {ok:true}; }
+    case 'unlock': { const t=await target(); await sql`update users set fails=0, locked_until=null where id=${t.id}`; return {ok:true}; }
+    // closes every session of the player (each phone has to enter with the code again)
+    case 'logout': { const t=await target(); await sql`delete from sessions where user_id=${t.id}`; await sql`update users set token_hash=${'x'+randomUUID()} where id=${t.id}`; return {ok:true}; }
+    case 'rename': { const t=await target(), name=cleanName(b.name); checkName(name);
+      const up=await sql`update users set name=${name}, name_key=${nameKey(name)} where id=${t.id}
+        and not exists(select 1 from users where name_key=${nameKey(name)} and id<>${t.id}) returning id`;
+      if(!up.length) throw new Bad(409,'Ese nombre ya está usado.'); return {ok:true}; }
+    case 'delmark': { const t=await target(), ev=String(b.ev||''); await sql`delete from marks where player_id=${t.id} and ev=${ev}`; return {ok:true}; }
+    case 'deluser': { const t=await target(); if(t.admin) throw new Bad(400,'No podés borrar al administrador.');
+      await sql`delete from users where id=${t.id}`;
+      // their groups: to the next member, and groups left empty go
+      await sql`update groups g set owner_id=(select player_id from group_members m where m.group_id=g.id order by added_at limit 1) where owner_id=${t.id}`;
+      await sql`delete from groups g where not exists(select 1 from group_members m where m.group_id=g.id)`;
+      return {ok:true}; }
+  }
+  throw new Bad(400,'Acción desconocida.');
+}
+
 // world top 10, or (group) every member of a group with a mark
 async function top(sql,ev,group){
   const rows=group
@@ -233,6 +286,7 @@ async function act(sql,b){
     }
     case 'mytours': return myTours(sql,await auth(sql,b.token));
     case 'groups': return myGroups(sql,await auth(sql,b.token));
+    case 'admin': return adminOp(sql,b);
     case 'gcreate': {
       const u=await auth(sql,b.token), name=String(b.name||'').replace(/\s+/g,' ').trim().slice(0,24);
       if(name.length<2) throw new Bad(400,'El nombre del grupo tiene que tener al menos 2 letras.');

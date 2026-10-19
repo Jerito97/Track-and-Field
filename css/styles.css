@@ -407,3 +407,5 @@ tr.me td{background:var(--red)}
 .g-mem.me{border-color:var(--sun)}
 .g-x{margin-left:auto;font-size:.9rem;padding:3px 10px;box-shadow:none}
 .u-item i{font-style:normal}
+.a-stats{grid-template-columns:repeat(5,minmax(0,1fr))}@media (max-width:620px){.a-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}.a-del{color:#ff6b6b}
+.a-card .p-pin{letter-spacing:.1em;font-size:1.2rem}

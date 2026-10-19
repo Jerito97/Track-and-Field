@@ -50,3 +50,5 @@ export const sendMarks=list=>call('POST',{action:'marks',list,token:tok()});
 // registered players, and one player's public profile
 export const getPlayers=()=>call('GET',null,'?players=1');
 export const getProfile=id=>call('GET',null,'?player='+encodeURIComponent(id));
+// admin tools (the server only lets the admin player use them)
+export const adminOp=(op,extra={})=>call('POST',{action:'admin',op,...extra,token:tok()});
