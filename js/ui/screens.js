@@ -95,14 +95,13 @@ export function showMenu(){
   if(!player()){ showAccount('first'); return; }
   if(!player().token&&!skipProtect){ showAccount('protect'); return; }
   setS(null); setScreen('menu');
-  const sb=player().survBest, sv=store.get('odb-surv-'+player().id,null);
-  const mode=(act,img,pos,name,sub,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.jpg" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b><small>${sub}</small></button>`;
+  const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.jpg" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><div class="m-title">Elegí cómo jugar <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-modes">
-    ${mode('events','100',THUMBS['100'],'Pruebas',`Las ${EVENTS.length} pruebas, de a una`)}
-    ${mode('tours','tour',THUMBS.tour,'Torneos','Con amigos o contra la máquina')}
-    ${mode('surv','surv',THUMBS.surv,'Supervivencia',sv?`Partida guardada: ronda ${sv.round} · ${sv.pts} pts`:sb?`Tu mejor: ${sb.pts} pts`:'Ganale a la máquina',' surv')}
+    ${mode('events','100',THUMBS['100'],'Pruebas')}
+    ${mode('tours','tour',THUMBS.tour,'Torneos')}
+    ${mode('surv','surv',THUMBS.surv,'Supervivencia',' surv')}
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();

@@ -385,3 +385,4 @@ tr.me td{background:var(--red)}
 .s-resume b{font-size:1.4rem;letter-spacing:.04em}.s-resume small{display:block;color:#c9d4ea;font-size:.8rem}
 .s-hero{border-radius:10px;overflow:hidden;height:clamp(90px,30vh,200px)}
 .s-hero img{width:100%;height:100%;object-fit:cover;object-position:50% 35%;display:block}
+.m-mode b{padding:.25em .5em .3em}
