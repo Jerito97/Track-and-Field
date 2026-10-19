@@ -46,7 +46,7 @@ export function updateSprint(dt){
     else if(S.hk<10&&S.stumble<=0){
       const h=HURDLES[S.hk], take=clamp(.2*S.v,1.6,2.6);
       if(S.armed&&S.x>=h-take){ S.armed=false; S.airT=clamp(3.4/Math.max(S.v,4),.26,.6); S.air=S.airT; tone(600,.05,'triangle',.04); if(S.hk+1<10) numCue(); }
-      else if(!S.armed&&S.x>=h-.35){ S.knocked.add(S.hk); S.v*=.55; S.stumble=.35; S.hk++; S.cue=null; S.armed=false; noise(.2,.3); tone(110,.18,'square',.05);
+      else if(!S.armed&&S.x>=h-.35){ S.knocked.add(S.hk); S.v*=.7; S.stumble=.35; S.hk++; S.cue=null; S.armed=false; noise(.2,.3); tone(110,.18,'square',.05);
         pop('¡UY!',{col:'#ff5a3c',dur:.8}); S.renum=.35; }
     }
     if(S.renum>0){ S.renum-=dt; if(S.renum<=0&&S.hk<10&&!S.cue) numCue(); }

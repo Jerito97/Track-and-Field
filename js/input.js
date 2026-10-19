@@ -1,7 +1,7 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
 import {cv,LW,OX,OY,SC,SW} from './canvas.js';
-import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,startRun} from './game/core.js';
+import {addRing,addX,bad,COMBO_K,comboQ,gH,gS,judge,NUM_DX,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,javThrow} from './game/field.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -23,14 +23,14 @@ export function onTap(pos){
   const cue=S.cue;
   if(cue.type==='side'){
     if(pos==='C'||pos==='B') return;  // Space/Enter is for the red buttons
-    if(pos===cue.side){ S.v+=gS(S.v); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
+    if(pos===cue.side){ speedUp(gS(S.v)); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
     else { addX(pos); bad(); }
   } else if(cue.type==='num'){
     if(S.stumble>0||pos==='B') return;
     const want=cue.order[cue.next];
     // the three numbers are one combo: no speed per tap, one boost when the 3 lands, bigger the faster 1-2-3 went
     if(pos===want){ if(cue.next===0) cue.t0=S.clock; addRing(pos); tone(440+cue.next*110,.05,'triangle',.04); cue.next++;
-      if(cue.next>=3){ const q=comboQ(S.clock-cue.t0); S.v+=COMBO_K*gH(S.v)*q; judge(Math.min(1,q)); S.armed=true; S.cue=null; } }
+      if(cue.next>=3){ const q=comboQ(S.clock-cue.t0); speedUp(COMBO_K*gH(S.v)*q); judge(Math.min(1,q)); S.armed=true; S.cue=null; } }
     else { addX(pos); bad(); }
   } else if(cue.type==='both'){
     if(cue.hold) return;  // pole vault: held, not tapped (see holdStart)
