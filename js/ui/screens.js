@@ -68,7 +68,7 @@ export function showMenu(){
   <section class="m-hero">
     <div class="m-art"><canvas data-pict="${menuSel}"></canvas></div>
     <div class="m-info"><h1>${tour?'Torneo':ev.name}</h1>
-      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'}<button class="m-how" data-act="board" data-i="${tour?0:menuSel}">Récords</button></div></div>
+      <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button><button class="m-play alt" data-act="go">Contra la máquina</button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'}<button class="m-rec" data-act="board" data-i="${tour?0:menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button></div></div>
     <div class="m-stats">${stats}</div>
   </section>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
