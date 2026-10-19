@@ -12,7 +12,8 @@ import {art,showOv,THUMBS} from './screens.js';
 // the machine's mark per event and round, measured against simulated players: round 1 easy, round 4 like a casual
 // player, 8 like a good one, 12 nearly an expert, 16 an expert's mark; after that 0.5% better every round
 const STEPS=[1,4,8,12,16];
-const LEVELS={'100':[12.0,10.0,8.6,7.25,7.0],'110h':[14.5,12.8,11.8,11.3,11.1],lj:[6.5,7.6,9.1,10.6,11.1],pv:[5.0,6.0,6.8,7.9,8.4],jav:[65,80,90,120,132]};
+// (sprints start at the normal machines' level: they were much harder early on than the field events)
+const LEVELS={'100':[13.0,11.5,9.8,8.2,7.3],'110h':[16.0,14.5,13.0,11.9,11.3],lj:[6.5,7.6,9.1,10.6,11.1],pv:[5.0,6.0,6.8,7.9,8.4],jav:[65,80,90,120,132]};
 function targets(round){
   const t={};
   EVENTS.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';

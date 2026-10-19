@@ -26,7 +26,7 @@ const RUSH_T=1.5, RUSH_TAP=.014, RUSH_MAX=.3;
 // taps) doesn't throw: it starts over
 const GAP=.6, BLIP=.12;
 // seconds for the star to reach the ball; let go before EARLY (of the way) = into the net, after LATE = out
-const HAM_T=.6, EARLY=.45, LATE=1.25, LAG=.03;
+const HAM_T=.42, EARLY=.45, LATE=1.25, LAG=.03;
 // without holding, the throw goes off on its own after this long (s)
 const WAIT=2;
 // throw length per m/s of tapping speed (full marks)
