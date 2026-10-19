@@ -37,8 +37,8 @@ export function drawBottomAds(){
   const n=Math.max(1,Math.floor((LW-40)/96)), bw=(LW-40)/n;
   for(let i=0;i<n;i++){ const [bg,fg,w]=BOARDS[(i+2)%BOARDS.length]; const x=40+i*bw; ctx.fillStyle=bg; ctx.fillRect(x,302,bw-4,16); ctx.font='12px Bangers, Impact, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=fg; ctx.fillText(w,x+(bw-4)/2,310.5); }
   ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(18,304,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(24,307); ctx.quadraticCurveTo(23,299,14,299); ctx.stroke();
-  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(9,299); ctx.lineTo(15,294); ctx.lineTo(15,304); ctx.closePath(); ctx.fill();
+  // pause: two bars
+  ctx.fillStyle='#fff'; ctx.fillRect(12.5,298,4,12); ctx.fillRect(19.5,298,4,12);
 }
 export function hurdle(px,py,s,down){ ctx.save(); ctx.translate(px,py); if(down) ctx.rotate(1.25);
   ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=Math.max(2.5,s*.07); ctx.beginPath(); ctx.moveTo(-.55*s,0); ctx.lineTo(0,0); ctx.lineTo(0,-.95*s); ctx.stroke();

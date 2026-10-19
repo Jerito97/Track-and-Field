@@ -11,7 +11,7 @@ import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
-import {finishOnline,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
+import {finishOnline,leaveOnline,onCreate,onJoin,onShare,playOnline,showOnline,shownCode,showTournament} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
@@ -133,20 +133,24 @@ export function showPlayers(){
     <div class="btns"><button class="btn" data-act="newplayer">+ Nuevo jugador</button>${cur?'<button class="btn alt" data-act="profile">Volver</button>':''}</div>
   </div></div>`);
 }
-export const rivalsFaces=()=>`<div class="faces">${ATH.filter(a=>!a.me).map(a=>`<canvas data-face="${a.C.id}"></canvas>`).join('')}</div>`;
 export function showEventCard(){
   const ev=EVENTS[G.evIdx]; setS(null); setScreen('menu');
   const tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">${tour?'TORNEO':ev.tag}</div><h2>${ev.name}${tour?` · ${G.evIdx+1}/${EVENTS.length}`:''}</h2></div><div class="body">
-    <div class="row2"><canvas class="pict" data-pict="${G.evIdx}"></canvas>
+    <div class="row2"><div class="pict${THUMBS[ev.id]?' img':''}">${art(G.evIdx)}</div>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="wr"><span>Récord mundial</span><b id="wr">${wrText(ev)}</b><span>Tu récord: ${rec[ev.id]==null?'—':fmt(ev,rec[ev.id])}</span></div>
-        <div class="menu"><button class="mi play" data-act="play" data-focus>Jugar</button><button class="mi" data-act="help">Instrucciones</button>${tour?'':'<button class="mi" data-act="menu">Otra prueba</button>'}</div>
+        <div class="menu"><button class="mi play" data-act="play" data-focus>Jugar</button><button class="mi" data-act="menu">${tour?'Abandonar torneo':'Menú principal'}</button></div>
       </div></div>
-    <p class="help" id="help" hidden>${ev.help}</p>
-    <p class="lbl" style="text-align:center">Rivales</p>${rivalsFaces()}
-    ${tour?'<button class="link" data-act="menu">Abandonar torneo</button>':''}
   </div></div>`);
+}
+// pause (button at the bottom left, or Esc): the game stops behind; resume, or back to the menu
+export function showPause(){
+  if(!S||!S.ev) return;
+  const online=G.mode==='online', tour=G.mode==='tour';
+  showOv(`<div class="card"><div class="head"><div class="logo">PAUSA</div><h2>${S.ev.name}</h2></div><div class="body">
+    ${online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':''}
+    <div class="btns"><button class="btn" data-act="resume" data-focus>Reanudar</button><button class="btn alt" data-act="quit">Volver al menú</button></div></div></div>`,'pause');
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
 export const place=(rows,i,valFmt)=>{ let j=i; while(j>0&&valFmt(rows[j-1])===valFmt(rows[i])) j--; return j+1; };
@@ -224,7 +228,8 @@ OV.addEventListener('click',e=>{
   else if(a==='go'){ if(menuSel===TOUR){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
     else { G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); } }
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
-  else if(a==='help'){ const h=$('help'); h.hidden=!h.hidden; }
+  else if(a==='resume'){ hideOv(); setScreen('play'); }
+  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else showMenu(); }
   else if(a==='menu') showMenu();
   else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')) showMenu(); else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
