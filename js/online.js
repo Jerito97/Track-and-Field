@@ -9,6 +9,8 @@ async function call(method,body,query=''){
   try{ r=await fetch(API+query,{method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined}); }
   catch(e){ throw new Error('Sin conexión. Probá de nuevo.'); }
   let data={}; try{ data=await r.json(); }catch(e){ /* no body */ }
+  // without connection the service worker answers with the last copy it kept (sw.js)
+  if(r.headers.get('x-offline')&&data&&typeof data==='object') data.offline=true;
   // the session is no longer valid: the game asks for the code again (records stay on this phone)
   if(r.status===401&&body?.token&&player()?.token===body.token) updatePlayer({token:null,expired:true});
   if(!r.ok) throw new Error(data.error||(r.status===404?'No se encontró el servidor de torneos.':'Error del servidor.'));

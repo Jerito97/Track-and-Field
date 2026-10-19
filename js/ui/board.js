@@ -13,9 +13,10 @@ const cache={};  // ev -> {at, top}
 const FRESH=60000;
 export async function loadTop(ev,force){
   const c=cache[ev]; if(c&&!force&&Date.now()-c.at<FRESH) return c.top;
-  const {top}=await getTop(ev); cache[ev]={at:Date.now(),top}; return top;
+  const r=await getTop(ev); cache[ev]={at:r.offline?0:Date.now(),top:r.top,offline:!!r.offline}; return r.top;
 }
 export const cachedTop=ev=>cache[ev]?.top||null;
+const wasOffline=ev=>!!cache[ev]?.offline;
 
 // your records not sent yet (or improved since): sent together; the server keeps only the better one
 let syncing=false;
@@ -52,7 +53,7 @@ export async function showBoard(i){
   showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'));
   await syncMarks();
   let top, note='';
-  try{ top=await loadTop(ev.id); }catch(e){ top=localTop(ev); note='<p class="small">No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.</p>'; }
+  try{ top=await loadTop(ev.id); if(wasOffline(ev.id)) note='<p class="small">Sin conexión: estos son los últimos récords que viste.</p>'; }catch(e){ top=localTop(ev); note='<p class="small">No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.</p>'; }
   if(shownEv!==ev.id||!OV.querySelector('.b-card')) return;  // left the board meanwhile
   const y=OV.scrollTop; showOv(card(note+rows(top))); OV.scrollTop=y;
 }

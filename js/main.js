@@ -7,9 +7,10 @@ import {POSE,runPose} from './poses.js';
 import {frame} from './render/frame.js';
 import {drawRig} from './rig.js';
 import {buildAthletes,G,ME,S,screen} from './state.js';
+import {player} from './storage.js';
+import {syncMarks} from './ui/board.js';
 import {clearInvite,inviteFromUrl,onJoin} from './ui/online.js';
 import {initScreens,paintOv,showMenu} from './ui/screens.js';
-import {player} from './storage.js';
 
 addEventListener('resize',resize); resize();
 buildAthletes();
@@ -23,6 +24,14 @@ if(inv&&player()){ clearInvite(); onJoin(inv); } else showMenu();
 const splash=document.getElementById('splash');
 if(splash){ const hide=()=>{ splash.classList.add('out'); setTimeout(()=>splash.remove(),500); };
   if(navigator.webdriver) splash.remove(); else { splash.addEventListener('pointerdown',hide); setTimeout(hide,Math.max(0,1400-performance.now())); } }
+// offline play: a service worker keeps a copy of the game (sw.js); it's told what this page already loaded
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+  navigator.serviceWorker.register(new URL('../sw.js',import.meta.url)).then(()=>navigator.serviceWorker.ready).then(reg=>{
+    const urls=performance.getEntriesByType('resource').map(r=>r.name).filter(u=>u.startsWith(location.origin)&&!u.includes('/api/')||/fonts\.(googleapis|gstatic)/.test(u));
+    reg.active?.postMessage({cache:[location.href.split('?')[0],...urls]}); }).catch(()=>{});
+}
+// back online: records made without connection go up to the world top 10
+addEventListener('online',()=>{ syncMarks(); });
 let lastT=performance.now();
 function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);

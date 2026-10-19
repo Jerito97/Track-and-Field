@@ -8,11 +8,11 @@ import {setS,setScreen} from '../state.js';
 import {player} from '../storage.js';
 import {esc,paintOv,showOv} from './screens.js';
 
-let list=null, at=0;
+let list=null, at=0, listOffline=false;
 export const cachedPlayers=()=>list;
 export async function loadPlayers(force){
   if(list&&!force&&Date.now()-at<60000) return list;
-  list=(await getPlayers()).players; at=Date.now(); return list;
+  const r=await getPlayers(); list=r.players; at=r.offline?0:Date.now(); listOffline=!!r.offline; return list;
 }
 const day=d=>{ const t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}); };
 const card=(logo,title,body,btns)=>`<div class="card u-card"><div class="head"><div class="logo">${logo}</div><h2>${title}</h2></div><div class="body">${body}<div class="btns">${btns}</div></div></div>`;
@@ -37,7 +37,7 @@ let query='';
 export async function showPeople(){
   view='list'; setS(null); setScreen('menu');
   const draw=(l,msg)=>{
-    showOv(card('JUGADORES',l?`Todos los jugadores (${l.length})`:'Todos los jugadores',msg||`<input id="usearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}"><div class="u-list">${rows(l,query)}</div>`,
+    showOv(card('JUGADORES',l?`Todos los jugadores (${l.length})`:'Todos los jugadores',msg||`${listOffline?'<p class="small">Sin conexión: esta es la última lista que viste.</p>':''}<input id="usearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}"><div class="u-list">${rows(l,query)}</div>`,
       '<button class="btn" data-act="menu" data-focus>Volver</button>'));
     const inp=OV.querySelector('#usearch'); if(inp) inp.addEventListener('input',()=>{ query=inp.value; OV.querySelector('.u-list').innerHTML=rows(l,query); paintOv(); }); };
   const c=cachedPlayers(); draw(c||[], c?'':'<p class="small o-wait">Cargando…</p>');

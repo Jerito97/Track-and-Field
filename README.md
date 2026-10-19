@@ -157,3 +157,7 @@ El juego se puede instalar como app (en iPhone: Safari → Compartir → *Agrega
 ## Escenario de las pruebas
 
 La tribuna de fondo es una imagen (`assets/scene/stands.jpg`): se repite de costado, una copia normal y la siguiente espejada, así siempre empalman; se mueve más lento que la pista para dar profundidad. El largador son dos imágenes recortadas (`assets/scene/starter0.png` listo, `starter1.png` disparando). La pista, el pasto, la arena, la colchoneta y la jabalina se dibujan en código con los colores de las ilustraciones (`TARTAN`, `GRASS` en `js/render/scenery.js`). Si falta alguna imagen, se dibuja la versión anterior en código.
+
+## Sin internet
+
+`sw.js` (service worker) guarda una copia del juego la primera vez que se abre con conexión, así después abre y se juega sin internet. Siempre pide primero lo nuevo a la red (las actualizaciones llegan apenas hay conexión) y usa la copia si no hay. Los récords se guardan en el celular y se suben al Top 10 cuando vuelve la conexión; los resultados de torneos online quedan en cola. Sin conexión, el Top 10 y la lista de jugadores muestran lo último que se vio, con un aviso.
