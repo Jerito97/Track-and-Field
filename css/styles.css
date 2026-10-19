@@ -335,3 +335,7 @@ tr.me td{background:var(--red)}
 .o-np{color:#aab8d8!important}
 .o-close[data-sure]{background:var(--red);color:#fff;box-shadow:0 5px 0 var(--red-d)}
 .m-art .m-th:not(.on){visibility:hidden}
+/* profile: confirmation, rename hint */
+.o-ok{margin:0;background:rgba(31,158,84,.2);border:1px solid #1f9e54;border-radius:8px;padding:6px 10px;font-size:.9rem}
+.p-hint{display:block;margin-top:4px;color:#aab8d8;font-size:.78rem}
+.btn:disabled{opacity:.45;cursor:default}

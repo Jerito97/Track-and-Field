@@ -127,24 +127,28 @@ function pickColor(c){ OV.querySelectorAll('.p-sw').forEach(b=>{ b.classList.tog
   updatePlayer({color:c}); OV.querySelectorAll('canvas[data-face="yo"]').forEach(cv=>paintFace(cv,ME()));
   if(player().token) updateRemote({color:c}).catch(()=>{}); }
 // rename: names are unique on the server, so it has to accept it first
-async function onRename(){ const name=$('pname').value.replace(/\s+/g,' ').trim().slice(0,14); if(name.length<2) return;
-  if(player().token){ try{ await updateRemote({name}); }catch(e){ showProfile(e.message); return; } }
-  updatePlayer({name}); showProfile(); }
-export function showProfile(msg){
+async function onRename(){ const name=$('pname').value.replace(/\s+/g,' ').trim().slice(0,14);
+  if(name===player().name) return;
+  if(name.length<2){ showProfile('El nombre tiene que tener al menos 2 letras.',false,name); return; }
+  if(player().token){ try{ await updateRemote({name}); }catch(e){ showProfile(e.message,false,name); return; } }
+  updatePlayer({name}); showProfile(`Listo: ahora sos «${name}».`,true); }
+export function showProfile(msg,ok,draft){
   const p=player(); if(!p){ showAccount('first'); return; } setS(null); setScreen('menu');
   // best mark of each event
   const bests=EVENTS.map(ev=>`<div><b>${p.rec[ev.id]==null?'—':fmt(ev,p.rec[ev.id])}</b><span>${ev.name}</span></div>`).join('');
   showOv(`<div class="card p-prof"><div class="head"><div class="logo">PERFIL</div><h2>${esc(p.name)}</h2></div><div class="body">
-    ${msg?`<p class="o-err" role="alert">${esc(msg)}</p>`:''}
+    ${msg?`<p class="${ok?'o-ok':'o-err'}" role="alert">${esc(msg)}</p>`:''}
     ${p.token?'':p.expired?'<div class="o-code"><p class="small">Se cerró tu sesión: tus récords no se suben al Top 10 hasta que vuelvas a entrar.</p><button class="btn" data-act="protect">Entrar</button></div>':'<div class="o-code"><p class="small">Tu jugador todavía no tiene código: cualquiera podría usar tu nombre.</p><button class="btn" data-act="protect">Poner código</button></div>'}
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
-      <label class="p-name"><span class="lbl">Nombre</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(p.name)}" autocomplete="off"><button class="btn alt" data-act="rename">Guardar</button></span></label></div>
+      <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
     <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.tours.length}</b><span>torneos</span></div><div><b>${p.rec.tour||'—'}</b><span>mejor torneo</span></div><div><b>${p.tours.filter(t=>t.place===1).length}</b><span>torneos ganados</span></div></div>
     <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button></div>
   </div></div>`);
-  $('pname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="rename"]').click(); });
+  const pn=$('pname'), rb=OV.querySelector('[data-act="rename"]');
+  pn.addEventListener('input',()=>{ rb.disabled=pn.value.replace(/\s+/g,' ').trim()===p.name; });
+  pn.addEventListener('keydown',e=>{ if(e.key==='Enter') rb.click(); });
 }
 export function showPlayers(){
   setS(null); setScreen('menu'); const cur=player();
