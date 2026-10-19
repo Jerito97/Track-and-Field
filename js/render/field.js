@@ -189,9 +189,13 @@ function hamDraw(V,X,GY){
   if(!a||a.k!=='ham'){ const b=[V.x-.95,.13]; return {far:true,draw:()=>{ cable(P(...hamHands(V.x,b)),P(...b)); ball(...P(...b)); }}; }
   const b=hamBall(V.x,a.phi), h=hamHands(V.x,b);
   return {far:b[2]>0,draw:()=>{ cable(P(...h),P(b[0],b[1])); ball(...P(b[0],b[1])); },arc:()=>{
+    // a still bar over the athlete (the cable spins too fast to follow): the star runs from the left end to the circle
     const m=V.meter; if(V.replay||!m||m.k!=='ham') return;
-    const [hx,hy]=P(...h), [bx,by]=P(b[0],b[1]), p=Math.min(m.hit??m.p,1.25);
-    target(bx,by); drawStar(hx+(bx-hx)*p,hy+(by-hy)*p,8,p,true); }};
+    const cx=X(V.x), y=GY-3.4*s, x0=cx-64, x1=cx+64, p=Math.min(m.hit??m.p,1.25);
+    ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=11; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=7; ctx.stroke(); ctx.strokeStyle='rgba(47,209,102,.9)'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+(x1-x0)*Math.min(1,p),y); ctx.stroke();
+    target(x1,y); drawStar(x0+(x1-x0)*p,y,10,p,true);
+    if(!m.hit) txt('SOLTÁ EN EL CÍRCULO',cx,y-22,'#fff',16,{lw:4}); }};
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.

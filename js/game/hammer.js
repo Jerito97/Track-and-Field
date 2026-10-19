@@ -1,4 +1,4 @@
-// Hammer throw: two winds, then four turns in the circle, tapping the green buttons as in the 100 m (each good tap
+// Hammer throw: four turns in the circle from the start, tapping the green buttons as in the 100 m (each good tap
 // spins faster, a wrong one slows down, not tapping slowly loses speed). Then, as with the javelin: hold both buttons
 // and a star runs along the cable from the hands to the ball; let go when it reaches the ball. Far too early the ball
 // hits the cage's net, too late it lands outside the sector: no mark.
@@ -18,7 +18,7 @@ export const HAM_CIRCLE=1.07, HAM_CAGE=3.2;
 const SH=1.42, ARM=.7;
 // turning speed (radians/s): slowest, and what each m/s of tapping speed adds
 const W_MIN=TAU/1.25, W_PER_V=.7;
-const WINDS=2, TURNS=4;
+const TURNS=4;
 // seconds for the star to reach the ball; let go before EARLY (of the way) = into the net, after LATE = out
 const HAM_T=.6, EARLY=.45, LATE=1.25, LAG=.03;
 // without holding, the throw goes off on its own after this long (s)
@@ -36,24 +36,22 @@ export function hamBall(x,phi){ const c=Math.cos(phi), s=Math.sin(phi); return [
 export function hamHands(x,b){ const dx=b[0]-x, dy=b[1]-SH, d=Math.hypot(dx,dy)||1; return [x+dx/d*ARM,SH+dy/d*ARM]; }
 
 // arms reach for the ball, legs shuffle with the turn, the body leans back against the pull
-function spinPose(a,b){ const dx=b[0]-S.x, dy=b[1]-SH, arm=Math.atan2(dx,-dy), f=a.stage==='wind'?0:.3*Math.sin(a.phi);
+function spinPose(a,b){ const dx=b[0]-S.x, dy=b[1]-SH, arm=Math.atan2(dx,-dy), f=.3*Math.sin(a.phi);
   return {kind:'hamspin',hip:.76,lean:-.12,legs:[{a:.2+f,b:.35},{a:-.15-f,b:.3}],arms:[{a:arm,b:.05},{a:arm+.08,b:.12}]}; }
 
-export function startHammer(){ S.cue=null; S.v=0; S.act={k:'ham',stage:'wind',t:0,phi:0,w:W_MIN*.8,lows:0}; S.phase='act'; tone(500,.06,'triangle',.04); }
+export function startHammer(){ S.v=0; S.act={k:'ham',stage:'turn',t:0,phi:0,w:W_MIN,lows:0}; S.phase='act'; S.lastTap=S.clock; sideCue(); tone(600,.06,'triangle',.04); }
 export function updateHammer(dt){
   const a=S.act;
   if(a.stage==='fly'||a.stage==='foul'){ flight(dt,a); return; }
   a.t+=dt;
-  if(a.stage==='wind') a.w=Math.min(W_MIN,a.w+dt*.6);
-  else if(a.stage==='turn'){
+  if(a.stage==='turn'){
     if(S.cue&&S.cue.type==='side'&&S.clock-(S.lastTap||0)>IDLE_GRACE) S.v-=S.v*IDLE_DECAY*dt;
     a.w+=(W_MIN+W_PER_V*S.v-a.w)*Math.min(1,dt*6);
     S.x=Math.min(HAM_CIRCLE-.55,S.x+dt*.3);  // across the circle while turning
   }
   a.phi+=a.w*dt;
   while(a.phi>=lowAt(a.lows+1)){ a.lows++;
-    if(a.lows===WINDS){ a.stage='turn'; S.lastTap=S.clock; sideCue(); tone(600,.06,'triangle',.04); }
-    if(a.lows===WINDS+TURNS){ a.stage='final'; a.t=0; a.v=S.v; S.cue={type:'hamhold',t:0}; tone(500,.06,'triangle',.04); } }
+    if(a.lows===TURNS){ a.stage='final'; a.t=0; a.v=S.v; S.cue={type:'hamhold',t:0}; tone(500,.06,'triangle',.04); } }
   if(a.stage==='final'){
     const m=S.meter;
     if(!m&&S.held2){ S.meter={k:'ham',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
