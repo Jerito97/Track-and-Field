@@ -9,11 +9,17 @@ import {player,recordSurv,store} from '../storage.js';
 import {syncMarks} from './board.js';
 import {art,showOv,THUMBS} from './screens.js';
 
-// the machine's mark per event: easy in round 1, very hard by round 9, and still a bit better every round after that
-const EASY={'100':12.8,'110h':16.8,lj:6.2,pv:3.8,jav:55}, HARD={'100':7.6,'110h':11.3,lj:11.6,pv:7.9,jav:122};
+// the machine's mark per event and round, measured against simulated players: round 1 easy, round 3 like a casual
+// player, 5 like a good one, 7 nearly an expert, 9 an expert's mark; after that 1% better every round
+const STEPS=[1,3,5,7,9];
+const LEVELS={'100':[12.0,10.0,8.6,7.25,7.0],'110h':[14.5,12.8,11.8,11.3,11.1],lj:[6.5,7.6,9.1,10.6,11.1],pv:[5.0,6.0,6.8,7.9,8.4],jav:[65,80,90,120,132]};
 function targets(round){
-  const d=Math.min(1,(round-1)/8), extra=Math.max(0,round-9)*.015, t={};
-  EVENTS.forEach(ev=>{ const m=EASY[ev.id]+(HARD[ev.id]-EASY[ev.id])*Math.pow(d,.9); t[ev.id]=ev.type==='sprint'?m*(1-extra):m*(1+extra); });
+  const t={};
+  EVENTS.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';
+    let m;
+    if(round>=STEPS[STEPS.length-1]){ const k=Math.pow(1.01,round-STEPS[STEPS.length-1]); m=sprint?L[L.length-1]/k:L[L.length-1]*k; }
+    else { const i=STEPS.findIndex((r,j)=>round>=r&&round<STEPS[j+1]), u=(round-STEPS[i])/(STEPS[i+1]-STEPS[i]); m=L[i]+(L[i+1]-L[i])*u; }
+    t[ev.id]=m; });
   return t;
 }
 const shuffle=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
