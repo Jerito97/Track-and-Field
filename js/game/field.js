@@ -29,17 +29,19 @@ const LJ_FOOT=.35;
 // where the athlete (hip) fouls: the foot reaching the board's edge (long jump), the line itself otherwise
 const jumps=ev=>ev.kind==='lj'||ev.kind==='tj';
 const foulX=ev=>jumps(ev)?ev.line-LJ_FOOT:ev.line;
-// triple jump: the sand starts TJ_SAND m past the board (the hop and the step land on the runway before it); the
-// step never lands closer than TJ_STEP_MAX m from the board's edge (any extra goes into the jump), and the jump always
-// reaches the sand
-export const TJ_SAND=13, TJ_PIT=30;
-const TJ_STEP_MAX=12.4;
+// triple jump: the sand starts TJ_SAND m past the board (the hop and the step land on the runway before it). A step
+// that would land past TJ_SOFT m gets shorter little by little, never reaching TJ_SAND-.6 (what it loses goes into the
+// jump), so where it lands still depends on how fast you were; the jump always reaches the sand
+export const TJ_SAND=11.5, TJ_PIT=30;
+const TJ_SOFT=9.3, TJ_STEP_END=TJ_SAND-.6;
 // hop / step contact: pressed within TJ_OK s of the foot touching down = perfect, nothing left TJ_EARLY s before or
 // TJ_LATE s after; the athlete waits on the ground (slowly) up to TJ_LATE s, then stumbles on
 const TJ_OK=.06, TJ_EARLY=.25, TJ_LATE=.18;
 export const qFoot=e=>Math.abs(e)<=TJ_OK?1:e<0?clamp(1+(e+TJ_OK)/(TJ_EARLY-TJ_OK),0,1):clamp(1-(e-TJ_OK)/(TJ_LATE-TJ_OK),0,1);
-// bound flights (hop, step): length per m/s of speed, time and height
-const TJ_BOUND={hop:{L:.6,T:v=>.42+.012*v,h:v=>.35+.02*v,side:'R'},step:{L:.48,T:v=>.36+.01*v,h:v=>.3+.015*v,side:'L'}};
+// bound flights (hop, step): length per m/s of speed, forward speed in the air (share of the run's), height
+const TJ_BOUND={hop:{L:.5,vx:.95,h:v=>.35+.02*v,side:'R'},step:{L:.42,vx:.92,h:v=>.3+.015*v,side:'L'}};
+// the last jump: length per m/s, and its forward speed in the air (share), at least as long as a long jump's flight
+const TJ_JUMP=.6, TJ_JUMP_VX=.85;
 export function updateField(dt){
   const ev=S.ev;
   if(S.phase==='ready'){ const k=armsFor(); S.pose=k==='jav'?{...POSE.stand,arms:[{a:-2.4,b:.55},POSE.stand.arms[1]]}:(k==='pole'?{...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]}:POSE.stand); return; }
@@ -82,7 +84,7 @@ export function fieldFoul(){
 export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
-    if(a&&isLeap(a)&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
+    if(a&&isLeap(a)&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.us=Math.min(1,a.t/a.T); a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       leapTo(a,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; }
     return;
   }
@@ -125,8 +127,8 @@ const isLeap=a=>a.k==='lj'||a.k==='tj'&&a.stage==='jump';
 function leapTo(a,len){ const ev=S.ev; len=Math.max(.5,len);
   a.x1=ev.kind==='tj'?Math.max(ev.line+TJ_SAND+.35,a.x0+len):ev.line+len; a.mark=a.x1-ev.line; }
 // triple jump: a bound (hop or step) of len m at speed v
-function bound(stage,v,len){ const B=TJ_BOUND[stage];
-  S.act={k:'tj',stage,t:0,T:B.T(v),h:B.h(v),v,x0:S.x,x1:S.x+Math.max(1,len),side:B.side,extra:(S.act&&S.act.extra)||0};
+function bound(stage,v,len,extra=0){ const B=TJ_BOUND[stage]; len=Math.max(1,len);
+  S.act={k:'tj',stage,t:0,T:clamp(len/(B.vx*v),.3,.75),h:B.h(v),v,x0:S.x,x1:S.x+len,side:B.side,extra};
   S.phase='act'; }
 // the hop / step button: the foot that touches down (right for the hop, left for the step)
 export function footTap(side){
@@ -143,11 +145,12 @@ function footDown(a){
   const ev=S.ev, q=a.q||0, v=q<.15?a.v*.55:a.v*(.8+.24*q);  // right on time: a little more speed
   judge(q); if(q<.15){ S.pops.push({text:'¡TRASTABILLASTE!',t:0,dur:.9,col:'#ff5a3c',sub:'',big:.55,small:true}); tone(160,.3,'sawtooth',.05); }
   S.v=v; S.y=0;
-  if(a.from==='hop') bound('step',v,TJ_BOUND.step.L*v);
-  else { const T=.6+.03*v, h=.45+.055*v, base=.58*v+(a.extra||0);
+  if(a.from==='hop'){
+    // the step may not land too close to the sand: past TJ_SOFT it gets shorter, smoothly; what's lost goes into the jump
+    const end=S.x-ev.line+TJ_BOUND.step.L*v, R=TJ_STEP_END-TJ_SOFT, fit=end<=TJ_SOFT?end:TJ_SOFT+R*(1-Math.exp(-(end-TJ_SOFT)/R));
+    bound('step',v,fit-(S.x-ev.line),end-fit); }
+  else { const base=TJ_JUMP*v+(a.extra||0), len=Math.max(.5,base+LJ_NOPUSH), T=clamp(len/(TJ_JUMP_VX*v),.6,.6+.03*v), h=.45+.055*v;
     S.act={k:'tj',stage:'jump',t:0,T,x0:S.x,base,h,q2:0}; leapTo(S.act,base+LJ_NOPUSH); noise(.12,.15); S.cueDelay=.12; }
-  // the step may not land too close to the sand: what's over goes into the jump
-  if(S.act.stage==='step'){ const over=S.act.x1-(ev.line+TJ_STEP_MAX); if(over>0){ S.act.x1-=over; S.act.extra=over; } }
 }
 export function updateAct(dt){
   if(S.act.k==='ham'){ updateHammer(dt); return; }
@@ -157,8 +160,9 @@ export function updateAct(dt){
     S.x=a.x0+(a.x1-a.x0)*u; S.y=4*a.h*u*(1-u); S.pose=POSE.hurdle;
     if(u>.3&&a.q==null&&!S.cue) S.cue={type:'foot',side:a.side,t:0};
     if(u>=1){ S.y=0; S.prints.push(S.x+LJ_FOOT*.3); dust(S.x);
-      const from=a.stage; Object.assign(a,{stage:'contact',from,t:0,T:null});
-      if(a.q!=null) footDown(a); }
+      // the time past the touch-down carries on (into the wait, or the next flight), so the motion doesn't stutter
+      const from=a.stage, carry=a.t-a.T; Object.assign(a,{stage:'contact',from,t:carry,T:null});
+      if(a.q!=null){ footDown(a); S.act.t=carry; updateAct(0); } }
     return;
   }
   if(a.k==='tj'&&a.stage==='contact'){
@@ -171,7 +175,7 @@ export function updateAct(dt){
     if(S.cueDelay>0){ S.cueDelay-=dt; if(S.cueDelay<=0&&!a.tapped) bothCue(); }
     const u=Math.min(1,a.t/a.T);
     // after the air push the jumper speeds forward to the new mark and gets a little lift
-    if(a.tapU!=null&&a.tapU<1){ const k=(u-a.tapU)/(1-a.tapU); S.x=a.xs+(a.x1-a.xs)*k; S.y=4*a.h*u*(1-u)+.35*a.q2*Math.sin(Math.PI*k); }
+    if(a.us!=null&&a.us<1){ const k=(u-a.us)/(1-a.us); S.x=a.xs+(a.x1-a.xs)*k; S.y=4*a.h*u*(1-u)+.35*a.q2*Math.sin(Math.PI*k); }
     else { S.x=a.x0+(a.x1-a.x0)*u; S.y=4*a.h*u*(1-u); } S.pose=u<.15?POSE.hurdle:(a.tapped?{...POSE.ljAir,legs:[{a:1.75,b:.05},{a:1.65,b:.1}]}:POSE.ljAir);
     if(u>=1&&!a.tapped){ a.tapped=1; a.q2=0; S.cue=null; judge(0); }
     if(u>=1){ S.y=0; S.pose=a.q2>.5?POSE.sit:POSE.lie; S.landX=S.x; sand(S.x); S.meter=null; landed(Math.floor(a.mark*100)/100); }
