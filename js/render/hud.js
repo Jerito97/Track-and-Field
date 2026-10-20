@@ -2,7 +2,7 @@
 import {secs} from '../utils.js';
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
-import {OVER,PERFECT,pedalP} from '../game/cycle.js';
+import {OVER,PAST,PERFECT,pedalP} from '../game/cycle.js';
 import {CUEPOS,NUMPOS} from '../game/core.js';
 import {ME,S} from '../state.js';
 import {txt} from './text.js';
@@ -14,6 +14,7 @@ export function drawHud(V){
   txt((ME().name||'Jugador').toUpperCase(),8,11,'#fff',14,{align:'left',stroke:null});
   if(ev.type==='sprint'){ const t=S.finished?S.final:S.t+(S.pen||0); ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(LW-62,2,58,16); ctx.fill(); ctx.stroke(); txt(secs(t||0),LW-33,10.5,'#fff',14,{stroke:null}); }
   else txt(`RONDA ${S.round}/3`,LW-8,11,'#fff',14,{align:'right',stroke:null});
+  if(S.ev.cycle) drawPedalLast();
   if(!V.replay&&S.cue) drawCue(S.cue);
   if(S.demo&&!V.replay) drawDemo();
   if(S.phase==='ready'&&!V.replay){ cueCircle(LW/2,150,'#ff4d2e',''); txt('TOCÁ PARA EMPEZAR',LW/2,196,'#fff',16); }
@@ -47,6 +48,25 @@ export function cueCircle(x,y,col,label){
   ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,15.5*K,0,Math.PI*2); ctx.fill();
   if(label) txt(label,x,y+1,'#fff',28,{lw:3});
 }
+// track cycling: a pedal's ring at x,y filled to p (0 to OVER): its track with the green zone across 12 o'clock (let go
+// in it: a full stroke), the fill red, yellow, then green close to full (past the zone, red), the mark at 12
+function pedalRing(x,y,p,a){
+  const R=37, a0=-Math.PI/2, ang=f=>a0+Math.PI*2*f;
+  ctx.save(); ctx.globalAlpha=a; ctx.lineCap='butt';
+  ctx.lineWidth=9; ctx.strokeStyle='rgba(14,26,52,.75)'; ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2); ctx.stroke();
+  ctx.lineWidth=9; ctx.strokeStyle='rgba(47,209,102,.45)'; ctx.beginPath(); ctx.arc(x,y,R,ang(PERFECT),ang(PAST)); ctx.stroke();
+  if(p>0){ ctx.strokeStyle=p>PAST?'#ff3b30':p>=PERFECT?'#2fd166':p>=.86?'#9be22e':p>=.65?'#ffd23a':'#ff8a1e'; ctx.lineWidth=7;
+    ctx.beginPath(); ctx.arc(x,y,R,a0,ang(Math.min(p,OVER))); ctx.stroke(); }
+  ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x-6,y-R-10); ctx.lineTo(x+6,y-R-10); ctx.lineTo(x,y-R+1); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+// the ring of the last stroke, left as it was let go for a moment on its side, with how much it was worth
+export function drawPedalLast(){
+  const l=S.pedLast; if(!l||l.t>1||S.replay) return;
+  const [x,y]=CUEPOS[l.side](), a=Math.min(1,(1-l.t)/.3);
+  pedalRing(x,y,l.p,a);
+  ctx.save(); ctx.globalAlpha=a; txt(l.over?'¡PASADO!':l.q>=1?'100%':Math.round(l.q*100)+'%',x,y+1,l.over?'#ff5a3c':l.q>=1?'#2fd166':'#fff',l.q>=1||l.over?16:18,{lw:4}); ctx.restore();
+}
 export function drawCue(cue){
   const pulse=1+.06*Math.sin(S.clock*14);
   const at=(p,col,label)=>{ const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
@@ -57,16 +77,10 @@ export function drawCue(cue){
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
   else if(cue.type==='pedal'){ const [x,y]=CUEPOS[cue.side](), p=pedalP();
-    // the button (orange: hold it), and round it the ring filling from 12 o'clock: red, yellow, green close to full;
-    // past it, red (the stroke is only half one)
-    ctx.save(); ctx.translate(x,y); if(!p) ctx.scale(pulse,pulse); cueCircle(0,0,p>1?'#ff4d2e':'#ff8a1e',''); ctx.restore();
-    const R=37, a0=-Math.PI/2;
-    ctx.lineCap='butt'; ctx.lineWidth=9; ctx.strokeStyle='rgba(14,26,52,.75)'; ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2); ctx.stroke();
-    if(p>0){ ctx.strokeStyle=p>1?'#ff3b30':p>=PERFECT?'#2fd166':p>=.86?'#9be22e':p>=.65?'#ffd23a':'#ff8a1e'; ctx.lineWidth=7;
-      ctx.beginPath(); ctx.arc(x,y,R,a0,a0+Math.PI*2*Math.min(p,OVER)); ctx.stroke(); }
-    // the mark at 12 o'clock: let go there
-    ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x-6,y-R-10); ctx.lineTo(x+6,y-R-10); ctx.lineTo(x,y-R+1); ctx.closePath(); ctx.fill(); ctx.stroke();
-    if(!p) txt('MANTENÉ',x,y+R+14,'#fff',12,{lw:3}); }
+    // the button (orange: hold it), and round it the ring filling from 12 o'clock
+    ctx.save(); ctx.translate(x,y); if(!p) ctx.scale(pulse,pulse); cueCircle(0,0,p>PAST?'#ff4d2e':'#ff8a1e',''); ctx.restore();
+    pedalRing(x,y,p,1);
+    if(!p) txt('MANTENÉ',x,y+37+14,'#fff',12,{lw:3}); }
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='num'){ // the three columns, faintly
     ctx.save(); ctx.setLineDash([7,6]); ctx.lineCap='round';

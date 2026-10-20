@@ -62,7 +62,7 @@ export function drawCycle(V){
   rider(px+(S.dip>0?9*Math.sin(Math.PI*Math.min(1,S.dipT/.5)):0),GY-6,U,S.crank||0,ME(),{dip:S.dip>0?S.dipT:null,gate});
   const ty=GY-6-1.75*U; ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke();
   // which lap
-  if(S.phase!=='set'&&!S.finished) txt(V.x<LAP?'VUELTA 1/2':'ÚLTIMA VUELTA',LW/2,40,'#fff',13,{lw:3});
+  if(S.phase!=='set'&&!S.finished) txt(V.x<LAP?'VUELTA 1/2':'ÚLTIMA VUELTA',LW/2,31,'#fff',12,{lw:3});
   drawPauseBtn();
 }
 

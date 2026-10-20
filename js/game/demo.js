@@ -63,7 +63,7 @@ export function demoStep(dt){
   if(c&&c.dive&&c.t>=.25) press('B');
   // cycling: hold the pedal's side, let go close to the end of the ring (now and then a little early; it lets go a
   // frame after deciding, the ring going on ~.03 meanwhile)
-  if(c&&c.type==='pedal'&&S.ped){ const f=S.ped; if(f.st==='wait'){ holdSide(f.side==='L'?'R':'L',false); if(f.free){ f.tgt=Math.random()<.6?.95:.86+Math.random()*.07; holdSide(f.side,true); } } else if(f.p>=(f.tgt||.985)) holdSide(f.side,false); }
+  if(c&&c.type==='pedal'&&S.ped){ const f=S.ped; if(f.st==='wait'){ holdSide(f.side==='L'?'R':'L',false); if(f.free){ f.tgt=Math.random()<.6?.97:.86+Math.random()*.06; holdSide(f.side,true); } } else if(f.p>=(f.tgt||.985)) holdSide(f.side,false); }
   if(ev.cycle&&c&&c.type==='both'){ holdSide('L',false); holdSide('R',false); if(ev.dist-S.x<=S.v*.22) press('B'); }
   if(c&&c.type==='shoot'&&S.shot.st==='show'&&S.shot.t>=.75) press(S.shot.dir);
   if(ev.relay&&S.chCued&&c&&c.type==='both'&&S.x+.35>=ev.dist/ev.legs*(S.leg+1)-1.5-.2) press('B');
