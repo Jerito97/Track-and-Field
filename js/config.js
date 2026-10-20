@@ -34,8 +34,12 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
- {id:'crawl',name:'100 m crawl',tag:'CRAWL',type:'sprint',swim:true,dist:100,pool:50,cpu:18,spread:24,beta:true,
+ {id:'crawl',name:'100 m crawl',tag:'CRAWL',type:'sprint',swim:true,stroke:'crawl',dist:100,pool:50,cpu:18,spread:24,beta:true,
   help:'<b>1. Salida:</b> al disparo te tirás solo del bloque. <b>2. Nadar:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece: cada acierto es una brazada y suma velocidad; cada error te frena y si dejás de tocar vas perdiendo velocidad. <b>3. Vuelta:</b> la pileta es de 50 m: cerca de la pared aparecen los <b>dos rojos</b>; tocalos juntos <b>justo antes de la pared</b> para dar la vuelta y salir despegado. Si llegás a la pared sin tocarlos, te la comés. <b>4. Llegada:</b> al final, los dos rojos otra vez para <b>tocar la pared</b>.'},
+ {id:'breast',name:'100 m pecho',tag:'PECHO',type:'sprint',swim:true,stroke:'breast',dist:100,pool:50,cpu:24,spread:30,beta:true,
+  help:'<b>1. Salida:</b> al disparo te tirás solo del bloque. <b>2. Nadar al ritmo:</b> sobre tu nadador se va cerrando un <b>anillo</b>: tocá los <b>dos rojos</b> juntos justo cuando se cierra. Cada brazada justa te empuja y hace que el ritmo vaya <b>más rápido</b>; una apurada, tarde o perdida te frena y el ritmo se hace más lento. <b>3. Vuelta:</b> cerca de la pared de los 50 m, los dos rojos <b>justo antes de la pared</b>. <b>4. Llegada:</b> los dos rojos para <b>tocar la pared</b>.'},
+ {id:'fly',name:'100 m mariposa',tag:'MARIPOSA',type:'sprint',swim:true,stroke:'fly',dist:100,pool:50,cpu:22,spread:28,beta:true,
+  help:'<b>1. Salida:</b> al disparo te tirás solo del bloque. <b>2. La ola:</b> <b>mantené los dos botones</b> y tu nadador se hunde en la brazada mientras una <b>estrellita</b> corre hacia el círculo: <b>soltá cuando llegue</b> para una brazada fuerte. Después saca los brazos por arriba del agua y volvés a mantener. Cuanto más justo soltás y más rápido encadenás, más rápido vas. <b>3. Vuelta:</b> cerca de la pared de los 50 m, los dos rojos <b>justo antes de la pared</b>. <b>4. Llegada:</b> los dos rojos para <b>tocar la pared</b>.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];

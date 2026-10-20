@@ -5,7 +5,7 @@ import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,start
 import {fieldAction,footTap,javThrow} from './game/field.js';
 import {demoTap,endDemo} from './game/demo.js';
 import {hamRush} from './game/hammer.js';
-import {swimTurnHit} from './game/swim.js';
+import {swimBeatHit,swimTurnHit} from './game/swim.js';
 import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -57,7 +57,7 @@ export function onTap(pos){
 export function bothHit(){
   S.pend=null; tone(520,.07,'square',.05);
   // swimming: by the far wall the red buttons are the turn
-  if(S.ev.swim&&swimTurnHit()) return;
+  if(S.ev.swim&&(swimTurnHit()||swimBeatHit())) return;
   if(S.ev.type==='sprint'){ S.cue=null; S.dip=.5; S.dipT=0; tone(300,.15,'triangle',.05); }
   else fieldAction();
 }

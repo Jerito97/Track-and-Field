@@ -141,22 +141,37 @@ export function fieldPose(V){
 }
 
 // ---- swimming ----
-// o.st: block (on the block, crouched at set), dive (u 0..1: from the block head first into the water), swim (crawl at
-// stroke phase ph; dip: reaching for the wall at the end), turn (u: the flip at the wall, tucked, then the push-off
-// stretched out), done (upright in the water, waving). Returns the pose with its rot: swimming the body lies face down
+// o.st: block (on the block, crouched at set), dive (u 0..1: from the block head first into the water), swim (o.stroke:
+// crawl at stroke phase ph; breast at u, 0..1 through a stroke, none = gliding; fly: o.fly {st:'hold',p} diving into
+// the pull, {st:'rec',r} the arms back over the water; dip: reaching for the wall at the end), turn (u: crawl the flip
+// at the wall, tucked, the others touching it and turning round; then the push-off stretched out), done (upright in the
+// water, waving). Returns the pose with its rot: swimming the body lies face down
 // (rot a quarter turn), so "forward" is down (the arm pulls under the water) and "back" is up (it comes back over it)
 const SW_STAND=P(.8,.3,[.15,.3],[.05,.3],[.15,.1],[-.1,.1]), SW_SET=P(.6,1.05,[.7,1.4],[.5,1.2],[.35,.15],[.45,.15]);
 const SW_LINE=P(.8,0,[.03,.05],[-.03,.05],[3.05,.05],[3.0,.05]);  // stretched out: arms over the head, legs together
-const SW_TUCK=P(.8,.5,[1.9,2.3],[1.8,2.2],[.6,.4],[.5,.4]);
+const SW_TUCK=P(.8,.5,[1.9,2.3],[1.8,2.2],[.6,.4],[.5,.4]), SW_TOUCH=P(.8,.6,[1.4,1.6],[1.3,1.5],[2.4,.6],[2.2,.6]);
+// breaststroke: the glide, the pull (elbows out, hands under the chest) with the knees coming up, the arms shooting
+// forward as the legs kick out, and back to the glide
+const SW_BREAST=[[0,SW_LINE],[.18,P(.8,.15,[1.2,2.2],[1.1,2.1],[1.9,.9],[1.8,.9])],[.34,P(.8,0,[.5,.5],[.4,.6],[2.9,.6],[2.8,.6])],[.55,SW_LINE],[1,SW_LINE]];
+// butterfly: both arms together; pulling under the water with the legs kicking, then back over the water
+const flyArm=(a,b)=>({a,b}), FLY_PULL=[[0,SW_LINE],[1,P(.8,.2,[.6,.4],[.5,.4],[.4,.3],[.35,.3])]];
 export function swimPose(o){
   const Q=Math.PI/2;
   if(o.st==='block') return {...(o.set?SW_SET:SW_STAND),kind:o.set?'swset':'swblock',rot:0};
   if(o.st==='dive') return {...lerpPose(SW_SET,SW_LINE,ease(clamp01(o.u*2.5))),kind:'swdive',rot:.5+(Q+.45-.5)*ease(o.u)};
   if(o.st==='turn'){ const u=o.u;
+    if(u<.5&&o.open){ const k=u/.5; return {...lerpPose(SW_LINE,SW_TOUCH,ease(clamp01(k*2))),kind:'swturn',rot:Q-1.1*ease(k)}; }
     if(u<.5){ const k=u/.5; return {...lerpPose(SW_LINE,SW_TUCK,ease(clamp01(k*3))),kind:'swturn',rot:Q+Math.PI*ease(k)}; }
     return {...SW_LINE,kind:'swglide',rot:Q}; }
   if(o.st==='done'){ const w=Math.sin(o.t*6); return {...P(.8,.05,[.3,.6],[-.2,.5],[2.9+.2*w,.2],[.7,.6]),kind:'swdone',rot:0}; }
   if(o.dip!=null) return {...SW_LINE,kind:'swtouch',rot:Q};
+  if(o.stroke==='breast') return {...track('swbreast',SW_BREAST,o.u??1),rot:Q-.18*Math.sin(Math.PI*clamp01((o.u??1)/.4))};
+  if(o.stroke==='fly'){ const f=o.fly||{st:'glide'};
+    if(f.st==='hold'){ const p=clamp01(f.p), k=Math.sin(p*7)*.35, J=lerpPose(FLY_PULL[0][1],FLY_PULL[1][1],ease(p));
+      return {...J,legs:[{a:.3+k,b:.3},{a:.25+k,b:.3}],kind:'swfly',rot:Q+.35*Math.sin(Math.PI*p)}; }
+    if(f.st==='rec'){ const r=clamp01(f.r), a=.4-(Math.PI*2-.4-.15)*ease(r);  // from the hips back over the water to the front
+      return {hip:.8,lean:-.1,legs:[{a:.1,b:.15},{a:.05,b:.15}],arms:[flyArm(a<-Math.PI?a+2*Math.PI:a,.15),flyArm((a<-Math.PI?a+2*Math.PI:a)-.05,.15)],kind:'swfly',rot:Q-.3*Math.sin(Math.PI*r)}; }
+    return {...SW_LINE,kind:'swfly',rot:Q}; }
   // crawl: each arm goes round, half a turn apart; over the water the elbow bends high; the legs flutter
   const ph=((o.ph%(2*Math.PI))+2*Math.PI)%(2*Math.PI), arm=p=>{ let a=Math.PI-p; if(a<=-Math.PI) a+=2*Math.PI; return {a,b:a<0?1.1*Math.sin(-a):.25}; };
   const f=.28*Math.sin(o.ph*3);

@@ -20,6 +20,9 @@ function caption(){
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'||S.phase==='set') return ev.type==='sprint'?'ESPERÁ EL DISPARO':'TOCÁ PARA EMPEZAR';
   if(ev.swim&&S.dive!=null&&S.dive<.6) return 'AL DISPARO TE TIRÁS SOLO DEL BLOQUE';
+  if(c&&c.beat) return 'LOS DOS ROJOS JUSTO CUANDO EL ANILLO SE CIERRA SOBRE LA CABEZA';
+  if(ev.stroke==='fly'&&m&&m.k==='fly') return 'SOLTÁ CUANDO LA ESTRELLA LLEGUE AL CÍRCULO';
+  if(ev.stroke==='fly'&&c&&c.type==='hamhold') return 'MANTENÉ LOS DOS PARA LA BRAZADA';
   if(c&&c.type==='both'&&ev.swim) return S.turned?'AL FINAL, LOS DOS ROJOS PARA TOCAR LA PARED':'LOS DOS ROJOS JUSTO ANTES DE LA PARED PARA DAR LA VUELTA';
   if(c&&c.type==='both'&&ev.type==='sprint') return 'AL FINAL, TOCÁ LOS DOS ROJOS JUNTOS PARA TIRARTE';
   if(c&&c.type==='num') return 'TOCÁ 1, 2 Y 3 BIEN RÁPIDO PARA SALTAR LA VALLA';
@@ -50,7 +53,9 @@ export function demoStep(dt){
   const pace=ev.type==='sprint'?14:k==='sp'?10:17;
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
-  if(c&&c.type==='both'&&ev.swim&&!S.turned&&ev.pool-S.x<=1.5) press('B');
+  if(c&&c.beat&&c.t>=c.T+.1) press('B');
+  else if(ev.stroke==='fly'&&!S.dipCued&&!S.turning){ if(c&&c.type==='hamhold') hold(true); else if(m&&m.k==='fly'&&m.hit==null&&m.p>=.9) hold(false); }
+  if(c&&c.type==='both'&&!c.beat&&ev.swim&&!S.turned&&ev.pool-S.x<=1.5){ hold(false); press('B'); }
   else if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
   if((k==='lj'||k==='tj'||k==='hj')&&c&&c.type==='both'){
     if(!a&&ev.line-S.x<=.4) press('B');
