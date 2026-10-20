@@ -49,7 +49,7 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
 }
 // illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
-export const THUMBS={'100':'34% 30%','lj':'44% 30%','tj':'48% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','ham':'60% 30%','sp':'50% 30%','hj':'55% 30%','crawl':'62% 30%','tour':'52% 30%','surv':'50% 35%'};
+export const THUMBS={'100':'34% 30%','lj':'44% 30%','tj':'48% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','ham':'60% 30%','sp':'50% 30%','hj':'55% 30%','crawl':'62% 30%','breast':'55% 30%','fly':'60% 30%','tour':'52% 30%','surv':'50% 35%'};
 const thumbKey=i=>i>=0&&i<EVENTS.length+BETA.length?evAt(i).id:'tour';
 // the events on the events screen: the published ones, and for the admin also the ones in testing
 const shownEvents=()=>isAdmin()?EVENTS.concat(BETA):EVENTS;
