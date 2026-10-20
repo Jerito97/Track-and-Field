@@ -254,11 +254,13 @@ async function people(sql){
     from users u order by u.created_at desc limit 500`;
   return {players};
 }
+// (its place in the world: as the world top 10 has it, a tie going to whoever made it first)
 async function profile(sql,id){
   const u=(await sql`select id,name,color,created_at from users where id=${id}`)[0];
   if(!u) throw new Bad(404,'No existe ese jugador.');
   const marks=await sql`select m.ev,m.mark,m.made_at as date,m.rounds,
-    1+(select count(*)::int from marks o where o.ev=m.ev and (case when m.ev in ('100','110h') then o.mark<m.mark else o.mark>m.mark end)) as rank
+    1+(select count(*)::int from marks o where o.ev=m.ev and ((case when m.ev = any(${SPRINT}) then o.mark<m.mark else o.mark>m.mark end)
+      or o.mark=m.mark and o.made_at<m.made_at)) as rank
     from marks m where m.player_id=${id}`;
   return {player:u,marks};
 }
