@@ -5,13 +5,16 @@ import {JAV_ART,SCENE} from '../assets.js';
 import {hash} from '../utils.js';
 import {txt} from './text.js';
 
-// colours of the track and grass, as in the event illustrations; survival has its own darker stadium (setTheme)
+// colours of the track and grass, as in the event illustrations; survival has its own darker stadium and swimming its
+// indoor pool (setTheme)
 export let TARTAN, TARTAN_D, GRASS, GRASS_L, LINE;
 const THEMES={
   day:{track:['#d9563f','#c94a35'],grass:['#7cc24a','#8ccf55'],line:'#fff',stands:'stands',sky:'sky',top:'#0671db',haze:'rgba(225,238,255,.12)'},
-  surv:{track:['#5b2a26','#4b221f'],grass:['#38423a','#404b41'],line:'#b9a8a4',stands:'standsSurv',sky:'skySurv',top:'#111519',haze:null}};
+  surv:{track:['#5b2a26','#4b221f'],grass:['#38423a','#404b41'],line:'#b9a8a4',stands:'standsSurv',sky:'skySurv',top:'#111519',haze:null},
+  // the indoor pool (swimming): its own stands and ceiling; no track or grass
+  swim:{track:['#d9563f','#c94a35'],grass:['#7cc24a','#8ccf55'],line:'#fff',stands:'standsSwim',sky:'skySwim',top:'#cfc6b0',haze:'rgba(225,238,255,.1)'}};
 let T=THEMES.day;
-export function setTheme(surv){ T=surv?THEMES.surv:THEMES.day; [TARTAN,TARTAN_D]=T.track; [GRASS,GRASS_L]=T.grass; LINE=T.line; }
+export function setTheme(surv,swim){ T=swim?THEMES.swim:surv?THEMES.surv:THEMES.day; [TARTAN,TARTAN_D]=T.track; [GRASS,GRASS_L]=T.grass; LINE=T.line; }
 setTheme(false);
 // a picture repeated sideways (made to tile), scrolled off logical px; false when it isn't loaded
 function strip(im,off,top,h){

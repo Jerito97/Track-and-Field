@@ -26,9 +26,10 @@ export const SPR={};
 export const JAV_ART=new Image();
 // the pole on its own (assets/pole.png, grip on the left): bent and drawn by the pole vault
 export const POLE_ART=new Image();
-// stadium scenery (assets/scene/): grandstands and sky, the normal ones and the dark ones of survival, and the race
+// stadium scenery (assets/scene/): grandstands and sky, the normal ones, the dark ones of survival and the indoor pool's
+// (stands and ceiling), and the race
 // starter (ready / firing)
-export const SCENE={stands:new Image(),sky:new Image(),standsSurv:new Image(),skySurv:new Image(),starter:[new Image(),new Image()]};
+export const SCENE={stands:new Image(),sky:new Image(),standsSurv:new Image(),skySurv:new Image(),standsSwim:new Image(),skySwim:new Image(),starter:[new Image(),new Image()]};
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
 // animations per athlete id: {run:{im (strip of frames side by side), frames (count), w,h,hx,feet,scale}, start:{...}, ...}
@@ -51,5 +52,7 @@ export function loadAssets(){
   load(POLE_ART,new URL('../assets/pole.png',import.meta.url).href);
   [['stands','stands.webp'],['sky','sky.jpg'],['standsSurv','stands-surv.webp'],['skySurv','sky-surv.jpg']].forEach(([k,f])=>load(SCENE[k],new URL('../assets/scene/'+f,import.meta.url).href));
   SCENE.starter.forEach((im,k)=>load(im,new URL(`../assets/scene/starter${k}.png`,import.meta.url).href));
+  // the pool's pictures load in the background (nothing waits for them: only swimming uses them)
+  [['standsSwim','stands-swim.webp'],['skySwim','sky-swim.jpg']].forEach(([k,f])=>{ SCENE[k].src=new URL('../assets/scene/'+f,import.meta.url).href; });
   return Promise.all(waits);
 }
