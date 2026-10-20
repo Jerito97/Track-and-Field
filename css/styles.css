@@ -112,6 +112,13 @@ kbd{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;background:#fff;bo
 .m-arr{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:clamp(26px,9vh,40px);height:clamp(26px,9vh,40px);border-radius:50%;border:2px solid #fff;background:var(--red);color:#fff;font:inherit;font-size:clamp(1rem,4vh,1.5rem);line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 3px 8px rgba(0,0,0,.35);padding:0}
 .m-arr.l{left:-6px}.m-arr.r{right:-6px}
 .m-arr[hidden]{display:none}
+.m-evs>.m-ev[hidden]{display:none}
+/* tabs over the carousel, joined to its top edge */
+.m-cats{display:flex;gap:4px;margin:0 0 calc(-1 * clamp(5px,1.6vh,12px)) 10px}
+.m-cat{font:inherit;font-family:var(--f-display);font-style:italic;letter-spacing:.05em;text-transform:uppercase;font-size:clamp(.7rem,3.2vh,1.05rem);line-height:1;
+  padding:.4em .9em .35em;border:0;border-radius:9px 9px 0 0;background:var(--panel2);color:rgba(255,255,255,.75);cursor:pointer}
+.m-cat.on{background:rgba(255,255,255,.92);color:var(--ink)}
+.m-cat:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
 .m-ev.new i{background:#2fd166;color:var(--ink)}
 .m-ev{position:relative;font:inherit;border:0;border-radius:9px;cursor:pointer;color:#fff;overflow:hidden;height:clamp(72px,22vh,180px);padding:0;display:flex;flex-direction:column;
   background:linear-gradient(180deg,#3d6fb8 0 58%,#1e3566 58%);box-shadow:0 3px 0 #0e1a34}

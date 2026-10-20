@@ -57,6 +57,11 @@ export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img 
 // events screen: the chosen event, remembered between visits (the tournament has its own screen now)
 const TOUR=-1;
 let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length+BETA.length?v:0; })();
+// tabs over the carousel: all the events, or one kind (remembered between visits)
+const CATS=[['all','Todas'],['run','Carreras'],['jump','Saltos'],['throw','Lanzamientos']];
+const catOf=ev=>ev.type==='sprint'?'run':['lj','tj','hj','pv'].includes(ev.kind)?'jump':'throw';
+let menuCat=(()=>{ const v=store.get('odb-menucat','all'); return CATS.some(c=>c[0]===v)?v:'all'; })();
+const inCat=ev=>menuCat==='all'||catOf(ev)===menuCat;
 const ICON={
   medal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h4l1 5-3 2zM17 2h-4l-1 5 3 2z" fill="#e8262d"/><circle cx="12" cy="15" r="6.5" fill="#ffd23a" stroke="#a8740c" stroke-width="1.5"/><path d="M12 11.6l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#a8740c"/></svg>',
   cup:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0zM5 4h2v3a2 2 0 0 1-2-2zM19 4h-2v3a2 2 0 0 0 2-2zM11 12h2v4h-2zM8 17h8v3H8z" fill="currentColor"/></svg>',
@@ -119,10 +124,11 @@ export function showMenu(){
 export function showEvents(){
   setS(null); setScreen('menu');
   if(menuSel>=shownEvents().length) menuSel=0;
+  if(!inCat(evAt(menuSel))) menuCat='all';
   // the admin: events in testing show up once the server confirms (the screen redraws)
   checkAdmin(()=>{ if(BETA.length&&OV.querySelector('.m-evs')) showEvents(); });
   // events marked nueva:true in config.js (invented ones) get a small NUEVA tag; events in testing, EN PRUEBA
-  const cards=shownEvents().map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva||e.beta?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}">${art(i,true)}<b>${e.tag}</b>${e.beta?'<i class="beta">En prueba</i>':e.nueva?'<i>Nueva</i>':''}</button>`).join('');
+  const cards=shownEvents().map((e,i)=>`<button class="m-ev${i===menuSel?' on':''}${e.nueva||e.beta?' new':''}" data-act="sel" data-i="${i}" aria-pressed="${i===menuSel}"${inCat(e)?'':' hidden'}>${art(i,true)}<b>${e.tag}</b>${e.beta?'<i class="beta">En prueba</i>':e.nueva?'<i>Nueva</i>':''}</button>`).join('');
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><button class="m-back" data-act="menu" aria-label="Volver al menú">‹</button>TRACK &amp; FIELD</div><div class="m-title">Elegí tu prueba <span class="m-ic">${ICON.cup}</span></div></header>
   <section class="m-hero">
@@ -130,6 +136,7 @@ export function showEvents(){
     <div class="m-info">${heroInfo()}</div>
     <div class="m-stats">${heroStats()}</div>
   </section>
+  <div class="m-cats" role="group" aria-label="Tipo de prueba">${CATS.map(([c,n])=>`<button class="m-cat${c===menuCat?' on':''}" data-act="cat" data-c="${c}" aria-pressed="${c===menuCat}">${n}</button>`).join('')}</div>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   ${footer()}</div>`,'menu');
   initCarousel(); refreshStrip(); loadWr();
@@ -142,6 +149,15 @@ function initCarousel(){
   const arrows=()=>{ evScroll=row.scrollLeft; l.hidden=row.scrollLeft<4; r.hidden=row.scrollLeft+row.clientWidth>=row.scrollWidth-4; };
   row.scrollLeft=evScroll; keepInView();
   row.addEventListener('scroll',arrows,{passive:true}); arrows();
+}
+// a tab: only that kind of event in the carousel; the chosen event moves to the first of them if it isn't one
+function selectCat(c){
+  menuCat=c; store.set('odb-menucat',c);
+  OV.querySelectorAll('.m-cat').forEach(b=>{ const on=b.dataset.c===c; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+  OV.querySelectorAll('.m-evs .m-ev').forEach(b=>{ b.hidden=!inCat(evAt(+b.dataset.i)); });
+  const row=OV.querySelector('.m-evs'); row.scrollLeft=0;
+  if(!inCat(evAt(menuSel))) selectEvent(shownEvents().findIndex(inCat)); else keepInView();
+  row.dispatchEvent(new window.Event('scroll'));  // the arrows, for the new width
 }
 function keepInView(){ const row=OV.querySelector('.m-evs'), on=row&&row.querySelector('.m-ev.on'); if(!on) return;
   const a=on.offsetLeft-row.offsetLeft, b=a+on.offsetWidth; if(a<row.scrollLeft) row.scrollLeft=a; else if(b>row.scrollLeft+row.clientWidth) row.scrollLeft=b-row.clientWidth; }
@@ -312,6 +328,7 @@ OV.addEventListener('click',e=>{
   else if(a==='rename') onRename();
   else if(a==='scroll'){ const row=OV.querySelector('.m-evs'); row.scrollBy({left:+b.dataset.d*row.clientWidth*.8,behavior:'smooth'}); }
   else if(a==='sel') selectEvent(+b.dataset.i);
+  else if(a==='cat') selectCat(b.dataset.c);
   else if(a==='demo'){ const i=menuSel; buildAthletes(true); newEvent(i); startPlay(); startDemo(()=>showEvents()); }  // the tutorial: it plays itself, then back here
   else if(a==='go'){ G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); }
   else if(a==='events') showEvents();
