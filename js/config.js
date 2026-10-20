@@ -32,6 +32,8 @@ export const EVENTS=[
   help:'<b>1. Salida:</b> al disparo, tocá los <b>dos rojos</b> para tirarte del bloque: cuanto antes reaccionás, mejor. <b>2. Nadar al ritmo:</b> sobre tu nadador se va cerrando un <b>anillo</b>: tocá los <b>dos rojos</b> juntos justo cuando se cierra. Cada brazada justa te empuja y hace que el ritmo vaya <b>más rápido</b>; una apurada, tarde o perdida te frena y el ritmo se hace más lento. <b>3. Vuelta:</b> cerca de la pared de los 50 m, los dos rojos <b>justo antes de la pared</b>. <b>4. Llegada:</b> los dos rojos para <b>tocar la pared</b>.'},
  {id:'fly',name:'100 m mariposa',tag:'MARIPOSA',type:'sprint',swim:true,stroke:'fly',dist:100,pool:50,cpu:23,spread:28,extra:true,
   help:'<b>1. Salida:</b> al disparo, tocá los <b>dos rojos</b> para tirarte del bloque: cuanto antes reaccionás, mejor. <b>2. La ola:</b> <b>mantené los dos botones</b> y tu nadador se hunde en la brazada mientras una <b>estrellita</b> corre hacia el círculo: <b>soltá cuando llegue</b> para una brazada fuerte. Después saca los brazos por arriba del agua y volvés a mantener. Cuanto más justo soltás y más rápido encadenás, más rápido vas. <b>3. Vuelta:</b> cerca de la pared de los 50 m, los dos rojos <b>justo antes de la pared</b>. <b>4. Llegada:</b> los dos rojos para <b>tocar la pared</b>.'},
+ {id:'4x100',name:'Posta 4x100',tag:'POSTA',type:'sprint',relay:true,dist:400,legs:4,cpu:36,spread:36,extra:true,
+  help:'Corrés los <b>cuatro relevos</b>. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. El pase:</b> tu compañero te espera y justo detrás de él hay una <b>tabla de colores</b>. Cuando te acercás aparecen los <b>dos rojos</b> y todo va en <b>cámara lenta</b>: tocalos juntos cuando el <b>testimonio</b> llega al <b>centro verde</b>. Cuanto más justo, con más velocidad sale tu compañero; si no lo pasás, se pasa solo al final de la tabla (el peor pase). <b>3. Llegada:</b> al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
 ];
 // the classic five: survival and the tournament against the machines (the newer ones, extra:true, are on their
 // own, in the online tournaments and on the boards)
@@ -40,8 +42,6 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
- {id:'4x100',name:'Posta 4x100',tag:'POSTA',type:'sprint',relay:true,dist:400,legs:4,cpu:36,spread:36,beta:true,
-  help:'Corrés los <b>cuatro relevos</b>. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. El pase:</b> tu compañero te espera y justo detrás de él hay una <b>tabla de colores</b>. Cuando te acercás aparecen los <b>dos rojos</b> y todo va en <b>cámara lenta</b>: tocalos juntos cuando el <b>testimonio</b> llega al <b>centro verde</b>. Cuanto más justo, con más velocidad sale tu compañero; si no lo pasás, se pasa solo al final de la tabla (el peor pase). <b>3. Llegada:</b> al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];
