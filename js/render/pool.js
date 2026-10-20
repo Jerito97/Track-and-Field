@@ -103,7 +103,7 @@ function startDeck(X,GY,s){
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,wx-1,LH); ctx.clip();
   // kickboards, the bench with towels, the starter, the timekeeper
   kickboards(X(-12),top,s); bench(X(-10),X(-6.5),top,s);
-  drawStarter(X(-4.4),top,2.9*s);
+  drawStarter(X(-4.4),top,2.85*s);
   timekeeper(X(-2.2),top,s);
   ctx.restore();
 }

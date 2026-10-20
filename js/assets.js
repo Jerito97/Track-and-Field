@@ -54,6 +54,6 @@ export function loadAssets(){
   load(JAV_ART,new URL('../assets/javelin.png',import.meta.url).href);
   load(POLE_ART,new URL('../assets/pole.png',import.meta.url).href);
   [['stands','stands.webp'],['sky','sky.jpg'],['standsSurv','stands-surv.webp'],['skySurv','sky-surv.jpg']].forEach(([k,f])=>load(SCENE[k],new URL('../assets/scene/'+f,import.meta.url).href));
-  SCENE.starter.forEach((im,k)=>load(im,new URL(`../assets/scene/starter${k}.png`,import.meta.url).href));
+  SCENE.starter.forEach((im,k)=>load(im,new URL(`../assets/scene/starter-${k}.png`,import.meta.url).href));
   return Promise.all(waits);
 }

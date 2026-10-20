@@ -83,7 +83,7 @@ export function drawSprint(V){
 }
 // the race starter, standing on the grass below the lanes (or where told: feet at base, h tall): arm up with the
 // pistol, then firing (smoke) at the gun
-const ST_H=84, ST_FEET=.297;  // figure height (logical px) and where the feet are across the picture
+const ST_H=84, ST_FEET=.315;  // figure height (logical px) and where the feet are across the picture
 export function drawStarter(x,base=319,h=ST_H){
   if(x<-120||x>LW+120) return;
   const im=SCENE.starter[S.smoke!=null&&S.smoke<1?1:0];
