@@ -25,11 +25,9 @@ const JAV_TIP_X=1.55, JAV_TIP_Y=2.6;  // JAV_T: seconds for the star to reach th
 const FINE=.04;
 const fine=(d,ok)=>1-FINE*Math.min(1,Math.abs(d)/ok);
 export const qPole=p=>{ const d=p-1; return Math.abs(d)<=PV_OK?fine(d,PV_OK):(1-FINE)*(d<0?clamp(1+(d+PV_OK)/.45,0,1):clamp(1-(d-PV_OK)/.2,0,1)); };
-// long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
-// within .44-.56), fading to nothing at .2 and .8
-export const stretchQ=u=>Math.max(0,Math.min(1,1-(Math.abs(u-.5)-.06)/.24));
-// the high jump's arch the same, but finer within the perfect part (as the pole vault's)
-const archQ=u=>Math.abs(u-.5)<=.06?fine(u-.5,.06):(1-FINE)*stretchQ(u);
+// long jump air push (and the high jump's arch), by flight progress u (0 take-off .. 1 landing): best at the highest
+// point (u .5, near full marks within .44-.56, finer as the pole vault's), fading to nothing at .2 and .8
+export const stretchQ=u=>Math.abs(u-.5)<=.06?fine(u-.5,.06):(1-FINE)*Math.max(0,Math.min(1,1-(Math.abs(u-.5)-.06)/.24));
 // distance without the air push, and what a perfect push adds (m)
 const LJ_NOPUSH=-.6, LJ_PUSH=1.4;
 // long jump: the front foot is about LJ_FOOT m ahead of the hip; it's the foot that must not pass the board
@@ -50,7 +48,7 @@ const TJ_SOFT=9.3, TJ_STEP_END=TJ_SAND-.6;
 // hop / step contact: pressed within TJ_OK s of the foot touching down = perfect, nothing left TJ_EARLY s before or
 // TJ_LATE s after; the athlete waits on the ground (slowly) up to TJ_LATE s, then stumbles on
 const TJ_OK=.06, TJ_EARLY=.25, TJ_LATE=.18;
-export const qFoot=e=>Math.abs(e)<=TJ_OK?1:e<0?clamp(1+(e+TJ_OK)/(TJ_EARLY-TJ_OK),0,1):clamp(1-(e-TJ_OK)/(TJ_LATE-TJ_OK),0,1);
+export const qFoot=e=>Math.abs(e)<=TJ_OK?fine(e,TJ_OK):(1-FINE)*(e<0?clamp(1+(e+TJ_OK)/(TJ_EARLY-TJ_OK),0,1):clamp(1-(e-TJ_OK)/(TJ_LATE-TJ_OK),0,1));
 // bound flights (hop, step): length per m/s of speed, forward speed in the air (share of the run's), height
 const TJ_BOUND={hop:{L:.5,vx:.95,h:v=>.35+.02*v,side:'R'},step:{L:.42,vx:.92,h:v=>.3+.015*v,side:'L'}};
 // the last jump: length per m/s, and its forward speed in the air (share), at least as long as a long jump's flight
@@ -100,7 +98,7 @@ export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
     // high jump: the arch over the bar (best when the back is right over it, the top of the flight)
-    if(a&&a.k==='hj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=archQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
+    if(a&&a.k==='hj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.mark=hjHeight(a.base,a.q2); }
     if(a&&isLeap(a)&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.us=Math.min(1,a.t/a.T); a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.x1o=a.x1; leapTo(a,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; }
@@ -108,10 +106,10 @@ export function fieldAction(){
   }
   if(S.phase!=='run'||!S.zone) return;
   S.cue=null;
-  // a take-off pressed just as the foot reached the board arrives a moment late: within that moment it counts as
-  // taking off right at the board (see the foul check)
+  // a take-off pressed just as the foot reached the board arrives a moment late: within that moment it takes off at
+  // the board (see the foul check), but as far from it as it got past it (right on the board is the best there is)
+  const d=Math.abs(foulX(ev)-S.x), v=S.v;  // foot to the board
   if(jumps(ev)&&ev.kind!=='hj'&&S.x>foulX(ev)) S.x=foulX(ev);
-  const d=Math.max(0,foulX(ev)-S.x), v=S.v;  // foot to the board
   if(ev.kind==='lj'){
     const base=Math.max(.5,.80*v-.25*d), T=.6+.03*v, h=.45+.055*v, mark=Math.max(.5,base+LJ_NOPUSH);
     S.act={k:'lj',t:0,T,x0:S.x,x1:ev.line+mark,base,mark,h,q2:0};
