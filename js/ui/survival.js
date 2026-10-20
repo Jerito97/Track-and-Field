@@ -38,8 +38,8 @@ export function showSurvModes(){
   setS(null); setScreen('menu');
   showOv(card('SUPERVIVENCIA','Elegí el modo',`
     <div class="t-two">
-      <button class="t-opt" data-act="sclassic" data-focus><b>Clásica</b><span>Las 5 pruebas de siempre: 100 m, largo, vallas, garrocha y jabalina.</span></button>
-      <button class="t-opt soon" disabled aria-disabled="true"><b>Moderna <i class="soon-tag">Próximamente</i></b><span>Con las pruebas nuevas.</span></button>
+      <button class="t-opt" data-act="sclassic" data-focus><img class="t-img" src="assets/thumbs/survclas-sm.webp" alt=""><b>Clásica</b><span>Las 5 pruebas de siempre: 100 m, largo, vallas, garrocha y jabalina.</span></button>
+      <button class="t-opt soon" disabled aria-disabled="true"><img class="t-img" src="assets/thumbs/survmod-sm.webp" alt=""><b>Moderna <i class="soon-tag">Próximamente</i></b><span>Con las pruebas nuevas.</span></button>
     </div>
     <div class="btns"><button class="btn alt" data-act="menu">Volver</button></div>`));
 }
@@ -48,7 +48,7 @@ export function showSurvival(){
   setS(null); setScreen('menu');
   const b=player()?.survBest, sv=saved();
   showOv(card('SUPERVIVENCIA','Clásica',`
-    <div class="s-hero"><img src="assets/thumbs/surv.webp" alt=""></div>
+    <div class="s-hero"><img src="assets/thumbs/survclas.webp" alt=""></div>
     ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>Ronda ${sv.round} · ${sv.pts} pts</b><small>${sv.k>=5?`Ronda ${sv.round} superada: sigue la ${sv.round+1}`:`Te toca ${EVENTS[sv.order[sv.k]]?.name||''} (${sv.k+1}/5)`}</small></div><button class="btn" data-act="sresume" data-focus>Seguir</button></div>`:''}
     <div class="s-best"><span class="lbl">Tu mejor partida</span><b>${b?`${b.pts} pts`:'—'}</b>${b?`<small>Llegaste a la ronda ${b.rounds+1}</small>`:''}</div>
     <div class="btns"><button class="btn${sv?' alt':''}" data-act="sstart"${sv?'':' data-focus'}>${sv?'Nueva partida':'Jugar'}</button><button class="btn alt" data-act="board" data-i="${EVENTS.length}">Récords</button><button class="btn alt" data-act="surv">Volver</button></div>`));

@@ -122,7 +122,7 @@ export function showMenu(){
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}
-    ${mode('surv','surv',THUMBS.surv,'Supervivencia',' surv')}
+    ${mode('surv','survmenu',THUMBS.surv,'Supervivencia',' surv')}
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();

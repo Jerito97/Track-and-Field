@@ -380,6 +380,7 @@ tr.me td{background:var(--red)}
 .t-opt b{font-family:var(--f-display);font-weight:400;font-style:italic;letter-spacing:.05em;font-size:1.6rem;text-transform:uppercase}
 .t-opt span{font-size:.88rem;color:#d6e0f5}
 @media (max-width:520px){ .t-two{grid-template-columns:1fr} }
+.t-img{width:100%;aspect-ratio:2.3/1;object-fit:cover;object-position:50% 40%;border-radius:8px;display:block}
 .t-opt.soon{cursor:default;opacity:.55;background:#1a3060;border-color:#1a3060}
 .t-opt.soon:hover{border-color:#1a3060}
 .soon-tag{display:inline-block;vertical-align:middle;font-family:var(--f-body,inherit);font-style:normal;font-size:.7rem;letter-spacing:.06em;background:var(--sun);color:#14284f;border-radius:6px;padding:2px 6px;margin-left:6px}
