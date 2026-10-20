@@ -162,7 +162,7 @@ function drawScope(){
     ctx.fillStyle=r&&r.hit?'#fff':INK; ctx.strokeStyle=r&&r.hit?'#9aa5b8':INK; ctx.lineWidth=u*.15; ctx.beginPath(); ctx.arc(tx,by,u,0,Math.PI*2); ctx.fill(); ctx.stroke();
     if(r&&!r.hit){ ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.arc(tx+r.x*u,by+r.y*u,u*.2,0,Math.PI*2); ctx.fill(); }
     if(i===s.k){ ctx.strokeStyle='#ffd23a'; ctx.lineWidth=u*.3; ctx.beginPath(); ctx.arc(tx,by,u*1.4,0,Math.PI*2); ctx.stroke();
-      const d=laserArrow(); if(d) arrowGlyph(tx,by,u*.85,...DIRS[d]); } }
+      const d=laserArrow(); if(d) arrowGlyph(tx,by,u*(.1+.55*d.k),...DIRS[d.dir]); } }
   // the edge of the lens, dark
   const vg=ctx.createRadialGradient(cx,cy,R*.55,cx,cy,R); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.75)'); ctx.fillStyle=vg; ctx.fillRect(cx-R,cy-R,2*R,2*R);
   ctx.restore();

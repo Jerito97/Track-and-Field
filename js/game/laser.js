@@ -1,13 +1,13 @@
 // Laser run (the modern pentathlon's last part) on the sprint engine: three legs of the 100 m's green buttons with a
 // shooting range after the first two. At a range the runner pulls up on the line and the view goes into the sight, with
-// four arrows around it: the sight sways a little around the target (more the faster the runner came in), and every
-// so often an arrow shows on the target's black, for a moment (a shorter one the faster the runner came in). The arrow
-// button it points to then shoots it: a hit turns it white; a wrong arrow, or one with no arrow on the target, is a
-// miss and adds MISS s to the time. Five shots, then off again from a standstill. The machines stop and shoot too.
+// four arrows around it: the sight sways a little around the target (more the faster the runner came in), and on the
+// target's black a white speck shows and grows, little by little, into an arrow. The arrow button it points to shoots
+// it: a hit turns it white; a wrong arrow, or one before the speck shows, is a miss and adds MISS s to the time. So
+// it's shooting early, when the arrow can hardly be made out, or waiting until it's clear and losing time. Five shots, then off again from a standstill. The machines stop and shoot too.
 import {noise,tone} from '../audio.js';
 import {LW} from '../canvas.js';
 import {S} from '../state.js';
-import {clamp,rand} from '../utils.js';
+import {rand} from '../utils.js';
 import {pop,sideCue} from './core.js';
 
 // seconds added for each miss; how hard the runner pulls up at a range (m/s²)
@@ -19,10 +19,10 @@ export const scope=()=>{ const R=Math.min(96,LW*.29); return {cx:LW/2,cy:150,R,u
 export const D=2.5;
 // the arrows
 export const DIRS={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
-// the sway (target radii): SWAY0, plus SWAY_V per m/s the runner came in with; the arrow shows after GAP s (FIRST the
-// first time), for HOLD0 s less HOLD_V s per m/s the runner came in with (never under HOLD_MIN); after a shot the sight
-// takes SLIDE s to go on to the next target
-const SWAY0=.5, SWAY_V=.09, GAP=[.5,1.3], FIRST=[.9,1.5], HOLD0=1, HOLD_V=.045, HOLD_MIN=.5, SLIDE=.3;
+// the sway (target radii): SWAY0, plus SWAY_V per m/s the runner came in with; the speck shows after GAP s (FIRST the
+// first time) and takes GROW s to become the whole arrow; after a shot the sight takes SLIDE s to go on to the next
+// target
+const SWAY0=.5, SWAY_V=.09, GAP=[.3,.8], FIRST=[.8,1.3], GROW=1.4, SLIDE=.3;
 // after the fifth shot, this long (s) to see the board before running on
 const DONE_T=.7;
 
@@ -35,19 +35,16 @@ export function laserAim(){
   const a=SWAY0+SWAY_V*(s.vin||0), t=s.clock, p=s.ph, sl=s.slide<SLIDE?D*(1-ease(s.slide/SLIDE)):0;
   return [sl-a*(Math.sin(.9*t+p[0])+.45*Math.sin(2.1*t+p[1]))/1.45, -a*(Math.sin(.7*t+p[2])+.45*Math.sin(1.8*t+p[3]))/1.45];
 }
-const holdT=()=>clamp(HOLD0-HOLD_V*(S.vin||0),HOLD_MIN,HOLD0);
 const wait=(s,g)=>{ s.st='wait'; s.t=0; s.T=rand(...g); };
-// the arrow on the target now (U, D, L, R), or none
-export const laserArrow=()=>{ const s=S.shot; return s&&s.st==='show'?s.dir:null; };
+// the arrow on the target now (U, D, L, R) and how grown it is (0 a speck, 1 the whole arrow), or none
+export const laserArrow=()=>{ const s=S.shot; return s&&s.st==='show'?{dir:s.dir,k:Math.min(1,s.t/GROW)}:null; };
 
 // once a frame while running: pulling up at a range, the sight and its arrows, and off again after the fifth shot
 export function laserStep(dt){
   const s=S.shot;
   if(s){ s.t+=dt; s.clock+=dt; s.slide+=dt; S.v=0; if(s.flash) s.flash.t+=dt;
     if(s.k>=5){ s.done+=dt; if(s.done>=DONE_T){ S.shot=null; S.ri=(S.ri||0)+1; S.cue=null; S.lastTap=S.clock; sideCue(); } return; }
-    if(s.t<s.T) return;
-    if(s.st==='wait'){ s.st='show'; s.t=0; s.T=holdT(); s.dir='UDLR'[Math.floor(Math.random()*4)]; tone(740,.04,'triangle',.03); }
-    else wait(s,GAP);
+    if(s.st==='wait'&&s.t>=s.T){ s.st='show'; s.t=0; s.dir='UDLR'[Math.floor(Math.random()*4)]; }
     return; }
   const m=nextRange(); if(m==null||S.finished) return;
   // pull up so as to stop right on the line
