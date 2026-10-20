@@ -10,7 +10,8 @@ import {HJ_BAR,HJ_DEAD,HJ_MAT,HJ_OK,HJ_W,TJ_PIT,TJ_SAND} from '../game/field.js'
 import {HAM_CAGE,HAM_CIRCLE,hamBall,hamHands} from '../game/hammer.js';
 import {SP_BEST,SP_GREEN,SP_MAX,SP_ORANGE} from '../game/shot.js';
 import {fieldPose} from '../stick.js';
-import {rec,STYLE} from '../storage.js';
+import {rec,STYLE,worldRec} from '../storage.js';
+import {cachedTop,loadTop} from '../ui/board.js';
 import {clamp,hash} from '../utils.js';
 import {drawStar,target} from './hud.js';
 import {drawBackdrop,drawBoards,drawPauseBtn,drawStands,setTheme,flag,GRASS,GRASS_L,javelin,LINE,shadow,TARTAN,TARTAN_D,upright} from './scenery.js';
@@ -56,6 +57,7 @@ export function drawField(V){
     rivalFlags(V,X,GY);
   }
   if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp') rivalFlags(V,X,GY);
+  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp'||ev.kind==='lj'||ev.kind==='tj') recordLines(V,X,GY);
   if(ev.kind==='hj') hjField(V,X,GY,s);
   if(ev.kind==='pv'){
     const bx=X(ev.line), ux=X(ev.line+.6);
@@ -132,7 +134,24 @@ const held={};
 function steadyHand(h,k='jav'){ const o=held[k]; held[k]=o&&Math.abs(o[0]-h[0])<60?[o[0]+(h[0]-o[0])*.2,o[1]+(h[1]-o[1])*.2]:h; return held[k]; }
 export function rivalFlags(V,X,GY){
   ATH.forEach((a,i)=>{ if(a.me) return; const b=S.marks[i].filter(m=>m!=null); if(!b.length) return; flag(X(V.ev.line+Math.max(...b)),GY+14,a.C.j,a.name[0]); });
-  if(rec[V.ev.id]!=null){ const x=X(V.ev.line+rec[V.ev.id]); ctx.setLineDash([4,4]); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,GY-30); ctx.lineTo(x,GY+16); ctx.stroke(); ctx.setLineDash([]); txt('RÉCORD',x,GY-36,'#fff',11); }
+}
+// the world record (gold, the world top 10's first; until it's loaded, the best on this phone) and your own record
+// (white, dashed) across the field at their distances; just one, gold, when the world record is yours. Jumps: across
+// the measuring tape and the sand, the labels over the tape
+// (not loaded yet, e.g. coming from a tournament: asked once)
+const asked=new Set();
+function recordLines(V,X,GY){
+  const ev=V.ev, t=cachedTop(ev.id);
+  if(!t&&!asked.has(ev.id)){ asked.add(ev.id); loadTop(ev.id).catch(()=>{}); }
+  const w=t?(t[0]?t[0].mark:null):worldRec(ev)?.v, me=rec[ev.id];
+  const jump=ev.kind==='lj'||ev.kind==='tj', ly=jump?GY-54:GY-36, y0=jump?GY-48:GY-30, y1=GY+(jump?20:16);
+  const line=(m,col,dash,label,dy)=>{ const x=X(ev.line+m); if(x<-60||x>LW+60) return;
+    ctx.setLineDash(dash?[4,4]:[]); ctx.strokeStyle=col; ctx.lineWidth=dash?2:2.5; ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y1); ctx.stroke(); ctx.setLineDash([]);
+    txt(label,x,ly+dy,col,10); };
+  const mine=me!=null&&w!=null&&me>=w;
+  if(w!=null) line(w,'#ffd23a',false,mine?'TU RÉCORD MUNDIAL':'RÉCORD MUNDIAL',0);
+  // (close to the world record's line, its label one row further away)
+  if(me!=null&&!mine) line(me,'#fff',true,'TU RÉCORD',w!=null&&Math.abs(X(ev.line+w)-X(ev.line+me))<90?-12:0);
 }
 export function drawPole(V,X,GY,fig){
   // lowering the pole (the star running along it): the grip follows the hand smoothed, so the star moves steadily
