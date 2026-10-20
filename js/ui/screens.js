@@ -16,6 +16,7 @@ import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
 import {onAdd,onCreateGroup,onLeave,onRemove,showGroup,showGroups} from './groups.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
+import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
@@ -73,6 +74,7 @@ const inCat=ev=>menuCat==='all'||catOf(ev)===menuCat;
 const ICON={
   medal:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h4l1 5-3 2zM17 2h-4l-1 5 3 2z" fill="#e8262d"/><circle cx="12" cy="15" r="6.5" fill="#ffd23a" stroke="#a8740c" stroke-width="1.5"/><path d="M12 11.6l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#a8740c"/></svg>',
   cup:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0zM5 4h2v3a2 2 0 0 1-2-2zM19 4h-2v3a2 2 0 0 0 2-2zM11 12h2v4h-2zM8 17h8v3H8z" fill="currentColor"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6zM10 18a2 2 0 0 0 4 0z" fill="currentColor"/></svg>',
   globe:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
   snd:on=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on?'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg>`
 };
@@ -112,13 +114,16 @@ const footer=()=>`<footer class="m-bot">
     <button class="m-people" data-act="people"><span class="m-lbl">Jugadores</span><span class="u-row">${peopleStrip()}</span></button>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer>`;
+// the bell's count of notices not seen yet (notifs.js)
+function refreshBell(){ const el=OV.querySelector('.m-bell .m-badge'); if(!el) return; const n=unread(); el.hidden=!n; el.textContent=n>9?'9+':String(n);
+  OV.querySelector('.m-bell').setAttribute('aria-label',n?`Avisos: ${n} nuevos`:'Avisos'); }
 export function showMenu(){
   if(!player()){ showAccount('first'); return; }
   if(!player().token&&!skipProtect){ showAccount('protect'); return; }
   setS(null); setScreen('menu');
   const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.webp" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
   showOv(`<div class="mm">
-  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-96.png" alt="">TRACK &amp; FIELD</div><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></header>
+  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-96.png" alt="">TRACK &amp; FIELD</div><div class="m-tr"><button class="m-bell" data-act="notifs" aria-label="Avisos"><span class="m-ic">${ICON.bell}</span><i class="m-badge" hidden></i></button><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></div></header>
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}
@@ -126,6 +131,7 @@ export function showMenu(){
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
+  refreshBell(); checkNotifs().then(n=>{ if(n) refreshBell(); });
 }
 // tournaments: with friends (online) or against the machines (all 5 events in a row)
 // events: the chosen event in big, the carousel of events below
@@ -310,6 +316,7 @@ OV.addEventListener('click',e=>{
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
   else if(a==='oshare') onShare(b.dataset.code);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
+  else if(a==='notifs') showNotifs();
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);
   else if(a==='groups') showGroups();
   else if(a==='admin') showAdmin();

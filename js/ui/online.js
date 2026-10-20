@@ -121,7 +121,7 @@ async function flushNow(){
   store.set(PENDING,left); }
 
 // standings: points per event as in the solo tournament, summed; equal totals share the place
-function standings(data){
+export function standings(data){
   const evs=data.tournament.events.map(evById).filter(Boolean);
   return data.entries.map(en=>{ const mine=data.results.filter(r=>r.player_id===en.player_id), marks={};
     mine.forEach(r=>{ marks[r.ev]=r.mark; });

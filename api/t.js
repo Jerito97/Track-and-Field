@@ -230,6 +230,14 @@ async function top(sql,ev,group,span){
       :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
   return {top:rows};
 }
+// the world record holder of each event (and survival): who and the mark (on a tie, whoever made it first)
+async function leaders(sql){
+  const t=await sql`select distinct on (m.ev) m.ev,m.player_id,u.name,m.mark from marks m join users u on u.id=m.player_id
+    where m.ev = any(${SPRINT}) order by m.ev, m.mark asc, m.made_at asc`;
+  const f=await sql`select distinct on (m.ev) m.ev,m.player_id,u.name,m.mark from marks m join users u on u.id=m.player_id
+    where not (m.ev = any(${SPRINT})) order by m.ev, m.mark desc, m.made_at asc`;
+  return {leaders:[...t,...f]};
+}
 // your groups, with their members
 async function myGroups(sql,u){
   const gs=await sql`select g.id,g.name,g.owner_id,g.created_at from groups g join group_members me on me.group_id=g.id and me.player_id=${u.id} order by g.created_at`;
@@ -414,6 +422,7 @@ export default async function handler(req,res){
     const sql=await db();
     if(req.method==='GET'){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
+      if(req.query.leaders!=null) return res.status(200).json(await leaders(sql));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
       if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&ev!=='surv') throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');

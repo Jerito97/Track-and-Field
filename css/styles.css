@@ -409,6 +409,21 @@ tr.me td{background:var(--red)}
 .s-hero img{width:100%;height:100%;object-fit:cover;object-position:50% 35%;display:block}
 .m-mode b{padding:.25em .5em .3em}
 /* main menu: records button at the top right, in the place of the title */
+.m-tr{display:flex;gap:8px;align-items:stretch}
+.m-bell{position:relative;flex:none;width:clamp(28px,8.5vh,58px);font-size:clamp(1.15rem,5.2vh,2.3rem);display:grid;place-items:center;background:var(--panel);border:0;border-radius:6px;color:var(--sun);cursor:pointer;padding:0}
+.m-bell .m-ic{display:block;width:1em;height:1em}
+.m-bell .m-ic svg{width:100%;height:100%;display:block}
+.m-bell:active{transform:translateY(2px)}
+.m-bell:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.m-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:10px;background:#e8262d;color:#fff;font:700 12px/20px var(--f-body);font-style:normal;text-align:center;box-shadow:0 0 0 2px #0b1730}
+.m-badge[hidden]{display:none}
+.n-list{display:flex;flex-direction:column;gap:8px;max-height:min(60vh,420px);overflow-y:auto;touch-action:pan-y}
+.n-item{font:inherit;color:#fff;text-align:left;display:flex;gap:10px;align-items:center;background:#1a3060;border:2px solid #1a3060;border-radius:10px;padding:10px 12px;cursor:pointer}
+.n-item.new{background:#22407a;border-color:var(--sun)}
+.n-item:focus-visible{outline:3px solid var(--blue)}
+.n-ic{font-size:1.4rem;flex:none}
+.n-tx{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:.95rem;line-height:1.3}
+.n-tx small{color:#aebbd6;font-size:.78rem}
 .m-recs{font:inherit;font-family:var(--f-display);font-style:italic;font-weight:400;letter-spacing:.05em;font-size:clamp(1.15rem,5.2vh,2.3rem);color:var(--sun);border:0;cursor:pointer;text-transform:uppercase}
 .m-recs .m-ic{color:var(--sun)}
 .m-recs:active{transform:translateY(2px)}
@@ -439,6 +454,11 @@ tr.me td{background:var(--red)}
   .m-logo{font-size:clamp(.95rem,5.4vw,1.5rem);padding:.3em 1.2em .3em .45em;flex:1 1 auto;min-width:0}
   .m-app{height:1.5em;width:1.5em;flex:none}
   .m-recs{flex:none}
+  .m-tr{flex:none}
+  .m-tr{gap:6px}
+  .m-bell{width:1.9em;font-size:clamp(.95rem,5.4vw,1.4rem)}
+  .m-bell .m-ic{width:.9em;height:.9em}
+  .m-top .m-recs{padding:.35em .5em .35em 1em}
   .m-title,.m-recs{font-size:clamp(.95rem,5.4vw,1.4rem);padding:.35em .6em .35em 1.1em}
   .m-modes{height:auto;grid-template-columns:1fr;gap:10px}
   .m-mode{flex-direction:row;height:clamp(96px,17vh,150px);align-items:stretch}

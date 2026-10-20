@@ -39,6 +39,8 @@ function remember(code){ const l=myTournaments().filter(c=>c!==code); l.unshift(
 export function forget(code){ store.set(KEY(),myTournaments().filter(c=>c!==code)); }
 // link that opens the game straight into the tournament
 export const inviteLink=code=>{ const u=new URL(location.href); u.search='?t='+code; u.hash=''; return u.href; };
+// who holds the world record of each event (and survival)
+export const getLeaders=async()=>(await call('GET',null,'?leaders=1')).leaders;
 // world top 10 of an event, and your marks for it
 export const getTop=(ev,group,span)=>call('GET',null,'?top='+encodeURIComponent(ev)+(group?'&group='+encodeURIComponent(group):'')+(span?'&span='+span:''));
 // groups of friends: your groups (with members), create, add a registered player, leave, remove (who created it)
