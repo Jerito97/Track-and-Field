@@ -16,7 +16,7 @@ import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
 import {onAdd,onCreateGroup,onLeave,onRemove,showGroup,showGroups} from './groups.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
-import {playSurv,resumeSurvival,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
+import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
 import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onRepeat,onShare,playOnline,showHistory,shownCode,showOnline,showRepeat,showTournament,toggleCat} from './online.js';
@@ -194,7 +194,7 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia</span></div></div>
+    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div></div>
     <span class="lbl">Tus récords</span>${recTabs()}<div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
@@ -343,7 +343,8 @@ OV.addEventListener('click',e=>{
   else if(a==='go'){ G.mode='single'; G.evIdx=menuSel; buildAthletes(); newEvent(G.evIdx); startPlay(); }
   else if(a==='events') showEvents();
   else if(a==='tours'){ if(player().token) showOnline(); else showAccount('protect'); }  // tournaments: only with friends now
-  else if(a==='surv') showSurvival();
+  else if(a==='surv') showSurvModes();
+  else if(a==='sclassic') showSurvival();
   else if(a==='sstart') startSurvival();
   else if(a==='sresume') resumeSurvival();
   else if(a==='splay') playSurv();

@@ -19,7 +19,7 @@ export function checkAdmin(then){ const p=player(); if(!p?.token||allowed===p.id
 
 const card=(title,body,btns)=>`<div class="card a-card"><div class="head"><div class="logo">ADMIN</div><h2>${title}</h2></div><div class="body">${body}<div class="btns">${btns}</div></div></div>`;
 const day=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-const evName=id=>id==='surv'?'Supervivencia':EVENTS.find(e=>e.id===id)?.name||id;
+const evName=id=>id==='surv'?'Supervivencia clásica':EVENTS.find(e=>e.id===id)?.name||id;
 const mk=(id,v)=>id==='surv'?v+' pts':fmt(EVENTS.find(e=>e.id===id),v);
 let users=[], query='', open=null;
 

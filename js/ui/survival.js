@@ -1,4 +1,4 @@
-// Survival: the 5 events in a random order against a single machine, round after round; the machine gets better
+// Survival (the classic one): the 5 classic events in a random order against a single machine, round after round; the machine gets better
 // every round. Beat it (or tie) in every event to keep going: the first event you lose ends the run. Each event won
 // adds its points (the tournament points table). The best run is kept in the profile and the world top 10.
 import {CLASSIC,EVENTS} from '../config.js';
@@ -12,8 +12,9 @@ import {art,showOv,THUMBS} from './screens.js';
 // the machine's mark per event and round, measured against simulated players: round 1 easy, round 4 like a casual
 // player, 8 like a good one, 12 nearly an expert, 16 an expert's mark; after that 0.5% better every round
 const STEPS=[1,4,8,12,16];
-// (sprints start at the normal machines' level: they were much harder early on than the field events)
-const LEVELS={'100':[13.0,11.5,9.8,8.2,7.3],'110h':[16.0,14.5,13.0,11.9,11.3],lj:[6.5,7.6,9.1,10.6,11.1],pv:[5.0,6.0,6.8,7.9,8.4],jav:[65,80,90,120,132]};
+// (sprints start at the normal machines' level: they were much harder early on than the field events; the 100 m
+// climbs gentler than the rest: there it's how fast the fingers go, and people tap slower than the simulated ones)
+const LEVELS={'100':[13.2,12.0,10.8,9.4,8.4],'110h':[16.0,14.5,13.0,11.9,11.3],lj:[6.5,7.6,9.1,10.6,11.1],pv:[5.0,6.0,6.8,7.9,8.4],jav:[65,80,90,120,132]};
 function targets(round){
   const t={};
   CLASSIC.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';
@@ -32,15 +33,25 @@ const KEY=()=>'odb-surv-'+(player()?.id||'');
 const saved=()=>store.get(KEY(),null);
 const keep=()=>store.set(KEY(),G.surv);
 
+// the survival modes: the classic one (the 5 classic events) and the modern one (with the new events: coming soon)
+export function showSurvModes(){
+  setS(null); setScreen('menu');
+  showOv(card('SUPERVIVENCIA','Elegí el modo',`
+    <div class="t-two">
+      <button class="t-opt" data-act="sclassic" data-focus><b>Clásica</b><span>Las 5 pruebas de siempre: 100 m, largo, vallas, garrocha y jabalina.</span></button>
+      <button class="t-opt soon" disabled aria-disabled="true"><b>Moderna <i class="soon-tag">Próximamente</i></b><span>Con las pruebas nuevas.</span></button>
+    </div>
+    <div class="btns"><button class="btn alt" data-act="menu">Volver</button></div>`));
+}
 // start screen: how it works, your best run, play
 export function showSurvival(){
   setS(null); setScreen('menu');
   const b=player()?.survBest, sv=saved();
-  showOv(card('SUPERVIVENCIA','Ganale a la máquina',`
+  showOv(card('SUPERVIVENCIA','Clásica',`
     <div class="s-hero"><img src="assets/thumbs/surv.webp" alt=""></div>
     ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>Ronda ${sv.round} · ${sv.pts} pts</b><small>${sv.k>=5?`Ronda ${sv.round} superada: sigue la ${sv.round+1}`:`Te toca ${EVENTS[sv.order[sv.k]]?.name||''} (${sv.k+1}/5)`}</small></div><button class="btn" data-act="sresume" data-focus>Seguir</button></div>`:''}
     <div class="s-best"><span class="lbl">Tu mejor partida</span><b>${b?`${b.pts} pts`:'—'}</b>${b?`<small>Llegaste a la ronda ${b.rounds+1}</small>`:''}</div>
-    <div class="btns"><button class="btn${sv?' alt':''}" data-act="sstart"${sv?'':' data-focus'}>${sv?'Nueva partida':'Jugar'}</button><button class="btn alt" data-act="board" data-i="${EVENTS.length}">Récords</button><button class="btn alt" data-act="menu">Volver</button></div>`));
+    <div class="btns"><button class="btn${sv?' alt':''}" data-act="sstart"${sv?'':' data-focus'}>${sv?'Nueva partida':'Jugar'}</button><button class="btn alt" data-act="board" data-i="${EVENTS.length}">Récords</button><button class="btn alt" data-act="surv">Volver</button></div>`));
 }
 export function startSurvival(){
   // a new run replaces the saved one (asks once if there is one)

@@ -50,7 +50,7 @@ function localTop(ev){
     date:surv?p.survBest?.date:(p.best[ev.id]||[]).find(b=>b.v===p.rec[ev.id])?.date,rounds:surv?p.survBest?.rounds:null})).sort((a,b)=>sprint?a.mark-b.mark:b.mark-a.mark).slice(0,10);
 }
 // survival as one more board: points of the best run, and the round it reached
-export const SURV={id:'surv',name:'Supervivencia',tag:'SUPERVIVENCIA',type:'score'};
+export const SURV={id:'surv',name:'Supervivencia clásica',tag:'SUPERV. CLÁSICA',type:'score'};
 const mk=(ev,v)=>ev===SURV?`${v} pts`:fmt(ev,v);
 const day=d=>{ if(!d) return ''; const t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}); };
 
@@ -71,7 +71,7 @@ export async function showBoard(i,from,group,sp){
   const card=body=>`<div class="mm b-card">
     <header class="m-top"><div class="m-logo">Récords</div><div class="m-title">${scope?esc(groupName(scope)):'Top 10'}${span?' · '+SPANS.find(x=>x[0]===span)[1]:''} · ${esc(ev.name)}</div></header>
     <div class="b-filters">${tabs}</div>${body}
-    <div class="b-foot"><button class="b-back" data-act="${back||(ev===SURV?'surv':'events')}" data-focus>Volver</button></div></div>`;
+    <div class="b-foot"><button class="b-back" data-act="${back||(ev===SURV?'sclassic':'events')}" data-focus>Volver</button></div></div>`;
   const me=player()?.id, unit=ev===SURV?'Puntos':ev.type==='sprint'?'Tiempo':'Marca';
   const rows=top=>top.length?`<div class="b-list"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev===SURV?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
     return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev===SURV?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table></div>`
