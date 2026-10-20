@@ -1,4 +1,4 @@
-// 100 m and 110 m hurdles, and swimming (swim.js on top)
+// 100 m and 110 m hurdles, and on top of them swimming (swim.js) and the 4x100 relay (relay.js)
 import {cheer,noise,tone} from '../audio.js';
 import {HURDLES} from '../config.js';
 import {endDemo} from './demo.js';
@@ -9,6 +9,7 @@ import {endEvent} from '../ui/screens.js';
 import {clamp,rand} from '../utils.js';
 import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
 import {REACH,SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
+import {relayStep} from './relay.js';
 
 // seconds without a correct tap before slowing down, and how fast (fraction of speed per second)
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
@@ -21,7 +22,7 @@ export function resetRivals(){
     // (swimming: the spread is spread s instead of 16, the races being longer)
     const k=(ev.spread||16)/16, T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16*k+rand(-.3,.3)*k;  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
     // flat sprint: about one in three rivals trips somewhere mid-race (not in the water)
-    const trip=!ev.hurdles&&!ev.swim&&!r.a.target&&Math.random()<.3?rand(15,85):null;
+    const trip=!ev.hurdles&&!ev.swim&&!ev.relay&&!r.a.target&&Math.random()<.3?rand(15,85):null;
     Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:0))/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); });
 }
 export function updateSprint(dt){
@@ -45,6 +46,9 @@ export function updateSprint(dt){
   if(ev.swim) swimStep(dt);
   else if(S.stumble>0){ S.stumble-=dt; S.x+=S.v*.6*dt; S.pose=POSE.stumble; }
   else { S.x+=S.v*dt; S.legP+=S.v*dt*2.4; }
+  if(ev.relay){ relayStep();
+    // the runner who handed the baton over slows down to a stop
+    const p=S.prev; if(p){ p.t+=dt; p.v=Math.max(0,p.v-p.v*1.8*dt); p.x+=p.v*dt; p.legP=(p.legP||0)+p.v*dt*2.4; } }
   if(ev.hurdles){
     if(S.air>0){ S.air-=dt; S.y=S.air>0?1.05*Math.sin(Math.PI*(1-S.air/S.airT)):0; if(S.air<=0){ S.y=0; S.hk++; S.v*=.93; } }
     else if(S.hk<HURDLES.length&&S.stumble<=0){
@@ -83,7 +87,7 @@ export function updateSprint(dt){
       pop(S.final.toFixed(2)+' s',{dur:2.2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
       S.next=finishSprintEvent;
     }
-  } else if(S.t>(ev.swim?90:40)){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
+  } else if(S.t>(ev.swim?90:ev.relay?120:40)){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
 }
 export function rivalStep(r,dt){
   if(r.vmax==null) return;

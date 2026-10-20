@@ -20,6 +20,8 @@ function caption(){
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'||S.phase==='set') return ev.type==='sprint'?'ESPERÁ EL DISPARO':'TOCÁ PARA EMPEZAR';
   if(ev.swim&&(c&&c.dive||S.dive!=null&&S.dive<.6)) return 'AL DISPARO, LOS DOS ROJOS PARA TIRARTE DEL BLOQUE';
+  if(ev.relay&&S.chCued) return 'LOS DOS ROJOS CUANDO EL TESTIMONIO LLEGA AL CENTRO VERDE';
+  if(ev.relay&&S.chPrep) return 'LLEGA EL PASE: PREPARATE';
   if(c&&c.beat) return 'LOS DOS ROJOS JUSTO CUANDO EL ANILLO SE CIERRA SOBRE LA CABEZA';
   if(ev.stroke==='fly'&&m&&m.k==='fly') return 'SOLTÁ CUANDO LA ESTRELLA LLEGUE AL CÍRCULO';
   if(ev.stroke==='fly'&&c&&c.type==='hamhold') return 'MANTENÉ LOS DOS PARA LA BRAZADA';
@@ -54,6 +56,7 @@ export function demoStep(dt){
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.dive&&c.t>=.25) press('B');
+  if(ev.relay&&S.chCued&&c&&c.type==='both'&&S.x+.35>=ev.dist/ev.legs*(S.leg+1)-.25) press('B');
   if(c&&c.beat&&c.t>=c.T+.04) press('B');
   else if(ev.stroke==='fly'&&!S.dipCued&&!S.turning){ if(c&&c.type==='hamhold') hold(true); else if(m&&m.k==='fly'&&m.hit==null&&m.p>=.9) hold(false); }
   if(c&&c.type==='both'&&!c.beat&&ev.swim&&!S.turned&&ev.pool-S.x<=1.5){ hold(false); press('B'); }
