@@ -452,3 +452,37 @@ tr.me td{background:var(--red)}
   .s-final{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 .m-ev i.beta{background:#ff7a1a;color:#fff}
+/* ===== records board: like the menus (red title, what's shown on the right), filters as pills, the event tabs as a
+   bar with the chosen one in red, the table on a panel: the podium rows in gold, silver and bronze, you in light blue ===== */
+.b-card .m-logo{padding-left:.8em}
+.b-filters{display:flex;flex-wrap:wrap;gap:clamp(5px,1.4vh,9px) 14px;align-items:center}
+.b-filters .b-scopes{flex:0 1 auto}.b-filters .b-tabs{flex:1 1 100%}
+.b-card .b-scope{font-size:clamp(.75rem,3.3vh,1rem);padding:.3em 1.1em;border-radius:99px;border:2px solid rgba(255,255,255,.28);background:rgba(10,22,48,.75)}
+.b-card .b-scope.on{background:#fff;border-color:#fff;color:var(--ink)}
+.b-card .b-tabs{gap:0;background:rgba(10,22,48,.75);border:1px solid var(--edge);border-radius:12px;padding:4px}
+.b-card .b-tab{border:0;background:none;color:#c9d4ea;font-style:italic;font-size:clamp(.8rem,3.5vh,1.05rem);padding:.3em .95em;border-radius:9px}
+.b-card .b-tab.on{background:var(--red);color:#fff;box-shadow:inset 0 -3px 0 var(--red-d)}
+.b-list{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:clamp(4px,1.2vh,10px) clamp(6px,1.4vw,14px)}
+.b-big{width:100%;border-collapse:separate;border-spacing:0 clamp(3px,.9vh,6px)}
+.b-big th{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#9fb0d2;font-weight:700;text-align:left;padding:0 10px}
+.b-big th.mk,.b-big th.sub{text-align:right}
+.b-big td{background:#1e3566;padding:clamp(3px,1.1vh,9px) 10px;font-weight:700;font-size:clamp(.85rem,3.6vh,1.15rem)}
+.b-big td:first-child{border-radius:9px 0 0 9px}.b-big td:last-child{border-radius:0 9px 9px 0}
+.b-big td.pos{font-family:var(--f-display);font-style:italic;width:3em}
+.b-big td.nm{text-transform:uppercase;letter-spacing:.03em}
+.b-big td.nm canvas{width:1.5em;height:1.5em;vertical-align:middle;margin-right:.6em}
+.b-big td.mk{font-family:var(--f-display);font-style:italic;font-size:clamp(.95rem,4vh,1.3rem)}
+.b-big td.sub{color:#c3cfe8;font-size:clamp(.75rem,3.2vh,.95rem)}
+.b-big tr.p1 td{background:#d29d17;color:#fff}.b-big tr.p1 td.mk,.b-big tr.p1 td.sub{background:#e2b02a}
+.b-big tr.p2 td{background:#8f9aae;color:#fff}.b-big tr.p2 td.mk,.b-big tr.p2 td.sub{background:#a2adc0}
+.b-big tr.p3 td{background:#b06634;color:#fff}.b-big tr.p3 td.mk,.b-big tr.p3 td.sub{background:#c37943}
+.b-big td.mk,.b-big td.sub{background:#24407a}
+.b-big tr.p1 td.sub,.b-big tr.p2 td.sub,.b-big tr.p3 td.sub{color:rgba(255,255,255,.9)}
+.b-big tr.me td.nm{text-decoration:underline;text-decoration-color:var(--sun);text-decoration-thickness:3px;text-underline-offset:4px}
+.b-card .b-empty,.b-card .o-wait{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px;margin:0}
+.b-foot{display:flex;justify-content:center;align-items:center;gap:14px}
+.b-foot::before,.b-foot::after{content:"";flex:0 1 120px;height:3px;background:var(--red);border-radius:2px}
+.b-back{font:inherit;font-family:var(--f-display);font-style:italic;letter-spacing:.06em;text-transform:uppercase;font-size:clamp(.95rem,4.2vh,1.35rem);
+  padding:.3em 2.4em;border:0;border-radius:99px;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 4px 0 var(--red-d)}
+.b-back:active{transform:translateY(2px);box-shadow:0 2px 0 var(--red-d)}
+.b-back:focus-visible,.b-card .b-tab:focus-visible,.b-card .b-scope:focus-visible{outline:3px solid var(--blue);outline-offset:2px}

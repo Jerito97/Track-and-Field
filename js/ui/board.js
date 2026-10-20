@@ -63,22 +63,26 @@ export async function showBoard(i,from,group,sp){
   if(sp!==undefined) span=sp||'';
   if(scope&&!myGroups().some(g=>g.id===scope)) scope=null;
   const ev=i===EVENTS.length?SURV:EVENTS[i]||EVENTS[0], evI=i===EVENTS.length?EVENTS.length:EVENTS.indexOf(ev); shownEv=ev.id+(scope||''); setS(null); setScreen('menu');
-  const scopes=`<div class="b-scopes">${[{id:'',name:'🌎 Mundial'}].concat(myGroups()).map(g=>`<button class="b-scope${(g.id||null)===scope?' on':''}" data-act="board" data-i="${evI}" data-group="${esc(g.id)}">${esc(g.name)}</button>`).join('')}<button class="b-scope add" data-act="groups">${myGroups().length?'Grupos ›':'+ Crear grupo'}</button></div>`
+  // the board, as the menus: a red title and what's shown on the right; the world or a group, the time, the event tabs,
+  // the table (the podium in gold, silver and bronze, you highlighted) and «Volver» at the bottom
+  const scopes=`<div class="b-scopes">${[{id:'',name:'Mundial'}].concat(myGroups()).map(g=>`<button class="b-scope${(g.id||null)===scope?' on':''}" data-act="board" data-i="${evI}" data-group="${esc(g.id)}">${esc(g.name)}</button>`).join('')}<button class="b-scope add" data-act="groups">${myGroups().length?'Grupos ›':'+ Crear grupo'}</button></div>`
     +`<div class="b-scopes b-spans">${SPANS.map(([k,t])=>`<button class="b-scope${k===span?' on':''}" data-act="board" data-i="${evI}" data-span="${k}">${t}</button>`).join('')}</div>`;
   const tabs=scopes+`<div class="b-tabs" role="tablist">${EVENTS.concat(SURV).map((e,j)=>`<button class="b-tab${e===ev?' on':''}" role="tab" aria-selected="${e===ev}" data-act="board" data-i="${j}">${e.tag}</button>`).join('')}</div>`;
-  const card=body=>`<div class="card b-card"><div class="head"><div class="logo">RÉCORDS</div><h2>${scope?esc(groupName(scope)):'Top 10'}${span?' · '+SPANS.find(x=>x[0]===span)[1].toLowerCase():''} · ${ev.name}</h2></div><div class="body">${tabs}${body}
-    <div class="btns"><button class="btn" data-act="${back||(ev===SURV?'surv':'events')}" data-focus>Volver</button></div></div></div>`;
-  const me=player()?.id;
-  const rows=top=>top.length?`<table class="b-table"><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
-    return `<tr class="${r.player_id===me?'me':''}"><td>${pl}.${pl<=3?' '+['🥇','🥈','🥉'][pl-1]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev===SURV?`<td class="sub">ronda ${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table>`
+  const card=body=>`<div class="mm b-card">
+    <header class="m-top"><div class="m-logo">Récords</div><div class="m-title">${scope?esc(groupName(scope)):'Top 10'}${span?' · '+SPANS.find(x=>x[0]===span)[1]:''} · ${esc(ev.name)}</div></header>
+    <div class="b-filters">${tabs}</div>${body}
+    <div class="b-foot"><button class="b-back" data-act="${back||(ev===SURV?'surv':'events')}" data-focus>Volver</button></div></div>`;
+  const me=player()?.id, unit=ev===SURV?'Puntos':ev.type==='sprint'?'Tiempo':'Marca';
+  const rows=top=>top.length?`<div class="b-list"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev===SURV?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
+    return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev===SURV?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table></div>`
     :`<p class="small b-empty">${scope?`Nadie del grupo tiene marca en esta prueba${span?(span==='year'?' este año':' este mes'):''} todavía.`:span?`Todavía no hay marcas ${span==='year'?'este año':'este mes'}. ¡La primera puede ser la tuya!`:'Todavía no hay marcas. ¡La primera puede ser la tuya!'}</p>`;
   const c=cachedTop(ev.id,scope,span), here=shownEv+span;
-  showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'));
+  showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'),'menu');
   if(!myGroups().length&&player()?.token) loadGroups().then(()=>{ if(shownEv===here&&OV.querySelector('.b-card')&&myGroups().length) showBoard(i); },()=>{});
   await syncMarks();
   let top, note='';
   try{ top=await loadTop(ev.id,false,scope,span); if(wasOffline(ev.id,scope,span)) note='<p class="small">Sin conexión: estos son los últimos récords que viste.</p>'; }
   catch(e){ top=scope||span?[]:localTop(ev); note=`<p class="small">${scope?'No se pudo conectar con el servidor.':'No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.'}</p>`; }
   if(shownEv+span!==here||!OV.querySelector('.b-card')) return;  // left the board meanwhile
-  const y=OV.scrollTop; showOv(card(note+rows(top))); OV.scrollTop=y;
+  const y=OV.scrollTop; showOv(card(note+rows(top)),'menu'); OV.scrollTop=y;
 }
