@@ -6,7 +6,7 @@ import {fmt} from '../game/scoring.js';
 import {getPlayers,getProfile} from '../online.js';
 import {setS,setScreen} from '../state.js';
 import {player} from '../storage.js';
-import {esc,paintOv,showOv} from './screens.js';
+import {catOf,esc,paintOv,recHidden,recTabs,showOv} from './screens.js';
 
 let list=null, at=0, listOffline=false;
 export const cachedPlayers=()=>list;
@@ -53,10 +53,10 @@ export async function showPerson(id){
   if(view!==id) return;
   const p=r.player, marks={}; r.marks.forEach(m=>{ marks[m.ev]=m; });
   const rows=EVENTS.map(ev=>{ const m=marks[ev.id];
-    return `<tr><td class="nm">${ev.name}</td><td class="mk">${m?fmt(ev,m.mark):'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; }).join('')
-    +(()=>{ const m=marks.surv; return `<tr><td class="nm">Supervivencia</td><td class="mk">${m?`${m.mark} pts`:'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo · ronda ${(m.rounds||0)+1}`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; })();
+    return `<tr data-pc="${catOf(ev)}"${recHidden(catOf(ev))}><td class="nm">${ev.tag.charAt(0)+ev.tag.slice(1).toLowerCase()}</td><td class="mk">${m?fmt(ev,m.mark):'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; }).join('')
+    +(()=>{ const m=marks.surv; return `<tr data-pc="surv"${recHidden('surv')}><td class="nm">Supervivencia</td><td class="mk">${m?`${m.mark} pts`:'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo · ronda ${(m.rounds||0)+1}`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; })();
   showOv(card('JUGADOR','Perfil',`
     <div class="p-row"><span class="p-av"><canvas data-color="${esc(p.color)}"></canvas></span><div><b class="u-big">${esc(p.name)}</b><p class="small">${p.id===player()?.id?'Sos vos · ':''}Juega desde el ${day(p.created_at)}</p></div></div>
-    <span class="lbl">Récords</span><table class="b-table u-recs"><tbody>${rows}</tbody></table>`,
+    <span class="lbl">Récords</span>${recTabs()}<table class="b-table u-recs"><tbody>${rows}</tbody></table>`,
     '<button class="btn" data-act="people" data-focus>Volver</button>'+MENU));
 }

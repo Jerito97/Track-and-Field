@@ -210,3 +210,4 @@ Publicada: **Posta 4x100** (`js/game/relay.js` sobre el motor de los 100 m; dibu
 Posta 4x100 publicada: en EVENTS con `extra:true` (torneos con amigos, récords, perfil; no en supervivencia). Tiempo: menor es mejor (servidor: `SPRINT`, rango 15 a 300 s). Puntos: 1000 con 30 s (30 por segundo). Marcas de prueba borradas una sola vez (servidor `reset-4x100-1`, teléfonos `4x100-1`).
 
 Torneos con amigos: al crear (y al repetir) un torneo, las pruebas se eligen agrupadas como en Pruebas (Carreras, Saltos, Lanzamientos, Natación), con el nombre corto de la tarjeta; tocar el nombre del grupo tilda todo el grupo, o lo destilda si ya estaba todo tildado. Por defecto, las 5 clásicas.
+Perfiles: los récords (los tuyos en el perfil y los de cada jugador) tienen las mismas pestañas (Todas, Carreras, Saltos, Lanzamientos, Natación); la elegida se recuerda mientras la app está abierta. Supervivencia aparece solo en Todas.

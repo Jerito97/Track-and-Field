@@ -318,7 +318,8 @@ tr.me td{background:var(--red)}
 .u-nm b{font-family:var(--f-display);font-weight:400;letter-spacing:.04em;font-size:1.15rem;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .u-nm small{color:#aab8d8;font-size:.78rem}
 .u-big{font-family:var(--f-display);font-weight:400;letter-spacing:.04em;font-size:1.6rem;text-transform:uppercase}
-.u-recs td.nm{font-weight:700;text-align:left;width:38%}
+.u-recs td.nm{font-weight:700;text-align:left;max-width:none;width:auto;white-space:nowrap;overflow:visible;text-transform:none}
+.u-recs td.sub{white-space:normal}
 .u-recs td.mk{width:16%}
 /* list rows: compact, name and marks on one line */
 .u-item{padding:4px 10px;gap:10px}
@@ -493,3 +494,9 @@ tr.me td{background:var(--red)}
   padding:.3em 2.4em;border:0;border-radius:99px;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 4px 0 var(--red-d)}
 .b-back:active{transform:translateY(2px);box-shadow:0 2px 0 var(--red-d)}
 .b-back:focus-visible,.b-card .b-tab:focus-visible,.b-card .b-scope:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+/* records on the profiles: kinds of event as pills (Todas, Carreras, ...); the others hidden */
+.p-cats{display:flex;flex-wrap:wrap;gap:5px;margin:2px 0 8px}
+.p-cat{font:inherit;font-size:.78rem;font-weight:700;padding:.25em .9em;border-radius:99px;border:1px solid rgba(255,255,255,.28);background:#0e1d3d;color:#c9d4ea;cursor:pointer}
+.p-cat.on{background:#fff;border-color:#fff;color:var(--ink)}
+.p-cat:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.p-recs>[hidden],.u-recs tr[hidden]{display:none}

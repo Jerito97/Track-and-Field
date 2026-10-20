@@ -59,6 +59,13 @@ const TOUR=-1;
 let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length+BETA.length?v:0; })();
 // tabs over the carousel: all the events, or one kind (remembered between visits)
 export const CATS=[['all','Todas'],['run','Carreras'],['jump','Saltos'],['throw','Lanzamientos'],['swim','Natación']];
+// records on the profiles: the same kinds as tabs (remembered while the app is open); each record carries data-pc
+let profCat='all';
+export const recTabs=()=>`<div class="p-cats" role="group" aria-label="Tipo de prueba">${CATS.map(([c,n])=>`<button class="p-cat${c===profCat?' on':''}" data-act="pcat" data-c="${c}" aria-pressed="${c===profCat}">${n}</button>`).join('')}</div>`;
+export const recHidden=c=>profCat!=='all'&&c!==profCat?' hidden':'';
+function pickProfCat(c){ profCat=c;
+  OV.querySelectorAll('.p-cat').forEach(b=>{ const on=b.dataset.c===c; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+  OV.querySelectorAll('[data-pc]').forEach(el=>{ el.hidden=c!=='all'&&el.dataset.pc!==c; }); }
 export const catOf=ev=>ev.swim?'swim':ev.type==='sprint'?'run':['lj','tj','hj','pv'].includes(ev.kind)?'jump':'throw';
 let menuCat=(()=>{ const v=store.get('odb-menucat','all'); return CATS.some(c=>c[0]===v)?v:'all'; })();
 const inCat=ev=>menuCat==='all'||catOf(ev)===menuCat;
@@ -179,7 +186,7 @@ async function onRename(){ const name=$('pname').value.replace(/\s+/g,' ').trim(
 export function showProfile(msg,ok,draft){
   const p=player(); if(!p){ showAccount('first'); return; } setS(null); setScreen('menu');
   // best mark of each event
-  const bests=EVENTS.map(ev=>`<div><b>${p.rec[ev.id]==null?'—':fmt(ev,p.rec[ev.id])}</b><span>${ev.name}</span></div>`).join('');
+  const bests=EVENTS.map(ev=>`<div data-pc="${catOf(ev)}"${recHidden(catOf(ev))}><b>${p.rec[ev.id]==null?'—':fmt(ev,p.rec[ev.id])}</b><span>${ev.name}</span></div>`).join('');
   showOv(`<div class="card p-prof"><div class="head"><div class="logo">PERFIL</div><h2>${esc(p.name)}</h2></div><div class="body">
     ${msg?`<p class="${ok?'o-ok':'o-err'}" role="alert">${esc(msg)}</p>`:''}
     ${p.token?'':p.expired?'<div class="o-code"><p class="small">Se cerró tu sesión: tus récords no se suben al Top 10 hasta que vuelvas a entrar.</p><button class="btn" data-act="protect">Entrar</button></div>':'<div class="o-code"><p class="small">Tu jugador todavía no tiene código: cualquiera podría usar tu nombre.</p><button class="btn" data-act="protect">Poner código</button></div>'}
@@ -187,7 +194,7 @@ export function showProfile(msg,ok,draft){
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
     <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia</span></div></div>
-    <span class="lbl">Tus récords</span><div class="p-stats p-recs">${bests}</div>
+    <span class="lbl">Tus récords</span>${recTabs()}<div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
   checkAdmin(()=>{ if(OV.querySelector('.p-prof')&&!OV.querySelector('.a-btn')) OV.querySelector('.p-prof .btns').insertAdjacentHTML('beforeend','<button class="btn alt a-btn" data-act="admin">Administrador</button>'); });
@@ -292,6 +299,7 @@ OV.addEventListener('click',e=>{
   else if(a==='online'){ if(player().token) showOnline(); else showAccount('protect'); }
   else if(a==='ocreate') onCreate();
   else if(a==='ocat') toggleCat(b.dataset.c);
+  else if(a==='pcat') pickProfCat(b.dataset.c);
   else if(a==='orepeat') showRepeat(b.dataset.code);
   else if(a==='orepeatgo') onRepeat(b.dataset.code);
   else if(a==='odays') onDays(b.dataset.d);
