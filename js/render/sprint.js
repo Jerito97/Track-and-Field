@@ -10,7 +10,7 @@ import {STYLE} from '../storage.js';
 import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
-import {CH_OK,CH_W,changes} from '../game/relay.js';
+import {BANDS,CH_OK,CH_W,changes} from '../game/relay.js';
 
 const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
@@ -54,7 +54,7 @@ export function drawSprint(V){
   for(let l=0;l<LANES;l++){
     const feet=TT+lh*(l+.85);
     if(ev.hurdles){ const ref=l===S.plLane?S:S.rivals.find(r=>r.lane===l); HURDLES.forEach((h,i)=>{ const x=X(h); if(x>-40&&x<LW+40) hurdle(x,feet,s*.85,ref&&ref.knocked&&ref.knocked.has(i)); }); }
-    if(l===S.plLane&&ev.relay) relayLane(ev,X,TT+lh*l,lh,feet,s);
+    if(l===S.plLane&&ev.relay){ V_X=V.x; relayLane(ev,X,TT+lh*l,lh,feet,s); }
     if(l===S.plLane){ const px=X(V.x); shadow(px,feet,V.y/RIV_K,s*RIV_K);
       let drawn=false;
       if(ME().sprite){ let k;
@@ -65,8 +65,9 @@ export function drawSprint(V){
       }
       if(!drawn){ const blocks=S.phase==='set'||(S.phase==='wait'&&!S.t), f=animFrame(ME(),ev,{blocks,setStage:S.setStage,running:V.v>.3&&!(S.stumble>0)&&!(S.dip>0),cheer:S.finished&&V.v<=.3&&!(S.dip>0),dipT:S.dip>0?S.dipT:null,tripT:S.stumble>0?S.stumble+.05:0,airU:S.air>0?1-S.air/S.airT:null,standing:!(S.stumble>0)&&!(S.air>0),x:V.x,lane:0});
         if(f){ drawAnim(ctx,ME(),f[0],f[1],px,feet-V.y*s,animScale(ME(),RUN_H)); drawn=true; } }
-      if(!drawn) drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,STYLE.stick?sprintPose({blocks:S.phase==='set'||(S.phase==='wait'&&!S.t),setStage:S.setStage,airU:S.air>0?1-S.air/S.airT:null,dipT:S.dip>0?S.dipT:null,tripT:S.stumble>0?S.stumble:0,cheer:S.finished&&V.v<=.3&&!(S.dip>0),running:V.v>.3,legP:S.legP,v:V.v,clock:S.clock,lane:0}):V.pose||POSE.stand,ME(),V.v>5);
-      if(ev.relay&&!S.finished) baton(px,feet);
+      let fig=null;
+      if(!drawn) fig=drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,STYLE.stick?sprintPose({blocks:S.phase==='set'||(S.phase==='wait'&&!S.t),setStage:S.setStage,airU:S.air>0?1-S.air/S.airT:null,dipT:S.dip>0?S.dipT:null,tripT:S.stumble>0?S.stumble:0,cheer:S.finished&&V.v<=.3&&!(S.dip>0),running:V.v>.3,legP:S.legP,v:V.v,clock:S.clock,lane:0}):V.pose||POSE.stand,ME(),V.v>5);
+      if(ev.relay&&!S.finished) baton(fig&&fig.hand?fig.hand:[px+10,feet-YO_H*.4]);
       ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; const ty=feet-V.y*s-YO_H-4; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke(); }
     else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue; const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
       let J; if(r.t<=r.react) J=S.setStage>=1?POSE.set:POSE.crouch; else if(r.air>0) J=POSE.hurdle; else if(r.tripT>0) J=POSE.stumble; else if(r.final!=null&&r.v<.5) J=POSE.cheer; else J=r.v>.2?runPose(r.legP,Math.min(1,r.v/4)):POSE.stand;
@@ -106,8 +107,17 @@ function drawStarterVector(x){
 // 4x100: in our lane, the change boards (centred on each change mark: orange, yellow, green in the middle, the mark in
 // white), where each baton was handed over, the next runner waiting on the mark, and the one who handed it over slowing
 // down behind
+const RB=['31,190,90','255,205,40','240,60,50'];
+let V_X=0;
 function relayLane(ev,X,top,lh,feet,s){
-  const half=CH_OK+CH_W;
+  const half=CH_OK+CH_W, d=m=>m-V_X-.35;
+  // before each change still to come: green, yellow and red as in the long jump (the one you're in lights up)
+  changes(ev).forEach((m,i)=>{ if(i<S.leg) return;
+    [[BANDS[0],BANDS[1],RB[0]],[BANDS[1],BANDS[2],RB[1]],[BANDS[2],half,RB[2]]].forEach(([from,to,rgb])=>{ const x0=X(m-from), x1=X(m-to); if(x1<-10||x0>LW+10) return;
+      const on=i===S.leg&&d(m)<=from&&d(m)>to;
+      ctx.fillStyle=`rgba(255,255,255,${on?.5:.35})`; ctx.fillRect(x0,top,x1-x0,lh); ctx.fillStyle=`rgba(${rgb},${on?.65:.4})`; ctx.fillRect(x0,top,x1-x0,lh);
+      ctx.strokeStyle=`rgba(${rgb},${on?1:.75})`; ctx.lineWidth=2; for(let x=x0+4;x<x1-6;x+=12){ ctx.beginPath(); ctx.moveTo(x,top+lh*.25); ctx.lineTo(x+5,top+lh*.5); ctx.lineTo(x,top+lh*.75); ctx.stroke(); }
+      ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x0-1,top,2,lh); }); });
   changes(ev).forEach((m,i)=>{ const a=X(m-half), b=X(m+half); if(b<-10||a>LW+10) return;
     ctx.fillStyle='#fff'; ctx.fillRect(a-2,top,b-a+4,lh);
     [[half,'#ff8a1e'],[half*.5,'#ffd23a'],[CH_OK,'#2fd166']].forEach(([d,c])=>{ ctx.fillStyle=c; ctx.fillRect(X(m-d),top+1,X(m+d)-X(m-d),lh-2); });
@@ -118,5 +128,6 @@ function relayLane(ev,X,top,lh,feet,s){
   if(next!=null){ const x=X(next-.2); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:false,clock:S.clock,lane:1}):POSE.stand,C,false); }
   const p=S.prev; if(p&&p.t<3){ const x=X(p.x); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:p.v>.3,legP:p.legP||0,v:p.v,clock:S.clock,lane:2}):p.v>.3?runPose(p.legP||0,Math.min(1,p.v/4)):POSE.stand,C,p.v>5); }
 }
-// the baton in the runner's hand
-function baton(px,feet){ ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.2; ctx.beginPath(); ctx.rect(px+5,feet-YO_H*.42,11,4); ctx.fill(); ctx.stroke(); }
+// the baton in the runner's (near) hand, sticking out both sides of the fist
+function baton([hx,hy]){ ctx.save(); ctx.translate(hx,hy); ctx.rotate(-.35); ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.roundRect(-5,-2.2,14,4.4,2); ctx.fill(); ctx.stroke(); ctx.restore(); }

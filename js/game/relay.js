@@ -1,6 +1,7 @@
 // 4x100 relay on the sprint engine: four legs of the 100 m's green buttons, run by the player one after the other. At
-// each change (every 100 m) a board on the track, centred on the change mark: the green buttons stop a moment before
-// it, then both red buttons hand the baton over, best with the baton right over the middle of the board; how close
+// each change (every 100 m) a board on the track, centred on the change mark, and before it the lane painted as in the
+// long jump: from the green there are no buttons (you keep your speed and get ready), in the red both red buttons hand
+// the baton over (and the game goes in slow motion), best with the baton right over the middle of the board; how close
 // sets how much speed the next runner takes off with. Not pressing, it's handed over on its own at the board's far end,
 // as badly as it gets.
 import {tone} from '../audio.js';
@@ -9,23 +10,26 @@ import {clamp} from '../utils.js';
 import {bothCue,judge,pop,sideCue} from './core.js';
 
 // the board: perfect within CH_OK m of the mark, nothing left CH_W m further (either side); the baton is BATON m ahead
-// of the runner's hip; the red buttons come CH_CUE s before the mark, the green ones stop CH_PREP s before that
-export const CH_OK=.12, CH_W=1.4;
-const BATON=.35, CH_CUE=.7, CH_PREP=.45, LAG=.03;
+// of the runner's hip; the coloured lane before the mark (m from it, for the baton): green from BANDS[0], yellow from
+// BANDS[1], red from BANDS[2] (the red buttons); in the red the game runs at SLOW of its speed
+export const CH_OK=.12, CH_W=1.4, BANDS=[16,10,5.5];
+const BATON=.35, LAG=.03, SLOW=.4;
 // what the next runner takes of the speed: CH_MIN at worst, all of it for a perfect change
 const CH_MIN=.72;
 // the change marks (m) and the next one ahead
 export const changes=ev=>Array.from({length:ev.legs-1},(_,i)=>ev.dist/ev.legs*(i+1));
 const nextMark=()=>changes(S.ev)[S.leg];
 // the baton from the change mark (m; >0 past it), counting the press's lag
-const off=()=>S.x+BATON-S.v*LAG-nextMark();
+const off=()=>S.x+BATON-S.v*LAG*(S.ts??1)-nextMark();
+// how fast the game runs: slowing down into the red, back to normal after the change
+export function relayTime(dt){ const want=S.chCued?SLOW:1; S.ts=(S.ts??1)+(want-(S.ts??1))*Math.min(1,dt*(S.chCued?10:5)); return S.ts; }
 
 // once a frame while running: the change coming (green buttons off, then the red ones), and the late change
 export function relayStep(){
   const m=nextMark(); if(m==null||S.finished) return;
-  const v=Math.max(S.v,4);
-  if(!S.chPrep&&S.x+BATON>=m-v*(CH_CUE+CH_PREP)){ S.chPrep=true; S.cue=null; pop('¡LLEGA EL PASE!',{dur:.6,col:'#fff',big:.55}); }
-  if(S.chPrep&&!S.chCued&&S.x+BATON>=m-v*CH_CUE){ S.chCued=true; bothCue(); }
+  const d=m-S.x-BATON;
+  if(!S.chPrep&&d<=BANDS[0]){ S.chPrep=true; S.cue=null; tone(520,.06,'triangle',.04); }
+  if(S.chPrep&&!S.chCued&&d<=BANDS[2]){ S.chCued=true; bothCue(); pop('¡PASALO!',{dur:.6,col:'#ffd23a',big:.6}); }
   if(off()>=CH_OK+CH_W) handOver();
 }
 // the red buttons at a change

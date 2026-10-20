@@ -21,7 +21,7 @@ function caption(){
   if(S.phase==='ready'||S.phase==='set') return ev.type==='sprint'?'ESPERÁ EL DISPARO':'TOCÁ PARA EMPEZAR';
   if(ev.swim&&(c&&c.dive||S.dive!=null&&S.dive<.6)) return 'AL DISPARO, LOS DOS ROJOS PARA TIRARTE DEL BLOQUE';
   if(ev.relay&&S.chCued) return 'LOS DOS ROJOS CUANDO EL TESTIMONIO LLEGA AL CENTRO VERDE';
-  if(ev.relay&&S.chPrep) return 'LLEGA EL PASE: PREPARATE';
+  if(ev.relay&&S.chPrep) return 'DESDE EL VERDE NO HAY BOTONES: PREPARATE PARA EL PASE';
   if(c&&c.beat) return 'LOS DOS ROJOS JUSTO CUANDO EL ANILLO SE CIERRA SOBRE LA CABEZA';
   if(ev.stroke==='fly'&&m&&m.k==='fly') return 'SOLTÁ CUANDO LA ESTRELLA LLEGUE AL CÍRCULO';
   if(ev.stroke==='fly'&&c&&c.type==='hamhold') return 'MANTENÉ LOS DOS PARA LA BRAZADA';
