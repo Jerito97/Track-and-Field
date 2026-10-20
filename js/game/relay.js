@@ -35,6 +35,7 @@ export function relayStep(){
 export function relayHit(){ if(!S.ev.relay||!S.chCued||board()==null) return false; handOver(); return true; }
 function handOver(){
   const e=off(), q=clamp(1-(Math.abs(e)-CH_OK)/CH_W,0,1);
+  S.pops=S.pops.filter(p=>p.text!=='¡PASALO!');  // (so it doesn't sit on top of RELEVO n)
   judge(q); tone(500+300*q,.08,'triangle',.05);
   S.prints.push(board()+e);
   // the runner who gave it slows down behind; the next one (waiting just ahead) goes on with the baton
