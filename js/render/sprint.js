@@ -11,6 +11,7 @@ import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 import {BACK,CH_OK,CH_W,changes,MATE} from '../game/relay.js';
+import {laserAim} from '../game/laser.js';
 
 const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
@@ -75,7 +76,10 @@ export function drawSprint(V){
       if(f) drawAnim(ctx,r.a.C,f[0],f[1],x,feet-r.y*s,animScale(r.a.C,RUN_H));
       else drawAthlete(ctx,s*RIV_K,x,feet,r.y/RIV_K,STYLE.stick?sprintPose({blocks:r.t<=r.react,setStage:S.setStage,airU:r.air>0?1-r.air/r.airT:null,tripT:r.tripT,cheer:r.final!=null&&r.v<.5,running:r.v>.2,legP:r.legP,v:r.v,clock:S.clock,lane:l}):J,r.a.C,r.v>5); }
   }
-  drawBottomAds(); drawStarter(X(5.5)); drawPauseBtn();
+  if(ev.laser) ev.ranges.forEach(m=>rangeLine(X(m),TT,TB));
+  drawBottomAds(); drawStarter(X(5.5));
+  if(ev.laser&&S.shot) drawScope();
+  drawPauseBtn();
 }
 // the race starter, standing on the grass below the lanes: arm up with the pistol, then firing (smoke) at the gun
 const ST_H=84, ST_FEET=.297;  // figure height (logical px) and where the feet are across the picture
@@ -122,3 +126,45 @@ function relayLane(ev,X,top,lh,feet,s){
 // the baton in the runner's (near) hand, sticking out both sides of the fist
 function baton([hx,hy]){ ctx.save(); ctx.translate(hx,hy); ctx.rotate(-.35); ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.2;
   ctx.beginPath(); ctx.roundRect(-5,-2.2,14,4.4,2); ctx.fill(); ctx.stroke(); ctx.restore(); }
+
+// laser run: the firing line across the lanes (yellow and black) with its sign
+function rangeLine(x,TT,TB){ if(x<-40||x>LW+40) return;
+  for(let y=TT,j=0;y<TB;y+=6,j++){ ctx.fillStyle=j%2?INK:'#ffd23a'; ctx.fillRect(x-2,y,4,Math.min(6,TB-y)); }
+  ctx.fillStyle=INK; ctx.fillRect(x-1,TT-22,2,22); ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(x-20,TT-34,40,14,3); ctx.fill(); ctx.stroke();
+  txt('TIRO',x,TT-27,INK,10,{stroke:null}); }
+// laser run, shooting: everything dark but a round sight; in it the range (sky, a far stand, grass) and the board with
+// the five targets, swaying (the board moves, the cross stays in the middle); hits white, misses marked; below, the
+// five shots so far
+function drawScope(){
+  const s=S.shot, cx=LW/2, cy=152, R=Math.min(104,LW*.3), u=R*.17, D=2.5, [ax,ay]=laserAim(), k=Math.min(s.k,4);
+  ctx.save();
+  ctx.fillStyle='rgba(4,8,18,.92)'; ctx.beginPath(); ctx.rect(0,0,LW,320); ctx.arc(cx,cy,R,0,Math.PI*2,true); ctx.fill('evenodd');
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
+  // the range, moving with the sway (further things a little less)
+  const bx=cx-(ax+k*D)*u, by=cy-ay*u;
+  const sky=ctx.createLinearGradient(0,cy-R,0,cy+R); sky.addColorStop(0,'#8fd0f5'); sky.addColorStop(.55,'#d8f0fb'); sky.addColorStop(.56,'#7cc24a'); sky.addColorStop(1,'#5aa83a');
+  ctx.fillStyle=sky; ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  ctx.fillStyle='#b7c2d3'; ctx.fillRect(cx-R,by-u*5.2,2*R,u*1.6);
+  for(let i=-30;i<30;i++){ ctx.fillStyle=['#e8262d','#2f6fd6','#ffd23a','#1f9e54','#ff8a1f'][(i+60)%5]; ctx.beginPath(); ctx.arc(cx-ax*u*.6+i*u*.55,by-u*4.5,u*.18,0,Math.PI*2); ctx.fill(); }
+  // the board: white with a light blue frame, a red banner on the right, the lane number on the left
+  const w=(4*D+3)*u, h=3*u, x0=bx-1.5*u, y0=by-h/2;
+  ctx.fillStyle='#16161d'; ctx.fillRect(bx+D*2*u-.3*u,y0+h,.6*u,u*3);
+  ctx.fillStyle='#fff'; ctx.strokeStyle='#5fa7d9'; ctx.lineWidth=u*.35; ctx.beginPath(); ctx.roundRect(x0,y0,w,h,u*.5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#e8262d'; ctx.fillRect(x0+w+u*.2,y0-u*.2,u*2.4,h+u*.4); ctx.fillStyle='#fff'; ctx.save(); ctx.translate(x0+w+u*1.4,by); ctx.rotate(-Math.PI/2); ctx.font=`italic ${Math.round(u*.9)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('LASER',0,0); ctx.restore();
+  ctx.fillStyle='#14284f'; ctx.fillRect(x0-u*2.6,by-u*1.1,u*2.2,u*2.2); txt(String((S.ri||0)+1).padStart(2,'0'),x0-u*1.5,by,'#fff',Math.round(u*1.2),{stroke:null});
+  for(let i=0;i<5;i++){ const tx=bx+(i)*D*u, r=s.res[i];
+    ctx.fillStyle=r&&r.hit?'#fff':INK; ctx.strokeStyle=r&&r.hit?'#9aa5b8':INK; ctx.lineWidth=u*.15; ctx.beginPath(); ctx.arc(tx,by,u,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    if(r&&!r.hit){ ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.arc(tx+r.x*u,by+r.y*u,u*.2,0,Math.PI*2); ctx.fill(); } }
+  // the edge of the lens, dark
+  const vg=ctx.createRadialGradient(cx,cy,R*.55,cx,cy,R); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.75)'); ctx.fillStyle=vg; ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  ctx.restore();
+  // the cross, and the lens ring
+  ctx.strokeStyle='rgba(20,20,30,.85)'; ctx.lineWidth=1.5; const g=u*.5;
+  [[-1,0],[1,0],[0,-1],[0,1]].forEach(([a,b])=>{ ctx.beginPath(); ctx.moveTo(cx+a*g,cy+b*g); ctx.lineTo(cx+a*R*.8,cy+b*R*.8); ctx.stroke(); });
+  ctx.fillStyle='#ff3b30'; ctx.beginPath(); ctx.arc(cx,cy,2,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#2b3a55'; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  // the five shots so far, under the sight
+  for(let i=0;i<5;i++){ const r=s.res[i], x=cx+(i-2)*18, y=cy+R+14;
+    ctx.fillStyle=!r?'rgba(255,255,255,.18)':r.hit?'#2fd166':'#ff5a3c'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
+  if(s.k<5&&!S.demo) txt('TOCÁ CUANDO EL BLANCO ESTÉ EN EL CENTRO',cx,cy-R-10,'#fff',13,{lw:3});
+}

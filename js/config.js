@@ -42,6 +42,8 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
+ {id:'laser',name:'Laser Run',tag:'LASER RUN',type:'sprint',laser:true,dist:300,ranges:[100,200],legT:12.6,cpu:52,spread:20,beta:true,
+  help:'Correr y tirar, como en el pentatlón moderno. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. Tirar:</b> a los 100 y a los 200 m frenás en el puesto de tiro y mirás por la mira: el tablero con los <b>5 blancos</b> se mueve. Tocá <b>cualquier botón</b> cuando el blanco esté en el centro de la mira. Si le das, se pone blanco; si errás, <b>+5 segundos</b>. Cuanto más rápido llegaste corriendo, más se mueve la mira (se va calmando de a poco). <b>3. Llegada:</b> después de los 5 tiros seguís corriendo; al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];

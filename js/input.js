@@ -7,6 +7,7 @@ import {demoTap,endDemo} from './game/demo.js';
 import {hamRush} from './game/hammer.js';
 import {swimBeatHit,swimDiveHit,swimTurnHit} from './game/swim.js';
 import {relayHit} from './game/relay.js';
+import {laserShoot} from './game/laser.js';
 import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -29,6 +30,8 @@ export function onTap(pos){
   if(ph==='ready'){ startRun(); return; }
   if(!S.cue||S.cue.type==='hold'||S.cue.type==='hamhold') return;
   const cue=S.cue;
+  // laser run: any button shoots
+  if(cue.type==='shoot'){ laserShoot(); addRing(pos==='R'?'R':'L'); return; }
   if(cue.type==='side'){
     if(pos==='C'||pos==='B') return;  // Space/Enter is for the red buttons
     if(pos===cue.side){ speedUp(gS(S.v)); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }

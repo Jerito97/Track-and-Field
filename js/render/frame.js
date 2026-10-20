@@ -36,9 +36,9 @@ export function frame(){
 function drawPads(){
   const top=OY+LH*SC+14, bot=SH-18, h=bot-top; if(h<60) return;
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush');
+  const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush'||c.type==='shoot');
   const gap=12, w=(SW-gap*3)/2;
-  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold')?'#ff8a1e':'#27c26a';
+  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush'||c.type==='shoot')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold')?'#ff8a1e':'#27c26a';
     ctx.fillStyle=lit?col:'rgba(255,255,255,.07)'; ctx.strokeStyle=lit?'#fff':'rgba(255,255,255,.18)'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.roundRect(x,top,w,h,22); ctx.fill(); ctx.stroke();
     ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.font=`${Math.round(Math.min(w,h)*.28)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
