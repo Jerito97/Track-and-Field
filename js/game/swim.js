@@ -4,7 +4,7 @@
 // and let go: holding both the swimmer dives into the stroke and a star runs to a circle, letting go there is the best
 // stroke, then the arms come back over the water and it's another hold. In both, each stroke pushes the swimmer on and
 // the water slows it down between strokes.
-// On top: the dive off the block at the gun; the race distance (S.x, 0..100) goes there and back in the pool (poolX);
+// On top: the dive off the block (both red buttons at the gun: the reaction counts in the time); the race distance (S.x, 0..100) goes there and back in the pool (poolX);
 // at the far wall the turn: the red buttons appear near it, pressed with the head about TURN_BEST m from the wall is a
 // perfect flip turn and push-off (it keeps all its speed and glides), earlier or later keeps less; reaching the wall
 // without pressing crashes into it. At the end the red buttons again to touch the wall (the 100 m's dip).
@@ -23,6 +23,10 @@ const DIVE_V=4.5;
 // left TURN_W further); how long it takes (s), the push-off (m); what a turn keeps of the speed: TURN_MIN to all of it
 export const TURN_ZONE=4.5, TURN_T=.7;
 const TURN_BEST=1.3, TURN_OK=.2, TURN_W=1.6, PUSH=2.5, TURN_MIN=.7, CRASH=.5, LAG=.03;
+// before the turn and before the touch, this long (s) with nothing to press, to get ready for it
+const PREP=.55;
+// the race distance counts the hands (stretched out ahead): the hip, where the swimmer is drawn, is REACH m behind
+export const REACH=1.0;
 // breaststroke and butterfly: what a perfect stroke adds (m/s), how fast the water slows the swimmer (share a second)
 const IMP={breast:5.4,fly:6}, DRAG=1.5, GLIDE_V=1.6;
 // breaststroke rhythm: seconds between strokes at first, at the fastest and at the slowest; a press TIME_OK s from the
@@ -32,13 +36,18 @@ const TIME_OK=.04, TIME_W=.18, LATE=.22;
 // butterfly: seconds for the star to reach the circle (past FLY_LATE of the way, a weak stroke), the arms coming back
 export const FLY_T=.45;
 const FLY_LATE=1.3, FLY_REC=.3, BLIP=.08;
-// where race distance d is in the pool (0 at the start wall, len at the far one); back: on the way back
+// where the hands are in the pool at race distance d (0 at the start wall, len at the far one); back: on the way back.
+// Turning, the body goes round with the feet where the hands were: the hands end up 2 REACH back toward the start, so
+// the turn takes the distance on by that much (swimmers swim 2 REACH less than the race)
 export const poolX=(ev,d)=>{ const L=ev.pool; return d<=L?d:Math.max(0,2*L-Math.min(d,ev.dist)); };
+// where the swimmer's hip is in the pool (the hands REACH m ahead of it, toward where it swims)
+export const hipX=(ev,d)=>poolX(ev,d)+(d>ev.pool?REACH:-REACH);
 export const isBack=(ev,d)=>d>ev.pool;
 const wallLeft=()=>S.ev.pool-S.x;
 
-// at the gun: off the block
-export function swimGun(){ S.dive=0; S.cue=null; noise(.15,.2); }
+// at the gun: the red buttons to dive
+export function swimGun(){ S.cue={type:'both',dive:true,t:0}; }
+export function swimDiveHit(){ if(!S.cue||!S.cue.dive) return false; S.cue=null; S.dive=0; noise(.15,.2); return true; }
 // what to press now to swim, by stroke
 function strokeCue(){ const k=S.ev.stroke;
   if(k==='breast'){ S.beat=S.beat||{T:BEAT_T0}; S.cue={type:'both',beat:true,t:0,T:S.beat.T}; }
@@ -69,29 +78,35 @@ function flyStep(dt){
 // one frame of the race (instead of running): dive, turn, or swimming
 export function swimStep(dt){
   const ev=S.ev;
-  if(S.dive!=null&&S.dive<DIVE_T){ S.dive+=dt; S.x=DIVE_X*Math.min(1,S.dive/DIVE_T);
+  if(S.dive==null) return;  // still on the block
+  if(S.dive<DIVE_T){ S.dive+=dt; S.x=DIVE_X*Math.min(1,S.dive/DIVE_T);
     if(S.dive>=DIVE_T){ S.v=DIVE_V/SWIM_K; S.lastTap=S.clock; tone(200,.12,'triangle',.05); noise(.25,.25,900); strokeCue(); }
     return; }
   const a=S.turning;
   if(a){ a.t+=dt; const u=Math.min(1,a.t/a.T);
     // into the wall and over (first half), then the push-off under the water (second half)
     if(u<.5){ const k=u/.5; S.x=a.x0+(ev.pool-a.x0)*k; }
-    else { const k=(u-.5)/.5; S.x=ev.pool+PUSH*k*(2-k); }
+    else { const k=(u-.5)/.5; S.x=ev.pool+2*REACH+PUSH*k*(2-k); }
     if(u>=1){ S.turning=null; S.v=a.v; S.lastTap=S.clock; S.turned=true; strokeCue(); }
     return; }
   const k=ev.stroke;
   // (gliding into a wall, for the turn or the touch, it keeps its speed, and at least GLIDE_V)
-  if(k!=='crawl'){ if((S.turnCued&&!S.turned)||S.dipCued) S.v=Math.max(S.v,GLIDE_V/SWIM_K); else S.v-=S.v*DRAG*dt;
+  if(k!=='crawl'){ if((S.prepWall&&!S.turned)||S.prepTouch) S.v=Math.max(S.v,GLIDE_V/SWIM_K); else S.v-=S.v*DRAG*dt;
     // a breaststroke ring left to close without pressing: the stroke is lost (slower rhythm)
     if(k==='breast'&&S.cue&&S.cue.beat&&S.cue.t>S.cue.T+LATE){ judge(0); beatNext(0); }
-    if(k==='fly'&&!S.dipCued&&!S.turning) flyStep(dt); }
+    if(k==='fly'&&!(S.prepWall&&!S.turned)&&!S.prepTouch) flyStep(dt); }
   S.x+=S.v*SWIM_K*dt; S.legP+=S.v*SWIM_K*dt;
-  if(S.turned||S.finished) return;
+  if(S.finished) return;
+  const va=Math.max(S.v*SWIM_K,GLIDE_V);
+  // the wall coming: a moment with nothing to press (the strokes stop showing), then the red buttons
+  if(S.turned){ if(!S.prepTouch&&S.x>=ev.dist-touchAt()-va*PREP){ S.prepTouch=true; clearStroke(); } return; }
   const w=wallLeft();
-  if(!S.turnCued&&w<=TURN_ZONE){ S.turnCued=true; S.fly=null; S.meter=null; bothCue(); S.pops.push({text:'¡VUELTA!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true}); }
+  if(!S.prepWall&&w<=TURN_ZONE+va*PREP){ S.prepWall=true; clearStroke(); S.pops.push({text:'¡LLEGA LA PARED!',t:0,dur:.6,col:'#fff',sub:'',big:.55,small:true}); }
+  if(!S.turnCued&&w<=TURN_ZONE){ S.turnCued=true; bothCue(); S.pops.push({text:'¡VUELTA!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true}); }
   // got to the wall without the turn: into it
   if(w<=0){ S.cue=null; startTurn(-1); }
 }
+function clearStroke(){ S.cue=null; S.fly=null; if(S.meter&&S.meter.k==='fly') S.meter=null; }
 // the red buttons by the far wall: the turn, as good as how close to TURN_BEST m from the wall
 export function swimTurnHit(){
   if(!S.turnCued||S.turned||S.turning) return false;

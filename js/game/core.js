@@ -11,7 +11,7 @@ import {demoStep} from './demo.js';
 import {updateField} from './field.js';
 import {snap,updateReplay} from './replay.js';
 import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js';
-import {isBack,poolX} from './swim.js';
+import {hipX,isBack} from './swim.js';
 
 export function newEvent(idx){
   const ev=evAt(idx);
@@ -30,7 +30,7 @@ export function resetAttempt(){
   const ev=S.ev;
   Object.assign(S,{t:0,x:0,y:0,v:0,legP:0,cue:null,last:null,streak:0,pend:null,rot:0,turn:0,pose:null,
     hk:0,armed:false,air:0,airT:.4,knocked:new Set(),stumble:0,finished:false,final:null,after:0,nextBoth:0,smoke:null,
-    act:null,jv:null,landX:null,print:null,prints:[],bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ppmOf(ev),camY:0,dip:0,dive:null,turning:null,turned:false,turnCued:false,beat:null,fly:null,strokeAt:null,strokeQ:0});
+    act:null,jv:null,landX:null,print:null,prints:[],bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ppmOf(ev),camY:0,dip:0,dive:null,turning:null,turned:false,turnCued:false,prepWall:false,prepTouch:false,beat:null,fly:null,strokeAt:null,strokeQ:0});
   S.cam=camTo();
 }
 // camera zoom (logical px per metre): sprints, field events
@@ -38,7 +38,7 @@ export const SPRINT_PPM=29, FIELD_PPM=41, SWIM_PPM=24;
 const ppmOf=ev=>ev.swim?SWIM_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM;
 export const camLead=()=>LW*.36/S.ppm;
 // where the camera goes: the athlete a third of the way in (swimming: in the pool, and from the other side on the way back)
-const camTo=()=>S.ev.swim?poolX(S.ev,S.x)-(isBack(S.ev,S.x)?LW-LW*.36:LW*.36)/S.ppm:S.x-camLead();
+const camTo=()=>S.ev.swim?hipX(S.ev,S.x)-(isBack(S.ev,S.x)?LW-LW*.36:LW*.36)/S.ppm:S.x-camLead();
 export const CUEPOS={L:()=>[64,150],C:()=>[LW/2,150],R:()=>[LW-64,150]};
 // hurdle numbers: the screen in three equal columns, a number in the middle of each (a tap anywhere in a column is
 // that number); NUM_DX = gap between neighbours (logical px)

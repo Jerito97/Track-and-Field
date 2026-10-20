@@ -2,7 +2,7 @@
 import {ctx,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {drawAthlete} from '../rig.js';
-import {BLOCK_H,DIVE_T,isBack,poolX} from '../game/swim.js';
+import {BLOCK_H,DIVE_T,DIVE_X,hipX,isBack,REACH} from '../game/swim.js';
 import {ME,S} from '../state.js';
 import {swimPose} from '../stick.js';
 import {drawPauseBtn} from './scenery.js';
@@ -27,16 +27,16 @@ export function drawSwim(V){
   const ev=V.ev, {GY,X,deck}=drawPool({cam:V.cam,ppm:V.ppm,camY:V.camY,len:ev.pool,clock:S.clock,lane:S.plLane+1});
   // rivals: smaller the further back, on the surface of their lane (on the deck by the wall before they dive in)
   S.rivals.forEach((r,i)=>{ if(r.vmax==null) return; const k=RIV_LANES[i%RIV_LANES.length], y=GY+(deck-GY)*k, sc=V.ppm*BODY*(.55-.3*k);
-    const d=r.x, x=X(poolX(ev,d)); if(x<-60||x>LW+60) return;
+    const d=r.x, x=X(r.t<=r.react?-.45:hipX(ev,d)); if(x<-60||x>LW+60) return;
     const o=r.t<=r.react?{st:'block',feet:.2*V.ppm}:r.final!=null&&r.v<.5?{st:'done',t:S.clock+i}:rivalStroke(ev.stroke,d+i*.7);
     swimmer(x,y,sc,o,r.a.C,isBack(ev,d)); });
   // ours: on the block, diving, swimming, turning at the wall, at the end
   const sc=V.ppm*BODY, a=S.turning;
-  let px=X(poolX(ev,V.x)), o, back=isBack(ev,V.x);
+  let px=X(hipX(ev,V.x)), o, back=isBack(ev,V.x);
   // on the block (it stands just behind the wall), then the dive: from there to where it lands, the hip high over the
   // water and down into it head first
-  if(S.phase==='set'||(S.phase==='wait'&&!S.t&&S.dive==null)){ o={st:'block',set:S.setStage>=1,feet:BLOCK_H*V.ppm}; px=X(-.45); }
-  else if(S.dive!=null&&S.dive<DIVE_T){ const u=S.dive/DIVE_T; o={st:'dive',u,hy:((BLOCK_H+.75)*(1-u)+1.6*u*(1-u)-.35*u)*V.ppm}; px=X(-.45+V.x*(1+.45/3.4)); }
+  if(S.dive==null&&!S.finished){ o={st:'block',set:S.setStage>=1,feet:BLOCK_H*V.ppm}; px=X(-.45); }
+  else if(S.dive!=null&&S.dive<DIVE_T){ const u=S.dive/DIVE_T; o={st:'dive',u,hy:((BLOCK_H+.75)*(1-u)+1.6*u*(1-u)-.35*u)*V.ppm}; px=X(-.45+(DIVE_X-REACH+.45)*u); }
   else if(a){ const u=Math.min(1,a.t/a.T), open=ev.stroke!=='crawl'; o={st:'turn',u,open,crash:a.crash,hy:(open&&u<.5?-.05:-.35*Math.sin(Math.PI*u))*sc}; back=u>=.5; }
   else if(S.finished) o={st:'done',t:S.clock,hy:-.55*sc};
   else o={st:'swim',stroke:ev.stroke,ph:V.x/2.2*Math.PI*2,dip:S.dip>0?S.dipT:null,...ownStroke(ev.stroke,sc)};

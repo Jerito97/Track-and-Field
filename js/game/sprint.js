@@ -8,7 +8,7 @@ import {rec} from '../storage.js';
 import {endEvent} from '../ui/screens.js';
 import {clamp,rand} from '../utils.js';
 import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
-import {SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
+import {REACH,SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
 
 // seconds without a correct tap before slowing down, and how fast (fraction of speed per second)
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
@@ -22,7 +22,7 @@ export function resetRivals(){
     const k=(ev.spread||16)/16, T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16*k+rand(-.3,.3)*k;  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
     // flat sprint: about one in three rivals trips somewhere mid-race (not in the water)
     const trip=!ev.hurdles&&!ev.swim&&!r.a.target&&Math.random()<.3?rand(15,85):null;
-    Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); });
+    Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:0))/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); });
 }
 export function updateSprint(dt){
   const ev=S.ev;
@@ -91,7 +91,7 @@ export function rivalStep(r,dt){
   if(r.trip!=null&&r.x>=r.trip){ r.trip=null; r.slow=.6; r.tripT=.4; }
   if(r.tripT>0) r.tripT-=dt;
   // swimming: a turn at the far wall costs a little
-  if(S.ev.swim&&!r.turned&&r.x>=S.ev.pool){ r.turned=true; r.slow=.8; }
+  if(S.ev.swim&&!r.turned&&r.x>=S.ev.pool){ r.turned=true; r.slow=.8; r.x+=2*REACH; }
   let v=r.vmax*(1-Math.exp(-Math.max(0,r.t-r.react)/2.0))*r.slow;
   if(r.final!=null){ r.done+=dt; v*=Math.max(0,1-r.done*.6); }
   r.v=v; r.x+=v*dt; r.legP+=v*dt*2.4;
