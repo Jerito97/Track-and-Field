@@ -139,3 +139,26 @@ export function fieldPose(V){
   }
   return V.pose||POSE.stand;
 }
+
+// ---- swimming ----
+// o.st: block (on the block, crouched at set), dive (u 0..1: from the block head first into the water), swim (crawl at
+// stroke phase ph; dip: reaching for the wall at the end), turn (u: the flip at the wall, tucked, then the push-off
+// stretched out), done (upright in the water, waving). Returns the pose with its rot: swimming the body lies face down
+// (rot a quarter turn), so "forward" is down (the arm pulls under the water) and "back" is up (it comes back over it)
+const SW_STAND=P(.8,.3,[.15,.3],[.05,.3],[.15,.1],[-.1,.1]), SW_SET=P(.6,1.05,[.7,1.4],[.5,1.2],[.35,.15],[.45,.15]);
+const SW_LINE=P(.8,0,[.03,.05],[-.03,.05],[3.05,.05],[3.0,.05]);  // stretched out: arms over the head, legs together
+const SW_TUCK=P(.8,.5,[1.9,2.3],[1.8,2.2],[.6,.4],[.5,.4]);
+export function swimPose(o){
+  const Q=Math.PI/2;
+  if(o.st==='block') return {...(o.set?SW_SET:SW_STAND),kind:o.set?'swset':'swblock',rot:0};
+  if(o.st==='dive') return {...lerpPose(SW_SET,SW_LINE,ease(clamp01(o.u*2.5))),kind:'swdive',rot:.5+(Q+.45-.5)*ease(o.u)};
+  if(o.st==='turn'){ const u=o.u;
+    if(u<.5){ const k=u/.5; return {...lerpPose(SW_LINE,SW_TUCK,ease(clamp01(k*3))),kind:'swturn',rot:Q+Math.PI*ease(k)}; }
+    return {...SW_LINE,kind:'swglide',rot:Q}; }
+  if(o.st==='done'){ const w=Math.sin(o.t*6); return {...P(.8,.05,[.3,.6],[-.2,.5],[2.9+.2*w,.2],[.7,.6]),kind:'swdone',rot:0}; }
+  if(o.dip!=null) return {...SW_LINE,kind:'swtouch',rot:Q};
+  // crawl: each arm goes round, half a turn apart; over the water the elbow bends high; the legs flutter
+  const ph=((o.ph%(2*Math.PI))+2*Math.PI)%(2*Math.PI), arm=p=>{ let a=Math.PI-p; if(a<=-Math.PI) a+=2*Math.PI; return {a,b:a<0?1.1*Math.sin(-a):.25}; };
+  const f=.28*Math.sin(o.ph*3);
+  return {hip:.8,lean:0,legs:[{a:.1+f,b:.2},{a:.1-f,b:.2}],arms:[arm(ph),arm((ph+Math.PI)%(2*Math.PI))],kind:'swim',rot:Q};
+}

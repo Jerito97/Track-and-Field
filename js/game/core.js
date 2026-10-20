@@ -11,12 +11,13 @@ import {demoStep} from './demo.js';
 import {updateField} from './field.js';
 import {snap,updateReplay} from './replay.js';
 import {finishSprintEvent,resetRivals,rivalStep,updateSprint} from './sprint.js';
+import {isBack,poolX} from './swim.js';
 
 export function newEvent(idx){
   const ev=evAt(idx);
   // the world top 10 as it is before you play, ready for the end (a cold server can take seconds to answer then)
   if(!ev.beta) ['','year','month'].forEach(sp=>loadTop(ev.id,false,null,sp).catch(()=>{}));
-  setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,
+  setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ppmOf(ev),
      cue:null,last:null,streak:0,pend:null,fx:[],pops:[],clock:0,rot:0,fs:0,
      round:1,marks:ATH.map(()=>[]),snaps:[],replay:null});
   if(ev.type==='sprint'){
@@ -29,12 +30,15 @@ export function resetAttempt(){
   const ev=S.ev;
   Object.assign(S,{t:0,x:0,y:0,v:0,legP:0,cue:null,last:null,streak:0,pend:null,rot:0,turn:0,pose:null,
     hk:0,armed:false,air:0,airT:.4,knocked:new Set(),stumble:0,finished:false,final:null,after:0,nextBoth:0,smoke:null,
-    act:null,jv:null,landX:null,print:null,prints:[],bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM,camY:0,dip:0});
-  S.cam=S.x-camLead();
+    act:null,jv:null,landX:null,print:null,prints:[],bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ppmOf(ev),camY:0,dip:0,dive:null,turning:null,turned:false,turnCued:false});
+  S.cam=camTo();
 }
 // camera zoom (logical px per metre): sprints, field events
-export const SPRINT_PPM=29, FIELD_PPM=41;
+export const SPRINT_PPM=29, FIELD_PPM=41, SWIM_PPM=24;
+const ppmOf=ev=>ev.swim?SWIM_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM;
 export const camLead=()=>LW*.36/S.ppm;
+// where the camera goes: the athlete a third of the way in (swimming: in the pool, and from the other side on the way back)
+const camTo=()=>S.ev.swim?poolX(S.ev,S.x)-(isBack(S.ev,S.x)?LW-LW*.36:LW*.36)/S.ppm:S.x-camLead();
 export const CUEPOS={L:()=>[64,150],C:()=>[LW/2,150],R:()=>[LW-64,150]};
 // hurdle numbers: the screen in three equal columns, a number in the middle of each (a tap anywhere in a column is
 // that number); NUM_DX = gap between neighbours (logical px)
@@ -74,7 +78,7 @@ export function startPlay(){
   setScreen('play'); hideOv(); resetAttempt(); S.pops=[]; S.fx=[];
   if(S.ev.type==='sprint'){ S.phase='set'; S.phaseT=0; S.setStage=-1; S.hold=rand(.9,1.8); resetRivals(); }
   else { S.phase='ready'; S.phaseT=0; pop(`RONDA ${S.round}`,{dur:1.6,col:'#ffd23a'}); }
-  S.cam=S.x-camLead();
+  S.cam=camTo();
 }
 export function startRun(){ S.phase='run'; S.phaseT=0; sideCue(); tone(600,.06,'triangle',.04); }
 export function falseStart(){
@@ -97,7 +101,7 @@ export function update(dt){
   else updateField(dt);
   if(!S||S.phase==='podium') return;
   const ev=S.ev;
-  let tx=S.x-camLead(), k=6;
+  let tx=camTo(), k=ev.swim?3:6;
   if(S.jv&&!S.jv.held){ tx=S.jv.x-LW*.55/S.ppm; k=8; }
   S.cam+=(tx-S.cam)*Math.min(1,dt*k);
   if(ev.kind==='pv'){ const ty=Math.max(0,S.y-2.2); S.camY+=(ty-S.camY)*Math.min(1,dt*5); }

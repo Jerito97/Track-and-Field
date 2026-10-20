@@ -34,6 +34,8 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
+ {id:'crawl',name:'100 m crawl',tag:'CRAWL',type:'sprint',swim:true,dist:100,pool:50,cpu:18,spread:24,beta:true,
+  help:'<b>1. Salida:</b> al disparo te tirás solo del bloque. <b>2. Nadar:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece: cada acierto es una brazada y suma velocidad; cada error te frena y si dejás de tocar vas perdiendo velocidad. <b>3. Vuelta:</b> la pileta es de 50 m: cerca de la pared aparecen los <b>dos rojos</b>; tocalos juntos <b>justo antes de la pared</b> para dar la vuelta y salir despegado. Si llegás a la pared sin tocarlos, te la comés. <b>4. Llegada:</b> al final, los dos rojos otra vez para <b>tocar la pared</b>.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];

@@ -49,7 +49,7 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
 }
 // illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
-export const THUMBS={'100':'34% 30%','lj':'44% 30%','tj':'48% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','ham':'60% 30%','sp':'50% 30%','hj':'55% 30%','tour':'52% 30%','surv':'50% 35%'};
+export const THUMBS={'100':'34% 30%','lj':'44% 30%','tj':'48% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','ham':'60% 30%','sp':'50% 30%','hj':'55% 30%','crawl':'62% 30%','tour':'52% 30%','surv':'50% 35%'};
 const thumbKey=i=>i>=0&&i<EVENTS.length+BETA.length?evAt(i).id:'tour';
 // the events on the events screen: the published ones, and for the admin also the ones in testing
 const shownEvents=()=>isAdmin()?EVENTS.concat(BETA):EVENTS;
@@ -58,8 +58,8 @@ export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img 
 const TOUR=-1;
 let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length+BETA.length?v:0; })();
 // tabs over the carousel: all the events, or one kind (remembered between visits)
-const CATS=[['all','Todas'],['run','Carreras'],['jump','Saltos'],['throw','Lanzamientos']];
-const catOf=ev=>ev.type==='sprint'?'run':['lj','tj','hj','pv'].includes(ev.kind)?'jump':'throw';
+const CATS=[['all','Todas'],['run','Carreras'],['jump','Saltos'],['throw','Lanzamientos'],['swim','Natación']];
+const catOf=ev=>ev.swim?'swim':ev.type==='sprint'?'run':['lj','tj','hj','pv'].includes(ev.kind)?'jump':'throw';
 let menuCat=(()=>{ const v=store.get('odb-menucat','all'); return CATS.some(c=>c[0]===v)?v:'all'; })();
 const inCat=ev=>menuCat==='all'||catOf(ev)===menuCat;
 const ICON={
@@ -136,7 +136,7 @@ export function showEvents(){
     <div class="m-info">${heroInfo()}</div>
     <div class="m-stats">${heroStats()}</div>
   </section>
-  <div class="m-cats" role="group" aria-label="Tipo de prueba">${CATS.map(([c,n])=>`<button class="m-cat${c===menuCat?' on':''}" data-act="cat" data-c="${c}" aria-pressed="${c===menuCat}">${n}</button>`).join('')}</div>
+  <div class="m-cats" role="group" aria-label="Tipo de prueba">${CATS.filter(([c])=>c==='all'||shownEvents().some(e=>catOf(e)===c)).map(([c,n])=>`<button class="m-cat${c===menuCat?' on':''}" data-act="cat" data-c="${c}" aria-pressed="${c===menuCat}">${n}</button>`).join('')}</div>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   ${footer()}</div>`,'menu');
   initCarousel(); refreshStrip(); loadWr();

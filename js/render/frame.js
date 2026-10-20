@@ -7,6 +7,7 @@ import {drawHud} from './hud.js';
 import {drawLap} from './lap.js';
 import {drawPodium} from './podium.js';
 import {drawSprint} from './sprint.js';
+import {drawSwim} from './swim.js';
 
 export function view(){
   if(S.replay){ const f=S.replay.frames[Math.min(S.replay.i,S.replay.frames.length-1)]; return {...f,ev:S.ev,replay:true}; }
@@ -20,7 +21,7 @@ export function frame(){
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,LW,LH); ctx.clip();
   if(S&&S.phase==='podium') drawPodium();
   else if(S&&S.phase==='lap') drawLap();
-  else if(S&&S.ev){ const Vw=view(); if(S.ev.type==='sprint') drawSprint(Vw); else drawField(Vw); drawHud(Vw); }
+  else if(S&&S.ev){ const Vw=view(); if(S.ev.swim) drawSwim(Vw); else if(S.ev.type==='sprint') drawSprint(Vw); else drawField(Vw); drawHud(Vw); }
   else drawIdle();
   ctx.restore();
   if(PORTRAIT&&S&&S.ev&&S.phase!=='podium'&&S.phase!=='lap') drawPads();

@@ -50,7 +50,7 @@ export function drawPool(o){
   wall(X(0),GY,fl,s,true,o.lane); wall(X(len),GY,fl,s,false);
   // distance on the floor every 10 m
   for(let m=10;m<len;m+=10){ const x=X(m); if(x>-30&&x<LW+30) txt(m+' m',x,fl-10,'#fff',10); }
-  return {GY,X};
+  return {GY,X,deck};
 }
 // a lane rope at height y: floats in half-metre pieces, red in the 5 m by each wall, then white and blue; size k
 // (further away = thinner)

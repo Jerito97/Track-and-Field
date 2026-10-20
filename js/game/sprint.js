@@ -1,4 +1,4 @@
-// 100 m and 110 m hurdles
+// 100 m and 110 m hurdles, and swimming (swim.js on top)
 import {cheer,noise,tone} from '../audio.js';
 import {HURDLES} from '../config.js';
 import {endDemo} from './demo.js';
@@ -8,6 +8,7 @@ import {rec} from '../storage.js';
 import {endEvent} from '../ui/screens.js';
 import {clamp,rand} from '../utils.js';
 import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
+import {SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
 
 // seconds without a correct tap before slowing down, and how fast (fraction of speed per second)
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
@@ -17,10 +18,11 @@ export function resetRivals(){
     // reaction to the gun; now and then a sleepy start
     let react=rand(.13,.24); if(!r.a.target&&Math.random()<.1) react+=rand(.25,.45);
     // a machine with a set mark (survival) runs close to it, without sleepy starts or trips
-    const T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16+rand(-.3,.3);  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
-    // flat sprint: about one in three rivals trips somewhere mid-race
-    const trip=!ev.hurdles&&!r.a.target&&Math.random()<.3?rand(15,85):null;
-    Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set()}); });
+    // (swimming: the spread is spread s instead of 16, the races being longer)
+    const k=(ev.spread||16)/16, T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16*k+rand(-.3,.3)*k;  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
+    // flat sprint: about one in three rivals trips somewhere mid-race (not in the water)
+    const trip=!ev.hurdles&&!ev.swim&&!r.a.target&&Math.random()<.3?rand(15,85):null;
+    Object.assign(r,{T,react,trip,tripT:0,vmax:ev.dist/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); });
 }
 export function updateSprint(dt){
   const ev=S.ev;
@@ -30,7 +32,7 @@ export function updateSprint(dt){
       if(st===0){ S.pops=[]; pop('PREPARADOS',{hold:true}); tone(392,.12); }
       else if(st===1){ S.pops=[]; pop('LISTOS',{hold:true}); tone(392,.12); }
       else { S.pops=[]; pop('¡YA!',{col:'#ffd23a',dur:.9,big:1.3}); noise(.35,.35); S.smoke=0; S.phase='run'; S.phaseT=0; S.t=0; S.lastTap=S.clock;
-        if(ev.hurdles) numCue(); else sideCue(); } }
+        if(ev.hurdles) numCue(); else if(ev.swim) swimGun(); else sideCue(); } }
     S.pose=st===0?POSE.crouch:POSE.set;
     return;
   }
@@ -40,7 +42,8 @@ export function updateSprint(dt){
   if(!S.finished) S.t+=dt;
   // 100 m: no top speed, but stop tapping the green buttons for a moment and you slowly lose speed
   if(!ev.hurdles&&!S.finished&&S.cue&&S.cue.type==='side'&&S.clock-(S.lastTap||0)>IDLE_GRACE) S.v-=S.v*IDLE_DECAY*dt;
-  if(S.stumble>0){ S.stumble-=dt; S.x+=S.v*.6*dt; S.pose=POSE.stumble; }
+  if(ev.swim) swimStep(dt);
+  else if(S.stumble>0){ S.stumble-=dt; S.x+=S.v*.6*dt; S.pose=POSE.stumble; }
   else { S.x+=S.v*dt; S.legP+=S.v*dt*2.4; }
   if(ev.hurdles){
     if(S.air>0){ S.air-=dt; S.y=S.air>0?1.05*Math.sin(Math.PI*(1-S.air/S.airT)):0; if(S.air<=0){ S.y=0; S.hk++; S.v*=.93; } }
@@ -57,14 +60,16 @@ export function updateSprint(dt){
   // final: red buttons = head dip at the line (no extra speed)
   // the dip buttons come about 1.1 s before the line (at least 8 m), so there's time to press both after the last taps
   // (hurdles: only once the last hurdle's numbers are done, or they'd take their place)
-  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-Math.max(8,S.v*1.1)&&S.air<=0&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
+  // (swimming: the touch at the wall, once the turn is done)
+  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-(ev.swim?touchAt():Math.max(8,S.v*1.1))&&S.air<=0&&(!ev.swim||S.turned)&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
   if(S.dip>0) S.dipT+=dt;
   if(S.stumble>0){}
   else if(ev.hurdles&&S.air>0) S.pose=POSE.hurdle;
   else if(S.dip>0){ S.dip-=dt; S.pose=POSE.dip; if(S.dip<=0&&!S.finished) S.pops.push({text:'¡MUY TEMPRANO!',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
   else S.pose=S.v>.3?runPose(S.legP,Math.min(1,S.v/4)):(S.finished?POSE.cheer:POSE.stand);
   if(!S.finished&&S.x>=ev.dist){
-    S.finished=true; const over=(S.x-ev.dist)/Math.max(S.v,.5); let bonus=0; if(S.dip>0){ const f=S.dipT/.5; bonus=.12*clamp(1-Math.abs(f-.55)/.55,0,1); judge(bonus/.12); } else if(!S.dipCued||S.cue){ S.pops.push({text:'SIN CABEZAZO',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
+    S.finished=true; const over=(S.x-ev.dist)/Math.max(S.v*(ev.swim?SWIM_K:1),.5); let bonus=0; if(S.dip>0){ const f=S.dipT/.5; bonus=.12*clamp(1-Math.abs(f-.55)/.55,0,1); judge(bonus/.12); } else if(!S.dipCued||S.cue){ S.pops.push({text:ev.swim?'SIN TOQUE':'SIN CABEZAZO',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
+    if(ev.swim) S.x=ev.dist;
     S.final=Math.ceil((S.t-over-bonus)*100)/100; S.cue=null; if(!(S.dip>0)) S.dip=.3;
     tone(880,.3,'triangle',.06); cheer();
   }
@@ -78,13 +83,15 @@ export function updateSprint(dt){
       pop(S.final.toFixed(2)+' s',{dur:2.2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
       S.next=finishSprintEvent;
     }
-  } else if(S.t>40){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
+  } else if(S.t>(ev.swim?90:40)){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
 }
 export function rivalStep(r,dt){
   if(r.vmax==null) return;
   const d=S.ev.dist; r.t+=dt; r.slow+=(1-r.slow)*dt*.9;
   if(r.trip!=null&&r.x>=r.trip){ r.trip=null; r.slow=.6; r.tripT=.4; }
   if(r.tripT>0) r.tripT-=dt;
+  // swimming: a turn at the far wall costs a little
+  if(S.ev.swim&&!r.turned&&r.x>=S.ev.pool){ r.turned=true; r.slow=.8; }
   let v=r.vmax*(1-Math.exp(-Math.max(0,r.t-r.react)/2.0))*r.slow;
   if(r.final!=null){ r.done+=dt; v*=Math.max(0,1-r.done*.6); }
   r.v=v; r.x+=v*dt; r.legP+=v*dt*2.4;

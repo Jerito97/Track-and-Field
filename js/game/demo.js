@@ -19,6 +19,8 @@ const hold=on=>{ if(!!S.held2===on) return; S.held2=on; S.held2At=performance.no
 function caption(){
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'||S.phase==='set') return ev.type==='sprint'?'ESPERÁ EL DISPARO':'TOCÁ PARA EMPEZAR';
+  if(ev.swim&&S.dive!=null&&S.dive<.6) return 'AL DISPARO TE TIRÁS SOLO DEL BLOQUE';
+  if(c&&c.type==='both'&&ev.swim) return S.turned?'AL FINAL, LOS DOS ROJOS PARA TOCAR LA PARED':'LOS DOS ROJOS JUSTO ANTES DE LA PARED PARA DAR LA VUELTA';
   if(c&&c.type==='both'&&ev.type==='sprint') return 'AL FINAL, TOCÁ LOS DOS ROJOS JUNTOS PARA TIRARTE';
   if(c&&c.type==='num') return 'TOCÁ 1, 2 Y 3 BIEN RÁPIDO PARA SALTAR LA VALLA';
   if(k==='ham'){ if(a&&a.stage==='turn') return 'TOCÁ EL VERDE DE CADA LADO: CUANTO MÁS RÁPIDO, MÁS GIRA';
@@ -36,7 +38,7 @@ function caption(){
   if(k==='hj'&&S.zone&&!a) return 'LOS DOS JUNTOS CON EL PIE EN EL VERDE DE LA TABLA';
   if((k==='lj'||k==='tj')&&S.zone) return 'EN EL ROJO, LOS DOS JUNTOS PARA SALTAR PEGADO A LA TABLA';
   if(ev.type==='field'&&S.prep&&S.phase==='run') return 'DESDE EL VERDE NO HAY BOTONES: PREPARATE';
-  if(c&&c.type==='side') return ev.type==='sprint'?'TOCÁ EL VERDE DEL LADO QUE APARECE: CADA ACIERTO SUMA VELOCIDAD':'TOCÁ EL VERDE DEL LADO QUE APARECE PARA TOMAR VELOCIDAD';
+  if(c&&c.type==='side') return ev.swim?'TOCÁ EL VERDE DEL LADO QUE APARECE: CADA ACIERTO ES UNA BRAZADA':ev.type==='sprint'?'TOCÁ EL VERDE DEL LADO QUE APARECE: CADA ACIERTO SUMA VELOCIDAD':'TOCÁ EL VERDE DEL LADO QUE APARECE PARA TOMAR VELOCIDAD';
   return '';
 }
 // one frame of the autopilot (before the game's update)
@@ -48,7 +50,8 @@ export function demoStep(dt){
   const pace=ev.type==='sprint'?14:k==='sp'?10:17;
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
-  if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
+  if(c&&c.type==='both'&&ev.swim&&!S.turned&&ev.pool-S.x<=1.5) press('B');
+  else if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
   if((k==='lj'||k==='tj'||k==='hj')&&c&&c.type==='both'){
     if(!a&&ev.line-S.x<=.4) press('B');
     if(a&&a.T&&a.t/a.T>=.36) press('B'); }
