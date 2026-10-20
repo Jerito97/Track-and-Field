@@ -1,5 +1,6 @@
 // Frame composition
 import {ctx,DPR,LH,LW,OX,OY,PORTRAIT,SC,SH,SIZED,SW} from '../canvas.js';
+import {HURDLES} from '../config.js';
 import {snap} from '../game/replay.js';
 import {S} from '../state.js';
 import {drawField} from './field.js';
@@ -40,6 +41,16 @@ function drawPads(){
   if(S.shot&&S.cue&&S.cue.type==='shoot'&&!S.replay){ const cx=SW/2, cy=(top+bot)/2, r=Math.min(h*.17,SW*.11), d=Math.min(h*.33,SW*.24), f=S.shot.flash&&S.shot.flash.t<.3?S.shot.flash:null;
     [['U',0,-1],['D',0,1],['L',-1,0],['R',1,0]].forEach(([k,dx,dy])=>arrowBtn(cx+dx*d,cy+dy*d,r,dx,dy,f&&f.dir===k?(f.hit?'#2fd166':'#ff5a3c'):null));
     return; }
+  // hurdles: three buttons, a column each (the screen's thirds, as above), with the number still to tap in each
+  // (between hurdles too, dark: the same three buttons the whole race, up to the last hurdle)
+  const nc=S.cue&&S.cue.type==='num'?S.cue:null;
+  if(S.ev.hurdles&&!S.replay&&(nc||!S.cue&&S.phase==='run'&&!S.finished&&S.hk<HURDLES.length)){ const g=10, w=(SW-g*4)/3;
+    ['L','C','R'].forEach((p,i)=>{ const x=g+i*(w+g), n=nc?nc.order.indexOf(p):-1, lit=!!nc&&n>=nc.next;
+      ctx.fillStyle=lit?'#2f6fe0':'rgba(255,255,255,.07)'; ctx.strokeStyle=lit?'#fff':'rgba(255,255,255,.18)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.roundRect(x,top,w,h,20); ctx.fill(); ctx.stroke();
+      ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.3)'; ctx.font=`${Math.round(Math.min(w,h)*.42)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      if(nc) ctx.fillText(String(n+1),x+w/2,top+h/2); });
+    return; }
   const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush');
   const gap=12, w=(SW-gap*3)/2;
   ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold')?'#ff8a1e':'#27c26a';
@@ -47,7 +58,6 @@ function drawPads(){
     ctx.beginPath(); ctx.roundRect(x,top,w,h,22); ctx.fill(); ctx.stroke();
     ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.font=`${Math.round(Math.min(w,h)*.28)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(side==='L'?'◀':'▶',x+w/2,top+h/2); });
-  if(c&&c.type==='num'){ ctx.fillStyle='rgba(255,255,255,.75)'; ctx.font='bold 13px Barlow, sans-serif'; ctx.textAlign='center'; ctx.fillText('Vallas: tocá los números arriba, en la pista',SW/2,top-5); }
 }
 // menus: dark navy background with the curves of a running track (no stadium), in the menu's colours
 export function drawIdle(){

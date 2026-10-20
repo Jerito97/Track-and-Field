@@ -14,7 +14,9 @@ import {endReplay} from './game/replay.js';
 import {S,screen} from './state.js';
 import {showPause} from './ui/screens.js';
 
-export function zoneOf(clientX,three){ const f=clientX/SW;
+export function zoneOf(clientX,three,clientY=0){ const f=clientX/SW;
+  // (upright, on the three buttons below the game: the screen's thirds, as they're drawn)
+  if(three&&PORTRAIT&&clientY>OY+LH*SC) return f<1/3?'L':(f<2/3?'C':'R');
   if(three){ const lx=(clientX-OX)/SC; return lx<LW/3?'L':(lx<LW*2/3?'C':'R'); }
   return f<.5?'L':'R'; }
 // laser run: which arrow a touch is, from where it is around the sight (upright, below the game: around the pad there)
@@ -81,7 +83,7 @@ export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) retur
 // letting go of either button throws
 export function holdEnd(){ setHeld2(); if(screen==='play'&&S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
 export function initInput(){
-  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&S.phase!=='lap'&&backHit(e)) return; const c=S&&S.cue; onTap(c&&c.type==='shoot'?arrowOf(e.clientX,e.clientY):zoneOf(e.clientX,!!c&&c.type==='num')); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
+  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&S.phase!=='lap'&&backHit(e)) return; const c=S&&S.cue; onTap(c&&c.type==='shoot'?arrowOf(e.clientX,e.clientY):zoneOf(e.clientX,!!c&&c.type==='num',e.clientY)); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
   const relHold=e=>{ holdN=Math.max(0,holdN-1); down.delete(e.pointerId); holdEnd(); };
   addEventListener('pointerup',relHold); addEventListener('pointercancel',relHold);
   addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter'){ kbHold=false; holdEnd(); } });
