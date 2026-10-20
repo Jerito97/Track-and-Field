@@ -1,6 +1,7 @@
-// Survival (the classic one): the 5 classic events in a random order against a single machine, round after round; the machine gets better
-// every round. Beat it (or tie) in every event to keep going: the first event you lose ends the run. Each event won
-// adds its points (the tournament points table). The best run is kept in the profile and the world top 10.
+// Survival (the classic one): the 5 classic events in a random order against a single machine, round after round;
+// the machine gets better every round. Beat it (or tie) in every event to keep going: the first event you lose ends
+// the run. Each event won adds its points (the tournament points table), and each round got through a bonus. The best
+// run is kept in the profile and the world top 10.
 import {CLASSIC,EVENTS} from '../config.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {fmt,pts} from '../game/scoring.js';
@@ -9,6 +10,8 @@ import {player,recordSurv,store} from '../storage.js';
 import {syncMarks} from './board.js';
 import {art,showOv,THUMBS} from './screens.js';
 
+// points for getting through a round (all 5 events), on top of each event's
+const ROUND_BONUS=1000;
 // the machine's mark per event and round, measured against simulated players: round 1 easy, round 4 like a casual
 // player, 8 like a good one, 12 nearly an expert, 16 an expert's mark; after that 0.5% better every round
 const STEPS=[1,4,8,12,16];
@@ -83,12 +86,12 @@ export function survAfterEvent(){
   const line=`<div class="s-vs"><div><span class="lbl">Vos</span><b>${fmt(ev,me)}</b></div><i>vs</i><div><span class="lbl">Máquina</span><b>${fmt(ev,cpu)}</b></div></div>`;
   if(!beat&&!both) return gameOver(`<p class="s-verdict lost">Perdiste en ${ev.name}</p>${line}`);
   const p=beat?pts(ev,me):0; s.pts+=p; if(beat) s.won++; s.log.push({ev:ev.id,round:s.round,me,cpu,pts:p});
-  s.k++; const roundDone=s.k>=5; keep();
+  s.k++; const roundDone=s.k>=5; if(roundDone) s.pts+=ROUND_BONUS; keep();
   setS(null); setScreen('menu');
   showOv(card(`RONDA ${s.round}`,tie?'¡Empate!':both?'Nulo los dos':'¡Le ganaste!',`
     <p class="s-verdict">${tie?'Empataste: seguís en carrera.':both?'Ninguno marcó: seguís en carrera.':`+${p} puntos`}</p>${line}
     <div class="s-best"><span class="lbl">Puntos</span><b>${s.pts}</b></div>
-    ${roundDone?`<p class="small s-up"><b>¡Ronda ${s.round} superada!</b> En la próxima la máquina viene más fuerte.</p>`:''}
+    ${roundDone?`<p class="small s-up"><b>¡Ronda ${s.round} superada! +${ROUND_BONUS} puntos de bonus.</b> En la próxima la máquina viene más fuerte.</p>`:''}
     <div class="btns"><button class="btn" data-act="snext" data-focus>${roundDone?`Ronda ${s.round+1}`:'Siguiente prueba'}</button><button class="btn alt" data-act="menu">Seguir después</button><button class="btn alt" data-act="squit">Abandonar</button></div>`));
 }
 export function survNext(){ const s=R(); if(s.k>=5){ s.round++; s.k=0; s.order=shuffle(CLASSIC.map((e,i)=>i)); keep(); } showSurvEvent(); }

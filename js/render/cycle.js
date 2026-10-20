@@ -2,13 +2,14 @@
 // now); the wooden track rising from the blue band at the bottom up to the barrier, steeper in the bends (two a lap),
 // with its lines (black measuring line, red sprinters' line, blue stayers' line); the finish line every lap. The
 // riders on their bikes (drawn in code: the legs follow the pedals), ours at the bottom, the machines higher up the
-// banking, smaller.
+// banking, smaller; the starter at the start.
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {GEAR,LAP} from '../game/cycle.js';
 import {ME,S} from '../state.js';
 import {drawAthlete} from '../rig.js';
 import {drawBackdrop,drawPauseBtn,drawStands,setTheme} from './scenery.js';
+import {drawStarter} from './sprint.js';
 import {txt} from './text.js';
 
 // layout (logical px): the stands' top and bottom, the track's inner edge (where our wheels run), the barrier's
@@ -50,6 +51,8 @@ export function drawCycle(V){
   for(let m=0;m<=ev.dist;m+=LAP){ const x=X(m); if(x<-30||x>LW+30) continue; const t=topAt(m);
     ctx.fillStyle='#fff'; ctx.fillRect(x-4,t,8,GY-t); ctx.fillStyle=INK; ctx.fillRect(x-1,t,2,GY-t);
     txt(m===0?'SALIDA':m>=ev.dist?'META':'VUELTA 2',x,t-17,'#fff',12); }
+  // the starter, on the blue band by the start (in front of everyone: on the infield side)
+  drawStarter(X(-3.5),GY+9,2.1*U);
   // the machines, highest first
   S.rivals.map((r,i)=>[r,ROWS[i%ROWS.length]]).filter(([r])=>r.vmax!=null).sort((a,b)=>b[1][0]-a[1][0]).forEach(([r,[f,k]])=>{
     const x=X(r.x); if(x<-60||x>LW+60) return; const y=GY-(GY-topAt(r.x))*f;
