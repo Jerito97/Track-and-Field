@@ -29,13 +29,13 @@ const PREP=.55;
 export const REACH=1.0;
 // breaststroke and butterfly: what a perfect stroke adds (m/s), how fast the water slows the swimmer (share a second),
 // and the slowest it gets between strokes (it never stops: it glides)
-const IMP={breast:4.4,fly:5.6}, DRAG=.9, GLIDE_V=1.6, CRUISE=1.4;
+const IMP={breast:3.8,fly:4.6}, DRAG=.9, GLIDE_V=1.6, CRUISE=1.4;
 // breaststroke rhythm: seconds between strokes at first, at the fastest and at the slowest; a press TIME_OK s from the
 // ring closing is perfect, nothing left TIME_W s further; past LATE s without pressing, the stroke is lost
-export const BEAT_T0=1.15, BEAT_MIN=.85, BEAT_MAX=1.45;
+export const BEAT_T0=.9, BEAT_MIN=.65, BEAT_MAX=1.15;
 const TIME_OK=.04, TIME_W=.18, LATE=.22;
 // butterfly: seconds for the star to reach the circle (past FLY_LATE of the way, a weak stroke), the arms coming back
-export const FLY_T=.6, FLY_REC=.45;
+export const FLY_T=.42, FLY_REC=.35;
 const FLY_LATE=1.3, BLIP=.08;
 // where the hands are in the pool at race distance d (0 at the start wall, len at the far one); back: on the way back.
 // Turning, the body goes round with the feet where the hands were: the hands end up 2 REACH back toward the start, so
