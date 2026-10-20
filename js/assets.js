@@ -29,14 +29,14 @@ export const POLE_ART=new Image();
 // stadium scenery (assets/scene/): grandstands and sky, the normal ones, the dark ones of survival and the indoor pool's
 // (stands and ceiling), and the race
 // starter (ready / firing)
-export const SCENE={stands:new Image(),sky:new Image(),standsSurv:new Image(),skySurv:new Image(),standsSwim:new Image(),skySwim:new Image(),starter:[new Image(),new Image()]};
+export const SCENE={stands:new Image(),sky:new Image(),standsSurv:new Image(),skySurv:new Image(),standsSwim:new Image(),skySwim:new Image(),timekeeper:new Image(),starter:[new Image(),new Image()]};
 // rig parts per athlete id: {head:{im,dark,w,h,px,py}, ...}
 export const RIGS={};
 // animations per athlete id: {run:{im (strip of frames side by side), frames (count), w,h,hx,feet,scale}, start:{...}, ...}
 export const ANIMS={};
 // the pool's pictures: only swimming uses them, so they load the first time a swimming event starts (until they're in,
 // the pool's backdrop is the plain wall colour)
-export function loadSwimScene(){ [['standsSwim','stands-swim.webp'],['skySwim','sky-swim.jpg']].forEach(([k,f])=>{ if(!SCENE[k].src) SCENE[k].src=new URL('../assets/scene/'+f,import.meta.url).href; }); }
+export function loadSwimScene(){ [['standsSwim','stands-swim.webp'],['skySwim','sky-swim.jpg'],['timekeeper','timekeeper.png']].forEach(([k,f])=>{ if(!SCENE[k].src) SCENE[k].src=new URL('../assets/scene/'+f,import.meta.url).href; }); }
 // resolves once every image has loaded (or failed); drawing code falls back to vector art for anything missing
 export function loadAssets(){
   const waits=[];

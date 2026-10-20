@@ -5,6 +5,7 @@
 // far end (len m) the wall with its touch pad; flags across the pool 5 m from each wall, red rope beads near the walls.
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
+import {SCENE} from '../assets.js';
 import {drawStarter} from './sprint.js';
 import {drawBackdrop,drawStands,setTheme} from './scenery.js';
 import {txt} from './text.js';
@@ -115,8 +116,9 @@ function bench(x0,x1,y,s){ const h=.6*s, t=.1*s;
   [['#e8262d',.12],['#2f6fd6',.42],['#ffd23a',.7]].forEach(([c,f])=>{ const x=x0+(x1-x0)*f, w=.75*s, th=.22*s;
     ctx.fillStyle=c; ctx.beginPath(); ctx.roundRect(x,y-h-t-th,w,th,3); ctx.fill(); ctx.stroke();
     ctx.fillStyle='rgba(255,255,255,.55)'; ctx.fillRect(x+3,y-h-t-th*.55,w-6,1.5); }); }
-// an official in white with a stopwatch held up in front, looking at the pool
+// an official in white with a stopwatch held up in front, looking at the pool (the picture; drawn in code until it loads)
 function timekeeper(x,y,s){
+  const im=SCENE.timekeeper; if(im.naturalWidth){ const h=2.75*s, w=h*im.naturalWidth/im.naturalHeight; ctx.drawImage(im,x-w*.45,y-h,w,h); return; }
   const k=s*1.45, P=(a,b)=>[x+a*k,y-b*k];
   ctx.lineCap='round'; ctx.lineJoin='round';
   // legs (navy trousers)
