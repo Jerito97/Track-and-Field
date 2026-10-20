@@ -27,15 +27,16 @@ const TURN_BEST=1.3, TURN_OK=.2, TURN_W=1.6, PUSH=2.5, TURN_MIN=.7, CRASH=.5, LA
 const PREP=.55;
 // the race distance counts the hands (stretched out ahead): the hip, where the swimmer is drawn, is REACH m behind
 export const REACH=1.0;
-// breaststroke and butterfly: what a perfect stroke adds (m/s), how fast the water slows the swimmer (share a second)
-const IMP={breast:5.4,fly:6}, DRAG=1.5, GLIDE_V=1.6;
+// breaststroke and butterfly: what a perfect stroke adds (m/s), how fast the water slows the swimmer (share a second),
+// and the slowest it gets between strokes (it never stops: it glides)
+const IMP={breast:4.4,fly:5.6}, DRAG=.9, GLIDE_V=1.6, CRUISE=1.4;
 // breaststroke rhythm: seconds between strokes at first, at the fastest and at the slowest; a press TIME_OK s from the
 // ring closing is perfect, nothing left TIME_W s further; past LATE s without pressing, the stroke is lost
-export const BEAT_T0=.85, BEAT_MIN=.55, BEAT_MAX=1.1;
+export const BEAT_T0=1.15, BEAT_MIN=.85, BEAT_MAX=1.45;
 const TIME_OK=.04, TIME_W=.18, LATE=.22;
 // butterfly: seconds for the star to reach the circle (past FLY_LATE of the way, a weak stroke), the arms coming back
-export const FLY_T=.45;
-const FLY_LATE=1.3, FLY_REC=.3, BLIP=.08;
+export const FLY_T=.6, FLY_REC=.45;
+const FLY_LATE=1.3, BLIP=.08;
 // where the hands are in the pool at race distance d (0 at the start wall, len at the far one); back: on the way back.
 // Turning, the body goes round with the feet where the hands were: the hands end up 2 REACH back toward the start, so
 // the turn takes the distance on by that much (swimmers swim 2 REACH less than the race)
@@ -63,7 +64,7 @@ export function swimBeatHit(){
   judge(q); tone(420+260*q,.06,'triangle',.05); beatNext(q); return true;
 }
 function beatNext(q){ const b=S.beat; stroke(q);
-  b.T=q>=.8?Math.max(BEAT_MIN,b.T*.95):q>=.55?Math.max(BEAT_MIN+.1,b.T*.98):q<.35?Math.min(BEAT_MAX,b.T*1.12+.04):b.T; strokeCue(); }
+  b.T=q>=.8?Math.max(BEAT_MIN,b.T*.96):q>=.55?Math.max(BEAT_MIN+.1,b.T*.985):q<.35?Math.min(BEAT_MAX,b.T*1.12+.04):b.T; strokeCue(); }
 // butterfly: waiting for a fresh hold, holding (the star running), the arms coming back
 function flyStep(dt){
   const f=S.fly; if(!f) return;
@@ -91,11 +92,13 @@ export function swimStep(dt){
     return; }
   const k=ev.stroke;
   // (gliding into a wall, for the turn or the touch, it keeps its speed, and at least GLIDE_V)
-  if(k!=='crawl'){ if((S.prepWall&&!S.turned)||S.prepTouch) S.v=Math.max(S.v,GLIDE_V/SWIM_K); else S.v-=S.v*DRAG*dt;
+  if(k!=='crawl'){ if((S.prepWall&&!S.turned)||S.prepTouch) S.v=Math.max(S.v,GLIDE_V/SWIM_K); else S.v=Math.max(Math.min(S.v,CRUISE/SWIM_K),S.v-S.v*DRAG*dt);
     // a breaststroke ring left to close without pressing: the stroke is lost (slower rhythm)
     if(k==='breast'&&S.cue&&S.cue.beat&&S.cue.t>S.cue.T+LATE){ judge(0); beatNext(0); }
     if(k==='fly'&&!(S.prepWall&&!S.turned)&&!S.prepTouch) flyStep(dt); }
   S.x+=S.v*SWIM_K*dt; S.legP+=S.v*SWIM_K*dt;
+  // crawl arms: faster the faster it swims, but at a believable pace (strokes a second)
+  S.strokePh=(S.strokePh||0)+dt*2*Math.PI*clamp(.45+S.v*SWIM_K*.12,.45,1.25);
   if(S.finished) return;
   const va=Math.max(S.v*SWIM_K,GLIDE_V);
   // the wall coming: a moment with nothing to press (the strokes stop showing), then the red buttons

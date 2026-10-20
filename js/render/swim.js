@@ -2,7 +2,7 @@
 import {ctx,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {drawAthlete} from '../rig.js';
-import {BLOCK_H,DIVE_T,DIVE_X,hipX,isBack,REACH} from '../game/swim.js';
+import {BLOCK_H,DIVE_T,DIVE_X,FLY_REC,hipX,isBack,REACH} from '../game/swim.js';
 import {ME,S} from '../state.js';
 import {swimPose} from '../stick.js';
 import {drawPauseBtn} from './scenery.js';
@@ -39,7 +39,7 @@ export function drawSwim(V){
   else if(S.dive!=null&&S.dive<DIVE_T){ const u=S.dive/DIVE_T; o={st:'dive',u,hy:((BLOCK_H+.75)*(1-u)+1.6*u*(1-u)-.35*u)*V.ppm}; px=X(-.45+(DIVE_X-REACH+.45)*u); }
   else if(a){ const u=Math.min(1,a.t/a.T), open=ev.stroke!=='crawl'; o={st:'turn',u,open,crash:a.crash,hy:(open&&u<.5?-.05:-.35*Math.sin(Math.PI*u))*sc}; back=u>=.5; }
   else if(S.finished) o={st:'done',t:S.clock,hy:-.55*sc};
-  else o={st:'swim',stroke:ev.stroke,ph:V.x/2.2*Math.PI*2,dip:S.dip>0?S.dipT:null,...ownStroke(ev.stroke,sc)};
+  else o={st:'swim',stroke:ev.stroke,ph:S.strokePh,dip:S.dip>0?S.dipT:null,...ownStroke(ev.stroke,sc)};
   swimmer(px,GY,sc,o,ME(),back);
   if(!S.finished&&!S.turning) strokeCue(px,GY,sc,back);
   // the marker over our swimmer
@@ -50,18 +50,18 @@ export function drawSwim(V){
 // our stroke's progress, from the game: breaststroke since the last stroke; butterfly holding (the star) or the arms
 // coming back; the hip lower as it dives into a butterfly pull
 function ownStroke(k,sc){
-  if(k==='breast') return {u:S.strokeAt==null?1:Math.min(1,(S.clock-S.strokeAt)/.75)};
+  if(k==='breast') return {u:S.strokeAt==null?1:Math.min(1,(S.clock-S.strokeAt)/.9)};
   if(k==='fly'){ const f=S.fly, m=S.meter;
     if(f&&f.st==='hold'&&m) return {fly:{st:'hold',p:Math.min(1,m.p)},hy:(-.12-.3*Math.min(1,m.p))*sc};
-    if(f&&f.st==='rec') return {fly:{st:'rec',r:f.t/.3},hy:(-.42+.4*Math.min(1,f.t/.2))*sc};
+    if(f&&f.st==='rec') return {fly:{st:'rec',r:f.t/FLY_REC},hy:(-.42+.4*Math.min(1,f.t/.25))*sc};
     return {fly:{st:'glide'}}; }
   return {};
 }
 // the rivals' strokes from how far they've swum
 function rivalStroke(k,d){
-  if(k==='breast') return {st:'swim',stroke:k,u:(d/1.9)%1*1.3};
-  if(k==='fly'){ const s=(d/2.4)%1; return {st:'swim',stroke:k,fly:s<.6?{st:'hold',p:s/.6}:{st:'rec',r:(s-.6)/.4}}; }
-  return {st:'swim',stroke:k,ph:d/2.2*Math.PI*2};
+  if(k==='breast') return {st:'swim',stroke:k,u:(d/2.8)%1*1.3};
+  if(k==='fly'){ const s=(d/3.2)%1; return {st:'swim',stroke:k,fly:s<.6?{st:'hold',p:s/.6}:{st:'rec',r:(s-.6)/.4}}; }
+  return {st:'swim',stroke:k,ph:d/4.5*Math.PI*2};
 }
 // what to press, drawn by the swimmer: breaststroke, a ring closing on the head (press as it closes); butterfly, the
 // bar over the swimmer with the star running to the circle while holding
