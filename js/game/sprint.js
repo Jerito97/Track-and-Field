@@ -69,8 +69,8 @@ export function updateSprint(dt){
   // final: red buttons = head dip at the line (no extra speed)
   // the dip buttons come about 1.1 s before the line (at least 8 m), so there's time to press both after the last taps
   // (hurdles: only once the last hurdle's numbers are done, or they'd take their place)
-  // (swimming: the touch at the wall, once the turn is done; cycling: half a second before, not to stop pedalling long)
-  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-(ev.swim?touchAt():ev.cycle?Math.max(4,S.v*.55):Math.max(8,S.v*1.1))&&S.air<=0&&(!ev.swim||S.turned)&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
+  // (swimming: the touch at the wall, once the turn is done; cycling: a second before, the rider coasting meanwhile)
+  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-(ev.swim?touchAt():ev.cycle?Math.max(8,S.v*1.0):Math.max(8,S.v*1.1))&&S.air<=0&&(!ev.swim||S.turned)&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
   if(S.dip>0) S.dipT+=dt;
   if(S.stumble>0){}
   else if(ev.hurdles&&S.air>0) S.pose=POSE.hurdle;

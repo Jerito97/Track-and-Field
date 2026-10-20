@@ -13,8 +13,9 @@ export const LAP=250;
 // half one, held to OVER it goes on its own
 export const FILL_T=.5;
 const PERFECT=.95, PAST=1.15, OVER=1.4, OVER_Q=.5;
-// a full stroke adds IMP m/s; the air takes DRAG·v² m/s every second
-const IMP=2.0, DRAG=.012;
+// a full stroke adds IMP m/s; the air takes DRAG·v² m/s every second (COAST of it once the pedalling is over, the
+// bike thrown at the line: tucked in, coasting)
+const IMP=2.0, DRAG=.012, COAST=.3;
 // metres the bike goes for a turn of the pedals (track gear)
 export const GEAR=7.5;
 
@@ -34,7 +35,7 @@ function stroke(p,side){
 }
 // once a frame while racing: the air, the pedal being held, the bell
 export function cycleStep(dt){
-  S.v=Math.max(0,S.v-DRAG*S.v*S.v*dt);
+  S.v=Math.max(0,S.v-DRAG*(S.dipCued&&!S.finished?COAST:1)*S.v*S.v*dt);
   S.crank=(S.crank||0)+S.v*dt/GEAR*Math.PI*2;
   if(S.pedLast) S.pedLast.t+=dt;
   if(!S.lapBell&&S.x>=LAP){ S.lapBell=true; pop('¡ÚLTIMA VUELTA!',{dur:1,col:'#ffd23a',big:.7}); [0,.18,.36].forEach(d=>setTimeout(()=>tone(1320,.12,'sine',.05),d*1000)); }
