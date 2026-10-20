@@ -4,7 +4,7 @@
 // black guide line ending in a T a couple of metres from each wall. At 0 the starting block on the end wall, at the
 // far end (len m) the wall with its touch pad; flags across the pool 5 m from each wall, red rope beads near the walls.
 import {ctx,LH,LW} from '../canvas.js';
-import {BOARDS,INK} from '../config.js';
+import {INK} from '../config.js';
 import {drawStarter} from './sprint.js';
 import {drawBackdrop,drawStands,setTheme} from './scenery.js';
 import {txt} from './text.js';
@@ -95,16 +95,11 @@ function wall(x,GY,fl,s,start,lane=4){
   }
 }
 // behind the start wall (seen at the start and at the finish): on the deck the starter (firing at the gun) and a
-// timekeeper with a stopwatch, a bench with towels and a stack of kickboards; on the wall under it a row of ads
+// timekeeper with a stopwatch, a bench with towels and a stack of kickboards
 function startDeck(X,GY,s){
   const wx=X(0); if(wx<=0) return;
-  const dy=.35*s, top=GY-dy;
+  const top=GY-.35*s;
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,wx-1,LH); ctx.clip();
-  // the ads on the wall (they slide with the camera, a board every 6 m)
-  const ay=top+14, ah=Math.min(26,LH-ay-8), bw=6*s;
-  if(ah>10){ ctx.fillStyle=INK; ctx.fillRect(0,ay-2,wx,ah+4);
-    for(let i=-1;X(-i*6)>-bw;i++){ const x=X(-(i+1)*6)+1, [bg,fg,word]=BOARDS[(i%BOARDS.length+BOARDS.length)%BOARDS.length];
-      ctx.fillStyle=bg; ctx.fillRect(x,ay,bw-2,ah); ctx.font=`${Math.round(ah*.66)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=fg; ctx.fillText(word,x+(bw-2)/2,ay+ah/2+1,bw-10); } }
   // kickboards, the bench with towels, the starter, the timekeeper
   kickboards(X(-12),top,s); bench(X(-10),X(-6.5),top,s);
   drawStarter(X(-4.4),top,2.9*s);
