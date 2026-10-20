@@ -13,7 +13,7 @@ import {bothCue,judge,pop,sideCue} from './core.js';
 // (the baton goes from hand to hand: the race goes on from there, GAIN m further on); the red buttons come when the
 // baton is CUE_D m from the board's middle, and from then the game runs at SLOW of its speed
 export const CH_OK=.12, CH_W=1.4, BACK=1.5, MATE=.6;
-const BATON=.35, LAG=.03, SLOW=.4, CUE_D=6;
+const BATON=.35, LAG=.03, SLOW=.6, CUE_D=6;
 export const GAIN=BATON+MATE;
 // what the next runner takes of the speed: CH_MIN at worst, all of it for a perfect change
 const CH_MIN=.72;
