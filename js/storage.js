@@ -15,7 +15,7 @@ const DB=(()=>{ const d=store.get(KEY,null); return d&&Array.isArray(d.list)?d:{
 const save=()=>store.set(KEY,DB);
 // one-time resets: the triple jump and the hammer (later the high jump and the shot put) start from scratch once published (the marks they had were tests
 // made while they were being tried out). Each player keeps the ids of the resets already done (new players: all)
-const RESETS=[{id:'tj-ham-1',evs:['tj','ham']},{id:'hj-sp-1',evs:['hj','sp']},{id:'swim-1',evs:['crawl','breast','fly']},{id:'4x100-1',evs:['4x100']},{id:'4x100-2',evs:['4x100']}];
+const RESETS=[{id:'tj-ham-1',evs:['tj','ham']},{id:'hj-sp-1',evs:['hj','sp']},{id:'swim-1',evs:['crawl','breast','fly']},{id:'4x100-1',evs:['4x100']},{id:'4x100-2',evs:['4x100']},{id:'laser-cycle-1',evs:['laser','cycle']}];
 DB.list.forEach(p=>{ const done=p.resets||[];
   RESETS.forEach(r=>{ if(done.includes(r.id)) return;
     r.evs.forEach(e=>{ delete p.rec[e]; if(p.best) delete p.best[e]; if(p.sent) delete p.sent[e]; if(p.pb) delete p.pb[e]; if(p.psent) Object.keys(p.psent).forEach(k=>{ if(k.startsWith(e+'|')) delete p.psent[k]; }); });

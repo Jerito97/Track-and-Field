@@ -35,10 +35,10 @@ import {Buffer} from 'node:buffer';
 import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
 import {neon} from '@neondatabase/serverless';
 
-const EVENTS=['100','lj','110h','pv','jav','tj','ham','hj','sp','crawl','breast','fly','4x100'];
-const SPRINT=['100','110h','crawl','breast','fly','4x100'];  // lower is better (times)
+const EVENTS=['100','lj','110h','pv','jav','tj','ham','hj','sp','crawl','breast','fly','4x100','laser','cycle'];
+const SPRINT=['100','110h','crawl','breast','fly','4x100','laser','cycle'];  // lower is better (times)
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
-const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250],hj:[0,5],sp:[0,60],crawl:[8,200],breast:[8,200],fly:[8,200],'4x100':[15,300]};
+const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250],hj:[0,5],sp:[0,60],crawl:[8,200],breast:[8,200],fly:[8,200],'4x100':[15,300],laser:[20,300],cycle:[20,200]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
 const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_GROUP=50, MAX_GROUPS=20;
 
