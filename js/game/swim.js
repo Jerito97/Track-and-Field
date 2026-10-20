@@ -91,8 +91,10 @@ export function swimStep(dt){
     if(u>=1){ S.turning=null; S.v=a.v; S.lastTap=S.clock; S.turned=true; strokeCue(); }
     return; }
   const k=ev.stroke;
-  // (gliding into a wall, for the turn or the touch, it keeps its speed, and at least GLIDE_V)
-  if(k!=='crawl'){ if((S.prepWall&&!S.turned)||S.prepTouch) S.v=Math.max(S.v,GLIDE_V/SWIM_K); else S.v=Math.max(Math.min(S.v,CRUISE/SWIM_K),S.v-S.v*DRAG*dt);
+  // its average speed (breaststroke and butterfly surge after each stroke and slow down: the walls are timed on this)
+  S.va=(S.va??DIVE_V)+(S.v*SWIM_K-(S.va??DIVE_V))*Math.min(1,dt*1.5);
+  // (gliding into a wall it keeps its average pace)
+  if(k!=='crawl'){ if((S.prepWall&&!S.turned)||S.prepTouch) S.v=Math.max(S.va,GLIDE_V)/SWIM_K; else S.v=Math.max(Math.min(S.v,CRUISE/SWIM_K),S.v-S.v*DRAG*dt);
     // a breaststroke ring left to close without pressing: the stroke is lost (slower rhythm)
     if(k==='breast'&&S.cue&&S.cue.beat&&S.cue.t>S.cue.T+LATE){ judge(0); beatNext(0); }
     if(k==='fly'&&!(S.prepWall&&!S.turned)&&!S.prepTouch) flyStep(dt); }
@@ -100,7 +102,7 @@ export function swimStep(dt){
   // crawl arms: faster the faster it swims, but at a believable pace (strokes a second)
   S.strokePh=(S.strokePh||0)+dt*2*Math.PI*clamp(.45+S.v*SWIM_K*.12,.45,1.25);
   if(S.finished) return;
-  const va=Math.max(S.v*SWIM_K,GLIDE_V);
+  const va=Math.max(S.ev.stroke==='crawl'?S.v*SWIM_K:S.va,GLIDE_V);
   // the wall coming: a moment with nothing to press (the strokes stop showing), then the red buttons
   if(S.turned){ if(!S.prepTouch&&S.x>=ev.dist-touchAt()-va*PREP){ S.prepTouch=true; clearStroke(); } return; }
   const w=wallLeft();
@@ -123,4 +125,4 @@ function startTurn(q){
   else tone(500+300*q,.1,'triangle',.05);
 }
 // the touch at the end: the red buttons come this far from the wall
-export const touchAt=()=>Math.max(2.5,S.v*SWIM_K*1.1);
+export const touchAt=()=>S.ev.stroke==='crawl'?Math.max(2.5,S.v*SWIM_K*1.1):Math.max(1.6,Math.max(S.va??0,GLIDE_V)*.55);
