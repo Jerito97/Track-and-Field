@@ -85,6 +85,9 @@ function db(){
       await sql`delete from marks where ev in ('crawl','breast','fly')`; await sql`delete from pmarks where ev in ('crawl','breast','fly')`; }
     if((await sql`insert into migrations(id) values('reset-4x100-1') on conflict do nothing returning id`).length){
       await sql`delete from marks where ev='4x100'`; await sql`delete from pmarks where ev='4x100'`; }
+    // again once the change gave the next runner half the speed plus a boost (the marks before were easier)
+    if((await sql`insert into migrations(id) values('reset-4x100-2') on conflict do nothing returning id`).length){
+      await sql`delete from marks where ev='4x100'`; await sql`delete from pmarks where ev='4x100'`; }
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }

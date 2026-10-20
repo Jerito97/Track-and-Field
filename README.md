@@ -211,3 +211,4 @@ Posta 4x100 publicada: en EVENTS con `extra:true` (torneos con amigos, récords,
 
 Torneos con amigos: al crear (y al repetir) un torneo, las pruebas se eligen agrupadas como en Pruebas (Carreras, Saltos, Lanzamientos, Natación), con el nombre corto de la tarjeta; tocar el nombre del grupo tilda todo el grupo, o lo destilda si ya estaba todo tildado. Por defecto, las 5 clásicas.
 Perfiles: los récords (los tuyos en el perfil y los de cada jugador) tienen las mismas pestañas (Todas, Carreras, Saltos, Lanzamientos, Natación); la elegida se recuerda mientras la app está abierta. Supervivencia aparece solo en Todas.
+Posta: récords borrados otra vez al cambiar el pase a mitad de velocidad más impulso (servidor `reset-4x100-2`, teléfonos `4x100-2`).
