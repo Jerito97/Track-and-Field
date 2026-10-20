@@ -35,7 +35,7 @@ export function onTap(pos){
   if(ph==='lap'){ lapNext(); return; }
   if(ph==='set') return;
   if(ph==='ready'){ startRun(); return; }
-  if(!S.cue||S.cue.type==='hold'||S.cue.type==='hamhold') return;
+  if(!S.cue||S.cue.type==='hold'||S.cue.type==='hamhold'||S.cue.type==='pedal') return;
   const cue=S.cue;
   // laser run: the arrows
   if(cue.type==='shoot'){ laserShoot(pos); return; }
@@ -75,10 +75,15 @@ export function bothHit(){
 }
 export let holdN=0;
 let kbHold=false;
+// each side held on its own (track cycling's pedals): a finger on that half, or its arrow key
+const kbSide={L:false,R:false};
 // javelin and pole vault hold BOTH buttons: a finger on each half of the screen, or Space/Enter
 const down=new Map();  // pointerId -> 'L' / 'R'
 // held2At: the exact moment it changed (the game checks once a frame; timing parts use it to be exact)
-const setHeld2=()=>{ const v=[...down.values()], h=kbHold||(v.includes('L')&&v.includes('R')); if(S){ if(h!==!!S.held2) S.held2At=performance.now(); S.held2=h; } };
+const setHeld2=()=>{ const v=[...down.values()], h=kbHold||(v.includes('L')&&v.includes('R')); if(!S) return;
+  if(h!==!!S.held2) S.held2At=performance.now(); S.held2=h;
+  S.press=S.press||{}; S.pressAt=S.pressAt||{};
+  ['L','R'].forEach(k=>{ const on=kbSide[k]||v.includes(k); if(on!==!!S.press[k]) S.pressAt[k]=performance.now(); S.press[k]=on; }); };
 export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) return; if(S.phase==='run'&&S.zone&&S.ev.kind==='jav'&&!S.meter){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
 // letting go of either button throws
 export function holdEnd(){ setHeld2(); if(screen==='play'&&S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
@@ -86,7 +91,8 @@ export function initInput(){
   cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&S.phase!=='lap'&&backHit(e)) return; const c=S&&S.cue; onTap(c&&c.type==='shoot'?arrowOf(e.clientX,e.clientY):zoneOf(e.clientX,!!c&&c.type==='num',e.clientY)); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
   const relHold=e=>{ holdN=Math.max(0,holdN-1); down.delete(e.pointerId); holdEnd(); };
   addEventListener('pointerup',relHold); addEventListener('pointercancel',relHold);
-  addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter'){ kbHold=false; holdEnd(); } });
+  addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter'){ kbHold=false; holdEnd(); }
+    const k=e.key.toLowerCase(), side=k==='arrowleft'||k==='a'||k==='z'?'L':k==='arrowright'||k==='d'||k==='x'?'R':null; if(side){ kbSide[side]=false; setHeld2(); } });
   cv.addEventListener('contextmenu',e=>e.preventDefault());
   addEventListener('keydown',e=>{
     if(screen!=='play'||e.repeat) return; const k=e.key.toLowerCase();
@@ -98,6 +104,7 @@ export function initInput(){
     else if(k==='arrowdown'||k==='arrowup'||k==='s') pos='C';
     else if(k===' '||k==='enter') pos='B';
     if(!pos) return; e.preventDefault(); onTap(pos); if(pos==='B'){ kbHold=true; holdStart(); }
+    if(pos==='L'||pos==='R'){ kbSide[pos]=true; setHeld2(); }
   });
 }
 // pause button (bottom left): the game stops and asks to resume or go back to the menu (not during a replay)

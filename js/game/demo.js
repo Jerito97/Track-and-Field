@@ -15,12 +15,16 @@ export function endDemo(){ const b=back; back=null; if(S) S.demo=false; if(b) b(
 const press=pos=>{ demoTap=true; try{ onTap(pos); } finally{ demoTap=false; }
   const o=scope(), [x,y]=S.shot&&DIRS[pos]?[o.cx+DIRS[pos][0]*o.R-10,o.cy+DIRS[pos][1]*o.R-10]:pos==='B'?[LW/2,150]:CUEPOS[pos]?CUEPOS[pos]():[LW/2,150]; S.fingers.push({x,y,t:0}); };
 const hold=on=>{ if(!!S.held2===on) return; S.held2=on; S.held2At=performance.now(); };
+// one side held (track cycling's pedals)
+const holdSide=(k,on)=>{ S.press=S.press||{}; S.pressAt=S.pressAt||{}; if(!!S.press[k]===on) return; S.press[k]=on; S.pressAt[k]=performance.now(); if(on){ const [x,y]=CUEPOS[k](); S.fingers.push({x,y,t:0}); } };
 
 // what to say now, from the game's state
 function caption(){
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'||S.phase==='set') return ev.type==='sprint'?'ESPERÁ EL DISPARO':'TOCÁ PARA EMPEZAR';
   if(ev.swim&&(c&&c.dive||S.dive!=null&&S.dive<.6)) return 'AL DISPARO, LOS DOS ROJOS PARA TIRARTE DEL BLOQUE';
+  if(c&&c.type==='pedal') return 'MANTENÉ EL NARANJA DE ESE LADO Y SOLTÁ CUANDO EL ANILLO SE COMPLETA';
+  if(ev.cycle&&c&&c.type==='both') return 'AL FINAL, TOCÁ LOS DOS ROJOS JUNTOS PARA TIRAR LA BICI';
   if(c&&c.type==='shoot') return 'EN EL BLANCO APARECE UNA FLECHITA: CUANDO LA VEAS, TOCÁ ESA FLECHA';
   if(ev.relay&&S.chCued) return 'LOS DOS ROJOS CUANDO EL TESTIMONIO LLEGA AL CENTRO VERDE DE LA TABLA';
   if(c&&c.beat) return 'LOS DOS ROJOS JUSTO CUANDO EL ANILLO SE CIERRA SOBRE LA CABEZA';
@@ -57,12 +61,16 @@ export function demoStep(dt){
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.dive&&c.t>=.25) press('B');
+  // cycling: hold the pedal's side, let go close to the end of the ring (now and then a little early; it lets go a
+  // frame after deciding, the ring going on ~.03 meanwhile)
+  if(c&&c.type==='pedal'&&S.ped){ const f=S.ped; if(f.st==='wait'){ holdSide(f.side==='L'?'R':'L',false); if(f.free){ f.tgt=Math.random()<.6?.95:.86+Math.random()*.07; holdSide(f.side,true); } } else if(f.p>=(f.tgt||.985)) holdSide(f.side,false); }
+  if(ev.cycle&&c&&c.type==='both'){ holdSide('L',false); holdSide('R',false); if(ev.dist-S.x<=S.v*.22) press('B'); }
   if(c&&c.type==='shoot'&&S.shot.st==='show'&&S.shot.t>=.75) press(S.shot.dir);
   if(ev.relay&&S.chCued&&c&&c.type==='both'&&S.x+.35>=ev.dist/ev.legs*(S.leg+1)-1.5-.2) press('B');
   if(c&&c.beat&&c.t>=c.T+.04) press('B');
   else if(ev.stroke==='fly'&&!S.dipCued&&!S.turning){ if(c&&c.type==='hamhold') hold(true); else if(m&&m.k==='fly'&&m.hit==null&&m.p>=.9) hold(false); }
   if(c&&c.type==='both'&&!c.beat&&ev.swim&&!S.turned&&ev.pool-S.x<=1.5){ hold(false); press('B'); }
-  else if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
+  else if(c&&c.type==='both'&&ev.type==='sprint'&&!ev.cycle&&ev.dist-S.x<=1.2) press('B');
   if((k==='lj'||k==='tj'||k==='hj')&&c&&c.type==='both'){
     if(!a&&ev.line-S.x<=.4) press('B');
     if(a&&a.T&&a.t/a.T>=.36) press('B'); }

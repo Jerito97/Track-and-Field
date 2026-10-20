@@ -2,6 +2,7 @@
 import {secs} from '../utils.js';
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
+import {OVER,PERFECT,pedalP} from '../game/cycle.js';
 import {CUEPOS,NUMPOS} from '../game/core.js';
 import {ME,S} from '../state.js';
 import {txt} from './text.js';
@@ -55,6 +56,17 @@ export function drawCue(cue){
   else if(cue.type==='hamhold'){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); if(!S.held2) txt(cue.label||'MANTENÉ LOS DOS',LW/2,104,'#fff',18,{lw:4}); }
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
+  else if(cue.type==='pedal'){ const [x,y]=CUEPOS[cue.side](), p=pedalP();
+    // the button (orange: hold it), and round it the ring filling from 12 o'clock: red, yellow, green close to full;
+    // past it, red (the stroke is only half one)
+    ctx.save(); ctx.translate(x,y); if(!p) ctx.scale(pulse,pulse); cueCircle(0,0,p>1?'#ff4d2e':'#ff8a1e',''); ctx.restore();
+    const R=37, a0=-Math.PI/2;
+    ctx.lineCap='butt'; ctx.lineWidth=9; ctx.strokeStyle='rgba(14,26,52,.75)'; ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2); ctx.stroke();
+    if(p>0){ ctx.strokeStyle=p>1?'#ff3b30':p>=PERFECT?'#2fd166':p>=.86?'#9be22e':p>=.65?'#ffd23a':'#ff8a1e'; ctx.lineWidth=7;
+      ctx.beginPath(); ctx.arc(x,y,R,a0,a0+Math.PI*2*Math.min(p,OVER)); ctx.stroke(); }
+    // the mark at 12 o'clock: let go there
+    ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x-6,y-R-10); ctx.lineTo(x+6,y-R-10); ctx.lineTo(x,y-R+1); ctx.closePath(); ctx.fill(); ctx.stroke();
+    if(!p) txt('MANTENÉ',x,y+R+14,'#fff',12,{lw:3}); }
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='num'){ // the three columns, faintly
     ctx.save(); ctx.setLineDash([7,6]); ctx.lineCap='round';

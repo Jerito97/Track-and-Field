@@ -9,6 +9,7 @@ import {drawLap} from './lap.js';
 import {drawPodium} from './podium.js';
 import {arrowBtn,drawSprint} from './sprint.js';
 import {drawSwim} from './swim.js';
+import {drawCycle} from './cycle.js';
 
 export function view(){
   if(S.replay){ const f=S.replay.frames[Math.min(S.replay.i,S.replay.frames.length-1)]; return {...f,ev:S.ev,replay:true}; }
@@ -27,7 +28,7 @@ export function frame(){
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,LW,LH); ctx.clip();
   if(S&&S.phase==='podium') drawPodium();
   else if(S&&S.phase==='lap') drawLap();
-  else if(S&&S.ev){ const Vw=view(); if(S.ev.swim) drawSwim(Vw); else if(S.ev.type==='sprint') drawSprint(Vw); else drawField(Vw); drawHud(Vw); }
+  else if(S&&S.ev){ const Vw=view(); if(S.ev.swim) drawSwim(Vw); else if(S.ev.cycle) drawCycle(Vw); else if(S.ev.type==='sprint') drawSprint(Vw); else drawField(Vw); drawHud(Vw); }
   else drawIdle();
   ctx.restore();
   if(PORTRAIT&&S&&S.ev&&S.phase!=='podium'&&S.phase!=='lap') drawPads();
@@ -51,9 +52,9 @@ function drawPads(){
       ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.3)'; ctx.font=`${Math.round(Math.min(w,h)*.42)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
       if(nc) ctx.fillText(String(n+1),x+w/2,top+h/2); });
     return; }
-  const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush');
+  const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot'||c.type==='pedal')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush');
   const gap=12, w=(SW-gap*3)/2;
-  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold')?'#ff8a1e':'#27c26a';
+  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold'||c.type==='pedal')?'#ff8a1e':'#27c26a';
     ctx.fillStyle=lit?col:'rgba(255,255,255,.07)'; ctx.strokeStyle=lit?'#fff':'rgba(255,255,255,.18)'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.roundRect(x,top,w,h,22); ctx.fill(); ctx.stroke();
     ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.font=`${Math.round(Math.min(w,h)*.28)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';

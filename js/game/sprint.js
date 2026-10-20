@@ -1,4 +1,5 @@
-// 100 m and 110 m hurdles, and on top of them swimming (swim.js), the 4x100 relay (relay.js) and the laser run (laser.js)
+// 100 m and 110 m hurdles, and on top of them swimming (swim.js), the 4x100 relay (relay.js), the laser run (laser.js)
+// and track cycling (cycle.js)
 import {cheer,noise,tone} from '../audio.js';
 import {HURDLES} from '../config.js';
 import {endDemo} from './demo.js';
@@ -11,6 +12,7 @@ import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
 import {REACH,SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
 import {GAIN,relayStep} from './relay.js';
 import {laserRival,laserRivalStop,laserStep} from './laser.js';
+import {cycleGun,cycleStep} from './cycle.js';
 
 // seconds without a correct tap before slowing down, and how fast (fraction of speed per second)
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
@@ -23,8 +25,8 @@ export function resetRivals(){
     // (swimming: the spread is spread s instead of 16, the races being longer)
     const k=(ev.spread||16)/16, T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16*k+rand(-.3,.3)*k;  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
     // flat sprint: about one in three rivals trips somewhere mid-race (not in the water)
-    const trip=!ev.hurdles&&!ev.swim&&!ev.relay&&!ev.laser&&!r.a.target&&Math.random()<.3?rand(15,85):null;
-    Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:ev.relay?(ev.legs-1)*GAIN:0))/(T-2.0-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); if(ev.laser) laserRival(r,ev); });
+    const trip=!ev.hurdles&&!ev.swim&&!ev.relay&&!ev.laser&&!ev.cycle&&!r.a.target&&Math.random()<.3?rand(15,85):null;
+    Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:ev.relay?(ev.legs-1)*GAIN:0))/(T-(ev.tau||2)-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); if(ev.laser) laserRival(r,ev); });
 }
 export function updateSprint(dt){
   const ev=S.ev;
@@ -34,7 +36,7 @@ export function updateSprint(dt){
       if(st===0){ S.pops=[]; pop('PREPARADOS',{hold:true}); tone(392,.12); }
       else if(st===1){ S.pops=[]; pop('LISTOS',{hold:true}); tone(392,.12); }
       else { S.pops=[]; pop('¡YA!',{col:'#ffd23a',dur:.9,big:1.3}); noise(.35,.35); S.smoke=0; S.phase='run'; S.phaseT=0; S.t=0; S.lastTap=S.clock;
-        if(ev.hurdles) numCue(); else if(ev.swim) swimGun(); else sideCue(); } }
+        if(ev.hurdles) numCue(); else if(ev.swim) swimGun(); else if(ev.cycle) cycleGun(); else sideCue(); } }
     S.pose=st===0?POSE.crouch:POSE.set;
     return;
   }
@@ -48,6 +50,7 @@ export function updateSprint(dt){
   else if(S.stumble>0){ S.stumble-=dt; S.x+=S.v*.6*dt; S.pose=POSE.stumble; }
   else { S.x+=S.v*dt; S.legP+=S.v*dt*2.4; }
   if(ev.laser) laserStep(dt);
+  if(ev.cycle) cycleStep(dt);
   if(ev.relay){ relayStep();
     // the runner who handed the baton over slows down to a stop
     const p=S.prev; if(p){ p.t+=dt; p.v=Math.max(0,p.v-p.v*1.8*dt); p.x+=p.v*dt; p.legP=(p.legP||0)+p.v*dt*2.4; } }
@@ -66,8 +69,8 @@ export function updateSprint(dt){
   // final: red buttons = head dip at the line (no extra speed)
   // the dip buttons come about 1.1 s before the line (at least 8 m), so there's time to press both after the last taps
   // (hurdles: only once the last hurdle's numbers are done, or they'd take their place)
-  // (swimming: the touch at the wall, once the turn is done)
-  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-(ev.swim?touchAt():Math.max(8,S.v*1.1))&&S.air<=0&&(!ev.swim||S.turned)&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
+  // (swimming: the touch at the wall, once the turn is done; cycling: half a second before, not to stop pedalling long)
+  if(!S.finished&&!S.dipCued&&S.x>=ev.dist-(ev.swim?touchAt():ev.cycle?Math.max(4,S.v*.55):Math.max(8,S.v*1.1))&&S.air<=0&&(!ev.swim||S.turned)&&(!ev.hurdles||S.hk>=HURDLES.length||S.hk===HURDLES.length-1&&S.armed)){ S.dipCued=true; bothCue(); }
   if(S.dip>0) S.dipT+=dt;
   if(S.stumble>0){}
   else if(ev.hurdles&&S.air>0) S.pose=POSE.hurdle;
@@ -89,7 +92,7 @@ export function updateSprint(dt){
       pop(secs(S.final)+(S.final<59.995?' s':''),{dur:2.2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
       S.next=finishSprintEvent;
     }
-  } else if(S.t>(ev.swim?90:ev.relay||ev.laser?120:40)){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
+  } else if(S.t>(ev.swim||ev.cycle?90:ev.relay||ev.laser?120:40)){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }
 }
 export function rivalStep(r,dt){
   if(r.vmax==null) return;
@@ -100,7 +103,7 @@ export function rivalStep(r,dt){
   if(S.ev.swim&&!r.turned&&r.x>=S.ev.pool){ r.turned=true; r.slow=.8; r.x+=2*REACH; }
   // laser run: stopped at a range, then off again from a standstill
   if(S.ev.laser&&r.final==null&&laserRivalStop(r,S.ev)) return;
-  let v=r.vmax*(1-Math.exp(-Math.max(0,r.t-(r.go??r.react))/2.0))*r.slow;
+  let v=r.vmax*(1-Math.exp(-Math.max(0,r.t-(r.go??r.react))/(S.ev.tau||2)))*r.slow;
   if(r.final!=null){ r.done+=dt; v*=Math.max(0,1-r.done*.6); }
   r.v=v; r.x+=v*dt; r.legP+=v*dt*2.4;
   if(r.final==null&&r.x>=d) r.final=Math.ceil((r.t-(r.x-d)/Math.max(v,.5)+(r.pen||0))*100)/100;

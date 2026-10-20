@@ -44,6 +44,8 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 export const BETA=[
  {id:'laser',name:'Laser Run',tag:'LASER RUN',type:'sprint',laser:true,dist:300,ranges:[100,200],legT:12.6,cpu:52,spread:20,beta:true,
   help:'Correr y tirar, como en el pentatlón moderno. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. Tirar:</b> a los 100 y a los 200 m frenás en el puesto de tiro y mirás por la mira: el tablero con los <b>5 blancos</b> se mueve. Tocá <b>cualquier botón</b> cuando el blanco esté en el centro de la mira. Si le das, se pone blanco; si errás, <b>+5 segundos</b>. Cuanto más rápido llegaste corriendo, más se mueve la mira (se va calmando de a poco). <b>3. Llegada:</b> después de los 5 tiros seguís corriendo; al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
+ {id:'cycle',name:'Ciclismo 500 m',tag:'CICLISMO',type:'sprint',cycle:true,dist:500,tau:4,cpu:37,spread:36,beta:true,
+  help:'Contrarreloj de 500 metros en el velódromo: <b>2 vueltas</b>. <b>Pedalear:</b> al lado del ciclista aparece un <b>anillo</b> de un lado (izquierda, derecha, izquierda…). <b>Mantené apretado</b> ese lado: el anillo se llena. <b>Soltá justo cuando se completa</b> para una pedaleada perfecta; si soltás antes vale menos, y si <b>te pasás</b> vale la mitad. Entre pedaleada y pedaleada el aire te frena. Al pasar la línea por primera vez suena la campana: <b>última vuelta</b>. <b>Llegada:</b> los dos rojos para <b>tirar la bici</b> sobre la línea.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];

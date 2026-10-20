@@ -17,7 +17,7 @@ import {relayTime} from './relay.js';
 
 export function newEvent(idx){
   const ev=evAt(idx);
-  if(ev.swim) loadSwimScene();
+  if(ev.swim||ev.cycle) loadSwimScene();
   // the world top 10 as it is before you play, ready for the end (a cold server can take seconds to answer then)
   if(!ev.beta) ['','year','month'].forEach(sp=>loadTop(ev.id,false,null,sp).catch(()=>{}));
   setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ppmOf(ev),
@@ -33,12 +33,12 @@ export function resetAttempt(){
   const ev=S.ev;
   Object.assign(S,{t:0,x:0,y:0,v:0,legP:0,cue:null,last:null,streak:0,pend:null,rot:0,turn:0,pose:null,
     hk:0,armed:false,air:0,airT:.4,knocked:new Set(),stumble:0,finished:false,final:null,after:0,nextBoth:0,smoke:null,
-    act:null,jv:null,landX:null,print:null,prints:[],bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ppmOf(ev),camY:0,dip:0,dive:null,turning:null,turned:false,turnCued:false,prepWall:false,prepTouch:false,beat:null,fly:null,strokeAt:null,strokeQ:0,strokePh:0,va:null,leg:0,prev:null,chPrep:false,chCued:false,ts:1,shot:null,ri:0,pen:0,braking:false,vin:0});
+    act:null,jv:null,landX:null,print:null,prints:[],bar:null,zone:false,prep:false,meter:null,dipCued:false,dipT:0,mark:undefined,foul:false,snaps:[],snapAcc:0,replay:null,peak:0,slips:0,ppm:ppmOf(ev),camY:0,dip:0,dive:null,turning:null,turned:false,turnCued:false,prepWall:false,prepTouch:false,beat:null,fly:null,strokeAt:null,strokeQ:0,strokePh:0,va:null,leg:0,prev:null,chPrep:false,chCued:false,ts:1,shot:null,ri:0,pen:0,braking:false,vin:0,ped:null,crank:0,lapBell:false});
   S.cam=camTo();
 }
 // camera zoom (logical px per metre): sprints, field events
-export const SPRINT_PPM=29, FIELD_PPM=41, SWIM_PPM=24;
-const ppmOf=ev=>ev.swim?SWIM_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM;
+export const SPRINT_PPM=29, FIELD_PPM=41, SWIM_PPM=24, CYCLE_PPM=20;
+const ppmOf=ev=>ev.swim?SWIM_PPM:ev.cycle?CYCLE_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM;
 export const camLead=()=>LW*.36/S.ppm;
 // where the camera goes: the athlete a third of the way in (swimming: in the pool, and from the other side on the way back)
 const camTo=()=>S.ev.swim?hipX(S.ev,S.x)-(isBack(S.ev,S.x)?LW-LW*.36:LW*.36)/S.ppm:S.x-camLead();
