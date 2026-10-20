@@ -1,7 +1,7 @@
 // 4x100 relay on the sprint engine: four legs of the 100 m's green buttons, run by the player one after the other. At
 // each change (every 100 m) the next runner waits on the change mark and, just behind them, a board on the track: when
 // the baton gets near it the red buttons appear (and the game goes in slow motion); pressed with the baton right over
-// the middle of the board, the next runner takes off with all the speed, further from it with less. Not pressing, it's
+// the middle of the board, the next runner takes off with half the speed and a boost, further from it less boost. Not pressing, it's
 // handed over on its own at the board's far end, as badly as it gets.
 import {tone} from '../audio.js';
 import {S} from '../state.js';
@@ -15,8 +15,9 @@ import {bothCue,judge,pop,sideCue} from './core.js';
 export const CH_OK=.12, CH_W=1.4, BACK=1.5, MATE=.6;
 const BATON=.35, LAG=.03, SLOW=.6, CUE_D=6;
 export const GAIN=BATON+MATE;
-// what the next runner takes of the speed: CH_MIN at worst, all of it for a perfect change
-const CH_MIN=.72;
+// the next runner takes off with CH_BASE of the speed the baton came with, plus a boost of up to CH_BOOST more for a
+// good change (all of it for a perfect one, nothing for the worst)
+const CH_BASE=.5, CH_BOOST=.25;
 // the change marks (m), the next board's middle
 export const changes=ev=>Array.from({length:ev.legs-1},(_,i)=>ev.dist/ev.legs*(i+1));
 const board=()=>{ const m=changes(S.ev)[S.leg]; return m==null?null:m-BACK; };
@@ -39,7 +40,7 @@ function handOver(){
   judge(q); tone(500+300*q,.08,'triangle',.05);
   S.prints.push(board()+e);
   // the runner who gave it slows down behind; the next one (waiting just ahead) goes on with the baton
-  S.prev={x:S.x,v:S.v,leg:S.leg,t:0}; S.leg++; S.x+=GAIN; S.v*=CH_MIN+(1-CH_MIN)*q; S.peak=S.v;
+  S.prev={x:S.x,v:S.v,leg:S.leg,t:0}; S.leg++; S.x+=GAIN; S.v*=CH_BASE+CH_BOOST*q; S.peak=S.v;
   S.chPrep=S.chCued=false; S.cue=null; S.lastTap=S.clock; sideCue();
   pop(`RELEVO ${S.leg+1}`,{dur:.8,col:"#ffd23a",big:.6});
 }
