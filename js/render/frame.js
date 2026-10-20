@@ -1,5 +1,5 @@
 // Frame composition
-import {ctx,DPR,LH,LW,OX,OY,PORTRAIT,SC,SH,SW} from '../canvas.js';
+import {ctx,DPR,LH,LW,OX,OY,PORTRAIT,SC,SH,SIZED,SW} from '../canvas.js';
 import {snap} from '../game/replay.js';
 import {S} from '../state.js';
 import {drawField} from './field.js';
@@ -13,11 +13,16 @@ export function view(){
   if(S.replay){ const f=S.replay.frames[Math.min(S.replay.i,S.replay.frames.length-1)]; return {...f,ev:S.ev,replay:true}; }
   return {...snap(),ev:S.ev};
 }
+// the menus' background doesn't move: drawn once for each screen size, then left as it is (saves the battery)
+let idleFor=null;
 export function frame(){
+  const idle=!(S&&(S.phase==='podium'||S.ev)), key=SIZED;
+  if(idle&&idleFor===key) return;
+  idleFor=idle?key:null;
   ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle='#0b1730'; ctx.fillRect(0,0,SW,SH);
   ctx.setTransform(SC*DPR,0,0,SC*DPR,OX*DPR,OY*DPR);
   // menus: the background fills the whole screen (also behind the camera island); the game stays in the safe area
-  if(!(S&&(S.phase==='podium'||S.ev))){ ctx.setTransform(DPR*SW/LW,0,0,DPR*SH/LH,0,0); drawIdle(); return; }
+  if(idle){ ctx.setTransform(DPR*SW/LW,0,0,DPR*SH/LH,0,0); drawIdle(); return; }
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,LW,LH); ctx.clip();
   if(S&&S.phase==='podium') drawPodium();
   else if(S&&S.phase==='lap') drawLap();

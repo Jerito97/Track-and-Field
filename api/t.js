@@ -158,12 +158,13 @@ async function isAdmin(sql,u){
   await sql`update users set admin=true where id=${u.id}`; return true;
 }
 async function adminOp(sql,b){
-  const u=await auth(sql,b.token);
-  if(!await isAdmin(sql,u)) throw new Bad(403,'No tenés permiso.');
+  const u=await auth(sql,b.token), admin=await isAdmin(sql,u);
+  // asking whether you are one is not an error either way (the game asks every player once)
+  if(b.op==='check') return {ok:true,admin};
+  if(!admin) throw new Bad(403,'No tenés permiso.');
   const pid=String(b.player||'').slice(0,64);
   const target=async()=>{ const t=(await sql`select id,name,admin from users where id=${pid}`)[0]; if(!t) throw new Bad(404,'No existe ese jugador.'); return t; };
   switch(b.op){
-    case 'check': return {ok:true};
     case 'stats': {
       const [r]=await sql`select (select count(*)::int from users) as players, (select count(*)::int from marks where ev<>'surv') as marks,
         (select count(*)::int from tournaments) as tournaments, (select count(*)::int from tournaments where closed_at is null and coalesce(ends_at,created_at+interval '7 days')>now()) as open_tournaments,

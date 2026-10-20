@@ -15,7 +15,7 @@ export const isAdmin=()=>allowed!=null&&allowed===player()?.id;
 // asked once per player (quietly): shows the admin things (profile button, events in testing) when it answers yes
 let asked=null;
 export function checkAdmin(then){ const p=player(); if(!p?.token||allowed===p.id||asked===p.id) return; asked=p.id;
-  adminOp('check').then(()=>{ if(player()?.id===p.id){ allowed=p.id; store.set('odb-admin',allowed); then?.(); } },()=>{}); }
+  adminOp('check').then(r=>{ if(r&&r.admin===false) return; if(player()?.id===p.id){ allowed=p.id; store.set('odb-admin',allowed); then?.(); } },()=>{}); }
 
 const card=(title,body,btns)=>`<div class="card a-card"><div class="head"><div class="logo">ADMIN</div><h2>${title}</h2></div><div class="body">${body}<div class="btns">${btns}</div></div></div>`;
 const day=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});

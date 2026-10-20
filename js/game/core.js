@@ -1,4 +1,5 @@
 // Event setup, cues, popups and the per-frame update dispatcher
+import {loadSwimScene} from '../assets.js';
 import {tone} from '../audio.js';
 import {LW} from '../canvas.js';
 import {evAt} from '../config.js';
@@ -15,6 +16,7 @@ import {hipX,isBack} from './swim.js';
 
 export function newEvent(idx){
   const ev=evAt(idx);
+  if(ev.swim) loadSwimScene();
   // the world top 10 as it is before you play, ready for the end (a cold server can take seconds to answer then)
   if(!ev.beta) ['','year','month'].forEach(sp=>loadTop(ev.id,false,null,sp).catch(()=>{}));
   setS({ev,phase:'idle',t:0,x:0,y:0,v:0,legP:0,cam:-6,camY:0,ppm:ppmOf(ev),

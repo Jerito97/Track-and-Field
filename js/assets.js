@@ -34,6 +34,9 @@ export const SCENE={stands:new Image(),sky:new Image(),standsSurv:new Image(),sk
 export const RIGS={};
 // animations per athlete id: {run:{im (strip of frames side by side), frames (count), w,h,hx,feet,scale}, start:{...}, ...}
 export const ANIMS={};
+// the pool's pictures: only swimming uses them, so they load the first time a swimming event starts (until they're in,
+// the pool's backdrop is the plain wall colour)
+export function loadSwimScene(){ [['standsSwim','stands-swim.webp'],['skySwim','sky-swim.jpg']].forEach(([k,f])=>{ if(!SCENE[k].src) SCENE[k].src=new URL('../assets/scene/'+f,import.meta.url).href; }); }
 // resolves once every image has loaded (or failed); drawing code falls back to vector art for anything missing
 export function loadAssets(){
   const waits=[];
@@ -52,7 +55,5 @@ export function loadAssets(){
   load(POLE_ART,new URL('../assets/pole.png',import.meta.url).href);
   [['stands','stands.webp'],['sky','sky.jpg'],['standsSurv','stands-surv.webp'],['skySurv','sky-surv.jpg']].forEach(([k,f])=>load(SCENE[k],new URL('../assets/scene/'+f,import.meta.url).href));
   SCENE.starter.forEach((im,k)=>load(im,new URL(`../assets/scene/starter${k}.png`,import.meta.url).href));
-  // the pool's pictures load in the background (nothing waits for them: only swimming uses them)
-  [['standsSwim','stands-swim.webp'],['skySwim','sky-swim.jpg']].forEach(([k,f])=>{ SCENE[k].src=new URL('../assets/scene/'+f,import.meta.url).href; });
   return Promise.all(waits);
 }

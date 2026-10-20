@@ -5,7 +5,7 @@
 // far end (len m) the wall with its touch pad; flags across the pool 5 m from each wall, red rope beads near the walls.
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
-import {drawBackdrop,setTheme} from './scenery.js';
+import {drawBackdrop,drawStands,setTheme} from './scenery.js';
 import {txt} from './text.js';
 
 // layout (logical px): top and bottom of the stands (the ceiling above), the deck's front edge, our lane's surface (GY)
@@ -19,7 +19,8 @@ export function drawPool(o){
   const s=o.ppm, sh=(o.camY||0)*s, X=m=>(m-o.cam)*s, GY=252+sh, len=o.len||50, t=o.clock||0;
   setTheme(false,true);
   ctx.fillStyle='#d8cfb8'; ctx.fillRect(0,0,LW,LH);
-  drawBackdrop(o.cam*s*.45,ST_TOP+sh,ST_BOT+sh);
+  // (the pictures load the first time: until then, the stands drawn in code)
+  if(!drawBackdrop(o.cam*s*.45,ST_TOP+sh,ST_BOT+sh)) drawStands(o.cam,ST_TOP+sh,ST_BOT+sh,.35,t);
   // the far deck: light tiles with a darker joint every metre, a gutter along the water
   const deck=DECK+sh;
   ctx.fillStyle='#e9eef2'; ctx.fillRect(0,ST_BOT+sh,LW,deck-ST_BOT-sh);
@@ -57,9 +58,11 @@ export function drawPool(o){
 function rope(X,y,len,k){
   const w=Math.max(1.5,5*k), x0=Math.max(-10,X(0)), x1=Math.min(LW+10,X(len)); if(x1<x0) return;
   ctx.strokeStyle='rgba(10,40,70,.55)'; ctx.lineWidth=w+2; ctx.lineCap='butt'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
-  ctx.lineWidth=w;
+  // one path per colour (a few strokes a frame instead of one per float)
+  ctx.lineWidth=w; const paths=BEAD.map(()=>new Path2D());
   for(let m=0;m<len;m+=.5){ const a=X(m), b=X(m+.5); if(b<0) continue; if(a>LW) break;
-    ctx.strokeStyle=m<5||m>=len-5?BEAD[0]:BEAD[1+Math.floor(m/.5)%2]; ctx.beginPath(); ctx.moveTo(a+.5,y); ctx.lineTo(b-.5,y); ctx.stroke(); }
+    const P=paths[m<5||m>=len-5?0:1+Math.floor(m/.5)%2]; P.moveTo(a+.5,y); P.lineTo(b-.5,y); }
+  paths.forEach((P,i)=>{ ctx.strokeStyle=BEAD[i]; ctx.stroke(P); });
 }
 // backstroke flags: a line across the pool on two poles, with small coloured triangles
 function flags(x,deck,GY){

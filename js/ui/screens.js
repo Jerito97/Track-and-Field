@@ -47,13 +47,13 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
   drawAthlete(g,s,ox,oy-(k==='lj'?s*.35:0)-(k==='pv'?s*.9:0),0,J,C,true,k==='pv'?-2.4:0);
   if(k==='jav'){ g.save(); g.lineCap='round'; g.strokeStyle=INK; g.lineWidth=4; g.beginPath(); g.moveTo(px*.04,px*.36); g.lineTo(px*.92,px*.1); g.stroke(); g.strokeStyle='#fff'; g.lineWidth=2; g.stroke(); g.restore(); }
 }
-// illustrated thumbnails (assets/thumbs/<id>.jpg, small <id>-sm.jpg for the cards), with where the athlete is so a crop
+// illustrated thumbnails (assets/thumbs/<id>.webp, small <id>-sm.webp for the cards; the .jpg are the originals), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
 export const THUMBS={'100':'34% 30%','lj':'44% 30%','tj':'48% 30%','110h':'50% 34%','pv':'36% 30%','jav':'52% 32%','ham':'60% 30%','sp':'50% 30%','hj':'55% 30%','crawl':'62% 30%','breast':'55% 30%','fly':'60% 30%','tour':'52% 30%','surv':'50% 35%'};
 const thumbKey=i=>i>=0&&i<EVENTS.length+BETA.length?evAt(i).id:'tour';
 // the events on the events screen: the published ones, and for the admin also the ones in testing
 const shownEvents=()=>isAdmin()?EVENTS.concat(BETA):EVENTS;
-export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.jpg" alt="" style="object-position:${pos}"">`:`<canvas data-pict="${i}"></canvas>`; };
+export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img class="m-th" src="assets/thumbs/${k}${sm?'-sm':''}.webp" alt="" style="object-position:${pos}">`:`<canvas data-pict="${i}"></canvas>`; };
 // events screen: the chosen event, remembered between visits (the tournament has its own screen now)
 const TOUR=-1;
 let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length+BETA.length?v:0; })();
@@ -74,7 +74,7 @@ export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 // hero (the chosen event): every illustration is in place from the start and only the chosen one shows, so changing
 // event swaps them instantly (no reloading, no blank frame); an event without one gets the drawn stickman
 function heroArt(){ const k=thumbKey(menuSel);
-  return Object.entries(THUMBS).map(([id,pos])=>`<img class="m-th${id===k?' on':''}" data-k="${id}" src="assets/thumbs/${id}.jpg" alt="" style="object-position:${pos}">`).join('')
+  return Object.entries(THUMBS).map(([id,pos])=>`<img class="m-th${id===k?' on':''}" data-k="${id}" src="assets/thumbs/${id}.webp" alt="" style="object-position:${pos}">`).join('')
     +(THUMBS[k]?'':`<canvas data-pict="${menuSel}"></canvas>`); }
 function heroInfo(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return `<h1>${tour?'Torneo':ev.name}</h1>
@@ -108,9 +108,9 @@ export function showMenu(){
   if(!player()){ showAccount('first'); return; }
   if(!player().token&&!skipProtect){ showAccount('protect'); return; }
   setS(null); setScreen('menu');
-  const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.jpg" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
+  const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.webp" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
   showOv(`<div class="mm">
-  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-192.png" alt="">TRACK &amp; FIELD</div><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></header>
+  <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-96.png" alt="">TRACK &amp; FIELD</div><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></header>
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}

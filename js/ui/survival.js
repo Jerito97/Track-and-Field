@@ -37,7 +37,7 @@ export function showSurvival(){
   setS(null); setScreen('menu');
   const b=player()?.survBest, sv=saved();
   showOv(card('SUPERVIVENCIA','Ganale a la máquina',`
-    <div class="s-hero"><img src="assets/thumbs/surv.jpg" alt=""></div>
+    <div class="s-hero"><img src="assets/thumbs/surv.webp" alt=""></div>
     ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>Ronda ${sv.round} · ${sv.pts} pts</b><small>${sv.k>=5?`Ronda ${sv.round} superada: sigue la ${sv.round+1}`:`Te toca ${EVENTS[sv.order[sv.k]]?.name||''} (${sv.k+1}/5)`}</small></div><button class="btn" data-act="sresume" data-focus>Seguir</button></div>`:''}
     <div class="s-best"><span class="lbl">Tu mejor partida</span><b>${b?`${b.pts} pts`:'—'}</b>${b?`<small>Llegaste a la ronda ${b.rounds+1}</small>`:''}</div>
     <div class="btns"><button class="btn${sv?' alt':''}" data-act="sstart"${sv?'':' data-focus'}>${sv?'Nueva partida':'Jugar'}</button><button class="btn alt" data-act="board" data-i="${EVENTS.length}">Récords</button><button class="btn alt" data-act="menu">Volver</button></div>`));

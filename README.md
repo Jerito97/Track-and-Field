@@ -195,3 +195,10 @@ En prueba: **100 m crawl** (`js/game/swim.js` sobre el motor de los 100 m, dibuj
 ## Sin internet
 
 `sw.js` (service worker) guarda una copia del juego la primera vez que se abre con conexión, así después abre y se juega sin internet. Siempre pide primero lo nuevo a la red (las actualizaciones llegan apenas hay conexión) y usa la copia si no hay. Los récords se guardan en el celular y se suben al Top 10 cuando vuelve la conexión; los resultados de torneos online quedan en cola. Sin conexión, el Top 10 y la lista de jugadores muestran lo último que se vio, con un aviso.
+
+## Rendimiento
+
+- Las ilustraciones se sirven en WebP (`assets/thumbs/<id>.webp` a 880 px, `<id>-sm.webp` para las tarjetas); los `.jpg` quedan como originales. Al abrir la app se bajan unos 0,9 MB y al entrar a Pruebas otros 0,9 MB (antes 1,4 y 1,7).
+- Los fondos del natatorio se cargan recién la primera vez que se juega una prueba de natación (`loadSwimScene` en `js/assets.js`); hasta que llegan se ve la tribuna dibujada en código.
+- El fondo de los menús no se mueve: se dibuja una sola vez por tamaño de pantalla (`frame` en `js/render/frame.js`), no 60 veces por segundo.
+- Las corcheras de la pileta se dibujan con un trazo por color, no uno por flotador.
