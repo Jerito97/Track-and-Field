@@ -5,7 +5,7 @@ import {POSE,runPose} from '../poses.js';
 import {S} from '../state.js';
 import {rec} from '../storage.js';
 import {clamp,rand} from '../utils.js';
-import {armsFor,bothCue,judge,pop} from './core.js';
+import {armsFor,bothCue,judge,pop,sinceHold} from './core.js';
 import {startHammer,updateHammer} from './hammer.js';
 import {startShot,updateShot} from './shot.js';
 import {startReplay} from './replay.js';
@@ -14,15 +14,22 @@ import {startReplay} from './replay.js';
 // PV_REACH m before the box; press and hold both buttons when the star is at the tip to plant it (the closer, the
 // higher), keep holding up the swing and let go when the star reaches the other end
 const POLE_T=1.0, PV_REACH=3.5;
-// pole vault and javelin timing (plant, release, throw): a small window around the target counts as perfect, then it
-// drops off, a bit faster when late than when early; LAG: the time between touching the screen and the game noticing it
+// pole vault and javelin timing (plant, release, throw): a small window around the target counts as perfect (losing
+// up to FINE of it toward its edges: right on the target is the best there is), then it drops off, a bit faster when
+// late than when early; LAG: the time between touching the screen and the game noticing it
 const PV_OK=.07, PV_LAG=.03, JAV_T=.7;
 // javelin's point when it leaves the hand: ahead of the athlete and up (m)
 const JAV_TIP_X=1.55, JAV_TIP_Y=2.6;  // JAV_T: seconds for the star to reach the javelin's tip
-export const qPole=p=>{ const d=p-1; return Math.abs(d)<=PV_OK?1:d<0?clamp(1+(d+PV_OK)/.45,0,1):clamp(1-(d-PV_OK)/.2,0,1); };
+// (without it every perfect attempt at the same speed came out the same to the centimetre: the run-up's speed only
+// changes tap by tap)
+const FINE=.04;
+const fine=(d,ok)=>1-FINE*Math.min(1,Math.abs(d)/ok);
+export const qPole=p=>{ const d=p-1; return Math.abs(d)<=PV_OK?fine(d,PV_OK):(1-FINE)*(d<0?clamp(1+(d+PV_OK)/.45,0,1):clamp(1-(d-PV_OK)/.2,0,1)); };
 // long jump air push, by flight progress u (0 take-off .. 1 landing): best at the highest point (u .5, full marks
 // within .44-.56), fading to nothing at .2 and .8
 export const stretchQ=u=>Math.max(0,Math.min(1,1-(Math.abs(u-.5)-.06)/.24));
+// the high jump's arch the same, but finer within the perfect part (as the pole vault's)
+const archQ=u=>Math.abs(u-.5)<=.06?fine(u-.5,.06):(1-FINE)*stretchQ(u);
 // distance without the air push, and what a perfect push adds (m)
 const LJ_NOPUSH=-.6, LJ_PUSH=1.4;
 // long jump: the front foot is about LJ_FOOT m ahead of the hip; it's the foot that must not pass the board
@@ -93,7 +100,7 @@ export function fieldAction(){
   const ev=S.ev, a=S.act;
   if(S.phase==='act'){
     // high jump: the arch over the bar (best when the back is right over it, the top of the flight)
-    if(a&&a.k==='hj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
+    if(a&&a.k==='hj'&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=archQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.mark=hjHeight(a.base,a.q2); }
     if(a&&isLeap(a)&&!a.tapped&&S.cueDelay<=0){ a.tapped=1; a.us=Math.min(1,a.t/a.T); a.tapU=Math.min(1,Math.max(0,a.t-PV_LAG)/a.T); a.q2=stretchQ(a.tapU); S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2);
       a.x1o=a.x1; leapTo(a,a.base+LJ_NOPUSH+LJ_PUSH*a.q2); a.xs=S.x; }
@@ -114,7 +121,7 @@ export function fieldAction(){
   }
   if(ev.kind==='hj'){
     // the height this take-off can reach (speed, and how close to the mark, before or past it); the arch adds to it
-    const e=hjOff(), q1=clamp(1-(Math.abs(e)-HJ_DEAD)/(HJ_OK+HJ_W-HJ_DEAD),0,1), base=HJ_A+HJ_V*v-HJ_MISS*(1-q1), T=.95+.02*v;
+    const e=hjOff(), q1=Math.abs(e)<=HJ_DEAD?fine(e,HJ_DEAD):(1-FINE)*clamp(1-(Math.abs(e)-HJ_DEAD)/(HJ_OK+HJ_W-HJ_DEAD),0,1), base=HJ_A+HJ_V*v-HJ_MISS*(1-q1), T=.95+.02*v;
     S.act={k:'hj',t:0,T,x0:S.x,x1:ev.line+HJ_LAND,base,mark:hjHeight(base,0),q2:0};
     S.print=ev.line+e; judge(q1); noise(.12,.15); S.cueDelay=.12;
   }
@@ -127,7 +134,7 @@ export function fieldAction(){
 }
 // pole vault: the pole goes into the box; how far down it was (the star on it) sets the height
 export function plantPole(){
-  const v=S.v, q1=qPole(S.meter.p-PV_LAG/POLE_T); S.meter.hit=S.meter.p; judge(q1); S.cue=null;
+  const v=S.v, q1=qPole(S.meter.p-(PV_LAG+sinceHold())/POLE_T); S.meter.hit=S.meter.p; judge(q1); S.cue=null;
   S.act={k:'pv',t:0,q1,v,pushed:0,stage:'plant',H:1.0+.44*v*(.72+.28*q1)}; tone(300,.15,'triangle',.05);
   S.phase='act';
 }
@@ -231,7 +238,7 @@ export function updateAct(dt){
       S.x=a.xs+(ev.line+.25-a.xs)*e; S.y=(a.H-.9)*e; S.rot=-Math.PI*e*.95; S.pose=POSE.pvSwing;
       // let go of both buttons at the top (star at the end of the pole); holding on too long = no push
       if(S.meter&&S.meter.k==='rise'&&!a.pushed){ S.meter.p=a.t/(a.Trise*.7);  // star at the end in ~.7 s
-        if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qPole(S.meter.p-PV_LAG/(a.Trise*.7)); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
+        if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qPole(S.meter.p-(PV_LAG+sinceHold())/(a.Trise*.7)); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
       if(a.pushed&&a.t>=Math.max(a.Trise*.7,.5)||a.t>a.Trise+.35){ S.cue=null; S.meter=null; a.stage='over'; a.t=0; a.yo=S.y; a.bonus=.7*(a.q2||0)-.25; }
     } else if(a.stage==='over'){
       // letting go upside down at the top, it turns to face the bar (drawn mirrored, the same tilt the other way), and
