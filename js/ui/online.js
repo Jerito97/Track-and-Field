@@ -7,9 +7,15 @@ import {fmt,pts} from '../game/scoring.js';
 import {cleanCode,closeTournament,createTournament,repeatTournament,getMyTours,getTournament,inviteLink,joinTournament,myTournaments,sendResult} from '../online.js';
 import {buildAthletes,G,screen,setS,setScreen} from '../state.js';
 import {player,players,store} from '../storage.js';
-import {esc,place,showOv} from './screens.js';
+import {CATS,catOf,esc,place,showOv} from './screens.js';
 
 const evById=id=>EVENTS.find(e=>e.id===id);
+// choosing the events: grouped as on the events screen (races, jumps, throws, swimming); a group's name ticks all of it,
+// or unticks all of it when they're all ticked already
+const short=e=>e.tag.charAt(0)+e.tag.slice(1).toLowerCase();  // the card's name: 100 m, Vallas, Posta...
+const evPicker=on=>`<div class="o-evs">${CATS.filter(([c])=>c!=='all').map(([c,n])=>{ const evs=EVENTS.filter(e=>catOf(e)===c); if(!evs.length) return '';
+  return `<div class="o-cat"><button type="button" class="o-catb" data-act="ocat" data-c="${c}">${n}</button><div class="o-catl">${evs.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}" data-c="${c}"${on(e)?' checked':''}> ${short(e)}</label>`).join('')}</div></div>`; }).join('')}</div>`;
+export function toggleCat(c){ const boxes=[...OV.querySelectorAll(`input[name="oev"][data-c="${c}"]`)], all=boxes.every(b=>b.checked); boxes.forEach(b=>{ b.checked=!all; }); }
 const card=(logo,title,body)=>`<div class="card o-card"><div class="head"><div class="logo">${logo}</div><h2>${title}</h2></div><div class="body">${body}</div></div>`;
 const err=msg=>`<p class="o-err" role="alert">${esc(msg)}</p>`;
 let busy=false;
@@ -38,7 +44,7 @@ export function showOnline(msg){
     <div class="o-two">
       <div class="o-box"><span class="lbl">Crear torneo</span>
         <input id="oname" maxlength="30" placeholder="Nombre (opcional)" autocomplete="off">
-        <div class="o-evs">${EVENTS.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}"${e.extra?'':' checked'}> ${e.name}</label>`).join('')}</div>
+        ${evPicker(e=>!e.extra)}
         <div class="o-days"><span class="small">Dura</span>${DAYS.map(([d,t])=>`<button class="o-day${d===days?' on':''}" data-act="odays" data-d="${d}" aria-pressed="${d===days}">${t}</button>`).join('')}</div>
         <button class="btn" data-act="ocreate">Crear</button></div>
       <div class="o-box"><span class="lbl">Unirme con un código</span>
@@ -75,7 +81,7 @@ export function showRepeat(code,msg){
   const t=shownT&&shownT.code===code?shownT:null; if(!t){ showTournament(code); return; }
   showOv(card('REPETIR',esc(t.name),`${msg?err(msg):''}
     <p class="small o-note">Se arma de nuevo con <b>los mismos jugadores</b> ya anotados: les aparece en <b>En juego</b>, sin pasar el código. Elegí las pruebas y cuánto dura.</p>
-    <div class="o-evs">${EVENTS.map(e=>`<label><input type="checkbox" name="oev" value="${e.id}"${t.events.includes(e.id)?' checked':''}> ${e.name}</label>`).join('')}</div>
+    ${evPicker(e=>t.events.includes(e.id))}
     <div class="o-days"><span class="small">Dura</span>${DAYS.map(([d,tx])=>`<button class="o-day${d===days?' on':''}" data-act="odays" data-d="${d}" aria-pressed="${d===days}">${tx}</button>`).join('')}</div>
     <div class="btns"><button class="btn" data-act="orepeatgo" data-code="${code}" data-focus>Empezar</button><button class="btn alt" data-act="oopen" data-code="${code}">Volver</button></div>`));
 }

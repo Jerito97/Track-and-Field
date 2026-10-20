@@ -18,7 +18,7 @@ import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {playSurv,resumeSurvival,showSurvival,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
-import {finishOnline,leaveOnline,onClose,onCreate,onRepeat,showRepeat,onDays,onJoin,onShare,playOnline,showHistory,showOnline,shownCode,showTournament} from './online.js';
+import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onRepeat,onShare,playOnline,showHistory,shownCode,showOnline,showRepeat,showTournament,toggleCat} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
@@ -58,8 +58,8 @@ export const art=(i,sm)=>{ const k=thumbKey(i), pos=THUMBS[k]; return pos?`<img 
 const TOUR=-1;
 let menuSel=(()=>{ const v=store.get('odb-menusel',0); return v>=0&&v<EVENTS.length+BETA.length?v:0; })();
 // tabs over the carousel: all the events, or one kind (remembered between visits)
-const CATS=[['all','Todas'],['run','Carreras'],['jump','Saltos'],['throw','Lanzamientos'],['swim','Natación']];
-const catOf=ev=>ev.swim?'swim':ev.type==='sprint'?'run':['lj','tj','hj','pv'].includes(ev.kind)?'jump':'throw';
+export const CATS=[['all','Todas'],['run','Carreras'],['jump','Saltos'],['throw','Lanzamientos'],['swim','Natación']];
+export const catOf=ev=>ev.swim?'swim':ev.type==='sprint'?'run':['lj','tj','hj','pv'].includes(ev.kind)?'jump':'throw';
 let menuCat=(()=>{ const v=store.get('odb-menucat','all'); return CATS.some(c=>c[0]===v)?v:'all'; })();
 const inCat=ev=>menuCat==='all'||catOf(ev)===menuCat;
 const ICON={
@@ -291,6 +291,7 @@ OV.addEventListener('click',e=>{
   else if(a==='tour'){ G.mode='tour'; G.evIdx=0; G.res={}; G.pts={}; G.total={}; buildAthletes(); showEventCard(); }
   else if(a==='online'){ if(player().token) showOnline(); else showAccount('protect'); }
   else if(a==='ocreate') onCreate();
+  else if(a==='ocat') toggleCat(b.dataset.c);
   else if(a==='orepeat') showRepeat(b.dataset.code);
   else if(a==='orepeatgo') onRepeat(b.dataset.code);
   else if(a==='odays') onDays(b.dataset.d);
