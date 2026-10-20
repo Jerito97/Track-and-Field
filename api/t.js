@@ -35,10 +35,10 @@ import {Buffer} from 'node:buffer';
 import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
 import {neon} from '@neondatabase/serverless';
 
-const EVENTS=['100','lj','110h','pv','jav','tj','ham','hj','sp'];
-const SPRINT=['100','110h'];  // lower is better
+const EVENTS=['100','lj','110h','pv','jav','tj','ham','hj','sp','crawl','breast','fly'];
+const SPRINT=['100','110h','crawl','breast','fly'];  // lower is better (times)
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
-const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250],hj:[0,5],sp:[0,60]};
+const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250],hj:[0,5],sp:[0,60],crawl:[8,200],breast:[8,200],fly:[8,200]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
 const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_GROUP=50, MAX_GROUPS=20;
 
@@ -80,6 +80,9 @@ function db(){
     // the same for the high jump and the shot put
     if((await sql`insert into migrations(id) values('reset-hj-sp-1') on conflict do nothing returning id`).length){
       await sql`delete from marks where ev in ('hj','sp')`; await sql`delete from pmarks where ev in ('hj','sp')`; }
+    // and swimming
+    if((await sql`insert into migrations(id) values('reset-swim-1') on conflict do nothing returning id`).length){
+      await sql`delete from marks where ev in ('crawl','breast','fly')`; await sql`delete from pmarks where ev in ('crawl','breast','fly')`; }
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }
