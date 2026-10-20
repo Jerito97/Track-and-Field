@@ -67,7 +67,7 @@ function rivalStroke(k,d){
 // bar over the swimmer with the star running to the circle while holding
 function strokeCue(px,GY,sc,back){
   const c=S.cue, m=S.meter;
-  if(c&&c.beat){ const hx=px+(back?-1:1)*.85*sc, hy=GY-.12*sc, k=Math.max(0,1-c.t/c.T), r=13+70*k;
+  if(c&&c.beat){ const hx=px+(back?-1:1)*.85*sc, hy=GY-.12*sc, k=1-c.t/c.T, r=Math.max(3,13+70*k);  // (late, it goes on closing past the circle)
     ctx.lineWidth=3; ctx.strokeStyle='rgba(47,209,102,.95)'; ctx.beginPath(); ctx.arc(hx,hy,13,0,Math.PI*2); ctx.stroke();
     ctx.lineWidth=4; ctx.strokeStyle=c.t>c.T?'rgba(255,90,60,.9)':'#fff'; ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2); ctx.stroke(); }
   if(m&&m.k==='fly'){ const y=GY-1.7*sc, x0=px-60, x1=px+60, p=Math.min(m.hit??m.p,1.3);

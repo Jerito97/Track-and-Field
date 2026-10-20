@@ -12,7 +12,6 @@ import {noise,tone} from '../audio.js';
 import {S} from '../state.js';
 import {clamp} from '../utils.js';
 import {bothCue,judge,pop,sideCue,sinceHold} from './core.js';
-import {qPole} from './field.js';
 
 // metres a second per unit of tapping speed (the 100 m's taps, at swimming pace)
 export const SWIM_K=.34;
@@ -33,10 +32,14 @@ const IMP={breast:3.8,fly:4.6}, DRAG=.9, GLIDE_V=1.6, CRUISE=1.4;
 // breaststroke rhythm: seconds between strokes at first, at the fastest and at the slowest; a press TIME_OK s from the
 // ring closing is perfect, nothing left TIME_W s further; past LATE s without pressing, the stroke is lost
 export const BEAT_T0=.9, BEAT_MIN=.65, BEAT_MAX=1.15;
-const TIME_OK=.04, TIME_W=.18, LATE=.22;
+const TIME_OK=.015, TIME_W=.12, LATE=.22;
 // butterfly: seconds for the star to reach the circle (past FLY_LATE of the way, a weak stroke), the arms coming back
 export const FLY_T=.42, FLY_REC=.35;
 const FLY_LATE=1.3, BLIP=.08;
+// how good a butterfly release is, from where the star was (1 = on the circle): perfect only right on it (FLY_OK of the
+// way either side), then less and less, nothing at FLY_EARLY before it or FLY_PAST after it
+const FLY_OK=.03, FLY_EARLY=.35, FLY_PAST=.17;
+const flyQ=p=>{ const d=p-1; return Math.abs(d)<=FLY_OK?1:d<0?clamp(1+(d+FLY_OK)/FLY_EARLY,0,1):clamp(1-(d-FLY_OK)/FLY_PAST,0,1); };
 // where the hands are in the pool at race distance d (0 at the start wall, len at the far one); back: on the way back.
 // Turning, the body goes round with the feet where the hands were: the hands end up 2 REACH back toward the start, so
 // the turn takes the distance on by that much (swimmers swim 2 REACH less than the race)
@@ -64,14 +67,14 @@ export function swimBeatHit(){
   judge(q); tone(420+260*q,.06,'triangle',.05); beatNext(q); return true;
 }
 function beatNext(q){ const b=S.beat; stroke(q);
-  b.T=q>=.8?Math.max(BEAT_MIN,b.T*.96):q>=.55?Math.max(BEAT_MIN+.1,b.T*.985):q<.35?Math.min(BEAT_MAX,b.T*1.12+.04):b.T; strokeCue(); }
+  b.T=q>=.8?Math.max(BEAT_MIN,b.T*.96):q>=.55?Math.max(BEAT_MIN+.1,b.T*.985):q<.35?Math.min(BEAT_MAX,b.T*1.07+.02):b.T; strokeCue(); }
 // butterfly: waiting for a fresh hold, holding (the star running), the arms coming back
 function flyStep(dt){
   const f=S.fly; if(!f) return;
   if(f.st==='wait'){ if(!S.held2) f.free=true; if(S.held2&&f.free){ f.st='hold'; S.cue=null; S.meter={k:'fly',p:0}; tone(500,.05,'triangle',.04); } return; }
   if(f.st==='hold'){ const m=S.meter; m.p+=dt/FLY_T;
     if(!S.held2&&m.p*FLY_T<BLIP){ strokeCue(); return; }  // a blip (fingers left over): start over
-    if(!S.held2||m.p>=FLY_LATE){ if(!S.held2) m.p-=sinceHold()/FLY_T; m.hit=m.p; const q=m.p>=FLY_LATE?0:qPole(m.p-LAG/FLY_T);
+    if(!S.held2||m.p>=FLY_LATE){ if(!S.held2) m.p-=sinceHold()/FLY_T; m.hit=m.p; const q=m.p>=FLY_LATE?0:flyQ(m.p-LAG/FLY_T);
       judge(q); tone(300+300*q,.1,'triangle',.05); stroke(q); f.st='rec'; f.t=0; setTimeout(()=>{ if(S&&S.meter&&S.meter.k==='fly'&&S.meter.hit!=null) S.meter=null; },350); }
     return; }
   if(f.st==='rec'){ f.t+=dt; if(f.t>=FLY_REC) strokeCue(); }

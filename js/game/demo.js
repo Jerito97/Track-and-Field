@@ -54,7 +54,7 @@ export function demoStep(dt){
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.dive&&c.t>=.25) press('B');
-  if(c&&c.beat&&c.t>=c.T+.1) press('B');
+  if(c&&c.beat&&c.t>=c.T+.04) press('B');
   else if(ev.stroke==='fly'&&!S.dipCued&&!S.turning){ if(c&&c.type==='hamhold') hold(true); else if(m&&m.k==='fly'&&m.hit==null&&m.p>=.9) hold(false); }
   if(c&&c.type==='both'&&!c.beat&&ev.swim&&!S.turned&&ev.pool-S.x<=1.5){ hold(false); press('B'); }
   else if(c&&c.type==='both'&&ev.type==='sprint'&&ev.dist-S.x<=1.2) press('B');
