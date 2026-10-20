@@ -10,7 +10,7 @@ import {STYLE} from '../storage.js';
 import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
-import {BANDS,CH_OK,CH_W,changes} from '../game/relay.js';
+import {BACK,CH_OK,CH_W,changes,MATE} from '../game/relay.js';
 
 const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
@@ -54,7 +54,7 @@ export function drawSprint(V){
   for(let l=0;l<LANES;l++){
     const feet=TT+lh*(l+.85);
     if(ev.hurdles){ const ref=l===S.plLane?S:S.rivals.find(r=>r.lane===l); HURDLES.forEach((h,i)=>{ const x=X(h); if(x>-40&&x<LW+40) hurdle(x,feet,s*.85,ref&&ref.knocked&&ref.knocked.has(i)); }); }
-    if(l===S.plLane&&ev.relay){ V_X=V.x; relayLane(ev,X,TT+lh*l,lh,feet,s); }
+    if(l===S.plLane&&ev.relay) relayLane(ev,X,TT+lh*l,lh,feet,s);
     if(l===S.plLane){ const px=X(V.x); shadow(px,feet,V.y/RIV_K,s*RIV_K);
       let drawn=false;
       if(ME().sprite){ let k;
@@ -104,28 +104,19 @@ function drawStarterVector(x){
   ctx.fillStyle='#e8262d'; ctx.fillRect(x-.2*s,base-1.84*s,.4*s,.06*s);
 }
 
-// 4x100: in our lane, the change boards (centred on each change mark: orange, yellow, green in the middle, the mark in
-// white), where each baton was handed over, the next runner waiting on the mark, and the one who handed it over slowing
-// down behind
-const RB=['31,190,90','255,205,40','240,60,50'];
-let V_X=0;
+// 4x100: in our lane, before each change mark the board (orange, yellow, green in the middle, its middle in white),
+// where each baton was handed over, the next runner waiting just past the board, and the one who handed it over
+// slowing down behind
 function relayLane(ev,X,top,lh,feet,s){
-  const half=CH_OK+CH_W, d=m=>m-V_X-.35;
-  // before each change still to come: green, yellow and red as in the long jump (the one you're in lights up)
-  changes(ev).forEach((m,i)=>{ if(i<S.leg) return;
-    [[BANDS[0],BANDS[1],RB[0]],[BANDS[1],BANDS[2],RB[1]],[BANDS[2],half,RB[2]]].forEach(([from,to,rgb])=>{ const x0=X(m-from), x1=X(m-to); if(x1<-10||x0>LW+10) return;
-      const on=i===S.leg&&d(m)<=from&&d(m)>to;
-      ctx.fillStyle=`rgba(255,255,255,${on?.5:.35})`; ctx.fillRect(x0,top,x1-x0,lh); ctx.fillStyle=`rgba(${rgb},${on?.65:.4})`; ctx.fillRect(x0,top,x1-x0,lh);
-      ctx.strokeStyle=`rgba(${rgb},${on?1:.75})`; ctx.lineWidth=2; for(let x=x0+4;x<x1-6;x+=12){ ctx.beginPath(); ctx.moveTo(x,top+lh*.25); ctx.lineTo(x+5,top+lh*.5); ctx.lineTo(x,top+lh*.75); ctx.stroke(); }
-      ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x0-1,top,2,lh); }); });
-  changes(ev).forEach((m,i)=>{ const a=X(m-half), b=X(m+half); if(b<-10||a>LW+10) return;
+  const half=CH_OK+CH_W;
+  changes(ev).forEach((mk,i)=>{ const m=mk-BACK, a=X(m-half), b=X(m+half); if(b<-10||a>LW+10) return;
     ctx.fillStyle='#fff'; ctx.fillRect(a-2,top,b-a+4,lh);
     [[half,'#ff8a1e'],[half*.5,'#ffd23a'],[CH_OK,'#2fd166']].forEach(([d,c])=>{ ctx.fillStyle=c; ctx.fillRect(X(m-d),top+1,X(m+d)-X(m-d),lh-2); });
     ctx.fillStyle='#fff'; ctx.fillRect(X(m)-1,top,2,lh);
     if(i>=S.leg) txt('PASE',X(m),top-6,'#fff',10); });
   (S.prints||[]).forEach(x=>{ const px=X(x); if(px<-10||px>LW+10) return; ctx.fillStyle=INK; ctx.beginPath(); ctx.moveTo(px-4,top+lh+5); ctx.lineTo(px+4,top+lh+5); ctx.lineTo(px,top+lh-1); ctx.closePath(); ctx.fill(); });
   const C=ME(), sk=s*RIV_K, next=changes(ev)[S.leg];
-  if(next!=null){ const x=X(next-.2); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:false,clock:S.clock,lane:1}):POSE.stand,C,false); }
+  if(next!=null){ const x=X(next-BACK+MATE); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:false,clock:S.clock,lane:1}):POSE.stand,C,false); }
   const p=S.prev; if(p&&p.t<3){ const x=X(p.x); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:p.v>.3,legP:p.legP||0,v:p.v,clock:S.clock,lane:2}):p.v>.3?runPose(p.legP||0,Math.min(1,p.v/4)):POSE.stand,C,p.v>5); }
 }
 // the baton in the runner's (near) hand, sticking out both sides of the fist

@@ -40,8 +40,8 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
- {id:'4x100',name:'Posta 4x100',tag:'POSTA',type:'sprint',relay:true,dist:400,legs:4,cpu:33,spread:36,beta:true,
-  help:'Corrés los <b>cuatro relevos</b>. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. El pase:</b> antes de cada pase, en la pista hay una <b>tabla de colores</b>: los verdes se apagan un momento y aparecen los <b>dos rojos</b>; tocalos juntos cuando el <b>testimonio</b> llega al <b>centro verde</b>. Cuanto más justo, con más velocidad sale el que sigue; antes o después pierde velocidad, y si no lo pasás, se pasa solo al final de la tabla (el peor pase). <b>3. Llegada:</b> al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
+ {id:'4x100',name:'Posta 4x100',tag:'POSTA',type:'sprint',relay:true,dist:400,legs:4,cpu:36,spread:36,beta:true,
+  help:'Corrés los <b>cuatro relevos</b>. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. El pase:</b> tu compañero te espera y justo detrás de él hay una <b>tabla de colores</b>. Cuando te acercás aparecen los <b>dos rojos</b> y todo va en <b>cámara lenta</b>: tocalos juntos cuando el <b>testimonio</b> llega al <b>centro verde</b>. Cuanto más justo, con más velocidad sale tu compañero; si no lo pasás, se pasa solo al final de la tabla (el peor pase). <b>3. Llegada:</b> al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];
