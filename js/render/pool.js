@@ -4,7 +4,8 @@
 // black guide line ending in a T a couple of metres from each wall. At 0 the starting block on the end wall, at the
 // far end (len m) the wall with its touch pad; flags across the pool 5 m from each wall, red rope beads near the walls.
 import {ctx,LH,LW} from '../canvas.js';
-import {INK} from '../config.js';
+import {BOARDS,INK} from '../config.js';
+import {drawStarter} from './sprint.js';
 import {drawBackdrop,drawStands,setTheme} from './scenery.js';
 import {txt} from './text.js';
 
@@ -49,6 +50,7 @@ export function drawPool(o){
   ctx.lineTo(LW,GY+3); ctx.closePath(); ctx.fill();
   // the end walls: the starting block at 0, the touch pad at the far end
   wall(X(0),GY,fl,s,true,o.lane); wall(X(len),GY,fl,s,false);
+  startDeck(X,GY,s);
   // distance on the floor every 10 m
   for(let m=10;m<len;m+=10){ const x=X(m); if(x>-30&&x<LW+30) txt(m+' m',x,fl-10,'#fff',10); }
   return {GY,X,deck};
@@ -91,4 +93,51 @@ function wall(x,GY,fl,s,start,lane=4){
     // the touch pad: yellow and black, just under the surface
     ctx.fillStyle='#ffd23a'; ctx.fillRect(x-4,GY-6,4,.9*s); ctx.fillStyle=INK; for(let y=GY-6;y<GY-6+.9*s;y+=6) ctx.fillRect(x-4,y,4,2);
   }
+}
+// behind the start wall (seen at the start and at the finish): on the deck the starter (firing at the gun) and a
+// timekeeper with a stopwatch, a bench with towels and a stack of kickboards; on the wall under it a row of ads
+function startDeck(X,GY,s){
+  const wx=X(0); if(wx<=0) return;
+  const dy=.35*s, top=GY-dy;
+  ctx.save(); ctx.beginPath(); ctx.rect(0,0,wx-1,LH); ctx.clip();
+  // the ads on the wall (they slide with the camera, a board every 6 m)
+  const ay=top+14, ah=Math.min(26,LH-ay-8), bw=6*s;
+  if(ah>10){ ctx.fillStyle=INK; ctx.fillRect(0,ay-2,wx,ah+4);
+    for(let i=-1;X(-i*6)>-bw;i++){ const x=X(-(i+1)*6)+1, [bg,fg,word]=BOARDS[(i%BOARDS.length+BOARDS.length)%BOARDS.length];
+      ctx.fillStyle=bg; ctx.fillRect(x,ay,bw-2,ah); ctx.font=`${Math.round(ah*.66)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=fg; ctx.fillText(word,x+(bw-2)/2,ay+ah/2+1,bw-10); } }
+  // kickboards, the bench with towels, the starter, the timekeeper
+  kickboards(X(-12),top,s); bench(X(-10),X(-6.5),top,s);
+  drawStarter(X(-4.4),top,2.9*s);
+  timekeeper(X(-2.2),top,s);
+  ctx.restore();
+}
+function kickboards(x,y,s){ const w=.75*s, h=.13*s, cols=['#ffd23a','#2f6fd6','#e8262d','#1f9e54','#ff8a1f','#2f6fd6'];
+  cols.forEach((c,i)=>{ ctx.fillStyle=c; ctx.strokeStyle=INK; ctx.lineWidth=1.2; ctx.beginPath(); ctx.roundRect(x-w/2+(i%2)*1.5,y-(i+1)*h,w,h,h*.4); ctx.fill(); ctx.stroke(); }); }
+function bench(x0,x1,y,s){ const h=.6*s, t=.1*s;
+  ctx.fillStyle='#8a94a3'; [x0+.15*s,x1-.15*s].forEach(x=>ctx.fillRect(x-1.5,y-h,3,h));
+  ctx.fillStyle='#c98b4f'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(x0,y-h-t,x1-x0,t); ctx.fill(); ctx.stroke();
+  // folded towels on it
+  [['#e8262d',.12],['#2f6fd6',.42],['#ffd23a',.7]].forEach(([c,f])=>{ const x=x0+(x1-x0)*f, w=.75*s, th=.22*s;
+    ctx.fillStyle=c; ctx.beginPath(); ctx.roundRect(x,y-h-t-th,w,th,3); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.55)'; ctx.fillRect(x+3,y-h-t-th*.55,w-6,1.5); }); }
+// an official in white with a stopwatch held up in front, looking at the pool
+function timekeeper(x,y,s){
+  const k=s*1.45, P=(a,b)=>[x+a*k,y-b*k];
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  // legs (navy trousers)
+  ctx.strokeStyle='#1d2c4f'; ctx.lineWidth=.17*k; [[-.1,.04],[.12,.06]].forEach(([a,b])=>{ ctx.beginPath(); ctx.moveTo(...P(a*.6,.85)); ctx.lineTo(...P(a,b)); ctx.stroke(); });
+  ctx.fillStyle=INK; [[-.1],[.12]].forEach(([a])=>{ ctx.beginPath(); ctx.ellipse(...P(a+.06,.02),.12*k,.05*k,0,0,Math.PI*2); ctx.fill(); });
+  // white polo
+  ctx.fillStyle='#fff'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.roundRect(...P(-.2,1.45),.4*k,.62*k,.08*k); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#2f6fd6'; ctx.fillRect(...P(-.2,1.2),.4*k,.05*k);
+  // arm up in front with the stopwatch, the other down
+  ctx.strokeStyle=INK; ctx.lineWidth=.11*k+2; ctx.beginPath(); ctx.moveTo(...P(.12,1.35)); ctx.lineTo(...P(.38,1.12)); ctx.lineTo(...P(.42,1.38)); ctx.stroke();
+  ctx.strokeStyle='#d9a07a'; ctx.lineWidth=.11*k; ctx.stroke();
+  ctx.strokeStyle=INK; ctx.lineWidth=.11*k+2; ctx.beginPath(); ctx.moveTo(...P(-.14,1.35)); ctx.lineTo(...P(-.2,.95)); ctx.stroke(); ctx.strokeStyle='#d9a07a'; ctx.lineWidth=.11*k; ctx.stroke();
+  ctx.fillStyle='#e9eef2'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(...P(.44,1.46),.09*k,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=INK; ctx.fillRect(P(.44,1.58)[0]-1.5,P(.44,1.58)[1],3,.04*k);
+  // head with a white cap
+  ctx.fillStyle='#d9a07a'; ctx.strokeStyle=INK; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(...P(0,1.65),.2*k,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(...P(0,1.7),.2*k,Math.PI,0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(...P(.18,1.7),.14*k,.04*k,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
 }

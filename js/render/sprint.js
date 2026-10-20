@@ -81,17 +81,18 @@ export function drawSprint(V){
   if(ev.laser&&S.shot) drawScope();
   drawPauseBtn();
 }
-// the race starter, standing on the grass below the lanes: arm up with the pistol, then firing (smoke) at the gun
+// the race starter, standing on the grass below the lanes (or where told: feet at base, h tall): arm up with the
+// pistol, then firing (smoke) at the gun
 const ST_H=84, ST_FEET=.297;  // figure height (logical px) and where the feet are across the picture
-export function drawStarter(x){
+export function drawStarter(x,base=319,h=ST_H){
   if(x<-120||x>LW+120) return;
   const im=SCENE.starter[S.smoke!=null&&S.smoke<1?1:0];
-  if(im.naturalWidth){ const w=ST_H*im.naturalWidth/im.naturalHeight; ctx.drawImage(im,x-w*ST_FEET,319-ST_H,w,ST_H); return; }
-  drawStarterVector(x);
+  if(im.naturalWidth){ const w=h*im.naturalWidth/im.naturalHeight; ctx.drawImage(im,x-w*ST_FEET,base-h,w,h); return; }
+  drawStarterVector(x,base+11*h/ST_H,34*h/ST_H);
 }
-function drawStarterVector(x){
+function drawStarterVector(x,base=330,s=34){
   if(x<-120||x>LW+120) return;
-  const s=34, base=330, P=(a,b)=>[x+a*s,base-b*s];
+  const P=(a,b)=>[x+a*s,base-b*s];
   ctx.lineCap='round'; ctx.lineJoin='round';
   const armTop=P(.42,1.95);
   ctx.strokeStyle=INK; ctx.lineWidth=s*.14+4; ctx.beginPath(); ctx.moveTo(...P(.22,1.3)); ctx.lineTo(...armTop); ctx.stroke();
