@@ -1,8 +1,8 @@
-// Track cycling: an indoor velodrome seen from the infield. Behind, the arena (the swimming arena's stands and roof for
-// now); the wooden track rising from the blue band at the bottom up to the barrier, steeper in the bends (two a lap),
-// with its lines (black measuring line, red sprinters' line, blue stayers' line); the finish line every lap. The
-// riders on their bikes (drawn in code: the legs follow the pedals), ours at the bottom, the machines higher up the
-// banking, smaller; the starter at the start.
+// Track cycling: an indoor velodrome seen from the infield. Behind, the arena (its stands and roof); the wooden track
+// rising from the blue band at the bottom up to the barrier, steeper in the bends (two a lap), with its lines (black
+// measuring line, red sprinters' line, blue stayers' line); the finish line every lap. The riders on their bikes
+// (drawn in code: the legs follow the pedals), ours at the bottom, the machines higher up the banking, smaller; the
+// starter at the start.
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {GEAR,LAP} from '../game/cycle.js';
@@ -14,7 +14,7 @@ import {txt} from './text.js';
 
 // layout (logical px): the stands' top and bottom, the track's inner edge (where our wheels run), the barrier's
 // height on the straights and in the bends
-const ST_TOP=30, ST_BOT=160, GY=272, TOP_STRAIGHT=184, TOP_BEND=136;
+const ST_TOP=62, ST_BOT=178, GY=272, TOP_STRAIGHT=184, TOP_BEND=136;
 // the machines up the banking: how far up (share of the track's height there) and how big
 const ROWS=[[.2,.86],[.36,.78],[.51,.71],[.64,.65],[.76,.6]];
 // a figure unit in logical px (the rider: about 2 units tall), for ours
@@ -27,7 +27,7 @@ const topAt=m=>TOP_STRAIGHT-(TOP_STRAIGHT-TOP_BEND)*bend(m);
 
 export function drawCycle(V){
   const ev=V.ev, s=V.ppm, X=m=>(m-V.cam)*s, M=x=>V.cam+x/s;
-  setTheme(false,true);
+  setTheme(false,false,true);
   ctx.fillStyle='#d8cfb8'; ctx.fillRect(0,0,LW,LH);
   if(!drawBackdrop(V.cam*s*.45,ST_TOP,ST_BOT)) drawStands(V.cam,ST_TOP,ST_BOT,.35,S.clock);
   // the track: wood from the blue band up to the barrier (its top following the banking)
