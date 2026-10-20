@@ -1,4 +1,5 @@
 // HUD: header bar, cue buttons, popups, meters
+import {secs} from '../utils.js';
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {CUEPOS,NUMPOS} from '../game/core.js';
@@ -10,7 +11,7 @@ export function drawHud(V){
   ctx.fillStyle='#14284f'; ctx.fillRect(0,0,LW,20);
   ctx.fillStyle='#e8262d'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(108,0); ctx.lineTo(100,20); ctx.lineTo(0,20); ctx.closePath(); ctx.fill();
   txt((ME().name||'Jugador').toUpperCase(),8,11,'#fff',14,{align:'left',stroke:null});
-  if(ev.type==='sprint'){ const t=S.finished?S.final:S.t+(S.pen||0); ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(LW-62,2,58,16); ctx.fill(); ctx.stroke(); txt((t||0).toFixed(2),LW-33,10.5,'#fff',14,{stroke:null}); }
+  if(ev.type==='sprint'){ const t=S.finished?S.final:S.t+(S.pen||0); ctx.fillStyle='#e8262d'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(LW-62,2,58,16); ctx.fill(); ctx.stroke(); txt(secs(t||0),LW-33,10.5,'#fff',14,{stroke:null}); }
   else txt(`RONDA ${S.round}/3`,LW-8,11,'#fff',14,{align:'right',stroke:null});
   if(!V.replay&&S.cue) drawCue(S.cue);
   if(S.demo&&!V.replay) drawDemo();

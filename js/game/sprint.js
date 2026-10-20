@@ -6,7 +6,7 @@ import {POSE,runPose} from '../poses.js';
 import {ATH,S} from '../state.js';
 import {rec} from '../storage.js';
 import {endEvent} from '../ui/screens.js';
-import {clamp,rand} from '../utils.js';
+import {clamp,rand,secs} from '../utils.js';
 import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
 import {REACH,SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
 import {GAIN,relayStep} from './relay.js';
@@ -86,7 +86,7 @@ export function updateSprint(dt){
       S.phase='wait'; S.wait=2.2;
       const rank=1+S.rivals.filter(r=>r.final!=null&&r.final<S.final).length;
       const isRec=rec[ev.id]==null||S.final<rec[ev.id];
-      pop(S.final.toFixed(2)+' s',{dur:2.2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
+      pop(secs(S.final)+(S.final<59.995?' s':''),{dur:2.2,big:1.1,sub:isRec?'¡RÉCORD PERSONAL!':(rank===1?'¡GENIAL!':rank+'º PUESTO')});
       S.next=finishSprintEvent;
     }
   } else if(S.t>(ev.swim?90:ev.relay||ev.laser?120:40)){ S.final=null; S.cue=null; S.phase='wait'; S.wait=1; S.next=finishSprintEvent; }

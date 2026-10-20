@@ -1,4 +1,5 @@
 // HTML overlay screens (menus and tables)
+import {secs} from '../utils.js';
 import {ANIMS,RIGS,SPR} from '../assets.js';
 import {soundOn,toggleSound,unlockAudio} from '../audio.js';
 import {$,OV} from '../canvas.js';
@@ -238,7 +239,7 @@ export function table(tag,title,rows,valFmt,subFmt,btn){
 }
 export function showRoundStandings(){
   const ev=S.ev, last=S.round>=3;
-  showOv(table(ev.tag,`Clasificación · ronda ${S.round}`,sortRows(ev,S.marks.map(bestOf)),r=>fmt(ev,r.v),r=>{ const m=S.marks[r.i][S.round-1]; return m==null?'nulo':m.toFixed(2); },last?'evdone':'nextround'),true);
+  showOv(table(ev.tag,`Clasificación · ronda ${S.round}`,sortRows(ev,S.marks.map(bestOf)),r=>fmt(ev,r.v),r=>{ const m=S.marks[r.i][S.round-1]; return m==null?'nulo':ev.type==='sprint'?secs(m):m.toFixed(2); },last?'evdone':'nextround'),true);
 }
 export function endEvent(vals){
   // once per event (the table's OK can be tapped again while the world board is asked for)

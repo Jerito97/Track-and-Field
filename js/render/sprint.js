@@ -11,7 +11,7 @@ import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 import {BACK,CH_OK,CH_W,changes,MATE} from '../game/relay.js';
-import {D,DIRS,laserAim,scope} from '../game/laser.js';
+import {D,DIRS,laserAim,laserArrow,scope} from '../game/laser.js';
 
 const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
@@ -132,9 +132,10 @@ function rangeLine(x,TT,TB){ if(x<-40||x>LW+40) return;
   for(let y=TT,j=0;y<TB;y+=6,j++){ ctx.fillStyle=j%2?INK:'#ffd23a'; ctx.fillRect(x-2,y,4,Math.min(6,TB-y)); }
   ctx.fillStyle=INK; ctx.fillRect(x-1,TT-22,2,22); ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(x-20,TT-34,40,14,3); ctx.fill(); ctx.stroke();
   txt('TIRO',x,TT-27,INK,10,{stroke:null}); }
-// laser run, shooting: everything dark but a round sight with the four arrows around it; in it the range (sky, a far
-// stand, grass) and the board with the five targets, the one to shoot ringed in yellow, moving (the board moves, the
-// cross stays in the middle); hits white, misses marked; below, the five shots so far
+// laser run, shooting: everything dark but a round sight with the four arrow buttons around it; in it the range (sky, a
+// far stand, grass) and the board with the five targets, swaying (the board moves, the cross stays in the middle), the
+// one to shoot ringed in yellow, with the arrow on it when there is one; hits white, misses marked; below, the five
+// shots so far
 function drawScope(){
   const s=S.shot, {cx,cy,R,u}=scope(), [px,py]=laserAim();
   ctx.save();
@@ -160,7 +161,8 @@ function drawScope(){
   for(let i=0;i<5;i++){ const tx=bx+i*D*u, r=s.res[i];
     ctx.fillStyle=r&&r.hit?'#fff':INK; ctx.strokeStyle=r&&r.hit?'#9aa5b8':INK; ctx.lineWidth=u*.15; ctx.beginPath(); ctx.arc(tx,by,u,0,Math.PI*2); ctx.fill(); ctx.stroke();
     if(r&&!r.hit){ ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.arc(tx+r.x*u,by+r.y*u,u*.2,0,Math.PI*2); ctx.fill(); }
-    if(i===s.k){ ctx.strokeStyle='#ffd23a'; ctx.lineWidth=u*.3; ctx.globalAlpha=.75+.25*Math.sin(S.clock*12); ctx.beginPath(); ctx.arc(tx,by,u*1.4,0,Math.PI*2); ctx.stroke(); ctx.globalAlpha=1; } }
+    if(i===s.k){ ctx.strokeStyle='#ffd23a'; ctx.lineWidth=u*.3; ctx.beginPath(); ctx.arc(tx,by,u*1.4,0,Math.PI*2); ctx.stroke();
+      const d=laserArrow(); if(d) arrowGlyph(tx,by,u*.85,...DIRS[d]); } }
   // the edge of the lens, dark
   const vg=ctx.createRadialGradient(cx,cy,R*.55,cx,cy,R); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.75)'); ctx.fillStyle=vg; ctx.fillRect(cx-R,cy-R,2*R,2*R);
   ctx.restore();
@@ -175,11 +177,15 @@ function drawScope(){
   // the five shots so far, under the sight
   for(let i=0;i<5;i++){ const r=s.res[i], x=cx+(i-2)*18, y=cy+R+30;
     ctx.fillStyle=!r?'rgba(255,255,255,.18)':r.hit?'#2fd166':'#ff5a3c'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
-  if(s.k<5&&!S.demo) txt('CUANDO EL BLANCO SE FRENE, TOCÁ SU FLECHA',cx,cy-R-22,'#fff',13,{lw:3});
+  if(s.k<5&&!S.demo) txt('TOCÁ LA FLECHA QUE APARECE EN EL BLANCO',cx,cy-R-22,'#fff',13,{lw:3});
 }
 // a round arrow button (blue, white arrow; lit: that colour) pointing dx,dy
 export function arrowBtn(x,y,r,dx,dy,lit,c=ctx){
   c.fillStyle=lit||'#2f6fd6'; c.strokeStyle='#fff'; c.lineWidth=Math.max(2,r*.16); c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); c.stroke();
-  const a=r*.5; c.save(); c.translate(x,y); c.rotate(Math.atan2(dy,dx)); c.fillStyle='#fff';
+  arrowGlyph(x,y,r*.5,dx,dy,'#fff',c);
+}
+// a white arrow of half-length a at x,y pointing dx,dy
+function arrowGlyph(x,y,a,dx,dy,col='#fff',c=ctx){
+  c.save(); c.translate(x,y); c.rotate(Math.atan2(dy,dx)); c.fillStyle=col;
   c.beginPath(); c.moveTo(a,0); c.lineTo(-a*.2,-a*.85); c.lineTo(-a*.2,-a*.32); c.lineTo(-a*.8,-a*.32); c.lineTo(-a*.8,a*.32); c.lineTo(-a*.2,a*.32); c.lineTo(-a*.2,a*.85); c.closePath(); c.fill(); c.restore();
 }
