@@ -6,7 +6,7 @@ import {drawField} from './field.js';
 import {drawHud} from './hud.js';
 import {drawLap} from './lap.js';
 import {drawPodium} from './podium.js';
-import {drawSprint} from './sprint.js';
+import {arrowBtn,drawSprint} from './sprint.js';
 import {drawSwim} from './swim.js';
 
 export function view(){
@@ -36,9 +36,13 @@ export function frame(){
 function drawPads(){
   const top=OY+LH*SC+14, bot=SH-18, h=bot-top; if(h<60) return;
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush'||c.type==='shoot');
+  // laser run, shooting: the four arrows instead (a touch anywhere there goes to the arrow on its side)
+  if(S.shot&&S.cue&&S.cue.type==='shoot'&&!S.replay){ const cx=SW/2, cy=(top+bot)/2, r=Math.min(h*.17,SW*.11), d=Math.min(h*.33,SW*.24), f=S.shot.flash&&S.shot.flash.t<.3?S.shot.flash:null;
+    [['U',0,-1],['D',0,1],['L',-1,0],['R',1,0]].forEach(([k,dx,dy])=>arrowBtn(cx+dx*d,cy+dy*d,r,dx,dy,f&&f.dir===k?(f.hit?'#2fd166':'#ff5a3c'):null));
+    return; }
+  const c=S.cue, on=side=>!!c&&!S.replay&&((c.type==='side'||c.type==='foot')&&c.side===side||c.type==='both'||c.type==='hold'||c.type==='hamhold'||c.type==='rush');
   const gap=12, w=(SW-gap*3)/2;
-  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush'||c.type==='shoot')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold')?'#ff8a1e':'#27c26a';
+  ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold')?'#ff8a1e':'#27c26a';
     ctx.fillStyle=lit?col:'rgba(255,255,255,.07)'; ctx.strokeStyle=lit?'#fff':'rgba(255,255,255,.18)'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.roundRect(x,top,w,h,22); ctx.fill(); ctx.stroke();
     ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.font=`${Math.round(Math.min(w,h)*.28)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';

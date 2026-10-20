@@ -1,5 +1,5 @@
 // HUD: header bar, cue buttons, popups, meters
-import {ctx,LH,LW,PORTRAIT} from '../canvas.js';
+import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {CUEPOS,NUMPOS} from '../game/core.js';
 import {ME,S} from '../state.js';
@@ -54,7 +54,6 @@ export function drawCue(cue){
   else if(cue.type==='hamhold'){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); if(!S.held2) txt(cue.label||'MANTENÉ LOS DOS',LW/2,104,'#fff',18,{lw:4}); }
   else if(cue.type==='both'&&cue.hold){ ['L','R'].forEach(p=>at(p,'#ff8a1e','')); txt(cue.release?'SOLTÁ EN LA PUNTA':'APRETÁ Y MANTENÉ EN LA PUNTA',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
-  else if(cue.type==='shoot'){ if(!PORTRAIT) ['L','R'].forEach(p=>at(p,'#ff4d2e','')); }  // (upright, the big buttons below; these would cover the sight)
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
   else if(cue.type==='num'){ // the three columns, faintly
     ctx.save(); ctx.setLineDash([7,6]); ctx.lineCap='round';

@@ -2,7 +2,7 @@
 // finger showing where to tap or hold. Nothing is saved; touching the screen (or any key) leaves it.
 import {CUEPOS} from './core.js';
 import {javThrow} from './field.js';
-import {laserAim} from './laser.js';
+import {DIRS,scope} from './laser.js';
 import {LW} from '../canvas.js';
 import {onTap} from '../input.js';
 import {S} from '../state.js';
@@ -13,7 +13,7 @@ let f=0, back=null;
 export function startDemo(onEnd){ back=onEnd; f=0; S.demo=true; S.fingers=[]; }
 export function endDemo(){ const b=back; back=null; if(S) S.demo=false; if(b) b(); }
 const press=pos=>{ demoTap=true; try{ onTap(pos); } finally{ demoTap=false; }
-  const [x,y]=pos==='B'?[LW/2,150]:CUEPOS[pos]?CUEPOS[pos]():[LW/2,150]; S.fingers.push({x,y,t:0}); };
+  const o=scope(), [x,y]=S.shot&&DIRS[pos]?[o.cx+DIRS[pos][0]*o.R-10,o.cy+DIRS[pos][1]*o.R-10]:pos==='B'?[LW/2,150]:CUEPOS[pos]?CUEPOS[pos]():[LW/2,150]; S.fingers.push({x,y,t:0}); };
 const hold=on=>{ if(!!S.held2===on) return; S.held2=on; S.held2At=performance.now(); };
 
 // what to say now, from the game's state
@@ -21,7 +21,7 @@ function caption(){
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'||S.phase==='set') return ev.type==='sprint'?'ESPERÁ EL DISPARO':'TOCÁ PARA EMPEZAR';
   if(ev.swim&&(c&&c.dive||S.dive!=null&&S.dive<.6)) return 'AL DISPARO, LOS DOS ROJOS PARA TIRARTE DEL BLOQUE';
-  if(c&&c.type==='shoot') return 'CUALQUIER BOTÓN CUANDO EL BLANCO ESTÉ EN EL CENTRO DE LA MIRA';
+  if(c&&c.type==='shoot') return 'CUANDO EL BLANCO SE FRENA AL LADO DE LA CRUZ, LA FLECHA DE ESE LADO';
   if(ev.relay&&S.chCued) return 'LOS DOS ROJOS CUANDO EL TESTIMONIO LLEGA AL CENTRO VERDE DE LA TABLA';
   if(c&&c.beat) return 'LOS DOS ROJOS JUSTO CUANDO EL ANILLO SE CIERRA SOBRE LA CABEZA';
   if(ev.stroke==='fly'&&m&&m.k==='fly') return 'SOLTÁ CUANDO LA ESTRELLA LLEGUE AL CÍRCULO';
@@ -57,7 +57,7 @@ export function demoStep(dt){
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.dive&&c.t>=.25) press('B');
-  if(c&&c.type==='shoot'&&c.t>.4&&Math.hypot(...laserAim())<.75) press('B');
+  if(c&&c.type==='shoot'&&S.shot.st==='hold'&&S.shot.t>=.22) press(S.shot.dir);
   if(ev.relay&&S.chCued&&c&&c.type==='both'&&S.x+.35>=ev.dist/ev.legs*(S.leg+1)-1.5-.2) press('B');
   if(c&&c.beat&&c.t>=c.T+.04) press('B');
   else if(ev.stroke==='fly'&&!S.dipCued&&!S.turning){ if(c&&c.type==='hamhold') hold(true); else if(m&&m.k==='fly'&&m.hit==null&&m.p>=.9) hold(false); }

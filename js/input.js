@@ -1,13 +1,13 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
-import {cv,LW,OX,OY,SC,SW} from './canvas.js';
+import {cv,LH,LW,OX,OY,PORTRAIT,SC,SH,SW} from './canvas.js';
 import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,footTap,javThrow} from './game/field.js';
 import {demoTap,endDemo} from './game/demo.js';
 import {hamRush} from './game/hammer.js';
 import {swimBeatHit,swimDiveHit,swimTurnHit} from './game/swim.js';
 import {relayHit} from './game/relay.js';
-import {laserShoot} from './game/laser.js';
+import {laserShoot,scope} from './game/laser.js';
 import {lapNext} from './game/lap.js';
 import {podiumNext} from './game/podium.js';
 import {endReplay} from './game/replay.js';
@@ -17,6 +17,11 @@ import {showPause} from './ui/screens.js';
 export function zoneOf(clientX,three){ const f=clientX/SW;
   if(three){ const lx=(clientX-OX)/SC; return lx<LW/3?'L':(lx<LW*2/3?'C':'R'); }
   return f<.5?'L':'R'; }
+// laser run: which arrow a touch is, from where it is around the sight (upright, below the game: around the pad there)
+export function arrowOf(x,y){ let cx,cy;
+  if(PORTRAIT&&y>OY+LH*SC){ cx=SW/2; cy=(OY+LH*SC+14+SH-18)/2; }
+  else { const o=scope(); cx=OX+o.cx*SC; cy=OY+o.cy*SC; }
+  const dx=x-cx, dy=y-cy; return Math.abs(dx)>Math.abs(dy)?(dx<0?'L':'R'):(dy<0?'U':'D'); }
 export function onTap(pos){
   unlockAudio();
   if(screen!=='play'||!S) return;
@@ -30,8 +35,8 @@ export function onTap(pos){
   if(ph==='ready'){ startRun(); return; }
   if(!S.cue||S.cue.type==='hold'||S.cue.type==='hamhold') return;
   const cue=S.cue;
-  // laser run: any button shoots
-  if(cue.type==='shoot'){ laserShoot(); addRing(pos==='R'?'R':'L'); return; }
+  // laser run: the arrows
+  if(cue.type==='shoot'){ laserShoot(pos); return; }
   if(cue.type==='side'){
     if(pos==='C'||pos==='B') return;  // Space/Enter is for the red buttons
     if(pos===cue.side){ speedUp(gS(S.v)); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
@@ -76,7 +81,7 @@ export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) retur
 // letting go of either button throws
 export function holdEnd(){ setHeld2(); if(screen==='play'&&S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
 export function initInput(){
-  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&S.phase!=='lap'&&backHit(e)) return; const three=!!(S&&S.cue&&S.cue.type==='num'); onTap(zoneOf(e.clientX,three)); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
+  cv.addEventListener('pointerdown',e=>{ e.preventDefault(); if(screen==='play'&&S&&S.phase!=='podium'&&S.phase!=='lap'&&backHit(e)) return; const c=S&&S.cue; onTap(c&&c.type==='shoot'?arrowOf(e.clientX,e.clientY):zoneOf(e.clientX,!!c&&c.type==='num')); holdN++; down.set(e.pointerId,e.clientX<SW/2?'L':'R'); holdStart(); },{passive:false});
   const relHold=e=>{ holdN=Math.max(0,holdN-1); down.delete(e.pointerId); holdEnd(); };
   addEventListener('pointerup',relHold); addEventListener('pointercancel',relHold);
   addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter'){ kbHold=false; holdEnd(); } });
@@ -85,7 +90,8 @@ export function initInput(){
     if(screen!=='play'||e.repeat) return; const k=e.key.toLowerCase();
     if((k==='escape'||k==='p')&&S&&S.phase!=='podium'&&S.phase!=='lap'&&!S.replay){ e.preventDefault(); showPause(); return; }
     let pos=null;
-    if(k==='arrowleft'||k==='a'||k==='z') pos='L';
+    if(S&&S.cue&&S.cue.type==='shoot'&&(k==='arrowup'||k==='w'||k==='arrowdown'||k==='s')) pos=k==='arrowup'||k==='w'?'U':'D';
+    else if(k==='arrowleft'||k==='a'||k==='z') pos='L';
     else if(k==='arrowright'||k==='d'||k==='x') pos='R';
     else if(k==='arrowdown'||k==='arrowup'||k==='s') pos='C';
     else if(k===' '||k==='enter') pos='B';

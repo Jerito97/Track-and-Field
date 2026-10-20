@@ -11,7 +11,7 @@ import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 import {BACK,CH_OK,CH_W,changes,MATE} from '../game/relay.js';
-import {laserAim} from '../game/laser.js';
+import {D,DIRS,laserAim,scope} from '../game/laser.js';
 
 const LANES=6;
 // every runner is YO_H logical px tall (YO_K: scale for the optional sprites, 144 px tall standing)
@@ -132,29 +132,35 @@ function rangeLine(x,TT,TB){ if(x<-40||x>LW+40) return;
   for(let y=TT,j=0;y<TB;y+=6,j++){ ctx.fillStyle=j%2?INK:'#ffd23a'; ctx.fillRect(x-2,y,4,Math.min(6,TB-y)); }
   ctx.fillStyle=INK; ctx.fillRect(x-1,TT-22,2,22); ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.beginPath(); ctx.roundRect(x-20,TT-34,40,14,3); ctx.fill(); ctx.stroke();
   txt('TIRO',x,TT-27,INK,10,{stroke:null}); }
-// laser run, shooting: everything dark but a round sight; in it the range (sky, a far stand, grass) and the board with
-// the five targets, swaying (the board moves, the cross stays in the middle); hits white, misses marked; below, the
-// five shots so far
+// laser run, shooting: everything dark but a round sight with the four arrows around it; in it the range (sky, a far
+// stand, grass) and the board with the five targets, the one to shoot ringed in yellow, moving (the board moves, the
+// cross stays in the middle); hits white, misses marked; below, the five shots so far
 function drawScope(){
-  const s=S.shot, cx=LW/2, cy=152, R=Math.min(104,LW*.3), u=R*.17, D=2.5, [ax,ay]=laserAim(), k=Math.min(s.k,4);
+  const s=S.shot, {cx,cy,R,u}=scope(), [px,py]=laserAim();
   ctx.save();
   ctx.fillStyle='rgba(4,8,18,.92)'; ctx.beginPath(); ctx.rect(0,0,LW,320); ctx.arc(cx,cy,R,0,Math.PI*2,true); ctx.fill('evenodd');
   ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.clip();
-  // the range, moving with the sway (further things a little less)
-  const bx=cx-(ax+k*D)*u, by=cy-ay*u;
-  const sky=ctx.createLinearGradient(0,cy-R,0,cy+R); sky.addColorStop(0,'#8fd0f5'); sky.addColorStop(.55,'#d8f0fb'); sky.addColorStop(.56,'#7cc24a'); sky.addColorStop(1,'#5aa83a');
+  // the range, moving with the sight (further things a little less)
+  const bx=cx+(px-s.k*D)*u, by=cy+py*u;
+  const hz=by+3.4*u, sky=ctx.createLinearGradient(0,hz-2*R,0,hz); sky.addColorStop(0,'#6fc0f0'); sky.addColorStop(1,'#d8f0fb');
   ctx.fillStyle=sky; ctx.fillRect(cx-R,cy-R,2*R,2*R);
-  ctx.fillStyle='#b7c2d3'; ctx.fillRect(cx-R,by-u*5.2,2*R,u*1.6);
-  for(let i=-30;i<30;i++){ ctx.fillStyle=['#e8262d','#2f6fd6','#ffd23a','#1f9e54','#ff8a1f'][(i+60)%5]; ctx.beginPath(); ctx.arc(cx-ax*u*.6+i*u*.55,by-u*4.5,u*.18,0,Math.PI*2); ctx.fill(); }
+  const gr=ctx.createLinearGradient(0,hz,0,hz+2*R); gr.addColorStop(0,'#8acf55'); gr.addColorStop(1,'#4f9a33');
+  ctx.fillStyle=gr; ctx.fillRect(cx-R,hz,2*R,Math.max(0,cy+R-hz));
+  ctx.fillStyle='#b7c2d3'; ctx.fillRect(cx-R,by-u*5.2,2*R,u*1.6); ctx.fillStyle='#8e9bb0'; ctx.fillRect(cx-R,by-u*3.6,2*R,u*.25);
+  for(let i=-40;i<40;i++){ const x=cx+px*u*.6+i*u*.55; if(x<cx-R-5||x>cx+R+5) continue; ctx.fillStyle=['#e8262d','#2f6fd6','#ffd23a','#1f9e54','#ff8a1f'][(i+80)%5]; ctx.beginPath(); ctx.arc(x,by-u*4.5,u*.18,0,Math.PI*2); ctx.fill(); }
+  // a hedge along the far end of the range
+  ctx.fillStyle='#3f8a3a'; ctx.fillRect(cx-R,hz-u*.9,2*R,u*.9);
+  for(let i=-30;i<30;i++){ const x=cx+px*u*.85+i*u*.9; if(x<cx-R-u||x>cx+R+u) continue; ctx.beginPath(); ctx.arc(x,hz-u*.9,u*.55,Math.PI,0); ctx.fill(); }
   // the board: white with a light blue frame, a red banner on the right, the lane number on the left
   const w=(4*D+3)*u, h=3*u, x0=bx-1.5*u, y0=by-h/2;
-  ctx.fillStyle='#16161d'; ctx.fillRect(bx+D*2*u-.3*u,y0+h,.6*u,u*3);
+  ctx.fillStyle='#16161d'; [.25,.75].forEach(f=>ctx.fillRect(x0+w*f-.3*u,y0+h,.6*u,u*3));
   ctx.fillStyle='#fff'; ctx.strokeStyle='#5fa7d9'; ctx.lineWidth=u*.35; ctx.beginPath(); ctx.roundRect(x0,y0,w,h,u*.5); ctx.fill(); ctx.stroke();
   ctx.fillStyle='#e8262d'; ctx.fillRect(x0+w+u*.2,y0-u*.2,u*2.4,h+u*.4); ctx.fillStyle='#fff'; ctx.save(); ctx.translate(x0+w+u*1.4,by); ctx.rotate(-Math.PI/2); ctx.font=`italic ${Math.round(u*.9)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('LASER',0,0); ctx.restore();
   ctx.fillStyle='#14284f'; ctx.fillRect(x0-u*2.6,by-u*1.1,u*2.2,u*2.2); txt(String((S.ri||0)+1).padStart(2,'0'),x0-u*1.5,by,'#fff',Math.round(u*1.2),{stroke:null});
-  for(let i=0;i<5;i++){ const tx=bx+(i)*D*u, r=s.res[i];
+  for(let i=0;i<5;i++){ const tx=bx+i*D*u, r=s.res[i];
     ctx.fillStyle=r&&r.hit?'#fff':INK; ctx.strokeStyle=r&&r.hit?'#9aa5b8':INK; ctx.lineWidth=u*.15; ctx.beginPath(); ctx.arc(tx,by,u,0,Math.PI*2); ctx.fill(); ctx.stroke();
-    if(r&&!r.hit){ ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.arc(tx+r.x*u,by+r.y*u,u*.2,0,Math.PI*2); ctx.fill(); } }
+    if(r&&!r.hit){ ctx.fillStyle='#ff5a3c'; ctx.beginPath(); ctx.arc(tx+r.x*u,by+r.y*u,u*.2,0,Math.PI*2); ctx.fill(); }
+    if(i===s.k){ ctx.strokeStyle='#ffd23a'; ctx.lineWidth=u*.3; ctx.globalAlpha=.75+.25*Math.sin(S.clock*12); ctx.beginPath(); ctx.arc(tx,by,u*1.4,0,Math.PI*2); ctx.stroke(); ctx.globalAlpha=1; } }
   // the edge of the lens, dark
   const vg=ctx.createRadialGradient(cx,cy,R*.55,cx,cy,R); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.75)'); ctx.fillStyle=vg; ctx.fillRect(cx-R,cy-R,2*R,2*R);
   ctx.restore();
@@ -163,8 +169,17 @@ function drawScope(){
   [[-1,0],[1,0],[0,-1],[0,1]].forEach(([a,b])=>{ ctx.beginPath(); ctx.moveTo(cx+a*g,cy+b*g); ctx.lineTo(cx+a*R*.8,cy+b*R*.8); ctx.stroke(); });
   ctx.fillStyle='#ff3b30'; ctx.beginPath(); ctx.arc(cx,cy,2,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='#2b3a55'; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  // the arrows on the ring (the one just pressed lit green for a hit, red for a miss)
+  const f=s.flash&&s.flash.t<.3?s.flash:null;
+  Object.entries(DIRS).forEach(([d,[dx,dy]])=>arrowBtn(cx+dx*R,cy+dy*R,15,dx,dy,f&&f.dir===d?(f.hit?'#2fd166':'#ff5a3c'):null));
   // the five shots so far, under the sight
-  for(let i=0;i<5;i++){ const r=s.res[i], x=cx+(i-2)*18, y=cy+R+14;
+  for(let i=0;i<5;i++){ const r=s.res[i], x=cx+(i-2)*18, y=cy+R+30;
     ctx.fillStyle=!r?'rgba(255,255,255,.18)':r.hit?'#2fd166':'#ff5a3c'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
-  if(s.k<5&&!S.demo) txt('TOCÁ CUANDO EL BLANCO ESTÉ EN EL CENTRO',cx,cy-R-10,'#fff',13,{lw:3});
+  if(s.k<5&&!S.demo) txt('CUANDO EL BLANCO SE FRENE, TOCÁ SU FLECHA',cx,cy-R-22,'#fff',13,{lw:3});
+}
+// a round arrow button (blue, white arrow; lit: that colour) pointing dx,dy
+export function arrowBtn(x,y,r,dx,dy,lit,c=ctx){
+  c.fillStyle=lit||'#2f6fd6'; c.strokeStyle='#fff'; c.lineWidth=Math.max(2,r*.16); c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); c.stroke();
+  const a=r*.5; c.save(); c.translate(x,y); c.rotate(Math.atan2(dy,dx)); c.fillStyle='#fff';
+  c.beginPath(); c.moveTo(a,0); c.lineTo(-a*.2,-a*.85); c.lineTo(-a*.2,-a*.32); c.lineTo(-a*.8,-a*.32); c.lineTo(-a*.8,a*.32); c.lineTo(-a*.2,a*.32); c.lineTo(-a*.2,a*.85); c.closePath(); c.fill(); c.restore();
 }
