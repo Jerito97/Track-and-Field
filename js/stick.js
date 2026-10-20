@@ -79,20 +79,22 @@ const JAV_FOLLOW=[[0,JAV_THROW[2][1]],[.3,P(.76,.55,[.6,.2],[.3,1.0],[-5.15,.2],
 // pole vault (both hands on the pole)
 const PV_PLANT=[[0,P(.8,.12,[.5,.9],[-.5,.6],[1.8,.6],[1.6,.7])],[.5,P(.82,-.05,[.3,.5],[-.4,.3],[2.8,.1],[2.6,.15])],[1,P(.84,-.1,[.9,1.6],[-.5,.1],[2.9,.05],[2.75,.1])]];
 const PV_RISE=[[0,P(.85,0,[.1,.3],[-.2,.4],[2.95,.05],[2.85,.08])],[.35,P(.85,.1,[2.0,2.2],[1.9,2.0],[2.9,.05],[2.8,.1])],[.7,P(.85,-.05,[.05,.1],[-.05,.15],[2.9,.05],[2.8,.1])],[1,P(.85,-.15,[-.2,.1],[.1,.3],[2.5,0],[2.3,.1])]];
-const PV_OVER=[[0,P(.85,-.5,[-1.2,-.4],[-1.0,-.6],[2.6,.1],[2.4,.2])],[1,P(.85,-.3,[-.5,.3],[-.3,.4],[3.3,.2],[3.1,.2])]];
-// falling and on the mat the body is turned a quarter (head away from the pole, feet toward it) and lies on its back:
-// in that turn "backward" is up, so the legs lift with negative angles; arms reaching past the head
-const PV_FALL=P(.3,0,[-1.1,.3],[-1.0,.4],[2.9,.1],[2.7,.2]);
-const PV_MAT=[[0,PV_FALL],[.3,P(.25,.05,[-.4,.5],[-.3,.6],[2.6,.2],[2.4,.3])],[.9,P(.25,.05,[-.3,.6],[-.2,.7],[-1.7,.3],[2.4,.3])]];
+// over the bar (drawn mirrored after turning to face it, so "forward" is the belly): from upside down, folding at the
+// hips as the feet go over, lying face down over the bar with head and legs hanging; then dropping, the legs come forward
+// and up (facing the bar, almost sitting in the air) and it lands on its back like an L, legs up; on the mat they come
+// down and a fist goes up. The hip stays at the same height (the game moves the body)
+const PV_OVER=[[0,P(.85,-.15,[-.2,.1],[.1,.3],[2.5,0],[2.3,.1])],[.5,P(.85,.3,[.5,.2],[.4,.3],[2.9,.1],[2.7,.2])],[1,P(.85,.8,[.9,.2],[.8,.3],[2.2,.3],[2.0,.3])]];
+const PV_FALL=[[0,PV_OVER[2][1]],[.5,P(.85,.3,[1.2,.1],[1.1,.15],[2.8,.2],[2.6,.3])],[1,P(.85,.3,[1.5,.05],[1.4,.1],[2.9,.2],[2.7,.3])]];
+const PV_MAT=[[0,PV_FALL[2][1]],[.25,P(.85,.3,[1.7,.1],[1.6,.15],[1.4,.3],[1.2,.3])],[.75,P(.85,.05,[.25,.4],[.15,.5],[1.6,.3],[1.3,.3])],[1.2,P(.85,.05,[.25,.4],[.15,.5],[1.6,.1],[.9,.3])]];
 
 export function fieldPose(V){
   const ev=V.ev, a=V.act, t=V.clock||0, k=ev.kind;
   if(a&&/foul$/.test(a.k)) return a.t>.7&&k!=='jav'?tag(k==='lj'||k==='tj'?POSE.sit:POSE.lie,'foulend'):tag(POSE.stumble,'foul');
   if(k==='hj'){
     if(a&&a.k==='hj'&&a.u!=null){
-      if(a.pt!=null) return track('hjmat',HJ_MATP,a.pt);
+      if(a.pt!=null) return {...track('hjmat',HJ_MATP,a.pt),flip:true};
       if(a.u<HJ_TURN) return track('hjtake',HJ_TAKE,a.u/HJ_TURN);
-      return track('hjover',HJ_OVER,(a.u-HJ_TURN)/(1-HJ_TURN)); }
+      return {...track('hjover',HJ_OVER,(a.u-HJ_TURN)/(1-HJ_TURN)),flip:true}; }
     if((V.v||0)>.2) return run(runPhase(V),amp(V));
     return breathe(POSE.stand,t);
   }
@@ -128,9 +130,9 @@ export function fieldPose(V){
     if(a&&a.k==='pv'){
       if(a.stage==='plant') return track('pvplant',PV_PLANT,clamp01((a.t||0)/.22));
       if(a.stage==='rise') return track('pvrise',PV_RISE,a.r??0);
-      if(a.stage==='over') return track('pvover',PV_OVER,clamp01((a.t||0)/.45));
-      if(a.stage==='fall'&&a.pt==null) return tag(PV_FALL,'pvfall');
-      if(a.stage==='fall') return track('pvmat',PV_MAT,a.pt);
+      if(a.stage==='over') return {...track('pvover',PV_OVER,clamp01((a.t||0)/.45)),flip:true};
+      if(a.stage==='fall'&&a.pt==null) return {...track('pvfall',PV_FALL,a.fk??0),flip:true};
+      if(a.stage==='fall') return {...track('pvmat',PV_MAT,a.pt),flip:true};
     }
     if((V.v||0)>.2) return run(runPhase(V),amp(V),'pole');
     return breathe({...POSE.stand,arms:[{a:.9,b:1.3},{a:.6,b:1.5}]},t);

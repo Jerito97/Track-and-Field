@@ -35,8 +35,9 @@ const unflat=v=>({hip:v[0],lean:v[1],legs:[{a:v[2],b:v[3]},{a:v[4],b:v[5]}],arms
 function blendPose(c,C,J,rot){
   let m=BLENDS.get(c); if(!m){ m=new Map(); BLENDS.set(c,m); }
   // kind: the movement this pose belongs to (stick.js); untagged poses (the game's fixed ones) change when their values do
-  const now=performance.now()/1000, cur=flat(J,rot), e=m.get(C.id), kind=J.kind||(J.run?'run':null);
-  if(!e||now-e.t>.5){ m.set(C.id,{t:now,tgt:cur,kind,out:cur,from:null,t0:0}); return {J,rot}; }
+  // flip: drawn mirrored (high jump, pole vault over the bar); turning around is its own change, so no blending across it
+  const now=performance.now()/1000, cur=flat(J,rot), e=m.get(C.id), kind=J.kind||(J.run?'run':null), flip=!!J.flip;
+  if(!e||now-e.t>.5||e.flip!==flip){ m.set(C.id,{t:now,tgt:cur,kind,out:cur,from:null,t0:0,flip}); return {J,rot}; }
   const changed=kind!=null?kind!==e.kind:(e.kind!=null||cur.some((v,i)=>Math.abs(v-e.tgt[i])>.02));
   if(changed){ e.from=e.out.slice(); e.t0=now; const d=e.from[10]-cur[10]; e.from[10]-=Math.round(d/(2*Math.PI))*2*Math.PI; }  // turn the short way
   const w=e.from?Math.max(0,1-(now-e.t0)/BLEND_T):0, k=w*w*(3-2*w);  // smoothstep ease

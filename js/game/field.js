@@ -137,6 +137,8 @@ export function javThrow(){
   S.act={k:'jav',t:.15,R:Math.max(8,9.0*S.v*(.72+.28*q))}; S.jv={held:true,x:S.x,y:1.9,a:.55}; S.v=Math.min(S.v,5.5); S.phase='act'; S.cue=null;
   setTimeout(()=>{ if(S&&S.meter&&S.meter.k==='jav') S.meter=null; },300);
 }
+// pole vault: the mat's height; the hip's height in the poses (as drawn), and above the mat once on it
+const PV_MAT_H=.85, PV_HIP=.85*1.15, PV_LIE=.1;
 // high jump: height (m) = HJ_A + HJ_V per m/s, minus up to HJ_MISS for missing the mark, then the arch: nothing adds
 // HJ_NOARCH, a perfect one HJ_ARCH more; where the athlete comes down on the mat (m past the mark)
 const HJ_A=.78, HJ_V=.125, HJ_MISS=.55, HJ_NOARCH=-.2, HJ_ARCH=.35, HJ_LAND=4.4;
@@ -232,11 +234,18 @@ export function updateAct(dt){
         if(!S.held2||S.meter.p>1.25){ a.pushed=1; a.q2=S.meter.p>1.25?0:qPole(S.meter.p-PV_LAG/(a.Trise*.7)); S.meter.hit=S.meter.p; S.cue=null; tone(700,.1,'triangle',.05); judge(a.q2); } }
       if(a.pushed&&a.t>=Math.max(a.Trise*.7,.5)||a.t>a.Trise+.35){ S.cue=null; S.meter=null; a.stage='over'; a.t=0; a.yo=S.y; a.bonus=.7*(a.q2||0)-.25; }
     } else if(a.stage==='over'){
-      const u=Math.min(1,a.t/.45); S.y=a.yo+Math.max(0,a.bonus+.4)*Math.sin(u*Math.PI/2); S.x+=dt*1.2; S.rot=-Math.PI*.95+Math.PI*.35*u*u*(3-2*u); S.pose=POSE.pvOver;  // upside down at the top, then the feet go over the bar first (to the far side)
-      if(u>=1){ a.stage='fall'; a.t=0; a.vy=0; a.peak=S.y; }
+      // letting go upside down at the top, it turns to face the bar (drawn mirrored, the same tilt the other way), and
+      // the feet go over first: it tips over until it lies face down over the bar, folded at the hips
+      if(!S.turn){ S.turn=1; a.r0=-S.rot; }
+      const u=Math.min(1,a.t/.45), e=u*u*(3-2*u); S.y=a.yo+Math.max(0,a.bonus+.4)*Math.sin(u*Math.PI/2); S.x+=dt*1.2; S.rot=a.r0+(Math.PI/2-a.r0)*e; S.pose=POSE.pvOver;
+      if(u>=1){ a.stage='fall'; a.t=0; a.vy=0; a.peak=S.y; a.fk=0; }
     } else if(a.stage==='fall'){
-      a.vy+=GRAV*dt; S.y-=a.vy*dt; S.x+=dt*1.6; S.rot+=(-Math.PI*1.5-S.rot)*Math.min(1,dt*3.2); S.pose=POSE.pvOver;  // then the legs swing up and back toward the pole and it falls on its back, feet toward the pole: as on the mat
-      if(S.y<=.85){ S.y=.85; S.rot=-Math.PI*1.5; S.pose=POSE.lie; const m=Math.floor((a.H+a.bonus+.1)*100)/100; S.bar=m; landed(m); }
+      // then it drops, the legs coming down toward the bar (facing it, almost upright) and on over onto its back: it lands
+      // on the mat on its back, feet toward the pole, resting on it
+      const land=PV_MAT_H+PV_LIE-PV_HIP;
+      a.vy+=GRAV*dt; S.y-=a.vy*dt; S.x+=dt*1.6; a.fk=clamp((a.peak-S.y)/(a.peak-land||1),0,1);
+      S.rot=Math.PI*(.5-a.fk*a.fk*(3-2*a.fk)); S.pose=POSE.pvOver;
+      if(S.y<=land){ S.y=land; S.rot=-Math.PI/2; S.pose=POSE.lie; const m=Math.floor((a.H+a.bonus+.1)*100)/100; S.bar=m; landed(m); }
     }
   } else if(a.k==='pvfoul'){
     S.x+=a.v*Math.max(0,1-a.t*1.2)*dt; S.pose=POSE.stumble; if(S.x>ev.line+.6) S.y=Math.min(.85,S.y+dt*3);
