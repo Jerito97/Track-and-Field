@@ -79,6 +79,8 @@ function db(){
     // the daily challenge: each player's one go at the day's event (mark null: fouled, or left / closed halfway)
     await sql`create table if not exists daily(day text not null, player_id text not null references users(id) on delete cascade,
       ev text not null, mark double precision, made_at timestamptz not null default now(), primary key(day,player_id))`;
+    // each day's event, kept the first time it's asked for (a change in how it's drawn can't change a day under way)
+    await sql`create table if not exists daily_ev(day text primary key, ev text not null)`;
     await sql`create table if not exists migrations(id text primary key, done_at timestamptz not null default now())`;
     if((await sql`insert into migrations(id) values('reset-tj-ham-1') on conflict do nothing returning id`).length)
       await sql`delete from marks where ev in ('tj','ham')`;
@@ -93,6 +95,9 @@ function db(){
     // again once the change gave the next runner half the speed plus a boost (the marks before were easier)
     if((await sql`insert into migrations(id) values('reset-4x100-2') on conflict do nothing returning id`).length){
       await sql`delete from marks where ev='4x100'`; await sql`delete from pmarks where ev='4x100'`; }
+    // 21/10/2026's challenge started over: the versions put up that night each drew a different event for it
+    if((await sql`insert into migrations(id) values('reset-daily-2026-10-21') on conflict do nothing returning id`).length)
+      await sql`delete from daily where day='2026-10-21'`;
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }
@@ -259,6 +264,11 @@ function dailyEv(day){
   for(let d=Math.min(DAY0,n);d<=n;d++){ const ok=EVENTS.filter(e=>!last.includes(e)); ev=ok[Math.floor(dayRnd(d)*ok.length)]; last.push(ev); if(last.length>FRESH) last.shift(); }
   return ev;
 }
+// the day's event as kept (the first time: drawn, and kept)
+async function dayEv(sql,day){
+  await sql`insert into daily_ev(day,ev) values(${day},${dailyEv(day)}) on conflict do nothing`;
+  return (await sql`select ev from daily_ev where day=${day}`)[0].ev;
+}
 // a day's board: everyone who played it, best first (fouls last), each one's place
 async function dailyBoard(sql,day,ev){
   const rows=await sql`select d.player_id,u.name,u.color,d.mark,d.made_at from daily d join users u on u.id=d.player_id where d.day=${day}`;
@@ -268,7 +278,7 @@ async function dailyBoard(sql,day,ev){
 }
 // today's challenge (and how yesterday's went); with a player: their go, place and streak (days in a row played)
 async function daily(sql,pid){
-  const day=dayOf(), ev=dailyEv(day), yday=dayOf(Date.now()-864e5), yev=dailyEv(yday);
+  const day=dayOf(), ev=await dayEv(sql,day), yday=dayOf(Date.now()-864e5), yev=await dayEv(sql,yday);
   const ends=new Date(Date.parse(day+'T00:00:00Z')+(24+3)*3600e3).toISOString();
   const top=await dailyBoard(sql,day,ev), yb=await dailyBoard(sql,yday,yev);
   const out={day,ev,ends_at:ends,count:top.length,top:top.slice(0,50),yday:{day:yday,ev:yev,count:yb.length,winner:yb[0]&&yb[0].mark!=null?yb[0]:null}};
@@ -439,7 +449,7 @@ async function act(sql,b){
     }
     // the daily challenge: start (the one go is used: leaving halfway is a foul), then the mark (once, for that day)
     case 'daily': {
-      const u=await auth(sql,b.token), day=dayOf(), ev=dailyEv(day);
+      const u=await auth(sql,b.token), day=dayOf(), ev=await dayEv(sql,day);
       if(b.step==='start'){ if(String(b.ev)!==ev) throw new Bad(409,'El desafío de hoy es otra prueba.');
         const ins=await sql`insert into daily(day,player_id,ev) values(${day},${u.id},${ev}) on conflict do nothing returning day`;
         if(!ins.length) throw new Bad(409,'Ya jugaste el desafío de hoy.');
