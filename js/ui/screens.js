@@ -20,7 +20,7 @@ import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
-import {finishOnline,leaveOnline,onClose,onCreate,onDays,onJoin,onRepeat,onShare,playOnline,showHistory,shownCode,showOnline,showRepeat,showTournament,toggleCat} from './online.js';
+import {finishOnline,leaveOnline,onClose,onCreate,onDays,onInvite,onJoin,onRepeat,onShare,playOnline,showHistory,showInvite,shownCode,showOnline,showRepeat,showTournament,toggleCat} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
@@ -315,6 +315,8 @@ OV.addEventListener('click',e=>{
   else if(a==='ojoin') onJoin();
   else if(a==='oopen'||a==='orefresh') showTournament(b.dataset.code);
   else if(a==='oshare') onShare(b.dataset.code);
+  else if(a==='oinvite') showInvite(b.dataset.code);
+  else if(a==='oinv') onInvite(b);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='notifs') showNotifs();
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);

@@ -1,6 +1,7 @@
-// Notices (the bell on the main menu): a tournament someone put you in that you haven't played yet, a tournament of
-// yours that ended (where you finished), and a world record of yours that someone beat. Worked out on this phone from
-// what the server says now against what it said the last time; kept per player on this phone (the last 30).
+// Notices (the bell on the main menu): a tournament someone put you in (invited you, or repeated one) that you haven't
+// played yet, a tournament of yours that ended (where you finished), and a world record of yours that someone beat.
+// Worked out on this phone from what the server says now against what it said the last time; kept per player on this
+// phone (the last 30).
 import {EVENTS} from '../config.js';
 import {fmt} from '../game/scoring.js';
 import {getLeaders,getMyTours,myTournaments} from '../online.js';
@@ -37,7 +38,7 @@ export async function checkNotifs(){
     // in), nothing played yet; one that ended where you played (the ones already over the first time, not)
     const own=new Set(myTournaments()), ended=new Set(d.ended||[]), first=d.ended==null;
     tours.forEach(x=>{ const t=x.tournament, played=x.results.some(r=>r.player_id===p.id);
-      if(!t.finished){ if(!played&&t.host_id!==p.id&&!own.has(t.code)) add(d,{id:'tn-'+t.code,k:'tn',code:t.code,name:t.name,evs:t.events.length}); return; }
+      if(!t.finished){ if(!played&&t.host_id!==p.id&&!own.has(t.code)) add(d,{id:'tn-'+t.code,k:'tn',code:t.code,name:t.name,evs:t.events.length,by:(x.entries.find(e=>e.player_id===p.id)||{}).invited_by||null}); return; }
       if(ended.has(t.code)) return; ended.add(t.code);
       if(first||!played) return;
       const rows=standings(x), i=rows.findIndex(r=>r.player_id===p.id);
@@ -52,7 +53,7 @@ const evOf=id=>id==='surv'?{id:'surv',name:'Supervivencia clásica'}:EVENTS.find
 function text(n){
   if(n.k==='wr'){ const ev=evOf(n.ev); if(!ev) return '';
     return `<b>${esc(n.who)}</b> te superó el récord mundial de <b>${esc(ev.name)}</b>: ${ev.id==='surv'?`${n.mark} pts`:fmt(ev,n.mark)}`; }
-  if(n.k==='tn') return `Te sumaron a <b>${esc(n.name)}</b>: ${n.evs===1?'tenés 1 prueba':`tenés ${n.evs} pruebas`} por jugar`;
+  if(n.k==='tn') return `${n.by?`<b>${esc(n.by)}</b> te invitó a`:'Te sumaron a'} <b>${esc(n.name)}</b>: ${n.evs===1?'tenés 1 prueba':`tenés ${n.evs} pruebas`} por jugar`;
   if(n.k==='te') return `Terminó <b>${esc(n.name)}</b>: ${n.place===1?'¡ganaste!':`quedaste ${n.place}º de ${n.of}`}`;
   return '';
 }

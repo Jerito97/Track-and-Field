@@ -25,6 +25,8 @@ export const updateRemote=fields=>call('POST',{action:'update',token:tok(),...fi
 export const getTournament=code=>call('GET',null,'?code='+encodeURIComponent(cleanCode(code)));
 export async function repeatTournament(code,events,days){ const r=await call('POST',{action:'repeat',code,events,days,token:tok()}); remember(r.code); return r.code; }
 export async function createTournament(name,events,days){ const r=await call('POST',{action:'create',name,events,days,token:tok()}); remember(r.code); return r.code; }
+// put a registered player in the tournament (it shows in their notices)
+export const invitePlayer=(code,player)=>call('POST',{action:'invite',code:cleanCode(code),player,token:tok()});
 export const closeTournament=code=>call('POST',{action:'close',code:cleanCode(code),token:tok()});
 // every tournament you're in, with players and results (from any phone)
 export const getMyTours=async()=>(await call('POST',{action:'mytours',token:tok()})).tours;

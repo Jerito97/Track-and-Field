@@ -560,3 +560,9 @@ tr.me td{background:var(--red)}
   .o-evs{gap:4px}
   .o-two{gap:8px}
 }
+/* tournament: inviting registered players */
+.o-inv{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.o-invp{display:flex;align-items:center;gap:10px}
+.o-invp .u-nm{flex:1;min-width:0}
+.o-invp .btn{font-size:.95rem;padding:4px 14px;margin:0}
+.o-in{color:#9fe0b0;font-size:.85rem;font-weight:700;white-space:nowrap}

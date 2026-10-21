@@ -57,6 +57,8 @@ function db(){
     await sql`create table if not exists entries(code text not null references tournaments(code) on delete cascade,
       player_id text not null, name text not null, color text not null, joined_at timestamptz not null default now(),
       primary key(code,player_id))`;
+    // who put a player in (invited from the game; null: joined with the code, or the host)
+    await sql`alter table entries add column if not exists invited_by text`;
     await sql`create table if not exists results(code text not null references tournaments(code) on delete cascade,
       player_id text not null, ev text not null, mark double precision, created_at timestamptz not null default now(),
       primary key(code,player_id,ev))`;
@@ -148,7 +150,8 @@ async function myTours(sql,u){
     from tournaments t join entries me on me.code=t.code and me.player_id=${u.id} order by t.created_at desc limit 60`;
   if(!ts.length) return {tours:[]};
   const codes=ts.map(t=>t.code);
-  const entries=await sql`select e.code,e.player_id, coalesce(u.name,e.name) as name, coalesce(u.color,e.color) as color, e.joined_at
+  const entries=await sql`select e.code,e.player_id, coalesce(u.name,e.name) as name, coalesce(u.color,e.color) as color, e.joined_at,
+    (select name from users i where i.id=e.invited_by) as invited_by
     from entries e left join users u on u.id=e.player_id where e.code = any(${codes}) order by e.joined_at`;
   const results=await sql`select code,player_id,ev,mark,created_at from results where code = any(${codes})`;
   return {tours:ts.map(t=>({tournament:pubT(t),entries:entries.filter(e=>e.code===t.code),results:results.filter(r=>r.code===t.code)}))};
@@ -383,6 +386,17 @@ async function act(sql,b){
       const ins=await sql`insert into group_members(group_id,player_id) select ${gid},${pid}
         where (select count(*) from group_members where group_id=${gid})<${MAX_GROUP} on conflict do nothing returning player_id`;
       if(!ins.length&&!await inGroup(sql,gid,pid)) throw new Bad(409,`El grupo ya tiene ${MAX_GROUP} jugadores.`);
+      return {ok:true};
+    }
+    // put a registered player in a tournament (anyone in it, while it's on and there's room): it shows in their notices
+    case 'invite': {
+      const u=await auth(sql,b.token), code=cleanCode(b.code), t=await getT(sql,code); if(!t) throw new Bad(404,'No existe ese torneo.');
+      if(t.finished) throw new Bad(409,'Este torneo ya terminó.');
+      if(!(await sql`select 1 from entries where code=${code} and player_id=${u.id}`).length) throw new Bad(403,'No estás en este torneo.');
+      const p=(await sql`select id,name,color from users where id=${String(b.player||'').slice(0,64)}`)[0]; if(!p) throw new Bad(404,'No existe ese jugador.');
+      const ins=await sql`insert into entries(code,player_id,name,color,invited_by) select ${code},${p.id},${p.name},${p.color},${u.id}
+        where (select count(*) from entries where code=${code})<${MAX_PLAYERS} on conflict do nothing returning player_id`;
+      if(!ins.length&&!(await sql`select 1 from entries where code=${code} and player_id=${p.id}`).length) throw new Bad(409,'El torneo está lleno.');
       return {ok:true};
     }
     case 'close': {

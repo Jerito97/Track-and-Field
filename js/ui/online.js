@@ -4,10 +4,11 @@ import {$,OV} from '../canvas.js';
 import {EVENTS} from '../config.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {fmt,pts} from '../game/scoring.js';
-import {cleanCode,closeTournament,createTournament,repeatTournament,getMyTours,getTournament,inviteLink,joinTournament,myTournaments,sendResult} from '../online.js';
+import {cleanCode,closeTournament,createTournament,repeatTournament,getMyTours,getTournament,inviteLink,invitePlayer,joinTournament,myTournaments,sendResult} from '../online.js';
 import {buildAthletes,G,screen,setS,setScreen} from '../state.js';
 import {player,players,store} from '../storage.js';
-import {CATS,catOf,esc,place,showOv} from './screens.js';
+import {loadPlayers} from './people.js';
+import {CATS,catOf,esc,paintOv,place,showOv} from './screens.js';
 
 const evById=id=>EVENTS.find(e=>e.id===id);
 // choosing the events: grouped as on the events screen (races, jumps, throws, swimming); a group's name ticks all of it,
@@ -167,8 +168,8 @@ export async function showTournament(code,msg,silent){
   showOv(card('TORNEO',esc(t.name),`
     ${msg?err(msg):''}${note}
     ${fin?`<p class="small o-final"><b>¡Torneo terminado!</b> ${why}</p>`
-      :`<div class="o-code"><div><span class="lbl">Código</span><b>${code}</b></div><button class="btn" data-act="oshare" data-code="${code}">Invitar</button></div>
-    <p class="small o-note">Cada prueba se juega <b>una sola vez</b> (salir a la mitad es nulo) · El torneo ${timeLeft(t)} (${day(t.ends_at)})${rows.length<2?' · Pasales el código a tus amigos':''}</p>`}
+      :`<div class="o-code"><div><span class="lbl">Código</span><b>${code}</b></div><div class="o-inv"><button class="btn" data-act="oinvite" data-code="${code}">Invitar jugadores</button><button class="btn alt" data-act="oshare" data-code="${code}">Compartir link</button></div></div>
+    <p class="small o-note">Cada prueba se juega <b>una sola vez</b> (salir a la mitad es nulo) · El torneo ${timeLeft(t)} (${day(t.ends_at)})${rows.length<2?' · Invitá jugadores o pasales el código':''}</p>`}
     <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
     <span class="lbl">Tabla${fin?' final':''}</span>${table}
     <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
@@ -181,6 +182,32 @@ export async function onClose(b){
   const code=b.dataset.code; loading('Terminando torneo');
   try{ await closeTournament(code); tours=null; }catch(e){ return showTournament(code,e.message); }
   showTournament(code);
+}
+// invite registered players: everyone who isn't in it yet, by name, with a search box; a tap puts them in (they get
+// it in their notices)
+let invQ='', invCode=null;
+const fold=t=>String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+export async function showInvite(code,msg){
+  code=cleanCode(code); invCode=code; shown=null; setS(null); setScreen('menu');
+  const body=inner=>card('TORNEO','Invitar jugadores',`${msg?err(msg):''}<p class="small">Les llega un aviso en el menú y ya quedan anotados en el torneo.</p>${inner}
+    <div class="btns"><button class="btn alt" data-act="oopen" data-code="${code}" data-focus>Volver al torneo</button></div>`);
+  showOv(body('<p class="small o-wait">Cargando…</p>'));
+  let all, inT;
+  try{ [all,inT]=await Promise.all([loadPlayers(true),getTournament(code).then(d=>new Set(d.entries.map(e=>e.player_id)))]); }
+  catch(e){ if(invCode===code) showOv(body(err(e.message))); return; }
+  if(invCode!==code) return;
+  const me=player().id, others=all.filter(p=>p.id!==me).sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
+  const rows=()=>{ const f=fold(invQ.trim()), l=others.filter(p=>!f||fold(p.name).includes(f));
+    return l.length?l.map(p=>`<div class="u-item o-invp"><span class="p-av sm"><canvas data-color="${esc(p.color)}"></canvas></span><span class="u-nm"><b>${esc(p.name)}</b></span>${inT.has(p.id)?'<span class="o-in">Ya está</span>':`<button class="btn" data-act="oinv" data-id="${esc(p.id)}">Invitar</button>`}</div>`).join('')
+      :'<p class="small">No hay ningún jugador con ese nombre.</p>'; };
+  showOv(body(`<input id="oisearch" class="u-search" type="search" placeholder="Buscá por nombre…" autocomplete="off" value="${esc(invQ)}"><div class="u-list" id="oilist">${rows()}</div>`));
+  paintOv();
+  const inp=$('oisearch'); inp.addEventListener('input',()=>{ invQ=inp.value; $('oilist').innerHTML=rows(); paintOv(); });
+}
+export async function onInvite(b){
+  if(b.disabled) return; const code=invCode; b.disabled=true; b.textContent='…';
+  try{ await invitePlayer(code,b.dataset.id); b.outerHTML='<span class="o-in">Invitado ✓</span>'; tours=null; }
+  catch(e){ b.disabled=false; b.textContent='Invitar'; showInvite(code,e.message); }
 }
 export async function onShare(code){
   const url=inviteLink(code), text=`¡Sumate a mi torneo de Track & Field! Código: ${code}`;
