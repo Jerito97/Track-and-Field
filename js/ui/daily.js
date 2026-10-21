@@ -45,20 +45,25 @@ export async function showDaily(msg){
   catch(e){ showOv(card('Desafío del día',`<p class="o-err" role="alert">${esc(e.message)}</p><div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div>`)); return; }
   const ev=evOf(d.ev); if(!ev) return;
   const me=d.me||{}, i=EVENTS.indexOf(ev);
+  // the board brings the first 50: further down, you after them
+  const out=me.played&&!d.top.some(r=>r.player_id===p.id);
   const rows=d.top.length?`<table class="o-table d-table"><tbody>${d.top.map((r,k)=>{ const pl=r.mark==null?'—':place(d.top,k,q=>q.mark==null?'x':fmt(ev,q.mark))+'.';
-      return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}${r.mark!=null&&k<3?' '+['🥇','🥈','🥉'][k]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${r.mark==null?'Nulo':fmt(ev,r.mark)}</td></tr>`; }).join('')}</tbody></table>`
+      return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}${r.mark!=null&&k<3?' '+['🥇','🥈','🥉'][k]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${r.mark==null?'Nulo':fmt(ev,r.mark)}</td></tr>`; }).join('')}${out?`<tr class="gap"><td></td><td class="nm">…</td><td></td></tr><tr class="me"><td>${me.place?me.place+'.':'—'}</td><td class="nm"><canvas data-color="${esc(p.color)}"></canvas>${esc(p.name)}</td><td class="mk">${me.mark==null?'Nulo':fmt(ev,me.mark)}</td></tr>`:''}</tbody></table>`
     :'<p class="small">Todavía nadie lo jugó hoy: ¡estrenalo!</p>';
   const y=d.yday, yev=evOf(y.ev), won=y.me&&y.me.place===1;
   const yline=y.winner&&yev?`<p class="small d-yday">Ayer (${esc(yev.name)}): ${won?`<b>¡ganaste vos!</b> con ${fmt(yev,y.winner.mark)}`:`ganó <b>${esc(y.winner.name)}</b> con ${fmt(yev,y.winner.mark)}${y.me?` · vos ${y.me.place?`${y.me.place}º de ${y.count}`:'nulo'}`:''}`}</p>`:'';
-  const mine=me.played?`<div class="s-best"><span class="lbl">Tu resultado</span><b>${me.mark!=null?fmt(ev,me.mark):'Nulo'}</b>${me.place?`<small>${me.place}º de ${d.count}</small>`:''}</div>`
+  const mine=me.played?`<div class="d-me"><span class="lbl">Tu resultado</span><b>${me.mark!=null?fmt(ev,me.mark):'Nulo'}</b>${me.place?`<small>${me.place}º de ${d.count}</small>`:''}</div>`
     :`<button class="btn d-play" data-act="dplay" data-focus>Jugar · 1 intento</button>`;
   showOv(card(esc(ev.name),`${msg?`<p class="o-err" role="alert">${esc(msg)}</p>`:''}
     <div class="d-top"><div class="d-pic">${art(i,true)}</div><div class="d-info">
-      <p class="small">Un solo intento: si salís a la mitad o cerrás el juego, cuenta como <b>nulo</b>. Termina en <b>${left(d.ends_at)}</b> · ${d.count} ${d.count===1?'jugó':'jugaron'}${me.streak?` · 🔥 racha de ${me.streak} ${me.streak===1?'día':'días'}`:''}</p>
+      <p class="d-rules">1 intento (si salís o cerrás el juego, nulo) · termina en <b>${left(d.ends_at)}</b> · ${d.count} ${d.count===1?'jugó':'jugaron'}${me.streak?` · 🔥 racha de ${me.streak} ${me.streak===1?'día':'días'}`:''}</p>
       ${mine}</div></div>
-    <span class="lbl">Tabla de hoy</span>${rows}${yline}
+    <span class="lbl">Tabla de hoy</span><div class="d-list">${rows}</div>${yline}
     <div class="btns"><button class="btn alt" data-act="menu"${me.played?' data-focus':''}>Volver</button></div>`));
   paintOv();
+  // your row in sight (a long board)
+  const toMe=()=>{ const r=document.querySelector('.d-list tr.me'); if(r) r.scrollIntoView({block:'center'}); };
+  toMe(); document.fonts?.ready.then(()=>requestAnimationFrame(toMe));
 }
 // play it: the go is used on the server first (no connection: it can't be played)
 export async function playDaily(){

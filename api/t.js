@@ -271,7 +271,7 @@ async function daily(sql,pid){
   const day=dayOf(), ev=dailyEv(day), yday=dayOf(Date.now()-864e5), yev=dailyEv(yday);
   const ends=new Date(Date.parse(day+'T00:00:00Z')+(24+3)*3600e3).toISOString();
   const top=await dailyBoard(sql,day,ev), yb=await dailyBoard(sql,yday,yev);
-  const out={day,ev,ends_at:ends,count:top.length,top:top.slice(0,10),yday:{day:yday,ev:yev,count:yb.length,winner:yb[0]&&yb[0].mark!=null?yb[0]:null}};
+  const out={day,ev,ends_at:ends,count:top.length,top:top.slice(0,50),yday:{day:yday,ev:yev,count:yb.length,winner:yb[0]&&yb[0].mark!=null?yb[0]:null}};
   if(pid){ const i=top.findIndex(r=>r.player_id===pid), yi=yb.findIndex(r=>r.player_id===pid);
     const days=(await sql`select day from daily where player_id=${pid} order by day desc limit 400`).map(r=>r.day);
     let streak=0, d=days[0]===day?day:yday; for(const x of days){ if(x!==d) break; streak++; d=dayOf(Date.parse(d+'T12:00:00Z')+3*3600e3-864e5); }

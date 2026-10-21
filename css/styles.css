@@ -588,3 +588,29 @@ tr.me td{background:var(--red)}
 .d-table td.mk{text-align:right;font-weight:700}
 .d-yday{margin:2px 0 0}
 @media (max-width:520px){ .d-top{flex-direction:column} .d-pic{flex:none;max-height:120px} }
+/* the daily challenge's screen, compact (the day's board below can be long: it scrolls in its box) */
+.d-card .head h2{font-size:clamp(1rem,4.4vh,1.35rem)}
+.d-card .body{gap:6px}
+.d-card .d-top{gap:10px;align-items:center}
+.d-card .d-pic{flex:0 0 auto;width:clamp(90px,22vw,150px);aspect-ratio:16/10;max-height:none}
+.d-rules{margin:0;font-size:.78rem;line-height:1.35;color:#c9d4ea}
+.d-me{display:flex;align-items:baseline;gap:10px;background:rgba(255,255,255,.06);border-radius:8px;padding:5px 10px}
+.d-me .lbl{margin:0}
+.d-me b{font-family:var(--f-display);font-style:italic;font-weight:400;color:var(--sun);font-size:1.3rem}
+.d-me small{font-size:.8rem;color:#c9d4ea}
+.d-card .d-play{font-size:1rem;padding:5px 14px}
+/* the card at most as tall as the screen: the board takes what's left and scrolls inside it (Volver always in sight) */
+.d-card{max-height:100%}
+.d-card .body{flex:1 1 auto;min-height:0}
+.d-card .body>*{flex:none}
+.d-card .body>.d-list{flex:0 1 auto;min-height:72px;overflow-y:auto;touch-action:pan-y;border-radius:8px}
+.d-table td{padding:3px 8px;font-size:.85rem}
+.d-table td:last-child{font-size:1rem}
+.d-table tr.gap td{background:none;padding:0 8px;color:#aab8d8;line-height:1}
+.d-me .lbl,.d-me b,.d-me small{white-space:nowrap}
+.d-card .d-info{min-width:0}
+.d-me{flex-wrap:wrap;row-gap:0}
+@media (max-height:500px){ .d-card .d-pic{width:110px} }
+.d-table td.nm canvas{width:1.2em;height:1.2em}
+.d-yday{font-size:.75rem}
+@media (max-width:520px){ .d-card .d-top{flex-direction:row} .d-card .d-pic{width:96px} }
