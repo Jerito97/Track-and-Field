@@ -245,20 +245,19 @@ async function leaders(sql){
     where not (m.ev = any(${SPRINT})) order by m.ev, m.mark desc, m.made_at asc`;
   return {leaders:[...t,...f]};
 }
-// The daily challenge: one event a day, the same for everyone, one go each. Days run in Argentina's time (UTC-3). The
-// events go round in blocks of as many days as there are events, each block shuffled (from its number): every event
-// once a block, never the same two days running
+// The daily challenge: one event a day, the same for everyone, one go each. Days run in Argentina's time (UTC-3: a new
+// one at midnight there). Each day's event is drawn at random (from the date, so it's the same for everyone), any of
+// them, only never the same as the day before's
 const dayOf=(t=Date.now())=>new Date(t-3*3600e3).toISOString().slice(0,10);
-function blockOrder(b){
-  let a=b*9301+49297; const rnd=()=>(a=(a*1103515245+12345)%2147483648)/2147483648, o=EVENTS.slice();
-  for(let i=o.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [o[i],o[j]]=[o[j],o[i]]; }
-  return o;
-}
+const DAY0=Math.round(Date.parse('2026-10-01T00:00:00Z')/864e5);
+// a number in [0,1) from a day's number (the same every time)
+function dayRnd(n,k=0){ let a=(n*374761393+k*668265263)|0; a=Math.imul(a^(a>>>13),1274126177); a^=a>>>16; return (a>>>0)/4294967296; }
 function dailyEv(day){
-  const n=Math.round(Date.parse(day+'T00:00:00Z')/864e5), N=EVENTS.length, b=Math.floor(n/N), o=blockOrder(b);
-  // (the block's first day after the last one's last: swapped with its second if they're the same)
-  if(o[0]===blockOrder(b-1)[N-1]) [o[0],o[1]]=[o[1],o[0]];
-  return o[n-b*N];
+  const n=Math.round(Date.parse(day+'T00:00:00Z')/864e5), N=EVENTS.length;
+  // day by day from DAY0: a random one, drawn again (among the others) if it's the day before's
+  let prev=-1, i=0;
+  for(let d=Math.min(DAY0,n);d<=n;d++){ i=Math.floor(dayRnd(d)*N); if(i===prev) i=(i+1+Math.floor(dayRnd(d,1)*(N-1)))%N; prev=i; }
+  return EVENTS[i];
 }
 // a day's board: everyone who played it, best first (fouls last), each one's place
 async function dailyBoard(sql,day,ev){
