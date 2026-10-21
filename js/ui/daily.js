@@ -58,7 +58,7 @@ export async function showDaily(msg){
     <div class="d-top"><div class="d-pic">${art(i,true)}</div><div class="d-info">
       <p class="d-rules">1 intento (si salís o cerrás el juego, nulo) · termina en <b>${left(d.ends_at)}</b> · ${d.count} ${d.count===1?'jugó':'jugaron'}${me.streak?` · 🔥 racha de ${me.streak} ${me.streak===1?'día':'días'}`:''}</p>
       ${mine}</div></div>
-    <span class="lbl">Tabla de hoy</span><div class="d-list">${rows}</div>${yline}
+    <span class="lbl">Tabla de hoy</span><div class="d-list scroll">${rows}</div>${yline}
     <div class="btns"><button class="btn alt" data-act="menu"${me.played?' data-focus':''}>Volver</button></div>`));
   paintOv();
   // your row in sight (a long board)

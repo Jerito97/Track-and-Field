@@ -32,7 +32,7 @@ export async function showAdmin(msg){
     <div class="p-stats a-stats"><div><b>${st.players}</b><span>jugadores</span></div><div><b>${st.new_week}</b><span>nuevos esta semana</span></div><div><b>${st.marks}</b><span>récords</span></div><div><b>${st.open_tournaments}/${st.tournaments}</b><span>torneos en juego</span></div><div><b>${st.groups}</b><span>grupos</span></div></div>
     <span class="lbl">Jugadores</span>
     <input id="asearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}">
-    <div class="u-list" id="alist"></div>`,'<button class="btn alt" data-act="profile" data-focus>Volver</button>'));
+    <div class="u-list scroll" id="alist"></div>`,'<button class="btn alt" data-act="profile" data-focus>Volver</button>'));
   const inp=$('asearch'); inp.addEventListener('input',()=>{ query=inp.value; list(); }); list();
 }
 const fold=t=>String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
@@ -51,7 +51,7 @@ export function showAdminUser(id,msg,isErr){
     <span class="lbl">Nombre</span>
     <div class="g-new"><input id="aname2" maxlength="14" value="${esc(u.name)}" autocomplete="off"><button class="btn alt" data-act="arename">Renombrar</button></div>
     <span class="lbl">Récords</span>
-    <div class="u-list">${u.marks.length?u.marks.map(m=>`<div class="u-item g-mem"><span class="u-nm"><b>${evName(m.ev)}</b><small>${mk(m.ev,m.mark)}</small></span><button class="btn alt g-x" data-act="adelmark" data-ev="${esc(m.ev)}">Borrar</button></div>`).join(''):'<p class="small">Sin récords.</p>'}</div>`,
+    <div class="u-list scroll">${u.marks.length?u.marks.map(m=>`<div class="u-item g-mem"><span class="u-nm"><b>${evName(m.ev)}</b><small>${mk(m.ev,m.mark)}</small></span><button class="btn alt g-x" data-act="adelmark" data-ev="${esc(m.ev)}">Borrar</button></div>`).join(''):'<p class="small">Sin récords.</p>'}</div>`,
     `${u.locked?'<button class="btn alt" data-act="aunlock">Desbloquear</button>':''}<button class="btn alt" data-act="alogout">Cerrar sus sesiones</button>${u.admin?'':'<button class="btn alt a-del" data-act="adeluser">Borrar jugador</button>'}<button class="btn" data-act="admin">Volver</button>`));
 }
 async function run(op,extra,ok,sure,b){

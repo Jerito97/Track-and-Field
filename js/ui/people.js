@@ -37,7 +37,7 @@ let query='';
 export async function showPeople(){
   view='list'; setS(null); setScreen('menu');
   const draw=(l,msg)=>{
-    showOv(card('JUGADORES',l?`Todos los jugadores (${l.length})`:'Todos los jugadores',msg||`${listOffline?'<p class="small">Sin conexión: esta es la última lista que viste.</p>':''}<input id="usearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}"><div class="u-list">${rows(l,query)}</div>`,
+    showOv(card('JUGADORES',l?`Todos los jugadores (${l.length})`:'Todos los jugadores',msg||`${listOffline?'<p class="small">Sin conexión: esta es la última lista que viste.</p>':''}<input id="usearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}"><div class="u-list scroll">${rows(l,query)}</div>`,
       '<button class="btn" data-act="menu" data-focus>Volver</button>'));
     const inp=OV.querySelector('#usearch'); if(inp) inp.addEventListener('input',()=>{ query=inp.value; OV.querySelector('.u-list').innerHTML=rows(l,query); paintOv(); }); };
   const c=cachedPlayers(); draw(c||[], c?'':'<p class="small o-wait">Cargando…</p>');
@@ -57,6 +57,6 @@ export async function showPerson(id){
     +[['surv','Supervivencia clásica'],['survm','Supervivencia moderna']].map(([k,n])=>{ const m=marks[k]; return `<tr data-pc="surv"${recHidden('surv')}><td class="nm">${n}</td><td class="mk">${m?`${m.mark} pts`:'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo · ronda ${(m.rounds||0)+1}`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; }).join('');
   showOv(card('JUGADOR','Perfil',`
     <div class="p-row"><span class="p-av"><canvas data-color="${esc(p.color)}"></canvas></span><div><b class="u-big">${esc(p.name)}</b><p class="small">${p.id===player()?.id?'Sos vos · ':''}Juega desde el ${day(p.created_at)}</p></div></div>
-    <span class="lbl">Récords</span>${recTabs()}<table class="b-table u-recs"><tbody>${rows}</tbody></table>`,
+    <span class="lbl">Récords</span>${recTabs()}<div class="scroll"><table class="b-table u-recs"><tbody>${rows}</tbody></table></div>`,
     '<button class="btn" data-act="people" data-focus>Volver</button>'+MENU));
 }

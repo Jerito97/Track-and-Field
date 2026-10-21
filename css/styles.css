@@ -417,7 +417,7 @@ tr.me td{background:var(--red)}
 .m-bell:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .m-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:10px;background:#e8262d;color:#fff;font:700 12px/20px var(--f-body);font-style:normal;text-align:center;box-shadow:0 0 0 2px #0b1730}
 .m-badge[hidden]{display:none}
-.n-list{display:flex;flex-direction:column;gap:8px;max-height:min(60vh,420px);overflow-y:auto;touch-action:pan-y}
+.n-list{display:flex;flex-direction:column;gap:8px}
 .n-item{font:inherit;color:#fff;text-align:left;display:flex;gap:10px;align-items:center;background:#1a3060;border:2px solid #1a3060;border-radius:10px;padding:10px 12px;cursor:pointer}
 .n-item.new{background:#22407a;border-color:var(--sun)}
 .n-item:focus-visible{outline:3px solid var(--blue)}
@@ -599,11 +599,6 @@ tr.me td{background:var(--red)}
 .d-me b{font-family:var(--f-display);font-style:italic;font-weight:400;color:var(--sun);font-size:1.3rem}
 .d-me small{font-size:.8rem;color:#c9d4ea}
 .d-card .d-play{font-size:1rem;padding:5px 14px}
-/* the card at most as tall as the screen: the board takes what's left and scrolls inside it (Volver always in sight) */
-.d-card{max-height:100%}
-.d-card .body{flex:1 1 auto;min-height:0}
-.d-card .body>*{flex:none}
-.d-card .body>.d-list{flex:0 1 auto;min-height:72px;overflow-y:auto;touch-action:pan-y;border-radius:8px}
 .d-table td{padding:3px 8px;font-size:.85rem}
 .d-table td:last-child{font-size:1rem}
 .d-table tr.gap td{background:none;padding:0 8px;color:#aab8d8;line-height:1}
@@ -614,3 +609,27 @@ tr.me td{background:var(--red)}
 .d-table td.nm canvas{width:1.2em;height:1.2em}
 .d-yday{font-size:.75rem}
 @media (max-width:520px){ .d-card .d-top{flex-direction:row} .d-card .d-pic{width:96px} }
+
+/* a list or a table in its own box (.scroll): the card is never taller than the screen, the box takes what's left
+   and scrolls inside it, the rest (title, buttons, Volver) always in sight */
+.card:has(>.body>.scroll),.mm:has(>.scroll){max-height:100%}
+.card:has(>.body>.scroll)>*,.card>.body:has(>.scroll)>*,.mm:has(>.scroll)>*{flex:none}
+.card:has(>.body>.scroll)>.body{flex:1 1 auto;min-height:0}
+.card>.body>.scroll,.mm>.scroll{flex:0 1 auto;min-height:84px;overflow:auto;touch-action:pan-x pan-y;overscroll-behavior:contain;border-radius:8px}
+/* the table's column names stay up while it scrolls */
+.scroll thead th{position:sticky;top:0;z-index:1;background:#13264f}
+.b-list.scroll thead th{background:#142a55}
+.card>.body>.scroll:empty{min-height:0}
+/* a tournament on a short or narrow screen (a phone): the code and your events tighter, to leave the table room */
+@media (max-height:520px),(max-width:520px){
+  .o-card .body{gap:6px}
+  .o-code{padding:4px 10px}
+  .o-code .lbl{display:none}
+  .o-code b{font-size:1.5rem}
+  .o-inv .btn{font-size:.95rem;padding:4px 12px}
+  .o-ev{flex-direction:row;align-items:center;justify-content:space-between;padding:3px 8px;gap:6px}
+  .o-ev b{font-size:.85rem;line-height:1.1}
+  .o-ev .btn{font-size:.85rem;padding:2px 10px}
+  .o-ev span{font-size:.75rem}
+}
+@media (max-width:520px){ .o-code b{letter-spacing:.15em} .o-inv{flex-direction:column;align-items:stretch} .o-inv .btn{padding:3px 10px} .o-table td.nm canvas{display:none} }

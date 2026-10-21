@@ -75,7 +75,7 @@ export function showNotifs(){
   setS(null); setScreen('menu');
   const d=load(), list=d.list.filter(n=>text(n));
   showOv(card('AVISOS','Novedades',`
-    ${list.length?`<div class="n-list">${list.map(n=>`<button class="n-item${n.read?'':' new'}" ${act(n)}><span class="n-ic" aria-hidden="true">${icon(n)}</span><span class="n-tx"><span>${text(n)}</span><small>${ago(n.at)}</small></span></button>`).join('')}</div>`
+    ${list.length?`<div class="n-list scroll">${list.map(n=>`<button class="n-item${n.read?'':' new'}" ${act(n)}><span class="n-ic" aria-hidden="true">${icon(n)}</span><span class="n-tx"><span>${text(n)}</span><small>${ago(n.at)}</small></span></button>`).join('')}</div>`
       :'<p class="small">No hay avisos. Acá te vamos a avisar si te invitan a un torneo, cuando termina uno tuyo, si alguien te supera un récord mundial y cómo te fue en el desafío de ayer.</p>'}
     <div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div>`));
   if(d.list.some(n=>!n.read)){ d.list.forEach(n=>{ n.read=true; }); save(d); }

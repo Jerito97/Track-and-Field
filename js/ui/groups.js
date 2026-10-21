@@ -22,7 +22,7 @@ export async function showGroups(msg){
   if(!player()?.token){ showOv(card('Tus grupos','<p class="small">Para tener grupos necesitás tu jugador con código.</p>','<button class="btn" data-act="protect">Poner código</button><button class="btn alt" data-act="menu">Volver</button>')); return; }
   const draw=(m,wait)=>{ showOv(card('Tus grupos',`${err(m)}
     <div class="g-new"><input id="gname" maxlength="24" placeholder="Nombre del grupo nuevo" autocomplete="off"><button class="btn" data-act="gcreate">Crear</button></div>
-    ${wait?'<p class="small o-wait">Cargando…</p>':myGroups().length?`<div class="u-list">${myGroups().map(g=>`<button class="u-item" data-act="group" data-id="${esc(g.id)}"><span class="g-heads">${g.members.slice(0,4).map(x=>head(x.color)).join('')}</span><span class="u-nm"><b>${esc(g.name)}</b><small>${g.members.length} ${g.members.length===1?'jugador':'jugadores'}</small></span><i>›</i></button>`).join('')}</div>`
+    ${wait?'<p class="small o-wait">Cargando…</p>':myGroups().length?`<div class="u-list scroll">${myGroups().map(g=>`<button class="u-item" data-act="group" data-id="${esc(g.id)}"><span class="g-heads">${g.members.slice(0,4).map(x=>head(x.color)).join('')}</span><span class="u-nm"><b>${esc(g.name)}</b><small>${g.members.length} ${g.members.length===1?'jugador':'jugadores'}</small></span><i>›</i></button>`).join('')}</div>`
       :'<p class="small">Todavía no estás en ningún grupo. Creá uno y sumá a tus amigos para comparar récords entre ustedes.</p>'}`,
     '<button class="btn alt" data-act="board" data-focus>Récords</button><button class="btn alt" data-act="menu">Menú</button>'));
     paintOv(); $('gname').addEventListener('keydown',e=>{ if(e.key==='Enter') OV.querySelector('[data-act="gcreate"]').click(); }); };
@@ -44,10 +44,10 @@ export async function showGroup(id,msg){
   const me=player().id, owner=g.owner_id===me;
   showOv(card(esc(g.name),`${err(msg)}
     <span class="lbl">Integrantes (${g.members.length})</span>
-    <div class="u-list">${g.members.map(m=>`<div class="u-item g-mem${m.id===me?' me':''}">${head(m.color)}<span class="u-nm"><b>${esc(m.name)}</b><small>${m.id===g.owner_id?'Creó el grupo':''}${m.id===me?(m.id===g.owner_id?' · ':'')+'Vos':''}</small></span>${owner&&m.id!==me?`<button class="btn alt g-x" data-act="gremove" data-id="${esc(m.id)}" aria-label="Sacar a ${esc(m.name)}">Sacar</button>`:''}</div>`).join('')}</div>
+    <div class="u-list scroll">${g.members.map(m=>`<div class="u-item g-mem${m.id===me?' me':''}">${head(m.color)}<span class="u-nm"><b>${esc(m.name)}</b><small>${m.id===g.owner_id?'Creó el grupo':''}${m.id===me?(m.id===g.owner_id?' · ':'')+'Vos':''}</small></span>${owner&&m.id!==me?`<button class="btn alt g-x" data-act="gremove" data-id="${esc(m.id)}" aria-label="Sacar a ${esc(m.name)}">Sacar</button>`:''}</div>`).join('')}</div>
     <span class="lbl">Sumar jugadores</span>
     <input id="gsearch" class="u-search" type="search" placeholder="Buscá por nombre…" autocomplete="off" value="${esc(query)}">
-    <div class="u-list" id="gfound"></div>`,
+    <div class="u-list scroll" id="gfound"></div>`,
     `<button class="btn" data-act="board" data-i="0" data-group="${esc(g.id)}" data-focus>Ver récords</button><button class="btn alt" data-act="groups">Volver</button><button class="btn alt g-leave" data-act="gleave">Salir del grupo</button>`));
   paintOv();
   const inp=$('gsearch'), found=$('gfound');

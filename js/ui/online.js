@@ -66,7 +66,7 @@ export function onDays(d){ days=+d; OV.querySelectorAll('.o-day').forEach(b=>{ c
 export async function showHistory(){
   hubOpen=false; setS(null); setScreen('menu'); ownTours(); const pid=player().id;
   const draw=msg=>{ const fin=finishedTours(), me=player().id;
-    showOv(card('HISTORIAL',`Torneos terminados${tours?` (${fin.length})`:''}`,msg||(fin.length?`<div class="o-list">${fin.map(d=>{ const t=d.tournament, rows=standings(d), i=rows.findIndex(r=>r.player_id===me), pl=i<0?null:place(rows,i,q=>String(q.total)), win=rows.filter((r,k)=>place(rows,k,q=>String(q.total))===1).map(r=>esc(r.name)).join(' y ');
+    showOv(card('HISTORIAL',`Torneos terminados${tours?` (${fin.length})`:''}`,msg||(fin.length?`<div class="o-list scroll">${fin.map(d=>{ const t=d.tournament, rows=standings(d), i=rows.findIndex(r=>r.player_id===me), pl=i<0?null:place(rows,i,q=>String(q.total)), win=rows.filter((r,k)=>place(rows,k,q=>String(q.total))===1).map(r=>esc(r.name)).join(' y ');
       return `<button class="o-item o-tour" data-act="oopen" data-code="${t.code}"><span class="o-tn"><b>${esc(t.name)}</b><small>${day(t.closed_at||t.ends_at)} · ${rows.length} jugadores · Ganó ${win}</small></span><span class="o-pl">${pl==null?'':`${pl<=3?['🥇','🥈','🥉'][pl-1]+' ':''}${pl}º`}</span></button>`; }).join('')}</div>`
       :'<p class="small">Todavía no terminó ningún torneo tuyo.</p>'))+'');
     OV.querySelector('.o-card .body').insertAdjacentHTML('beforeend','<div class="btns"><button class="btn alt" data-act="online" data-focus>Volver</button></div>'); };
@@ -151,7 +151,7 @@ export async function showTournament(code,msg,silent){
   if(shown!==code) return;
   if(silent){ if(!onBoard(code)) return; const sig=JSON.stringify([data.entries,data.results,data.tournament.finished]); if(sig===lastSig) return autoRefresh(code); }
   lastSig=JSON.stringify([data.entries,data.results,data.tournament.finished]);
-  const keepY=silent?OV.scrollTop:0;
+  const keepY=silent?OV.scrollTop:0, keepL=silent?OV.querySelector('.o-tbl')?.scrollTop||0:0;
   // your results still waiting for connection count as played here
   const mine=pending().filter(q=>q.pid===player().id&&q.code===code&&!data.results.some(r=>r.player_id===q.pid&&r.ev===q.ev));
   data.results=data.results.concat(mine.map(q=>({player_id:q.pid,ev:q.ev,mark:q.mark})));
@@ -171,9 +171,9 @@ export async function showTournament(code,msg,silent){
       :`<div class="o-code"><div><span class="lbl">Código</span><b>${code}</b></div><div class="o-inv"><button class="btn" data-act="oinvite" data-code="${code}">Invitar jugadores</button><button class="btn alt" data-act="oshare" data-code="${code}">Compartir link</button></div></div>
     <p class="small o-note">Cada prueba se juega <b>una sola vez</b> (salir a la mitad es nulo) · El torneo ${timeLeft(t)} (${day(t.ends_at)})${rows.length<2?' · Invitá jugadores o pasales el código':''}</p>`}
     <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
-    <span class="lbl">Tabla${fin?' final':''}</span>${table}
+    <span class="lbl">Tabla${fin?' final':''}</span><div class="scroll o-tbl">${table}</div>
     <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
-  if(silent) OV.scrollTop=keepY;
+  if(silent){ OV.scrollTop=keepY; const l=OV.querySelector('.o-tbl'); if(l) l.scrollTop=keepL; }
   if(!fin) autoRefresh(code);
 }
 // who created it can end it now (asks once more first)
@@ -200,7 +200,7 @@ export async function showInvite(code,msg){
   const rows=()=>{ const f=fold(invQ.trim()), l=others.filter(p=>!f||fold(p.name).includes(f));
     return l.length?l.map(p=>`<div class="u-item o-invp"><span class="p-av sm"><canvas data-color="${esc(p.color)}"></canvas></span><span class="u-nm"><b>${esc(p.name)}</b></span>${inT.has(p.id)?'<span class="o-in">Ya está</span>':`<button class="btn" data-act="oinv" data-id="${esc(p.id)}">Invitar</button>`}</div>`).join('')
       :'<p class="small">No hay ningún jugador con ese nombre.</p>'; };
-  showOv(body(`<input id="oisearch" class="u-search" type="search" placeholder="Buscá por nombre…" autocomplete="off" value="${esc(invQ)}"><div class="u-list" id="oilist">${rows()}</div>`));
+  showOv(body(`<input id="oisearch" class="u-search" type="search" placeholder="Buscá por nombre…" autocomplete="off" value="${esc(invQ)}"><div class="u-list scroll" id="oilist">${rows()}</div>`));
   paintOv();
   const inp=$('oisearch'); inp.addEventListener('input',()=>{ invQ=inp.value; $('oilist').innerHTML=rows(); paintOv(); });
 }

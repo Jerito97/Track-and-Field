@@ -214,7 +214,7 @@ export function showProfile(msg,ok,draft){
 export function showPlayers(){
   setS(null); setScreen('menu'); const cur=player();
   showOv(`<div class="card"><div class="head"><div class="logo">JUGADORES</div><h2>¿Quién juega?</h2></div><div class="body">
-    <div class="p-list">${players().map(p=>`<button class="p-pl${cur&&p.id===cur.id?' on':''}" data-act="switch" data-id="${p.id}"><span class="p-av sm"><canvas data-color="${p.color}"></canvas></span><b>${esc(p.name)}</b><small>${p.history.length} ${p.history.length===1?'prueba':'pruebas'}</small></button>`).join('')}</div>
+    <div class="p-list scroll">${players().map(p=>`<button class="p-pl${cur&&p.id===cur.id?' on':''}" data-act="switch" data-id="${p.id}"><span class="p-av sm"><canvas data-color="${p.color}"></canvas></span><b>${esc(p.name)}</b><small>${p.history.length} ${p.history.length===1?'prueba':'pruebas'}</small></button>`).join('')}</div>
     <div class="btns"><button class="btn" data-act="newplayer">+ Nuevo jugador</button>${cur?'<button class="btn alt" data-act="profile">Volver</button>':''}</div>
   </div></div>`);
 }

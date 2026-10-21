@@ -76,7 +76,7 @@ export async function showBoard(i,from,group,sp){
     <div class="b-filters">${tabs}</div>${body}
     <div class="b-foot"><button class="b-back" data-act="${back||(ev===SURV?'sclassic':ev===SURVM?'smodern':'events')}" data-focus>Volver</button></div></div>`;
   const me=player()?.id, unit=ev.surv?'Puntos':ev.type==='sprint'?'Tiempo':'Marca';
-  const rows=top=>top.length?`<div class="b-list"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev.surv?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
+  const rows=top=>top.length?`<div class="b-list scroll"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev.surv?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
     return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev.surv?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table></div>`
     :`<p class="small b-empty">${scope?`Nadie del grupo tiene marca en esta prueba${span?(span==='year'?' este año':' este mes'):''} todavía.`:span?`Todavía no hay marcas ${span==='year'?'este año':'este mes'}. ¡La primera puede ser la tuya!`:'Todavía no hay marcas. ¡La primera puede ser la tuya!'}</p>`;
   const c=cachedTop(ev.id,scope,span), here=shownEv+span;
@@ -87,5 +87,5 @@ export async function showBoard(i,from,group,sp){
   try{ top=await loadTop(ev.id,false,scope,span); if(wasOffline(ev.id,scope,span)) note='<p class="small">Sin conexión: estos son los últimos récords que viste.</p>'; }
   catch(e){ top=scope||span?[]:localTop(ev); note=`<p class="small">${scope?'No se pudo conectar con el servidor.':'No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.'}</p>`; }
   if(shownEv+span!==here||!OV.querySelector('.b-card')) return;  // left the board meanwhile
-  const y=OV.scrollTop; showOv(card(note+rows(top)),'menu'); OV.scrollTop=y;
+  const y=OV.scrollTop, ly=OV.querySelector('.scroll')?.scrollTop||0; showOv(card(note+rows(top)),'menu'); OV.scrollTop=y; const l=OV.querySelector('.scroll'); if(l) l.scrollTop=ly;
 }
