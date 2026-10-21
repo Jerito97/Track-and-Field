@@ -11,7 +11,7 @@
 //   POST {action:'join', token, code}                       -> {ok}
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date,rounds}, ...10]}  (top=surv: survival)
-//   POST {action:'marks', token, list:[{ev,mark,date,rounds}]} -> {ok}  (your marks for the world top 10; ev 'surv': survival points)
+//   POST {action:'marks', token, list:[{ev,mark,date,rounds}]} -> {ok}  (your marks for the world top 10; ev 'surv' / 'survm': survival points, classic / modern)
 //   GET  /api/t?top=100&group=ID                            -> {top:[...every member with a mark]}  (a group's board)
 //   GET  /api/t?top=100&span=year|month[&group=ID]          -> the same for this year / this month (Argentina's time)
 //   POST {action:'groups', token}                           -> {groups:[{id,name,owner_id,members:[{id,name,color}]}]}
@@ -157,8 +157,9 @@ async function myTours(sql,u){
   return {tours:ts.map(t=>({tournament:pubT(t),entries:entries.filter(e=>e.code===t.code),results:results.filter(r=>r.code===t.code)}))};
 }
 
-// survival ('surv'): the best run's points, with the rounds it got through
-const okMark=(ev,m)=>ev==='surv'?Number.isInteger(m)&&m>=0&&m<=10000000:EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
+// survival ('surv' the classic one, 'survm' the modern one): the best run's points, with the rounds it got through
+const SURVS=['surv','survm'];
+const okMark=(ev,m)=>SURVS.includes(ev)?Number.isInteger(m)&&m>=0&&m<=10000000:EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
 // Admin: one player, by id. The first time the player named ADMIN_NAME (Jero) asks, and there's no admin yet, that
 // player becomes it for good: renaming later keeps it, and someone new taking the name doesn't get it.
 const ADMIN_NAME='jero';
@@ -177,7 +178,7 @@ async function adminOp(sql,b){
   const target=async()=>{ const t=(await sql`select id,name,admin from users where id=${pid}`)[0]; if(!t) throw new Bad(404,'No existe ese jugador.'); return t; };
   switch(b.op){
     case 'stats': {
-      const [r]=await sql`select (select count(*)::int from users) as players, (select count(*)::int from marks where ev<>'surv') as marks,
+      const [r]=await sql`select (select count(*)::int from users) as players, (select count(*)::int from marks where not (ev = any(${SURVS}))) as marks,
         (select count(*)::int from tournaments) as tournaments, (select count(*)::int from tournaments where closed_at is null and coalesce(ends_at,created_at+interval '7 days')>now()) as open_tournaments,
         (select count(*)::int from groups) as groups, (select count(*)::int from users where created_at>now()-interval '7 days') as new_week`;
       return {stats:r};
@@ -253,7 +254,7 @@ async function inGroup(sql,gid,pid){ return (await sql`select 1 from group_membe
 
 // everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
 async function people(sql){
-  const players=await sql`select u.id,u.name,u.color,u.created_at,(select count(*)::int from marks m where m.player_id=u.id and m.ev<>'surv') as marks
+  const players=await sql`select u.id,u.name,u.color,u.created_at,(select count(*)::int from marks m where m.player_id=u.id and not (m.ev = any(${SURVS}))) as marks
     from users u order by u.created_at desc limit 500`;
   return {players};
 }
@@ -336,7 +337,7 @@ async function act(sql,b){
       for(const it of list){
         const ev=String(it?.ev||''), mark=Number(it?.mark); if(!okMark(ev,mark)) continue;
         const d=new Date(Number(it.date)||Date.now()), when=(d>new Date()||d<new Date('2025-01-01')?new Date():d).toISOString();
-        const rounds=ev==='surv'?Math.max(0,Math.min(10000,Math.floor(Number(it.rounds)||0))):null;
+        const rounds=SURVS.includes(ev)?Math.max(0,Math.min(10000,Math.floor(Number(it.rounds)||0))):null;
         if(SPRINT.includes(ev)) await sql`insert into marks(player_id,ev,mark,made_at) values(${u.id},${ev},${mark},${when})
           on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark<marks.mark`;
         else await sql`insert into marks(player_id,ev,mark,made_at,rounds) values(${u.id},${ev},${mark},${when},${rounds})
@@ -440,7 +441,7 @@ export default async function handler(req,res){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
       if(req.query.leaders!=null) return res.status(200).json(await leaders(sql));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
-      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&ev!=='surv') throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }
+      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');
       return res.status(200).json(v);

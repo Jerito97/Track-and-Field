@@ -54,8 +54,9 @@ export function linkPlayer(remote){ const p=player(); if(!p) return;
 // best marks kept on the server (logging in on another phone or app): the better of each stays as personal record
 export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(marks)) return;
   marks.forEach(m=>{
-    if(m.ev==='surv'){ if(Number.isFinite(m.mark)&&(p.rec.surv==null||m.mark>p.rec.surv)){ p.rec.surv=m.mark; p.survBest={pts:m.mark,rounds:m.rounds||0,date:Date.parse(m.date)||Date.now()}; }
-      if(Number.isFinite(m.mark)) p.sent={...p.sent,surv:Math.max(m.mark,p.rec.surv)===m.mark?m.mark:p.sent?.surv}; return; }
+    if(m.ev==='surv'||m.ev==='survm'){ const k=m.ev, b=survBestKey(k);
+      if(Number.isFinite(m.mark)&&(p.rec[k]==null||m.mark>p.rec[k])){ p.rec[k]=m.mark; p[b]={pts:m.mark,rounds:m.rounds||0,date:Date.parse(m.date)||Date.now()}; }
+      if(Number.isFinite(m.mark)) p.sent={...p.sent,[k]:Math.max(m.mark,p.rec[k])===m.mark?m.mark:p.sent?.[k]}; return; }
     const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;
     const sprint=ev.type==='sprint', date=Date.parse(m.date)||Date.now(), list=p.best[ev.id]||[];
     if(!list.some(b=>b.v===m.mark)){ list.push({v:m.mark,date}); list.sort((x,y)=>sprint?x.v-y.v:y.v-x.v); p.best[ev.id]=list.slice(0,TOP); }
@@ -87,10 +88,12 @@ export function recordEvent(ev,mark,place,of,mode){
   lastPeriods=periodBest(p,ev.id,mark,sprint);
   save(); return isRec;
 }
+// survival's best run of each mode (id: 'surv' the classic one, 'survm' the modern one): its points, rounds, date
+export const survBestKey=id=>id==='survm'?'survmBest':'survBest';
 // a survival run ended: best points (and how many rounds it got through); returns true for a new best
-export function recordSurv(pts,rounds){ const p=player(); if(!p) return false;
-  const best=pts>0&&(p.rec.surv==null||pts>p.rec.surv); if(best){ p.rec.surv=pts; p.survBest={pts,rounds,date:Date.now()}; }
-  if(pts>0) periodBest(p,'surv',pts,false,rounds); save(); return best; }
+export function recordSurv(pts,rounds,id='surv'){ const p=player(); if(!p) return false;
+  const best=pts>0&&(p.rec[id]==null||pts>p.rec[id]); if(best){ p.rec[id]=pts; p[survBestKey(id)]={pts,rounds,date:Date.now()}; }
+  if(pts>0) periodBest(p,id,pts,false,rounds); save(); return best; }
 export function recordTour(pts,place){ const p=player(); if(!p) return;
   p.tours.unshift({pts,place,date:Date.now()}); if(pts>(p.rec.tour||0)) p.rec.tour=pts; save(); }
 // world record of an event: the best mark of any player on this device (machines don't count), with who set it

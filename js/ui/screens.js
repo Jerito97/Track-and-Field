@@ -353,7 +353,8 @@ OV.addEventListener('click',e=>{
   else if(a==='events') showEvents();
   else if(a==='tours'){ if(player().token) showOnline(); else showAccount('protect'); }  // tournaments: only with friends now
   else if(a==='surv') showSurvModes();
-  else if(a==='sclassic') showSurvival();
+  else if(a==='sclassic') showSurvival('classic');
+  else if(a==='smodern') showSurvival('modern');
   else if(a==='sstart') startSurvival();
   else if(a==='sresume') resumeSurvival();
   else if(a==='splay') playSurv();

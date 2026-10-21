@@ -49,17 +49,17 @@ export async function checkNotifs(){
   finally{ busy=false; }
 }
 
-const evOf=id=>id==='surv'?{id:'surv',name:'Supervivencia clásica'}:EVENTS.find(e=>e.id===id);
+const evOf=id=>id==='surv'?{id,name:'Supervivencia clásica',surv:true}:id==='survm'?{id,name:'Supervivencia moderna',surv:true}:EVENTS.find(e=>e.id===id);
 function text(n){
   if(n.k==='wr'){ const ev=evOf(n.ev); if(!ev) return '';
-    return `<b>${esc(n.who)}</b> te superó el récord mundial de <b>${esc(ev.name)}</b>: ${ev.id==='surv'?`${n.mark} pts`:fmt(ev,n.mark)}`; }
+    return `<b>${esc(n.who)}</b> te superó el récord mundial de <b>${esc(ev.name)}</b>: ${ev.surv?`${n.mark} pts`:fmt(ev,n.mark)}`; }
   if(n.k==='tn') return `${n.by?`<b>${esc(n.by)}</b> te invitó a`:'Te sumaron a'} <b>${esc(n.name)}</b>: ${n.evs===1?'tenés 1 prueba':`tenés ${n.evs} pruebas`} por jugar`;
   if(n.k==='te') return `Terminó <b>${esc(n.name)}</b>: ${n.place===1?'¡ganaste!':`quedaste ${n.place}º de ${n.of}`}`;
   return '';
 }
 // where a notice takes you: the tournament, or the event's world records
 function act(n){
-  if(n.k==='wr'){ const i=n.ev==='surv'?EVENTS.length:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-back="notifs"`; }
+  if(n.k==='wr'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-back="notifs"`; }
   return `data-act="oopen" data-code="${esc(n.code)}"`;
 }
 const icon=n=>n.k==='wr'?'🏆':n.k==='te'?'🏁':'📣';
