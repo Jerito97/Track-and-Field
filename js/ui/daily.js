@@ -43,7 +43,8 @@ export async function showDaily(msg){
   const c=cachedDaily(); if(!c) showOv(card('Desafío del día','<p class="small o-wait">Cargando…</p>'));
   let d; try{ d=await loadDaily(true); }
   catch(e){ showOv(card('Desafío del día',`<p class="o-err" role="alert">${esc(e.message)}</p><div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div>`)); return; }
-  const ev=evOf(d.ev); if(!ev) return;
+  const ev=evOf(d.ev);
+  if(!ev){ showOv(card('Desafío del día',`<p class="small">El desafío de hoy es una prueba nueva que esta versión del juego todavía no tiene.</p><div class="btns"><button class="btn" data-act="reload" data-focus>Actualizar el juego</button><button class="btn alt" data-act="menu">Volver</button></div>`)); return; }
   const me=d.me||{}, i=EVENTS.indexOf(ev);
   // the board brings the first 50: further down, you after them
   const out=me.played&&!d.top.some(r=>r.player_id===p.id);

@@ -155,7 +155,7 @@ export async function showTournament(code,msg,silent){
   // your results still waiting for connection count as played here
   const mine=pending().filter(q=>q.pid===player().id&&q.code===code&&!data.results.some(r=>r.player_id===q.pid&&r.ev===q.ev));
   data.results=data.results.concat(mine.map(q=>({player_id:q.pid,ev:q.ev,mark:q.mark})));
-  const note=(data.offline?'<p class="small">Sin conexión: esta es la última tabla que viste.</p>':'')+(mine.length?`<p class="small">${mine.length===1?'Tenés 1 resultado que se envía':`Tenés ${mine.length} resultados que se envían`} cuando vuelva la conexión.</p>`:'');
+  const note=(data.tournament.events.some(id=>!evById(id))?'<p class="small">Este torneo tiene pruebas nuevas que esta versión del juego todavía no tiene. <button class="btn alt" data-act="reload">Actualizar el juego</button></p>':'')+(data.offline?'<p class="small">Sin conexión: esta es la última tabla que viste.</p>':'')+(mine.length?`<p class="small">${mine.length===1?'Tenés 1 resultado que se envía':`Tenés ${mine.length} resultados que se envían`} cuando vuelva la conexión.</p>`:'');
   const t=data.tournament; shownT=t;
   const p=player(), evs=t.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id), fin=t.finished;
   if(!meRow){ if(fin){ showOnline('Este torneo ya terminó.'); return; } try{ await joinTournament(code); }catch(e){ showOnline(e.message); return; } return showTournament(code,msg); }

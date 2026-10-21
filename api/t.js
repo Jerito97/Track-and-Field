@@ -264,9 +264,15 @@ function dailyEv(day){
   for(let d=Math.min(DAY0,n);d<=n;d++){ const ok=EVENTS.filter(e=>!last.includes(e)); ev=ok[Math.floor(dayRnd(d)*ok.length)]; last.push(ev); if(last.length>FRESH) last.shift(); }
   return ev;
 }
-// the day's event as kept (the first time: drawn, and kept)
+// the day's event as kept. The first time it's drawn and kept: among the events that weren't in the FRESH days before
+// (those as kept, or as they'd be drawn if nobody asked for them), so adding an event changes only the days to come
 async function dayEv(sql,day){
-  await sql`insert into daily_ev(day,ev) values(${day},${dailyEv(day)}) on conflict do nothing`;
+  const kept=(await sql`select ev from daily_ev where day=${day}`)[0]; if(kept) return kept.ev;
+  const n=Math.round(Date.parse(day+'T00:00:00Z')/864e5), prev=[];
+  for(let k=1;k<=FRESH;k++) prev.push(new Date((n-k)*864e5).toISOString().slice(0,10));
+  const had=new Map((await sql`select day,ev from daily_ev where day = any(${prev})`).map(r=>[r.day,r.ev]));
+  const last=prev.map(d=>had.get(d)||dailyEv(d)), ok=EVENTS.filter(e=>!last.includes(e));
+  await sql`insert into daily_ev(day,ev) values(${day},${ok[Math.floor(dayRnd(n)*ok.length)]}) on conflict do nothing`;
   return (await sql`select ev from daily_ev where day=${day}`)[0].ev;
 }
 // a day's board: everyone who played it, best first (fouls last), each one's place
@@ -278,7 +284,7 @@ async function dailyBoard(sql,day,ev){
 }
 // today's challenge (and how yesterday's went); with a player: their go, place and streak (days in a row played)
 async function daily(sql,pid){
-  const day=dayOf(), ev=await dayEv(sql,day), yday=dayOf(Date.now()-864e5), yev=await dayEv(sql,yday);
+  const day=dayOf(), yday=dayOf(Date.now()-864e5), yev=await dayEv(sql,yday), ev=await dayEv(sql,day);
   const ends=new Date(Date.parse(day+'T00:00:00Z')+(24+3)*3600e3).toISOString();
   const top=await dailyBoard(sql,day,ev), yb=await dailyBoard(sql,yday,yev);
   const out={day,ev,ends_at:ends,count:top.length,top:top.slice(0,50),yday:{day:yday,ev:yev,count:yb.length,winner:yb[0]&&yb[0].mark!=null?yb[0]:null}};

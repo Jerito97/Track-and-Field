@@ -324,6 +324,8 @@ OV.addEventListener('click',e=>{
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='notifs') showNotifs();
   else if(a==='daily') showDaily();
+  // a newer version is needed (something the server has that this copy doesn't): the kept copy goes, load it again
+  else if(a==='reload'){ (window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):Promise.resolve()).finally(()=>location.reload()); }
   else if(a==='dplay') playDaily();
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);
   else if(a==='groups') showGroups();

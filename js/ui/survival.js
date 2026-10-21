@@ -49,7 +49,11 @@ const R=()=>G.surv;
 // the run in progress is kept on the phone (per player) after every step: leaving the game, or closing it, and coming
 // back later continues from the event that was next (an event left halfway starts over)
 const KEY=m=>`odb-${m.id}-`+(player()?.id||'');
-const saved=(m=M())=>store.get(KEY(m),null);
+// the round's events are kept by id (runs saved before were kept by place in the list, as it was then: still the
+// same, so they're read that way); one that's no longer there: the run can't go on
+const saved=(m=M())=>{ const sv=store.get(KEY(m),null); if(!sv||!Array.isArray(sv.order)) return null;
+  const order=sv.order.map(x=>typeof x==='number'?EVENTS[x]?.id:x);
+  return order.every(id=>evIdx(id)>=0)?{...sv,order}:null; };
 const keep=()=>store.set(KEY(M()),G.surv);
 
 // the survival modes: the classic one and the modern one
@@ -68,7 +72,7 @@ export function showSurvival(mode=shownMode){
   const m=MODES[mode], b=player()?.[survBestKey(m.id)], sv=saved(m);
   showOv(card('SUPERVIVENCIA',m.name,`
     <div class="s-hero"><img src="assets/thumbs/${m.img}.webp" alt=""></div>
-    ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>Ronda ${sv.round} · ${sv.pts} pts</b><small>${sv.k>=5?`Ronda ${sv.round} superada: sigue la ${sv.round+1}`:`Te toca ${EVENTS[sv.order[sv.k]]?.name||''} (${sv.k+1}/5)`}</small></div><button class="btn" data-act="sresume" data-focus>Seguir</button></div>`:''}
+    ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>Ronda ${sv.round} · ${sv.pts} pts</b><small>${sv.k>=5?`Ronda ${sv.round} superada: sigue la ${sv.round+1}`:`Te toca ${EVENTS[evIdx(sv.order[sv.k])]?.name||''} (${sv.k+1}/5)`}</small></div><button class="btn" data-act="sresume" data-focus>Seguir</button></div>`:''}
     <div class="s-best"><span class="lbl">Tu mejor partida</span><b>${b?`${b.pts} pts`:'—'}</b>${b?`<small>Llegaste a la ronda ${b.rounds+1}</small>`:''}</div>
     <div class="btns"><button class="btn${sv?' alt':''}" data-act="sstart"${sv?'':' data-focus'}>${sv?'Nueva partida':'Jugar'}</button><button class="btn alt" data-act="board" data-i="${boardI(m)}">Récords</button><button class="btn alt" data-act="surv">Volver</button></div>`));
 }
@@ -77,17 +81,17 @@ export function startSurvival(){
   if(saved()&&!startSurvival.sure){ startSurvival.sure=true; const b=document.querySelector('[data-act="sstart"]'); if(b){ b.textContent='¿Empezar de cero? Tocá de nuevo'; return; } }
   startSurvival.sure=false;
   const m=MODES[shownMode];
-  G.mode='surv'; G.surv={mode:shownMode,round:1,order:shuffle(m.evs.map(evIdx)),k:0,pts:0,won:0,log:[]}; keep();
+  G.mode='surv'; G.surv={mode:shownMode,round:1,order:shuffle(m.evs.slice()),k:0,pts:0,won:0,log:[]}; keep();
   showSurvEvent();
 }
 export function resumeSurvival(){ const sv=saved(MODES[shownMode]); if(!sv) return showSurvival(); G.mode='surv'; G.surv={mode:shownMode,...sv}; survNext(); }
 // before each event: round, event, points so far, the round's events
 function showSurvEvent(){
   const s=R(); setS(null); setScreen('menu');
-  G.evIdx=s.order[s.k]; const ev=EVENTS[G.evIdx];
+  G.evIdx=evIdx(s.order[s.k]); const ev=EVENTS[G.evIdx];
   buildAthletes(false,{name:'Máquina',target:targets(M(),s.round)});
   // the round's progress: a dot per event (done, this one, still to come)
-  const done=s.order.map((i,k)=>`<span class="s-step${k<s.k?' s-done':k===s.k?' s-now':''}" title="${EVENTS[i].name}">${k<s.k?'✓':k+1}</span>`).join('');
+  const done=s.order.map((i,k)=>`<span class="s-step${k<s.k?' s-done':k===s.k?' s-now':''}" title="${EVENTS[evIdx(i)].name}">${k<s.k?'✓':k+1}</span>`).join('');
   showOv(card(`RONDA ${s.round}`,`${ev.name} · ${s.k+1}/5`,`
     <div class="row2"><div class="pict${THUMBS[ev.id]?' img':''}">${art(G.evIdx)}</div>
       <div class="s-side"><div class="s-steps">${done}</div>
@@ -111,7 +115,7 @@ export function survAfterEvent(){
     ${roundDone?`<p class="small s-up"><b>¡Ronda ${s.round} superada! +${ROUND_BONUS} puntos de bonus.</b> En la próxima la máquina viene más fuerte.</p>`:''}
     <div class="btns"><button class="btn" data-act="snext" data-focus>${roundDone?`Ronda ${s.round+1}`:'Siguiente prueba'}</button><button class="btn alt" data-act="menu">Seguir después</button><button class="btn alt" data-act="squit">Abandonar</button></div>`));
 }
-export function survNext(){ const s=R(); if(s.k>=5){ s.round++; s.k=0; s.order=shuffle(M().evs.map(evIdx)); keep(); } showSurvEvent(); }
+export function survNext(){ const s=R(); if(s.k>=5){ s.round++; s.k=0; s.order=shuffle(M().evs.slice()); keep(); } showSurvEvent(); }
 // the run ends (lost an event, or left): points, how far, best run saved and sent to the world top 10
 export function survQuit(b){
   if(b&&!b.dataset.sure){ b.dataset.sure='1'; b.textContent='¿Terminar la partida? Tocá de nuevo'; return; }
