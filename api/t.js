@@ -246,18 +246,18 @@ async function leaders(sql){
   return {leaders:[...t,...f]};
 }
 // The daily challenge: one event a day, the same for everyone, one go each. Days run in Argentina's time (UTC-3: a new
-// one at midnight there). Each day's event is drawn at random (from the date, so it's the same for everyone), any of
-// them, only never the same as the day before's
+// one at midnight there). Each day's event is drawn at random (from the date, so it's the same for everyone) among
+// the ones that weren't in the last FRESH days
 const dayOf=(t=Date.now())=>new Date(t-3*3600e3).toISOString().slice(0,10);
-const DAY0=Math.round(Date.parse('2026-10-01T00:00:00Z')/864e5);
+const DAY0=Math.round(Date.parse('2026-10-01T00:00:00Z')/864e5), FRESH=5;
 // a number in [0,1) from a day's number (the same every time)
 function dayRnd(n,k=0){ let a=(n*374761393+k*668265263)|0; a=Math.imul(a^(a>>>13),1274126177); a^=a>>>16; return (a>>>0)/4294967296; }
 function dailyEv(day){
-  const n=Math.round(Date.parse(day+'T00:00:00Z')/864e5), N=EVENTS.length;
-  // day by day from DAY0: a random one, drawn again (among the others) if it's the day before's
-  let prev=-1, i=0;
-  for(let d=Math.min(DAY0,n);d<=n;d++){ i=Math.floor(dayRnd(d)*N); if(i===prev) i=(i+1+Math.floor(dayRnd(d,1)*(N-1)))%N; prev=i; }
-  return EVENTS[i];
+  const n=Math.round(Date.parse(day+'T00:00:00Z')/864e5);
+  // day by day from DAY0: each one drawn among the events not in the last FRESH days
+  const last=[]; let ev=EVENTS[0];
+  for(let d=Math.min(DAY0,n);d<=n;d++){ const ok=EVENTS.filter(e=>!last.includes(e)); ev=ok[Math.floor(dayRnd(d)*ok.length)]; last.push(ev); if(last.length>FRESH) last.shift(); }
+  return ev;
 }
 // a day's board: everyone who played it, best first (fouls last), each one's place
 async function dailyBoard(sql,day,ev){
