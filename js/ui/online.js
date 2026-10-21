@@ -39,14 +39,14 @@ export function showOnline(msg){
   setS(null); setScreen('menu'); ownTours(); const pid=player().id;
   const draw=()=>{ const fin=finishedTours().length;
     showOv(card('ONLINE','Torneos con amigos',`
-    <p class="small">Creá un torneo y pasales el código a tus amigos. Cada uno juega las pruebas cuando quiera; al final gana el que suma más puntos.</p>
+    <p class="small o-intro">Pasales el código a tus amigos: cada uno juega cuando quiera y gana el que suma más puntos.</p>
     ${msg?err(msg):''}
     <div class="o-two">
       <div class="o-box"><span class="lbl">Crear torneo</span>
         <input id="oname" maxlength="30" placeholder="Nombre (opcional)" autocomplete="off">
         ${evPicker(e=>!e.extra)}
-        <div class="o-days"><span class="small">Dura</span>${DAYS.map(([d,t])=>`<button class="o-day${d===days?' on':''}" data-act="odays" data-d="${d}" aria-pressed="${d===days}">${t}</button>`).join('')}</div>
-        <button class="btn" data-act="ocreate">Crear</button></div>
+        <div class="o-mk"><div class="o-days"><span class="small">Dura</span>${DAYS.map(([d,t])=>`<button class="o-day${d===days?' on':''}" data-act="odays" data-d="${d}" aria-pressed="${d===days}">${t}</button>`).join('')}</div>
+        <button class="btn" data-act="ocreate">Crear</button></div></div>
       <div class="o-box"><span class="lbl">Unirme con un código</span>
         <input id="ocode" maxlength="8" placeholder="Ej: K7Q4P" autocomplete="off" autocapitalize="characters">
         <button class="btn" data-act="ojoin">Entrar</button>

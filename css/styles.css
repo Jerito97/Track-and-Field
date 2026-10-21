@@ -524,3 +524,39 @@ tr.me td{background:var(--red)}
 .p-cat.on{background:#fff;border-color:#fff;color:var(--ink)}
 .p-cat:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .p-recs>[hidden],.u-recs tr[hidden]{display:none}
+
+/* tournaments hub: the length of the tournament and Crear on one row */
+.o-mk{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.o-mk .btn{flex:1 1 7em}
+/* short screens (a phone sideways): the records board and the tournaments hub tighter, to fit without scrolling */
+@media (max-height:520px){
+  .b-card{gap:4px}
+  .b-card .m-top{height:24px}
+  .b-card .m-logo,.b-card .m-title{font-size:1.05rem}
+  .b-big{border-spacing:0 2px}
+  .b-big td{padding:1px 10px;font-size:.9rem}
+  .b-big td.mk{font-size:1rem}
+  .b-big td.sub{font-size:.75rem}
+  .b-big td.nm canvas{width:1.25em;height:1.25em}
+  .b-big th{font-size:.62rem}
+  .b-list{padding:3px 10px}
+  .b-filters{gap:4px 10px}
+  .b-card .b-scope{padding:.15em .9em}
+  .b-card .b-tab{padding:.2em .8em}
+  .b-back{padding:.2em 2.2em}
+  .o-card .body{gap:6px}
+  .o-intro{margin:0}
+  .o-box{padding:7px 9px;gap:5px}
+  .o-box input[type=text],.o-box input:not([type]){padding:4px 9px;font-size:.95rem}
+  .o-evs{gap:3px;font-size:.82rem}
+  .o-catb{font-size:.78rem;padding:.1em .5em}
+  .o-box .btn{padding:4px 12px;font-size:1rem}
+  .o-item{padding:4px 10px}
+  .o-day{padding:2px 9px}
+}
+/* the tournaments hub upright: a little tighter too */
+@media (max-width:620px){
+  .o-box{padding:8px;gap:6px}
+  .o-evs{gap:4px}
+  .o-two{gap:8px}
+}

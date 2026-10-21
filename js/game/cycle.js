@@ -1,8 +1,9 @@
 // Track cycling (500 m time trial in a velodrome: two laps of 250 m) on the sprint engine. The pedals, one after the
 // other: a ring shows on the pedal's side (left, right, left...); hold that button and the ring fills, let go right
 // as it closes (a little before or after) for a full stroke, earlier for less (the ring filled, squared: half a ring
-// is a quarter of a stroke); held past it, the stroke is half one. The ring let go stays a moment as it was left. The air slows the rider down, more the faster it goes. At the gun the first
-// pedal; past the line the first time the bell (last lap); at the line, both red buttons to throw the bike.
+// is a quarter of a stroke); held past it, the stroke is half one. The ring let go stays a moment as it was left.
+// The air slows the rider down, more the faster it goes. At the gun the first pedal; past the line the first time
+// the bell (last lap); at the line, both red buttons to throw the bike.
 import {tone} from '../audio.js';
 import {S} from '../state.js';
 import {judge,pop} from './core.js';
