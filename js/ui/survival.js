@@ -16,8 +16,9 @@ const ROUND_BONUS=1000;
 // expert 1; the median of a few runs each): round 1 at -.4 of it, round 4 at -.05 (a casual player), 8 at .27, 12 at
 // .77, 16 at .97 (an expert's mark); after that 0.5% better every round. The 100 m and the hurdles are mostly how fast
 // the fingers go, where people fall behind the simulated players: there they count 15% and 8% slower
+// (the pole vault climbs gentler than that: a few cm a round)
 const STEPS=[1,4,8,12,16];
-const LEVELS={'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.7,14.8,14.0,12.7,12.2],lj:[6.0,7.3,8.5,10.4,11.1],pv:[5.6,6.3,7.0,8.0,8.4],jav:[62,80,96,121,131]};
+const LEVELS={'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.7,14.8,14.0,12.7,12.2],lj:[6.0,7.3,8.5,10.4,11.1],pv:[5.6,6.0,6.5,7.2,7.8],jav:[62,80,96,121,131]};
 function targets(round){
   const t={};
   CLASSIC.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';
