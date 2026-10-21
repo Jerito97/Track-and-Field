@@ -76,6 +76,9 @@ function db(){
       period text not null, mark double precision not null, made_at timestamptz not null default now(), rounds int, primary key(player_id,ev,period))`;
     // one-time resets, each run once ever: the triple jump and the hammer (and later the high jump and the shot put) start from scratch once published (the marks
     // they had were tests made while they were being tried out)
+    // the daily challenge: each player's one go at the day's event (mark null: fouled, or left / closed halfway)
+    await sql`create table if not exists daily(day text not null, player_id text not null references users(id) on delete cascade,
+      ev text not null, mark double precision, made_at timestamptz not null default now(), primary key(day,player_id))`;
     await sql`create table if not exists migrations(id text primary key, done_at timestamptz not null default now())`;
     if((await sql`insert into migrations(id) values('reset-tj-ham-1') on conflict do nothing returning id`).length)
       await sql`delete from marks where ev in ('tj','ham')`;
@@ -242,6 +245,41 @@ async function leaders(sql){
     where not (m.ev = any(${SPRINT})) order by m.ev, m.mark desc, m.made_at asc`;
   return {leaders:[...t,...f]};
 }
+// The daily challenge: one event a day, the same for everyone, one go each. Days run in Argentina's time (UTC-3). The
+// events go round in blocks of as many days as there are events, each block shuffled (from its number): every event
+// once a block, never the same two days running
+const dayOf=(t=Date.now())=>new Date(t-3*3600e3).toISOString().slice(0,10);
+function blockOrder(b){
+  let a=b*9301+49297; const rnd=()=>(a=(a*1103515245+12345)%2147483648)/2147483648, o=EVENTS.slice();
+  for(let i=o.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [o[i],o[j]]=[o[j],o[i]]; }
+  return o;
+}
+function dailyEv(day){
+  const n=Math.round(Date.parse(day+'T00:00:00Z')/864e5), N=EVENTS.length, b=Math.floor(n/N), o=blockOrder(b);
+  // (the block's first day after the last one's last: swapped with its second if they're the same)
+  if(o[0]===blockOrder(b-1)[N-1]) [o[0],o[1]]=[o[1],o[0]];
+  return o[n-b*N];
+}
+// a day's board: everyone who played it, best first (fouls last), each one's place
+async function dailyBoard(sql,day,ev){
+  const rows=await sql`select d.player_id,u.name,u.color,d.mark,d.made_at from daily d join users u on u.id=d.player_id where d.day=${day}`;
+  const sp=SPRINT.includes(ev);
+  rows.sort((a,b)=>a.mark==null?(b.mark==null?0:1):b.mark==null?-1:(sp?a.mark-b.mark:b.mark-a.mark)||new Date(a.made_at)-new Date(b.made_at));
+  return rows;
+}
+// today's challenge (and how yesterday's went); with a player: their go, place and streak (days in a row played)
+async function daily(sql,pid){
+  const day=dayOf(), ev=dailyEv(day), yday=dayOf(Date.now()-864e5), yev=dailyEv(yday);
+  const ends=new Date(Date.parse(day+'T00:00:00Z')+(24+3)*3600e3).toISOString();
+  const top=await dailyBoard(sql,day,ev), yb=await dailyBoard(sql,yday,yev);
+  const out={day,ev,ends_at:ends,count:top.length,top:top.slice(0,10),yday:{day:yday,ev:yev,count:yb.length,winner:yb[0]&&yb[0].mark!=null?yb[0]:null}};
+  if(pid){ const i=top.findIndex(r=>r.player_id===pid), yi=yb.findIndex(r=>r.player_id===pid);
+    const days=(await sql`select day from daily where player_id=${pid} order by day desc limit 400`).map(r=>r.day);
+    let streak=0, d=days[0]===day?day:yday; for(const x of days){ if(x!==d) break; streak++; d=dayOf(Date.parse(d+'T12:00:00Z')+3*3600e3-864e5); }
+    out.me={played:i>=0,mark:i>=0?top[i].mark:null,place:i>=0&&top[i].mark!=null?i+1:null,streak};
+    out.yday.me=yi>=0?{mark:yb[yi].mark,place:yb[yi].mark!=null?yi+1:null}:null; }
+  return out;
+}
 // your groups, with their members
 async function myGroups(sql,u){
   const gs=await sql`select g.id,g.name,g.owner_id,g.created_at from groups g join group_members me on me.group_id=g.id and me.player_id=${u.id} order by g.created_at`;
@@ -400,6 +438,20 @@ async function act(sql,b){
       if(!ins.length&&!(await sql`select 1 from entries where code=${code} and player_id=${p.id}`).length) throw new Bad(409,'El torneo está lleno.');
       return {ok:true};
     }
+    // the daily challenge: start (the one go is used: leaving halfway is a foul), then the mark (once, for that day)
+    case 'daily': {
+      const u=await auth(sql,b.token), day=dayOf(), ev=dailyEv(day);
+      if(b.step==='start'){ if(String(b.ev)!==ev) throw new Bad(409,'El desafío de hoy es otra prueba.');
+        const ins=await sql`insert into daily(day,player_id,ev) values(${day},${u.id},${ev}) on conflict do nothing returning day`;
+        if(!ins.length) throw new Bad(409,'Ya jugaste el desafío de hoy.');
+        return {ok:true,day}; }
+      // the mark: for the day it was started (it may have ended meanwhile), only while it's still empty
+      const d=String(b.day||''), mark=b.mark==null?null:Number(b.mark);
+      const row=(await sql`select ev,mark from daily where day=${d} and player_id=${u.id}`)[0]; if(!row) throw new Bad(404,'No empezaste ese desafío.');
+      if(mark!=null&&!(Number.isFinite(mark)&&mark>=RANGE[row.ev][0]&&mark<=RANGE[row.ev][1])) throw new Bad(400,'Marca imposible.');
+      await sql`update daily set mark=${mark}, made_at=now() where day=${d} and player_id=${u.id} and mark is null`;
+      return {ok:true};
+    }
     case 'close': {
       const u=await auth(sql,b.token), t=await getT(sql,cleanCode(b.code)); if(!t) throw new Bad(404,'No existe ese torneo.');
       if(t.host_id!==u.id) throw new Bad(403,'Solo quien creó el torneo lo puede terminar.');
@@ -440,6 +492,7 @@ export default async function handler(req,res){
     if(req.method==='GET'){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
       if(req.query.leaders!=null) return res.status(200).json(await leaders(sql));
+      if(req.query.daily!=null) return res.status(200).json(await daily(sql,req.query.player?String(req.query.player).slice(0,64):null));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
       if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');

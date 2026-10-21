@@ -17,6 +17,7 @@ import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
 import {onAdd,onCreateGroup,onLeave,onRemove,showGroup,showGroups} from './groups.js';
 import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
 import {checkNotifs,showNotifs,unread} from './notifs.js';
+import {afterDaily,dailyBar,finishDaily,leaveDaily,playDaily,refreshDailyBar,showDaily} from './daily.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {updateRemote} from '../online.js';
@@ -124,6 +125,7 @@ export function showMenu(){
   const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.webp" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-96.png" alt="">TRACK &amp; FIELD</div><div class="m-tr"><button class="m-bell" data-act="notifs" aria-label="Avisos"><span class="m-ic">${ICON.bell}</span><i class="m-badge" hidden></i></button><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></div></header>
+  <button class="m-daily" data-act="daily"${dailyBar()?'':' hidden'}>${dailyBar()}</button>
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}
@@ -131,7 +133,7 @@ export function showMenu(){
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
-  refreshBell(); checkNotifs().then(n=>{ if(n) refreshBell(); });
+  refreshBell(); checkNotifs().then(n=>{ if(n) refreshBell(); }); refreshDailyBar();
 }
 // tournaments: with friends (online) or against the machines (all 5 events in a row)
 // events: the chosen event in big, the carousel of events below
@@ -233,7 +235,7 @@ export function showPause(){
   hamPause(); shotPause();
   const online=G.mode==='online', tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">PAUSA</div><h2>${S.ev.name}</h2></div><div class="body">
-    ${online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, la partida queda guardada y la seguís después desde esta prueba.</p>':''}
+    ${G.mode==='daily'?'<p class="small">Si volvés al menú, el desafío del día cuenta como <b>nulo</b>.</p>':online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, la partida queda guardada y la seguís después desde esta prueba.</p>':''}
     <div class="btns"><button class="btn" data-act="resume" data-focus>Reanudar</button><button class="btn alt" data-act="quit">Volver al menú</button></div></div></div>`,'pause');
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
@@ -259,6 +261,7 @@ export function endEvent(vals){
   const p=ATH.map((a,i)=>pts(ev,vals[i])); G.pts[ev.id]=p;
   if(G.mode==='tour') ATH.forEach((a,i)=>G.total[i]=(G.total[i]||0)+p[i]);
   if(G.mode==='online') finishOnline(mine);
+  if(G.mode==='daily') finishDaily(mine);
   const lp={...lastPeriods};
   const results=kind=>showOv(table(ev.tag,{world:'¡Récord mundial!',year:'¡Récord del año!',month:'¡Récord del mes!'}[kind]||(newRec?'¡Nuevo récord personal!':'Resultados'),sortRows(ev,vals),r=>fmt(ev,r.v),null,'afterres'));
   // records: world (all-time), this year's, this month's. Each only if it improved your own best of that time, and only
@@ -279,6 +282,7 @@ export function endEvent(vals){
 export function afterResults(){
   const ev=S.ev;
   if(G.mode==='online'){ showTournament(G.code); return; }
+  if(G.mode==='daily'){ afterDaily(); return; }
   if(G.mode==='surv'){ survAfterEvent(); return; }
   if(G.mode!=='tour'){ showEventCard(); return; }
   const p=G.pts[ev.id];
@@ -319,6 +323,8 @@ OV.addEventListener('click',e=>{
   else if(a==='oinv') onInvite(b);
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='notifs') showNotifs();
+  else if(a==='daily') showDaily();
+  else if(a==='dplay') playDaily();
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);
   else if(a==='groups') showGroups();
   else if(a==='admin') showAdmin();
@@ -362,7 +368,7 @@ OV.addEventListener('click',e=>{
   else if(a==='squit') survQuit(b);
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='resume'){ hideOv(); setScreen('play'); }
-  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else showMenu(); }
+  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else if(G.mode==='daily') leaveDaily(); else showMenu(); }
   else if(a==='menu') showMenu();
   else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')){ b.innerHTML=ICON.snd(on); b.setAttribute('aria-label','Sonido '+(on?'activado':'apagado')); } else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }

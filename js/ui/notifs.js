@@ -1,10 +1,11 @@
 // Notices (the bell on the main menu): a tournament someone put you in (invited you, or repeated one) that you haven't
-// played yet, a tournament of yours that ended (where you finished), and a world record of yours that someone beat.
+// played yet, a tournament of yours that ended (where you finished), a world record of yours that someone beat, and
+// how yesterday's daily challenge went (if you played it).
 // Worked out on this phone from what the server says now against what it said the last time; kept per player on this
 // phone (the last 30).
 import {EVENTS} from '../config.js';
 import {fmt} from '../game/scoring.js';
-import {getLeaders,getMyTours,myTournaments} from '../online.js';
+import {getDaily,getLeaders,getMyTours,myTournaments} from '../online.js';
 import {setS,setScreen} from '../state.js';
 import {player,store} from '../storage.js';
 import {standings} from './online.js';
@@ -25,9 +26,11 @@ export async function checkNotifs(){
   const p=player(); if(!p?.token||busy||Date.now()-load().at<EVERY) return false;
   busy=true;
   try{
-    const [lead,tours]=await Promise.all([getLeaders(),getMyTours()]);
+    const [lead,tours,daily]=await Promise.all([getLeaders(),getMyTours(),getDaily(p.id).catch(()=>null)]);
     if(player()?.id!==p.id) return false;
     const d=load(), before=d.list.length; d.at=Date.now();
+    // yesterday's daily challenge, if you played it (and someone made a mark)
+    const y=daily&&daily.yday; if(y&&y.me&&y.winner) add(d,{id:'dy-'+y.day,k:'dy',ev:y.ev,who:y.winner.name,mark:y.winner.mark,place:y.me.place,of:y.count});
     // world records: the ones that were yours last time and now are someone else's (the first time, nothing: it
     // only learns which ones are yours)
     const mine=lead.filter(l=>l.player_id===p.id).map(l=>l.ev);
@@ -54,15 +57,18 @@ function text(n){
   if(n.k==='wr'){ const ev=evOf(n.ev); if(!ev) return '';
     return `<b>${esc(n.who)}</b> te superó el récord mundial de <b>${esc(ev.name)}</b>: ${ev.surv?`${n.mark} pts`:fmt(ev,n.mark)}`; }
   if(n.k==='tn') return `${n.by?`<b>${esc(n.by)}</b> te invitó a`:'Te sumaron a'} <b>${esc(n.name)}</b>: ${n.evs===1?'tenés 1 prueba':`tenés ${n.evs} pruebas`} por jugar`;
+  if(n.k==='dy'){ const ev=evOf(n.ev); if(!ev) return '';
+    return n.place===1?`¡Ganaste el desafío de ayer (<b>${esc(ev.name)}</b>)!`:`Desafío de ayer (<b>${esc(ev.name)}</b>): ${n.place?`quedaste ${n.place}º de ${n.of}`:'nulo'} · ganó <b>${esc(n.who)}</b> con ${fmt(ev,n.mark)}`; }
   if(n.k==='te') return `Terminó <b>${esc(n.name)}</b>: ${n.place===1?'¡ganaste!':`quedaste ${n.place}º de ${n.of}`}`;
   return '';
 }
 // where a notice takes you: the tournament, or the event's world records
 function act(n){
   if(n.k==='wr'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-back="notifs"`; }
+  if(n.k==='dy') return 'data-act="daily"';
   return `data-act="oopen" data-code="${esc(n.code)}"`;
 }
-const icon=n=>n.k==='wr'?'🏆':n.k==='te'?'🏁':'📣';
+const icon=n=>n.k==='wr'?'🏆':n.k==='te'?'🏁':n.k==='dy'?'⚡':'📣';
 const ago=t=>{ const m=(Date.now()-t)/60000; return m<60?`hace ${Math.max(1,Math.round(m))} min`:m<1440?`hace ${Math.round(m/60)} h`:`hace ${Math.round(m/1440)} d`; };
 // the list (opening it marks them all as seen)
 export function showNotifs(){
@@ -70,7 +76,7 @@ export function showNotifs(){
   const d=load(), list=d.list.filter(n=>text(n));
   showOv(card('AVISOS','Novedades',`
     ${list.length?`<div class="n-list">${list.map(n=>`<button class="n-item${n.read?'':' new'}" ${act(n)}><span class="n-ic" aria-hidden="true">${icon(n)}</span><span class="n-tx"><span>${text(n)}</span><small>${ago(n.at)}</small></span></button>`).join('')}</div>`
-      :'<p class="small">No hay avisos. Acá te vamos a avisar si te sumaron a un torneo, cuando termina uno tuyo y si alguien te supera un récord mundial.</p>'}
+      :'<p class="small">No hay avisos. Acá te vamos a avisar si te invitan a un torneo, cuando termina uno tuyo, si alguien te supera un récord mundial y cómo te fue en el desafío de ayer.</p>'}
     <div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div>`));
   if(d.list.some(n=>!n.read)){ d.list.forEach(n=>{ n.read=true; }); save(d); }
 }
