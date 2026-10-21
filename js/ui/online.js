@@ -159,8 +159,9 @@ export async function showTournament(code,msg,silent){
   const t=data.tournament; shownT=t;
   const p=player(), evs=t.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id), fin=t.finished;
   if(!meRow){ if(fin){ showOnline('Este torneo ya terminó.'); return; } try{ await joinTournament(code); }catch(e){ showOnline(e.message); return; } return showTournament(code,msg); }
-  const myEvs=evs.map(ev=>{ const played=ev.id in meRow.marks;
-    return `<div class="o-ev${played||fin?' done':''}"><b>${ev.name}</b>${played?`<span>${fmt(ev,meRow.marks[ev.id])} · ${pts(ev,meRow.marks[ev.id])} pts</span>`:fin?'<span class="o-np">No jugada · 0 pts</span>':`<button class="btn" data-act="oplay" data-ev="${ev.id}">Jugar</button>`}</div>`; }).join('');
+  // the ones still to play first (their Jugar in sight), short names
+  const myEvs=evs.filter(ev=>!(ev.id in meRow.marks)).concat(evs.filter(ev=>ev.id in meRow.marks)).map(ev=>{ const played=ev.id in meRow.marks;
+    return `<div class="o-ev${played||fin?' done':''}" title="${ev.name}"><b>${ev.tag}</b>${played?`<span>${fmt(ev,meRow.marks[ev.id])} · ${pts(ev,meRow.marks[ev.id])} pts</span>`:fin?'<span class="o-np">No jugada · 0 pts</span>':`<button class="btn" data-act="oplay" data-ev="${ev.id}">Jugar</button>`}</div>`; }).join('');
   const table=`<table class="o-table"><thead><tr><th></th><th></th>${evs.map(ev=>`<th>${ev.tag.replace(/ /g,'&nbsp;')}</th>`).join('')}<th>Pts</th></tr></thead><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.total));
     return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}.${fin&&pl<=3?' '+['🥇','🥈','🥉'][pl-1]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td>${evs.map(ev=>`<td class="sub">${ev.id in r.marks?fmt(ev,r.marks[ev.id]):fin?'—':'·'}</td>`).join('')}<td>${r.total}</td></tr>`; }).join('')}</tbody></table>`;
   const why={all:'Todos jugaron todas las pruebas.',time:'Se terminó el tiempo: las pruebas que no se jugaron cuentan 0.',host:'Lo terminó quien lo creó: las pruebas que no se jugaron cuentan 0.'}[t.reason]||'';
@@ -168,8 +169,7 @@ export async function showTournament(code,msg,silent){
   showOv(card('TORNEO',esc(t.name),`
     ${msg?err(msg):''}${note}
     ${fin?`<p class="small o-final"><b>¡Torneo terminado!</b> ${why}</p>`
-      :`<div class="o-code"><div><span class="lbl">Código</span><b>${code}</b></div><div class="o-inv"><button class="btn" data-act="oinvite" data-code="${code}">Invitar jugadores</button><button class="btn alt" data-act="oshare" data-code="${code}">Compartir link</button></div></div>
-    <p class="small o-note">Cada prueba se juega <b>una sola vez</b> (salir a la mitad es nulo) · El torneo ${timeLeft(t)} (${day(t.ends_at)})${rows.length<2?' · Invitá jugadores o pasales el código':''}</p>`}
+      :`<div class="o-code"><div class="o-cd"><b aria-label="Código">${code}</b><small>${timeLeft(t)}</small></div><div class="o-inv"><button class="btn" data-act="oinvite" data-code="${code}">Invitar jugadores</button><button class="btn alt" data-act="oshare" data-code="${code}">Compartir link</button></div></div>`}
     <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
     <span class="lbl">Tabla${fin?' final':''}</span><div class="scroll o-tbl">${table}</div>
     <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));

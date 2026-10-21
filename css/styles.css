@@ -620,16 +620,24 @@ tr.me td{background:var(--red)}
 .scroll thead th{position:sticky;top:0;z-index:1;background:#13264f}
 .b-list.scroll thead th{background:#142a55}
 .card>.body>.scroll:empty{min-height:0}
-/* a tournament on a short or narrow screen (a phone): the code and your events tighter, to leave the table room */
-@media (max-height:520px),(max-width:520px){
-  .o-card .body{gap:6px}
-  .o-code{padding:4px 10px}
-  .o-code .lbl{display:none}
-  .o-code b{font-size:1.5rem}
-  .o-inv .btn{font-size:.95rem;padding:4px 12px}
-  .o-ev{flex-direction:row;align-items:center;justify-content:space-between;padding:3px 8px;gap:6px}
-  .o-ev b{font-size:.85rem;line-height:1.1}
-  .o-ev .btn{font-size:.85rem;padding:2px 10px}
-  .o-ev span{font-size:.75rem}
-}
-@media (max-width:520px){ .o-code b{letter-spacing:.15em} .o-inv{flex-direction:column;align-items:stretch} .o-inv .btn{padding:3px 10px} .o-table td.nm canvas{display:none} }
+/* a phone upright: no heads in a tournament's table, the names keep a width and the events slide sideways */
+@media (max-width:520px){ .o-table td.nm canvas{display:none} .o-table td.nm{min-width:84px} }
+/* the points always in sight, at the right, when the events slide sideways */
+.o-tbl .o-table th:last-child,.o-tbl .o-table td:last-child{position:sticky;right:0;z-index:1}
+.o-tbl .o-table td:last-child{box-shadow:-8px 0 8px -6px rgba(0,0,0,.45)}
+.o-tbl .o-table th:last-child{z-index:2}
+/* a tournament: the code (and how long it has left), Invitar and Compartir in one slim row; your events in one row
+   that slides sideways if they don't fit; the rest of the card for the table */
+.o-card .body{gap:6px}
+.o-code{padding:4px 6px 4px 12px;flex-wrap:wrap;row-gap:4px}
+.o-cd{display:flex;align-items:baseline;gap:10px}
+.o-code .o-cd b{font-size:1.45rem;letter-spacing:.18em}
+.o-cd small{font-size:.75rem;color:#c9d4ea;white-space:nowrap}
+.o-inv .btn{font-size:.9rem;padding:3px 12px;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.o-inv .btn:not(.alt){box-shadow:0 3px 0 var(--red-d)}
+.o-evlist{display:flex;grid-template-columns:none;gap:6px;overflow-x:auto;touch-action:pan-x pan-y;padding-bottom:2px}
+.o-ev{flex:1 0 128px;flex-direction:row;align-items:center;justify-content:space-between;padding:4px 8px;gap:6px}
+.o-ev b{font-size:.85rem;line-height:1.1}
+.o-ev .btn{font-size:.85rem;padding:2px 10px;flex:none}
+.o-ev span{font-size:.75rem;text-align:right}
+@media (max-height:520px){ .o-card .lbl{font-size:.68rem} }
