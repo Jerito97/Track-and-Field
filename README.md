@@ -214,3 +214,11 @@ Perfiles: los récords (los tuyos en el perfil y los de cada jugador) tienen las
 Posta: récords borrados otra vez al cambiar el pase a mitad de velocidad más impulso (servidor `reset-4x100-2`, teléfonos `4x100-2`).
 
 En prueba: **Laser Run** (`js/game/laser.js` sobre el motor de los 100 m; la mira en `drawScope` de `js/render/sprint.js`). 300 m: tres tramos de 100 m con los verdes y dos puestos de tiro (a los 100 y 200 m, línea amarilla y negra). Al llegar el corredor frena solo en la línea y se ve por la mira: el tablero con 5 blancos negros se balancea (más cuanto más rápido llegó, y se va calmando); cualquier botón dispara al blanco del centro: acierto = blanco blanco, error = +5 s. Después de los 5 tiros sale de nuevo desde parado. Las máquinas también frenan a tirar (6 a 9 s) y erran a veces. Al final, los dos rojos para tirarse.
+
+## Al actualizar: que nada en curso cambie
+
+- Desafío del día: la prueba de cada día queda guardada en `daily_ev` la primera vez que se pide. Nunca cambiar ni borrar filas de días ya empezados; el sorteo (`dailyEv`/`dayEv`) se puede cambiar, solo afecta los días que vienen.
+- Pruebas nuevas: agregarlas al final de `EVENTS` (cliente y servidor). Lo guardado en el celular va por id (`'100'`, `'pv'`...), nunca por posición en la lista.
+- Datos guardados en el celular: si cambia su forma, leer también la forma vieja (como `saved()` en supervivencia).
+- Una versión vieja del juego con algo nuevo del servidor: tiene que avisar y ofrecer «Actualizar el juego» (`data-act="reload"`), nunca quedarse trabada.
+- Borrar récords o resultados: solo con una migración de una vez (`migrations`), y solo si se pidió.
