@@ -5,10 +5,10 @@
 import {OV} from '../canvas.js';
 import {EVENTS} from '../config.js';
 import {fmt} from '../game/scoring.js';
-import {getTop,sendMarks} from '../online.js';
+import {getTop,getWipes,sendMarks} from '../online.js';
 import {groupName,loadGroups,myGroups} from './groups.js';
 import {setS,setScreen} from '../state.js';
-import {periods,player,players,survBestKey,updatePlayer} from '../storage.js';
+import {applyWipes,lastWipe,periods,player,players,survBestKey,updatePlayer} from '../storage.js';
 import {esc,place,showOv} from './screens.js';
 
 const cache={};  // 'ev' (world) or 'ev:group' -> {at, top}
@@ -27,7 +27,16 @@ const SPANS=[['','Histórico'],['year','Este año'],['month','Este mes']];
 
 // your records not sent yet (or improved since): sent together; the server keeps only the better one
 let syncing=false;
+// records wiped out on the server since the last time: cleared here too (asked at most once a minute), before
+// sending anything
+let wipedAt=0;
+export async function checkWipes(){
+  if(Date.now()-wipedAt<60000) return; wipedAt=Date.now();
+  try{ const r=await getWipes(lastWipe()); if(!r.offline&&applyWipes(r.wipes||[])) Object.keys(cache).forEach(k=>delete cache[k]); }
+  catch(e){ wipedAt=0; }
+}
 export async function syncMarks(){
+  await checkWipes();
   const p=player(); if(!p||!p.token||syncing) return;
   const sent=p.sent||{}, list=EVENTS.filter(e=>p.rec[e.id]!=null&&sent[e.id]!==p.rec[e.id])
     .map(e=>({ev:e.id,mark:p.rec[e.id],date:(p.best[e.id]||[]).find(b=>b.v===p.rec[e.id])?.date}));

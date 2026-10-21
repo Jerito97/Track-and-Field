@@ -331,7 +331,7 @@ OV.addEventListener('click',e=>{
   else if(a==='groups') showGroups();
   else if(a==='admin') showAdmin();
   else if(a==='auser') showAdminUser(b.dataset.id);
-  else if(a.startsWith('a')&&['asetpin','arename','aunlock','alogout','adelmark','adeluser'].includes(a)) onAdmin(a,b);
+  else if(a.startsWith('a')&&['asetpin','arename','aunlock','alogout','adelmark','adeluser','awipe'].includes(a)) onAdmin(a,b);
   else if(a==='gcreate') onCreateGroup();
   else if(a==='group') showGroup(b.dataset.id);
   else if(a==='gadd') onAdd(b.dataset.id);

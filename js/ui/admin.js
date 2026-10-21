@@ -30,6 +30,8 @@ export async function showAdmin(msg){
   if(!OV.querySelector('.a-card')) return;
   showOv(card('Administrador',`${msg?`<p class="o-ok" role="status">${esc(msg)}</p>`:''}
     <div class="p-stats a-stats"><div><b>${st.players}</b><span>jugadores</span></div><div><b>${st.new_week}</b><span>nuevos esta semana</span></div><div><b>${st.marks}</b><span>récords</span></div><div><b>${st.open_tournaments}/${st.tournaments}</b><span>torneos en juego</span></div><div><b>${st.groups}</b><span>grupos</span></div></div>
+    <span class="lbl">Reiniciar los récords de una prueba (los de todos)</span>
+    <div class="g-new"><select id="awipe" class="u-search"><option value="">Elegí la prueba…</option>${EVENTS.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}<option value="surv">Supervivencia clásica</option><option value="survm">Supervivencia moderna</option></select><button class="btn alt a-del" data-act="awipe">Reiniciar</button></div>
     <span class="lbl">Jugadores</span>
     <input id="asearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}">
     <div class="u-list scroll" id="alist"></div>`,'<button class="btn alt" data-act="profile" data-focus>Volver</button>'));
@@ -69,5 +71,8 @@ export function onAdmin(a,b){
   if(a==='aunlock') return run('unlock',{},'Desbloqueado.');
   if(a==='alogout') return run('logout',{},'Se cerraron sus sesiones: tiene que entrar de nuevo con su código.','¿Cerrar todas? Tocá de nuevo',b);
   if(a==='adelmark') return run('delmark',{ev:b.dataset.ev},'Récord borrado.','¿Borrar? Tocá de nuevo',b);
+  if(a==='awipe'){ const ev=$('awipe').value; if(!ev) return;
+    if(!b.dataset.sure){ b.dataset.sure='1'; b.textContent=`¿Borrar todos los récords de ${evName(ev)}? Tocá de nuevo`; return; }
+    b.disabled=true; return adminOp('wipeev',{ev}).then(()=>showAdmin(`Récords de ${evName(ev)} reiniciados: en cada celular se borran la próxima vez que abra el juego.`),e=>showAdmin(e.message)); }
   if(a==='adeluser') return run('deluser',{},'Jugador borrado.','¿Borrar el jugador y todo lo suyo? Tocá de nuevo',b);
 }

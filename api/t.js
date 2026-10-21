@@ -81,6 +81,9 @@ function db(){
       ev text not null, mark double precision, made_at timestamptz not null default now(), primary key(day,player_id))`;
     // each day's event, kept the first time it's asked for (a change in how it's drawn can't change a day under way)
     await sql`create table if not exists daily_ev(day text primary key, ev text not null)`;
+    // records wiped out (one player's, or everyone's with player_id null): each phone clears what it kept of them
+    // made before «at» (else it would keep the old one as its record and never send a new, worse one)
+    await sql`create table if not exists wipes(id serial primary key, ev text not null, player_id text, at timestamptz not null default now())`;
     await sql`create table if not exists migrations(id text primary key, done_at timestamptz not null default now())`;
     if((await sql`insert into migrations(id) values('reset-tj-ham-1') on conflict do nothing returning id`).length)
       await sql`delete from marks where ev in ('tj','ham')`;
@@ -98,6 +101,8 @@ function db(){
     // 21/10/2026's challenge started over: the versions put up that night each drew a different event for it
     if((await sql`insert into migrations(id) values('reset-daily-2026-10-21') on conflict do nothing returning id`).length)
       await sql`delete from daily where day='2026-10-21'`;
+    // pole vault started over (the records cleared before lived on in the phones and in this year's / month's boards)
+    if((await sql`insert into migrations(id) values('reset-pv-2') on conflict do nothing returning id`).length) await wipe(sql,'pv',null);
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }
@@ -209,7 +214,9 @@ async function adminOp(sql,b){
       const up=await sql`update users set name=${name}, name_key=${nameKey(name)} where id=${t.id}
         and not exists(select 1 from users where name_key=${nameKey(name)} and id<>${t.id}) returning id`;
       if(!up.length) throw new Bad(409,'Ese nombre ya está usado.'); return {ok:true}; }
-    case 'delmark': { const t=await target(), ev=String(b.ev||''); await sql`delete from marks where player_id=${t.id} and ev=${ev}`; return {ok:true}; }
+    case 'delmark': { const t=await target(), ev=String(b.ev||''); await wipe(sql,ev,t.id); return {ok:true}; }
+    // every record of an event, everyone's
+    case 'wipeev': { const ev=String(b.ev||''); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); await wipe(sql,ev,null); return {ok:true}; }
     case 'deluser': { const t=await target(); if(t.admin) throw new Bad(400,'No podés borrar al administrador.');
       await sql`delete from users where id=${t.id}`;
       // their groups: to the next member, and groups left empty go
@@ -241,6 +248,13 @@ async function top(sql,ev,group,span){
       ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
       :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
   return {top:rows};
+}
+// wipe an event's records: one player's, or everyone's (player null); the world, this year's and this month's boards,
+// and a note so each phone clears its own
+async function wipe(sql,ev,pid){
+  if(pid){ await sql`delete from marks where player_id=${pid} and ev=${ev}`; await sql`delete from pmarks where player_id=${pid} and ev=${ev}`; }
+  else { await sql`delete from marks where ev=${ev}`; await sql`delete from pmarks where ev=${ev}`; }
+  await sql`insert into wipes(ev,player_id) values(${ev},${pid})`;
 }
 // the world record holder of each event (and survival): who and the mark (on a tie, whoever made it first)
 async function leaders(sql){
@@ -507,6 +521,7 @@ export default async function handler(req,res){
     if(req.method==='GET'){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
       if(req.query.leaders!=null) return res.status(200).json(await leaders(sql));
+      if(req.query.wipes!=null) return res.status(200).json({wipes:await sql`select id,ev,player_id,at from wipes where id>${Math.max(0,Math.floor(Number(req.query.after)||0))} order by id limit 200`});
       if(req.query.daily!=null) return res.status(200).json(await daily(sql,req.query.player?String(req.query.player).slice(0,64):null));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
       if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }

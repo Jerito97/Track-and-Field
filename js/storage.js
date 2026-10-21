@@ -63,6 +63,21 @@ export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(m
     if(p.rec[ev.id]==null||better(sprint,m.mark,p.rec[ev.id])) p.rec[ev.id]=m.mark;
     p.sent={...p.sent,[ev.id]:m.mark}; });  // what the server has: only a better local record is sent again
   save(); }
+// records wiped out on the server (wipes: [{id, ev, player_id (null: everyone), at}]): what the players here kept of
+// that event from before then goes (marks made since stay, and the best of them is the record again), so the old
+// one doesn't keep blocking new ones from being sent. The last one applied is kept on this device
+export const lastWipe=()=>store.get('odb-wipe',0);
+export function applyWipes(wipes){
+  if(!wipes.length) return false;
+  wipes.forEach(w=>{ const at=Date.parse(w.at)||Date.now(), ev=w.ev;
+    DB.list.filter(p=>!w.player_id||p.id===w.player_id).forEach(p=>{
+      if(ev==='surv'||ev==='survm'){ const k=survBestKey(ev), b=p[k]; if(!b||!(b.date>=at)){ delete p[k]; delete p.rec[ev]; } }
+      else { const l=(p.best[ev]||[]).filter(b=>b.date>=at); if(l.length){ p.best[ev]=l; p.rec[ev]=l[0].v; } else { delete p.best[ev]; delete p.rec[ev]; } }
+      if(p.sent) delete p.sent[ev];
+      const pb=p.pb&&p.pb[ev]; if(pb) ['y','m'].forEach(s=>{ if(pb[s]&&!(pb[s].date>=at)) delete pb[s]; });
+      if(p.psent) Object.keys(p.psent).forEach(k=>{ if(k.startsWith(ev+'|')) delete p.psent[k]; }); }); });
+  save(); store.set('odb-wipe',Math.max(lastWipe(),...wipes.map(w=>w.id))); return true;
+}
 export function updatePlayer(fields){ const p=player(); if(!p) return; Object.assign(p,fields); save(); }
 export function deletePlayer(id){ DB.list=DB.list.filter(p=>p.id!==id); if(DB.cur===id) DB.cur=DB.list[0]?.id||null; save(); bind(); }
 const better=(sprint,a,b)=>sprint?a<b:a>b;

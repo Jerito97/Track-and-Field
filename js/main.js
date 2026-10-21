@@ -34,6 +34,8 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
 }
 // back online: records made without connection go up to the world top 10, waiting tournament results are sent
 addEventListener('online',()=>{ syncMarks(); flush(); });
+// at the start: records wiped out on the server meanwhile are cleared here, and what's waiting goes up
+syncMarks();
 // leaving the app (or locking the phone) in the middle of an event pauses it
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&screen==='play'&&S&&S.ev&&!S.replay&&S.phase!=='lap') showPause(); });
 let lastT=performance.now();

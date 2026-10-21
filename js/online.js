@@ -44,6 +44,7 @@ export const inviteLink=code=>{ const u=new URL(location.href); u.search='?t='+c
 // who holds the world record of each event (and survival)
 export const getLeaders=async()=>(await call('GET',null,'?leaders=1')).leaders;
 // the daily challenge: today's (its board, your go, your streak) and yesterday's; start (uses your one go) and the mark
+export const getWipes=after=>call('GET',null,'?wipes=1&after='+after);
 export const getDaily=pid=>call('GET',null,'?daily=1'+(pid?'&player='+encodeURIComponent(pid):''));
 export const dailyStart=ev=>call('POST',{action:'daily',step:'start',ev,token:tok()});
 export const dailyFinish=(day,mark)=>call('POST',{action:'daily',step:'mark',day,mark,token:tok()});
