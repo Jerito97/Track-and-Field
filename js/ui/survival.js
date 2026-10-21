@@ -18,7 +18,7 @@ const ROUND_BONUS=1000;
 // the fingers go, where people fall behind the simulated players: there they count 15% and 8% slower
 // (the pole vault climbs gentler than that: a few cm a round)
 const STEPS=[1,4,8,12,16];
-const LEVELS={'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.4,14.4,13.5,12.4,11.9],lj:[6.3,7.6,8.8,10.6,11.2],pv:[5.6,5.9,6.3,6.8,7.3],jav:[62,80,96,121,131]};
+const LEVELS={'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.0,14.0,13.1,12.1,11.7],lj:[6.3,7.6,8.8,10.6,11.2],pv:[5.6,5.9,6.3,6.8,7.3],jav:[62,80,96,121,131]};
 function targets(round){
   const t={};
   CLASSIC.forEach(ev=>{ const L=LEVELS[ev.id], sprint=ev.type==='sprint';
