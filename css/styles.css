@@ -6,12 +6,13 @@
   --f-body:"Barlow",system-ui,sans-serif;
   color-scheme:dark;
 }
-html,body{height:100%;margin:0;background:#0b1730;overflow:hidden;touch-action:none;
+/* text-size-adjust: Safari on an iPhone sideways would blow the text up on its own */
+html,body{height:100%;margin:0;background:#0b1730;overflow:hidden;touch-action:none;overscroll-behavior:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;font-family:var(--f-body);color:var(--ink)}
 *,*::before,*::after{box-sizing:border-box}
 #game{position:fixed;inset:0;display:block}
 #rot{position:fixed;left:16px;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));text-align:center;color:#c9d4ea;font-size:.9rem;font-weight:700;pointer-events:none;margin:0}
-#ov{position:fixed;inset:0;z-index:5;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;
+#ov{position:fixed;inset:0;z-index:5;overflow-x:hidden;overflow-y:auto;overscroll-behavior:none;display:flex;justify-content:center;align-items:flex-start;
   padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:rgba(8,16,34,.72);touch-action:pan-y}
 #ov.clear{background:transparent;pointer-events:none}
 #ov.clear .card{pointer-events:auto}
@@ -641,3 +642,12 @@ tr.me td{background:var(--red)}
 .o-ev .btn{font-size:.85rem;padding:2px 10px;flex:none}
 .o-ev span{font-size:.75rem;text-align:right}
 @media (max-height:520px){ .o-card .lbl{font-size:.68rem} }
+/* a swipe in a box (a list, the table, the row of events) that has nothing left to slide doesn't drag the screen */
+.o-evlist{overscroll-behavior:contain}
+/* a tournament: smaller titles, the table a bit tighter */
+.o-card .logo{font-size:1.1rem;padding-top:2px;padding-bottom:2px}
+.o-card .head{min-height:34px}
+.o-card .head h2{font-size:1.15rem}
+.o-card .lbl{font-size:.66rem}
+.o-tbl .o-table td{padding:3px 8px;font-size:.88rem}
+.o-tbl .o-table td:last-child{font-size:1.05rem}
