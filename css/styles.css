@@ -651,3 +651,5 @@ tr.me td{background:var(--red)}
 .o-card .lbl{font-size:.66rem}
 .o-tbl .o-table td{padding:3px 8px;font-size:.88rem}
 .o-tbl .o-table td:last-child{font-size:1.05rem}
+/* an event played: its points, on one line (the mark is in the table) */
+.o-ev span{white-space:nowrap;font-weight:700}
