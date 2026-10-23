@@ -46,7 +46,7 @@ export function switchPlayer(id){ if(DB.list.some(p=>p.id===id)){ DB.cur=id; sav
 export function linkPlayer(remote){ const p=player(); if(!p) return;
   if(p.id!==remote.id) p.sent={};
   const twin=DB.list.find(q=>q!==p&&q.id===remote.id);
-  if(twin){ p.history=p.history.concat(twin.history).sort((a,b)=>b.date-a.date).slice(0,HISTORY_MAX); p.tours=p.tours.concat(twin.tours);
+  if(twin){ p.played=playedCount(p)+playedCount(twin); p.history=p.history.concat(twin.history).sort((a,b)=>b.date-a.date).slice(0,HISTORY_MAX); p.tours=p.tours.concat(twin.tours);
     Object.entries(twin.rec).forEach(([k,v])=>{ const sprint=k==='100'||k==='110h'; if(p.rec[k]==null||(k==='tour'?v>p.rec[k]:better(sprint,v,p.rec[k]))) p.rec[k]=v; });
     Object.entries(twin.best).forEach(([k,l])=>{ p.best[k]=(p.best[k]||[]).concat(l); });
     DB.list=DB.list.filter(q=>q!==twin); }
@@ -92,8 +92,12 @@ function periodBest(p,id,mark,sprint,rounds){
 // what the last event improved, for the end of the event (this year's / this month's best)
 export let lastPeriods={};
 // an event finished: history, top 5 and personal record; returns true for a new personal record
+// events played: a count of its own (the history keeps only the last HISTORY_MAX; players from before the count:
+// what their history has)
+export const playedCount=p=>Math.max(p.played||0,(p.history||[]).length);
 export function recordEvent(ev,mark,place,of,mode){
   const p=player(); if(!p) return false;
+  p.played=playedCount(p)+1;
   p.history.unshift({ev:ev.id,mark,place,of,mode,date:Date.now()}); p.history.length=Math.min(p.history.length,HISTORY_MAX);
   lastPeriods={};
   if(mark==null){ save(); return false; }

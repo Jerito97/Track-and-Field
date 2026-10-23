@@ -25,7 +25,7 @@ import {finishOnline,leaveOnline,onClose,onCreate,onDays,onInvite,onJoin,onRepea
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
 import {ATH,buildAthletes,G,ME,S,setS,setScreen} from '../state.js';
-import {COLORS,lastPeriods,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
+import {COLORS,lastPeriods,playedCount,player,players,rec,recordEvent,recordTour,store,STYLE,switchPlayer,updatePlayer,worldRec} from '../storage.js';
 
 export function hideOv(){ OV.hidden=true; OV.innerHTML=''; }
 export function showOv(html,clear){ setScreen('menu'); OV.className=clear===true?'clear':(clear||''); OV.innerHTML=html; OV.hidden=false; OV.scrollTop=0; paintOv();
@@ -202,7 +202,7 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats"><div><b>${p.history.length}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div></div>
+    <div class="p-stats"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div></div>
     <span class="lbl">Tus récords</span>${recTabs()}<div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
@@ -214,7 +214,7 @@ export function showProfile(msg,ok,draft){
 export function showPlayers(){
   setS(null); setScreen('menu'); const cur=player();
   showOv(`<div class="card"><div class="head"><div class="logo">JUGADORES</div><h2>¿Quién juega?</h2></div><div class="body">
-    <div class="p-list scroll">${players().map(p=>`<button class="p-pl${cur&&p.id===cur.id?' on':''}" data-act="switch" data-id="${p.id}"><span class="p-av sm"><canvas data-color="${p.color}"></canvas></span><b>${esc(p.name)}</b><small>${p.history.length} ${p.history.length===1?'prueba':'pruebas'}</small></button>`).join('')}</div>
+    <div class="p-list scroll">${players().map(p=>`<button class="p-pl${cur&&p.id===cur.id?' on':''}" data-act="switch" data-id="${p.id}"><span class="p-av sm"><canvas data-color="${p.color}"></canvas></span><b>${esc(p.name)}</b><small>${playedCount(p)} ${playedCount(p)===1?'prueba':'pruebas'}</small></button>`).join('')}</div>
     <div class="btns"><button class="btn" data-act="newplayer">+ Nuevo jugador</button>${cur?'<button class="btn alt" data-act="profile">Volver</button>':''}</div>
   </div></div>`);
 }
