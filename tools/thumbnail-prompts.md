@@ -342,3 +342,21 @@ DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or wa
 Variantes de supervivencia (en el mismo chat, después de la de arriba):
 - **Clásica:** `Make the same image as a vintage 1980s sports poster: warm faded colors, film grain, slightly soft focus, a retro stadium. Keep the same character and pose.`
 - **Moderna:** `Make the same image at night in a futuristic stadium: neon blue and red lights, a glossy track reflecting the lights, the chasing rivals as bright digital silhouettes. Keep the same character and pose.`
+
+### Disco
+
+```
+STYLE: A 16:9 horizontal digital illustration in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look. Saturated, cheerful colors.
+
+CHARACTER (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
+
+SETTING: A large outdoor athletics stadium on a sunny day. Light blue sky with a few soft white cartoon clouds. Red-brown running track with crisp white lane lines, a bright green grass infield. In the background, two tiers of stands packed with small colorful cheering cartoon fans (many colors of shirts, some arms raised, a few small flags), four tall floodlight towers on the stadium roof, and small triangular colored flags along the roof edge. Sunlight from the upper left.
+
+EVENT AND SCENE: Discus throw, from inside a concrete throwing circle surrounded at the back and sides by a tall dark safety cage made of netting on metal posts, open at the front toward the green field. The discus is ONE flat round disc (like a big thick plate), about 22 cm wide, with a gold-brown edge and a silver center.
+
+POSE (follow exactly): The release after spinning: the athlete has turned around and is facing forward, body twisted, the right (throwing) arm swept fully out to the side and slightly forward at shoulder height, the discus just leaving the flat palm of the hand (held by the fingertips on its edge, flat, NOT gripped like a ball); the left arm thrown back and out for balance; the right leg pivoting on the toes, the left leg braced. A curved motion-blur arc behind the arm shows the spin.
+
+COMPOSITION: Camera at the athlete's chest height, side view, slightly from the front. The athlete is shown FULL BODY from head to feet, large (about 60-70% of the image height), placed in the CENTER of the image, with clear empty space around him on every side (the image will be cropped into a smaller card, so nothing important near the edges). Background slightly simpler and lighter than the athlete so he stands out.
+
+DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or watermarks anywhere (not on the bib, not on the stands, not on banners); a face, eyes or hair on the athlete; extra athletes unless asked; extra arms, legs or fingers; a realistic or 3D style. Also avoid: a frisbee; a plate of food; a CD; holding it like a shot put ball against the neck; the discus thrown overhand; two discs.
+```

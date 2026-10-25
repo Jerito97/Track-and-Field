@@ -8,6 +8,7 @@ import {drawHead} from '../draw/character.js';
 import {newEvent,startPlay} from '../game/core.js';
 import {hamPause} from '../game/hammer.js';
 import {shotPause} from '../game/shot.js';
+import {discusPause} from '../game/discus.js';
 import {startDemo} from '../game/demo.js';
 import {startLap} from '../game/lap.js';
 import {startPodium} from '../game/podium.js';
@@ -234,7 +235,7 @@ export function showEventCard(){
 // pause (button at the bottom left, or Esc): the game stops behind; resume, or back to the menu
 export function showPause(){
   if(!S||!S.ev) return;
-  hamPause(); shotPause();
+  hamPause(); shotPause(); discusPause();
   const online=G.mode==='online', tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">PAUSA</div><h2>${S.ev.name}</h2></div><div class="body">
     ${G.mode==='daily'?'<p class="small">Si volvés al menú, el desafío del día cuenta como <b>nulo</b>.</p>':online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, la partida queda guardada y la seguís después desde esta prueba.</p>':''}

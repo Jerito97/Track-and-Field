@@ -33,9 +33,9 @@ export function drawField(V){
   ctx.fillStyle=GRASS; ctx.fillRect(0,apTop,LW,LH-apTop);
   ctx.fillStyle=GRASS_L; for(let m=Math.floor(V.cam/12)*12;X(m)<LW;m+=12) ctx.fillRect(X(m),apTop,6*s,LH-apTop);
   // the runway (red, like the track) up to the line; the javelin field beyond it is grass
-  const rw=ev.kind==='ham'||ev.kind==='sp'?0:ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
+  const rw=ev.kind==='ham'||ev.kind==='sp'||ev.kind==='dis'?0:ev.kind==='jav'?Math.max(0,Math.min(LW,X(ev.line))):LW;
   ctx.fillStyle=TARTAN; ctx.fillRect(0,GY-26,rw,44); ctx.fillStyle=TARTAN_D; ctx.fillRect(0,GY-4,rw,22);
-  if(ev.kind==='ham'||ev.kind==='sp') hamField(V,X,GY,apTop,ev.kind==='ham');
+  if(ev.kind==='ham'||ev.kind==='sp'||ev.kind==='dis') hamField(V,X,GY,apTop,ev.kind!=='sp');
   else if(ev.kind==='jav'){
     const lx=X(ev.line);
     ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(lx,apTop); ctx.quadraticCurveTo(lx+14,(apTop+LH)/2,lx,LH); ctx.stroke();
@@ -56,8 +56,8 @@ export function drawField(V){
     for(let m=Math.ceil(a0*2)/2;m<=a1-.5;m+=.5){ const x=X(ev.line+m); ctx.fillStyle=INK; const whole=m%1===0; ctx.fillRect(x-.5,nb+(whole?9:12),1,whole?6:3); if(whole) txt(m+' m',x,nb+6.5,'#e8262d',11,{stroke:null}); }
     rivalFlags(V,X,GY);
   }
-  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp') rivalFlags(V,X,GY);
-  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp'||ev.kind==='lj'||ev.kind==='tj') recordLines(V,X,GY);
+  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp'||ev.kind==='dis') rivalFlags(V,X,GY);
+  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp'||ev.kind==='dis'||ev.kind==='lj'||ev.kind==='tj') recordLines(V,X,GY);
   if(ev.kind==='hj') hjField(V,X,GY,s);
   if(ev.kind==='pv'){
     const bx=X(ev.line), ux=X(ev.line+.6);
@@ -81,7 +81,7 @@ export function drawField(V){
     // triple jump: the hop's and the step's footprints too
     (V.prints||[]).forEach(x=>footprint(X(x),GY,s,1));
     if(V.print!=null){ footprint(X(V.print),GY,s,1); const gap=Math.max(0,ev.line-V.print); txt(gap<.005?'¡JUSTO!':`a ${gap.toFixed(2)} m`,X(V.print),GY+22,'#fff',11); } }
-  if(!ev.bands&&ev.kind!=='ham'&&ev.kind!=='sp'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
+  if(!ev.bands&&ev.kind!=='ham'&&ev.kind!=='sp'&&ev.kind!=='dis'&&(V.zone||S.phase==='ready'||S.phase==='run')){ const z0=X(ev.line-ev.zone), z1=X(ev.line);
     if(z1>-10&&z0<LW+10){ ctx.fillStyle='rgba(255,210,58,.35)'; ctx.fillRect(z0,GY-25,z1-z0,40);
       ctx.strokeStyle='rgba(255,210,58,.9)'; ctx.lineWidth=3; for(let x=z0+6;x<z1-6;x+=18){ ctx.beginPath(); ctx.moveTo(x,GY-14); ctx.lineTo(x+7,GY-5); ctx.lineTo(x,GY+4); ctx.stroke(); }
       ctx.fillStyle='#ffd23a'; ctx.fillRect(z0-1,GY-25,3,40); } }
@@ -112,6 +112,7 @@ export function drawField(V){
   if(hb&&!hb.far) hb.draw();
   if(hb&&hb.arc) hb.arc();
   if(ev.kind==='sp') spDraw(V,X,GY,fig);
+  if(ev.kind==='dis') disDraw(V,X,GY,fig);
   if(ev.kind==='pv'){ drawPole(V,X,GY,fig); upright(X(ev.line+.6)+6,GY,s); }
   if(ev.kind==='jav'){
     if(!V.jv&&V.meter&&V.meter.k==='jav'&&fig.jav){ if(!V.replay){ const [tx,ty,hx,hy]=fig.jav; target(hx,hy); const p=Math.min(V.meter.p,1.25); drawStar(tx+(hx-tx)*p,ty+(hy-ty)*p,8,p,true); } }
@@ -270,20 +271,42 @@ function spDraw(V,X,GY,fig){
   else if(fig&&fig.hand) ball(fig.hand[0]+2,fig.hand[1]-2);
   // the angle gauge: the needle rising (spang), then fixed where it was caught (sp), a moment after letting go too
   const m=V.meter; if(V.replay||!m||(m.k!=='sp'&&m.k!=='spang')||V.jv&&V.jv.t>.3) return;
-  const ox=X(V.x)+.9*s, oy=GY-.9*s, rr=Math.min(72,LW*.19), deg=d=>d*Math.PI/180, at=d=>[ox+Math.cos(deg(d))*rr,oy-Math.sin(deg(d))*rr];
-  ctx.save(); ctx.lineCap='round';
-  const arc=(d0,d1,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.arc(ox,oy,rr,-deg(d1),-deg(d0)); ctx.stroke(); };
-  ctx.lineCap='butt'; arc(0,SP_MAX,INK,18); arc(0,SP_MAX,'#fff',12); arc(SP_BEST-SP_ORANGE-.5,SP_BEST+SP_ORANGE+.5,'#ff8a1e',12); arc(SP_BEST-SP_GREEN-.5,SP_BEST+SP_GREEN+.5,'#2fd166',12); arc(SP_MAX-4,SP_MAX,'#e8262d',12);
-  [0,20,40,60,80].forEach(d=>{ const [x,y]=at(d); txt(d+'°',ox+(x-ox)*1.32,oy+(y-oy)*1.32,'#fff',11); });
-  const d=m.k==='sp'?m.ang:Math.min(m.hit??m.p,SP_MAX), [nx,ny]=at(d);
-  ctx.strokeStyle=INK; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(nx,ny); ctx.stroke(); ctx.strokeStyle='#ffd23a'; ctx.lineWidth=3; ctx.stroke();
-  ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill(); ctx.restore();
+  angleGauge(V,X,GY,m.k==='sp'?m.ang:Math.min(m.hit??m.p,SP_MAX));
   // then the release, as in the hammer: a still bar over the athlete, the star running to the circle at its end
   if(m.k==='sp'){ const cx=X(V.x), y=GY-3.8*s, x0=cx-64, x1=cx+64, p=Math.min(m.hit??m.p,1.25);
     ctx.lineCap='round'; ctx.strokeStyle=INK; ctx.lineWidth=11; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
     ctx.strokeStyle='#fff'; ctx.lineWidth=7; ctx.stroke(); ctx.strokeStyle='rgba(47,209,102,.9)'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+(x1-x0)*Math.min(1,p),y); ctx.stroke();
     target(x1,y); drawStar(x0+(x1-x0)*p,y,10,p,true);
     if(m.hit==null) txt('SOLTÁ EN EL CÍRCULO',cx,y-22,'#fff',16,{lw:4}); }
+}
+// the angle gauge beside the athlete (shot put, discus): its green zone and the needle at d degrees
+function angleGauge(V,X,GY,d){
+  const s=V.ppm, ox=X(V.x)+.9*s, oy=GY-.9*s, rr=Math.min(72,LW*.19), deg=d=>d*Math.PI/180, at=d=>[ox+Math.cos(deg(d))*rr,oy-Math.sin(deg(d))*rr];
+  ctx.save(); ctx.lineCap='round';
+  const arc=(d0,d1,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); ctx.arc(ox,oy,rr,-deg(d1),-deg(d0)); ctx.stroke(); };
+  ctx.lineCap='butt'; arc(0,SP_MAX,INK,18); arc(0,SP_MAX,'#fff',12); arc(SP_BEST-SP_ORANGE-.5,SP_BEST+SP_ORANGE+.5,'#ff8a1e',12); arc(SP_BEST-SP_GREEN-.5,SP_BEST+SP_GREEN+.5,'#2fd166',12); arc(SP_MAX-4,SP_MAX,'#e8262d',12);
+  [0,20,40,60,80].forEach(d=>{ const [x,y]=at(d); txt(d+'°',ox+(x-ox)*1.32,oy+(y-oy)*1.32,'#fff',11); });
+  const [nx,ny]=at(d);
+  ctx.strokeStyle=INK; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(nx,ny); ctx.stroke(); ctx.strokeStyle='#ffd23a'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill(); ctx.restore();
+}
+// the discus: in the hand (a flat disc seen edge-on), spinning through the air, lying on the grass; during the swings
+// a ring closes on it (tap when it meets the white circle); then the angle gauge
+function disDraw(V,X,GY,fig){
+  const s=V.ppm, R=Math.max(6,.14*s);
+  const disc=(x,y,tilt)=>{ ctx.save(); ctx.translate(x,y); ctx.rotate(tilt); ctx.fillStyle='#c9892b'; ctx.strokeStyle=INK; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.ellipse(0,0,R,R*.42,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#e9e2d0'; ctx.beginPath(); ctx.ellipse(0,0,R*.38,R*.16,0,0,Math.PI*2); ctx.fill(); ctx.restore(); };
+  const j=V.jv;
+  if(j&&j.disc){ const x=X(j.x), y=GY-j.y*s;
+    if(j.stuck){ ctx.fillStyle='rgba(90,60,30,.45)'; ctx.beginPath(); ctx.ellipse(x,GY+3,R*1.2,R*.35,0,0,Math.PI*2); ctx.fill(); disc(x,GY+1,0); }
+    else disc(x,y,-.25+.12*Math.sin(j.spin||0)); }
+  else if(fig&&fig.hand) disc(fig.hand[0]+3,fig.hand[1]-1,-.2);
+  const m=V.meter; if(V.replay||!m) return;
+  if(m.k==='disring'&&fig&&fig.hand){ const hx=fig.hand[0]+3, hy=fig.hand[1]-1, r0=R+12, r=Math.max(3,r0*(1+2.4*(1-m.p))), on=Math.abs(m.p-1)<=.07;
+    ctx.save(); ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.beginPath(); ctx.arc(hx,hy,r0,0,Math.PI*2); ctx.stroke();
+    ctx.lineWidth=5; ctx.strokeStyle=INK; ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=3; ctx.strokeStyle=on?'#2fd166':'#ffd23a'; ctx.stroke(); ctx.restore(); }
+  if(m.k==='disang'&&!(j&&j.t>.3)) angleGauge(V,X,GY,Math.min(m.hit??m.p,SP_MAX));
 }
 // long jump run-up: green / yellow / red bands before the board. No tapping from the green on (you keep your
 // speed and get ready); red = the last metres, where the red take-off buttons appear. The band you're in lights up.

@@ -111,7 +111,7 @@ export function update(dt){
   if(S.jv&&!S.jv.held){ tx=S.jv.x-LW*.55/S.ppm; k=8; }
   S.cam+=(tx-S.cam)*Math.min(1,dt*k);
   if(ev.kind==='pv'){ const ty=Math.max(0,S.y-2.2); S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
-  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp'){ const ty=(S.jv&&!S.jv.held)?Math.max(0,S.jv.y-3):0; S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
+  if(ev.kind==='jav'||ev.kind==='ham'||ev.kind==='sp'||ev.kind==='dis'){ const ty=(S.jv&&!S.jv.held)?Math.max(0,S.jv.y-3):0; S.camY+=(ty-S.camY)*Math.min(1,dt*5); }
   // replay snapshots on a fixed 1/60 s step (played back at 30 per second: half speed), whatever the screen's refresh rate
   if(ev.type==='field'&&(S.phase==='run'||S.phase==='act'||S.phase==='post')){ S.snapAcc=(S.snapAcc||0)+dt;
     while(S.snapAcc>=1/60){ S.snapAcc-=1/60; S.snaps.push(snap()); } if(S.snaps.length>900) S.snaps.splice(0,S.snaps.length-900); }

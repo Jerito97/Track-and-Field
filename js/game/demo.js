@@ -39,6 +39,9 @@ function caption(){
   if(k==='sp'){ if(a&&a.stage==='power') return 'TOCÁ EL VERDE DE CADA LADO PARA TOMAR FUERZA';
     if(a&&(a.stage==='gap'||a.stage==='angle')) return 'LA AGUJA SUBE: APRETÁ LOS DOS EN LO VERDE';
     if(a&&a.stage==='aim') return 'SIN SOLTAR... SOLTÁ CUANDO LA ESTRELLA LLEGUE AL CÍRCULO'; }
+  if(k==='dis'){ if(a&&a.stage==='swing') return 'LOS DOS JUNTOS JUSTO CUANDO EL ANILLO SE CIERRA: ASÍ ARRANCÁS CON MÁS VELOCIDAD';
+    if(a&&a.stage==='spin') return 'TOCÁ EL VERDE DE CADA LADO MIENTRAS GIRA';
+    if(a&&(a.stage==='gap'||a.stage==='angle')) return 'LA AGUJA SUBE: APRETÁ LOS DOS EN LO VERDE Y SALE EL DISCO'; }
   if(c&&c.type==='foot') return 'TOCÁ EL NARANJA JUSTO CUANDO EL PIE TOCA LA PISTA';
   if(k==='pv'){ if(m&&m.k==='pole'&&m.on) return 'MANTENÉ LOS DOS CUANDO LA ESTRELLA LLEGUE A LA PUNTA';
     if(m&&m.k==='rise') return 'SOLTÁ CUANDO LA ESTRELLA LLEGUE A LA OTRA PUNTA'; }
@@ -57,7 +60,7 @@ export function demoStep(dt){
   const ev=S.ev, k=ev.kind, c=S.cue, a=S.act, m=S.meter;
   if(S.phase==='ready'&&f>40){ press('L'); return; }
   // run-up taps a normal player's pace (sprints a bit faster), the timing parts close but not perfect
-  const pace=ev.type==='sprint'?14:k==='sp'?10:17;
+  const pace=ev.type==='sprint'?14:k==='sp'||k==='dis'?10:17;
   if(c&&c.type==='side'&&f%pace===0) press(c.side);
   if(c&&c.type==='num'&&f%15===0) press(c.order[c.next]);
   if(c&&c.dive&&c.t>=.25) press('B');
@@ -80,4 +83,8 @@ export function demoStep(dt){
   if(k==='ham'&&a){ if(c&&c.type==='rush'&&f%7===0) press(f%8?'L':'R');
     if(a.stage==='final'&&!m) hold(true); if(m&&m.k==='ham'&&m.p>=.92) hold(false); }
   if(k==='sp'&&a){ if(a.stage==='angle'&&m&&m.p>=44.5) hold(true); if(a.stage==='aim'&&m&&m.p>=.92) hold(false); }
+  // discus: a tap as each ring closes (let go in between), the angle a little past the green
+  if(k==='dis'&&a){ if(a.stage==='swing'){ if(m&&m.k==='disring'&&m.p>=.97&&!S.held2) hold(true); else if(S.held2&&(!m||m.p<.5)) hold(false); }
+    if(a.stage==='spin'&&S.held2) hold(false);
+    if(a.stage==='angle'&&m&&m.p>=41.5&&!S.held2) hold(true); if(a.stage==='fly'&&S.held2) hold(false); }
 }

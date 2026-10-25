@@ -1,4 +1,4 @@
-// Field events: long jump, triple jump, pole vault, javelin
+// Field events: long jump, triple jump, pole vault, javelin (the hammer, the shot put and the discus in their own files)
 import {cheer,noise,tone} from '../audio.js';
 import {GRAV} from '../config.js';
 import {POSE,runPose} from '../poses.js';
@@ -8,6 +8,7 @@ import {clamp,rand} from '../utils.js';
 import {armsFor,bothCue,judge,pop,sinceHold} from './core.js';
 import {startHammer,updateHammer} from './hammer.js';
 import {startShot,updateShot} from './shot.js';
+import {startDiscus,updateDiscus} from './discus.js';
 import {startReplay} from './replay.js';
 
 // pole vault (as in the original): the pole lowers by itself, timed so the star reaches its tip (in POLE_T s) about
@@ -59,6 +60,7 @@ export function updateField(dt){
   // hammer: no run-up, the turns start right away
   if(S.phase==='run'&&ev.kind==='ham'){ startHammer(); return; }
   if(S.phase==='run'&&ev.kind==='sp'){ startShot(); return; }
+  if(S.phase==='run'&&ev.kind==='dis'){ startDiscus(); return; }
   if(S.phase==='run'){
     if(ev.bands&&!S.prep&&ev.line-S.x<=ev.bands[0]){ S.prep=true; S.cue=null; tone(520,.06,'triangle',.04); }
     if(!S.zone&&ev.line-S.x<=ev.zone){
@@ -186,6 +188,7 @@ function footDown(a){
 export function updateAct(dt){
   if(S.act.k==='ham'){ updateHammer(dt); return; }
   if(S.act.k==='sp'){ updateShot(dt); return; }
+  if(S.act.k==='dis'){ updateDiscus(dt); return; }
   const ev=S.ev, a=S.act; a.t+=dt;
   if(a.k==='tj'&&(a.stage==='hop'||a.stage==='step')){
     const u=Math.min(1,a.t/a.T);
