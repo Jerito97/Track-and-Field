@@ -24,11 +24,18 @@ export async function loadDaily(force){
 }
 const left=t=>{ const ms=Math.max(0,new Date(t)-Date.now()), h=Math.floor(ms/3600e3); return h>=1?`${h} h`:`${Math.max(1,Math.round(ms/60000))} min`; };
 
-// the menu's bar: today's event, your streak, Jugar (or how you did)
+// how long until it ends, as a clock (h:mm:ss), for the countdown on the menu's bar
+const clock=t=>{ const s=Math.max(0,Math.floor((new Date(t)-Date.now())/1000)), h=Math.floor(s/3600), m=Math.floor(s/60)%60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; };
+// the countdown ticks every second while the bar is on screen; at zero, the next day's challenge is asked for
+globalThis.setInterval(()=>{ const el=document.querySelector('.m-daily .m-dt'); if(!el) return; el.textContent='⏱ '+clock(el.dataset.ends);
+  if(new Date(el.dataset.ends)<=Date.now()&&!el.dataset.next){ el.dataset.next='1'; data=null; refreshDailyBar(); } },1000);
+// the menu's bar: today's event, your streak, the countdown, Jugar (or how you did)
 export function dailyBar(){
   const d=cachedDaily(), ev=d&&evOf(d.ev); if(!ev) return '';
   const me=d.me, done=me&&me.played;
   return `<span class="m-dk">⚡ Desafío del día</span><b>${esc(ev.name)}</b>${me&&me.streak>1?`<span class="m-ds">🔥 ${me.streak}</span>`:''}`
+    +`<span class="m-dt" data-ends="${esc(d.ends_at)}" title="Termina en">⏱ ${clock(d.ends_at)}</span>`
     +`<span class="m-dg${done?' done':''}">${done?(me.mark!=null?`${fmt(ev,me.mark)} · ${me.place}º de ${d.count}`:'Nulo'):'Jugar ›'}</span>`;
 }
 export function refreshDailyBar(){
@@ -51,15 +58,13 @@ export async function showDaily(msg){
   const rows=d.top.length?`<table class="o-table d-table"><tbody>${d.top.map((r,k)=>{ const pl=r.mark==null?'—':place(d.top,k,q=>q.mark==null?'x':fmt(ev,q.mark))+'.';
       return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}${r.mark!=null&&k<3?' '+['🥇','🥈','🥉'][k]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${r.mark==null?'Nulo':fmt(ev,r.mark)}</td></tr>`; }).join('')}${out?`<tr class="gap"><td></td><td class="nm">…</td><td></td></tr><tr class="me"><td>${me.place?me.place+'.':'—'}</td><td class="nm"><canvas data-color="${esc(p.color)}"></canvas>${esc(p.name)}</td><td class="mk">${me.mark==null?'Nulo':fmt(ev,me.mark)}</td></tr>`:''}</tbody></table>`
     :'<p class="small">Todavía nadie lo jugó hoy: ¡estrenalo!</p>';
-  const y=d.yday, yev=evOf(y.ev), won=y.me&&y.me.place===1;
-  const yline=y.winner&&yev?`<p class="small d-yday">Ayer (${esc(yev.name)}): ${won?`<b>¡ganaste vos!</b> con ${fmt(yev,y.winner.mark)}`:`ganó <b>${esc(y.winner.name)}</b> con ${fmt(yev,y.winner.mark)}${y.me?` · vos ${y.me.place?`${y.me.place}º de ${y.count}`:'nulo'}`:''}`}</p>`:'';
   const mine=me.played?`<div class="d-me"><span class="lbl">Tu resultado</span><b>${me.mark!=null?fmt(ev,me.mark):'Nulo'}</b>${me.place?`<small>${me.place}º de ${d.count}</small>`:''}</div>`
     :`<button class="btn d-play" data-act="dplay" data-focus>Jugar · 1 intento</button>`;
   showOv(card(esc(ev.name),`${msg?`<p class="o-err" role="alert">${esc(msg)}</p>`:''}
     <div class="d-top"><div class="d-pic">${art(i,true)}</div><div class="d-info">
       <p class="d-rules">1 intento (si salís o cerrás el juego, nulo) · termina en <b>${left(d.ends_at)}</b> · ${d.count} ${d.count===1?'jugó':'jugaron'}${me.streak?` · 🔥 racha de ${me.streak} ${me.streak===1?'día':'días'}`:''}</p>
       ${mine}</div></div>
-    <span class="lbl">Tabla de hoy</span><div class="d-list scroll">${rows}</div>${yline}
+    <span class="lbl">Tabla de hoy</span><div class="d-list scroll">${rows}</div>
     <div class="btns"><button class="btn alt" data-act="menu"${me.played?' data-focus':''}>Volver</button></div>`));
   paintOv();
   // your row in sight (a long board)

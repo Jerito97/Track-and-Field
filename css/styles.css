@@ -674,3 +674,16 @@ tr.me td{background:var(--red)}
 .a-card .u-search,.a-card .g-new input,.a-card select{font-size:.85rem;padding:5px 9px}
 .a-card .btn{font-size:.85rem;padding:4px 12px}
 .a-card .p-pin{font-size:1rem}
+/* the daily challenge: the countdown on the menu's bar; its screen with smaller text */
+.m-dt{font-size:clamp(.7rem,2.8vh,.85rem);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:#dfe7f7;margin-left:auto}
+.m-dt+.m-dg{margin-left:0}
+.d-card .head h2{font-size:clamp(.95rem,4vh,1.15rem)}
+.d-card .logo{font-size:1.05rem}
+.d-rules{font-size:.7rem}
+.d-me{padding:3px 9px}
+.d-me b{font-size:1.1rem}
+.d-me small{font-size:.72rem}
+.d-card .lbl{font-size:.62rem}
+.d-table td{font-size:.78rem;padding:2px 8px}
+.d-table td:last-child{font-size:.9rem}
+.d-card .d-play{font-size:.9rem;padding:4px 12px}
