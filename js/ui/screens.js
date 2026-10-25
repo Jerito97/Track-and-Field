@@ -12,7 +12,7 @@ import {startDemo} from '../game/demo.js';
 import {startLap} from '../game/lap.js';
 import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
-import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
+import {cachedTop,loadTop,onBoardCat,showBoard,syncMarks} from './board.js';
 import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
 import {friendsStrip,onAddFriend,refreshFriendsStrip,showFriends} from './friends.js';
 import {personAdd,personDel,showPeople,showPerson} from './people.js';
@@ -20,7 +20,7 @@ import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {afterDaily,dailyBar,finishDaily,leaveDaily,playDaily,refreshDailyBar,showDaily} from './daily.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
-import {updateRemote} from '../online.js';
+import {getProfile,updateRemote} from '../online.js';
 import {finishOnline,leaveOnline,onClose,onCreate,onDays,onInvite,onJoin,onRepeat,onShare,playOnline,showHistory,showInvite,shownCode,showOnline,showRepeat,showTournament,toggleCat} from './online.js';
 import {POSE,runPose} from '../poses.js';
 import {animReady,drawAthlete,rigReady} from '../rig.js';
@@ -202,10 +202,12 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div></div>
+    <div class="p-stats"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b id="pdaily">${p.token?'…':'—'}</b><span>desafíos del día ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div><div><b>${p.survmBest?p.survmBest.pts:'—'}</b><span>mejor supervivencia moderna</span></div></div>
     <span class="lbl">Tus récords</span>${recTabs()}<div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
+  // the daily challenges won come from the server
+  if(p.token) getProfile(p.id).then(r=>{ const el=$('pdaily'); if(el&&player()===p) el.textContent=r.daily_wins??'—'; },()=>{ const el=$('pdaily'); if(el) el.textContent='—'; });
   checkAdmin(()=>{ if(OV.querySelector('.p-prof')&&!OV.querySelector('.a-btn')) OV.querySelector('.p-prof .btns').insertAdjacentHTML('beforeend','<button class="btn alt a-btn" data-act="admin">Administrador</button>'); });
   const pn=$('pname'), rb=OV.querySelector('[data-act="rename"]');
   pn.addEventListener('input',()=>{ rb.disabled=pn.value.replace(/\s+/g,' ').trim()===p.name; });
@@ -327,6 +329,7 @@ OV.addEventListener('click',e=>{
   // a newer version is needed (something the server has that this copy doesn't): the kept copy goes, load it again
   else if(a==='reload'){ (window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):Promise.resolve()).finally(()=>location.reload()); }
   else if(a==='dplay') playDaily();
+  else if(a==='bcat') onBoardCat(b.dataset.c);
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);
   else if(a==='friends'||a==='groups') showFriends();
   else if(a==='fadd'){ if(b.dataset.from==='person') personAdd(b); else onAddFriend(b); }

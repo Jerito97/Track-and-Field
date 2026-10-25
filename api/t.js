@@ -104,6 +104,18 @@ function db(){
     // the groups gave way to friends: everyone in a group gets the others in it as friends
     if((await sql`insert into migrations(id) values('groups-to-friends-1') on conflict do nothing returning id`).length)
       await sql`insert into friends(player_id,friend_id) select a.player_id,b.player_id from group_members a join group_members b on a.group_id=b.group_id and a.player_id<>b.player_id on conflict do nothing`;
+    // the boards agree once: each period's best has the all-time marks made in it, the all-time has every period's best
+    if((await sql`insert into migrations(id) values('boards-agree-1') on conflict do nothing returning id`).length){
+      for(const m of await sql`select player_id,ev,mark,made_at,rounds from marks`) for(const pk of periods(m.made_at)){
+        if(SPRINT.includes(m.ev)) await sql`insert into pmarks(player_id,ev,period,mark,made_at,rounds) values(${m.player_id},${m.ev},${pk},${m.mark},${m.made_at},${m.rounds})
+          on conflict(player_id,ev,period) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark<pmarks.mark`;
+        else await sql`insert into pmarks(player_id,ev,period,mark,made_at,rounds) values(${m.player_id},${m.ev},${pk},${m.mark},${m.made_at},${m.rounds})
+          on conflict(player_id,ev,period) do update set mark=excluded.mark, made_at=excluded.made_at, rounds=excluded.rounds where excluded.mark>pmarks.mark`; }
+      for(const m of await sql`select player_id,ev,mark,made_at,rounds from pmarks`){
+        if(SPRINT.includes(m.ev)) await sql`insert into marks(player_id,ev,mark,made_at,rounds) values(${m.player_id},${m.ev},${m.mark},${m.made_at},${m.rounds})
+          on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at where excluded.mark<marks.mark`;
+        else await sql`insert into marks(player_id,ev,mark,made_at,rounds) values(${m.player_id},${m.ev},${m.mark},${m.made_at},${m.rounds})
+          on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at, rounds=excluded.rounds where excluded.mark>marks.mark`; } }
     // pole vault started over (the records cleared before lived on in the phones and in this year's / month's boards)
     if((await sql`insert into migrations(id) values('reset-pv-2') on conflict do nothing returning id`).length) await wipe(sql,'pv',null);
   })().catch(e=>{ ready=null; throw e; });
@@ -236,23 +248,16 @@ const periods=t=>{ const d=new Date(new Date(t).getTime()-3*3600000), y=String(d
 async function top(sql,ev,fof,span){
   // a player's friends board (fof: the player): them and their friends; else the world's top 10
   const ids=fof?[fof,...(await sql`select friend_id from friends where player_id=${fof}`).map(r=>r.friend_id)]:null, n=fof?MAX_FRIENDS+1:10;
-  // this year / this month: each player's best of that period
-  if(span==='year'||span==='month'){
-    const per=periods(Date.now())[span==='year'?0:1];
-    const rows=ids
-      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id where m.ev=${ev} and m.period=${per} and m.player_id = any(${ids})`
-      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id where m.ev=${ev} and m.period=${per}`;
-    const sp=SPRINT.includes(ev); rows.sort((a,b)=>(sp?a.mark-b.mark:b.mark-a.mark)||new Date(a.date)-new Date(b.date));
-    return {top:rows.slice(0,n)};
-  }
-  const rows=ids
-    ?(SPRINT.includes(ev)
-      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} and m.player_id = any(${ids}) order by m.mark asc, m.made_at asc limit ${n}`
-      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} and m.player_id = any(${ids}) order by m.mark desc, m.made_at asc limit ${n}`)
-    :SPRINT.includes(ev)
-      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
-      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
-  return {top:rows};
+  // every board checks the others: a mark in the all-time one made this year (or month) is in this year's (month's)
+  // too, and the all-time one has the best of a player even if it only reached a period's board
+  const all=await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev}`;
+  const per=await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds,m.period from pmarks m join users u on u.id=m.player_id where m.ev=${ev}`;
+  // (a period's board: every mark made in it, wherever it was kept)
+  const k=span==='year'?0:span==='month'?1:-1, now=k<0?null:periods(Date.now())[k];
+  const rows=all.concat(per).filter(r=>k<0||periods(r.date)[k]===now);
+  const sp=SPRINT.includes(ev), better=(a,b)=>(sp?a.mark-b.mark:b.mark-a.mark)||new Date(a.date)-new Date(b.date), best=new Map();
+  rows.forEach(r=>{ if(ids&&!ids.includes(r.player_id)) return; const o=best.get(r.player_id); if(!o||better(r,o)<0) best.set(r.player_id,r); });
+  return {top:[...best.values()].sort(better).slice(0,n).map(({period,...r})=>r)};
 }
 // wipe an event's records: one player's, or everyone's (player null); the world, this year's and this month's boards,
 // and a note so each phone clears its own
@@ -333,7 +338,11 @@ async function profile(sql,id){
     1+(select count(*)::int from marks o where o.ev=m.ev and ((case when m.ev = any(${SPRINT}) then o.mark<m.mark else o.mark>m.mark end)
       or o.mark=m.mark and o.made_at<m.made_at)) as rank
     from marks m where m.player_id=${id}`;
-  return {player:u,marks};
+  // daily challenges won: days already over that they played where nobody beat their mark (a tie: who made it first)
+  const days=await sql`select day,ev,player_id,mark,made_at from daily where mark is not null and day<${dayOf()}
+    and day in (select day from daily where player_id=${id} and mark is not null)`, win=new Map();
+  days.forEach(r=>{ const o=win.get(r.day), sp=SPRINT.includes(r.ev); if(!o||(sp?r.mark<o.mark:r.mark>o.mark)||r.mark===o.mark&&new Date(r.made_at)<new Date(o.made_at)) win.set(r.day,r); });
+  return {player:u,marks,daily_wins:[...win.values()].filter(r=>r.player_id===id).length};
 }
 
 async function act(sql,b){

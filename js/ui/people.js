@@ -58,6 +58,7 @@ export async function showPerson(id,back){
     +[['surv','Supervivencia clásica'],['survm','Supervivencia moderna']].map(([k,n])=>{ const m=marks[k]; return `<tr data-pc="surv"${recHidden('surv')}><td class="nm">${n}</td><td class="mk">${m?`${m.mark} pts`:'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo · ronda ${(m.rounds||0)+1}`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; }).join('');
   showOv(card('JUGADOR','Perfil',`
     <div class="p-row"><span class="p-av"><canvas data-color="${esc(p.color)}"></canvas></span><div><b class="u-big">${esc(p.name)}</b><p class="small">${p.id===player()?.id?'Sos vos · ':''}Juega desde el ${day(p.created_at)}</p></div></div>
+    <div class="p-stats"><div><b>${r.daily_wins??'—'}</b><span>desafíos del día ganados</span></div></div>
     ${friendBtn(p.id)}
     <span class="lbl">Récords</span>${recTabs()}<div class="scroll"><table class="b-table u-recs"><tbody>${rows}</tbody></table></div>`,
     `<button class="btn" data-act="${personBack}" data-focus>Volver</button>`+MENU));

@@ -656,3 +656,21 @@ tr.me td{background:var(--red)}
 /* a profile: add to friends / it's your friend (and take them off) */
 .u-fr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .u-fr .btn{font-size:.95rem;padding:4px 14px}
+/* records: the event tabs measure their buttons from themselves (to keep the one picked in sight) */
+.b-tabs{position:relative}
+/* the admin screen: smaller text all over (it's a tool, it holds a lot) */
+.a-card .head h2{font-size:1.1rem}
+.a-card .logo{font-size:1.05rem}
+.a-card .body{gap:7px}
+.a-card .p-stats b{font-size:1.05rem}
+.a-card .p-stats span{font-size:.62rem}
+.a-card .p-stats>div{padding:4px 6px}
+.a-card .lbl{font-size:.62rem}
+.a-card .small,.a-card .o-ok,.a-card .o-err{font-size:.75rem}
+.a-card .u-item{padding:3px 8px}
+.a-card .u-item .p-av.sm{width:24px;height:24px}
+.a-card .u-item .u-nm b{font-size:.88rem}
+.a-card .u-nm small{font-size:.68rem}
+.a-card .u-search,.a-card .g-new input,.a-card select{font-size:.85rem;padding:5px 9px}
+.a-card .btn{font-size:.85rem;padding:4px 12px}
+.a-card .p-pin{font-size:1rem}

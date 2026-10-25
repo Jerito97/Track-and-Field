@@ -9,7 +9,7 @@ import {getTop,getWipes,sendMarks} from '../online.js';
 import {loadFriends,myFriends} from './friends.js';
 import {setS,setScreen} from '../state.js';
 import {applyWipes,lastWipe,periods,player,players,survBestKey,updatePlayer} from '../storage.js';
-import {esc,place,showOv} from './screens.js';
+import {CATS,catOf,esc,place,showOv} from './screens.js';
 
 const cache={};  // 'ev' (world) or 'ev:friends' (and '@year' / '@month') -> {at, top}
 const FRESH=60000;
@@ -23,7 +23,7 @@ export async function loadTop(ev,force,group,span){
 export const cachedTop=(ev,group,span)=>cache[key(ev,group,span)]?.top||null;
 const wasOffline=(ev,group,span)=>!!cache[key(ev,group,span)]?.offline;
 // which board: the world (null) or you and your friends ('friends'), and which time (all-time, this year, this month); remembered
-let scope=null, span='';
+let scope=null, span='', bcat='all';  // bcat: the kind of event the tabs show (all, races, jumps...)
 const SPANS=[['','Histórico'],['year','Este año'],['month','Este mes']];
 
 // your records not sent yet (or improved since): sent together; the server keeps only the better one
@@ -70,6 +70,18 @@ const day=d=>{ if(!d) return ''; const t=new Date(d); return isNaN(t)?'':t.toLoc
 // back: where «Volver» goes (kept while changing tabs); by default the events screen, or survival for its tab
 let shownEv=null, back=null;
 // i: event index (EVENTS.length: survival); from: where «Volver» goes; group: '' for the world, 'friends' for friends
+// the kind of an event on the board (survival is one of its own); picking a kind shows its events, and the first of
+// them if the one on screen isn't one
+const kindOf=e=>e.surv?'surv':catOf(e);
+const BCATS=[...CATS,['surv','Supervivencia']];
+export function onBoardCat(c){ bcat=BCATS.some(k=>k[0]===c)?c:'all'; const l=EVENTS.concat(SURVS), cur=l.findIndex(e=>e.id+(scope||'')===shownEv);
+  const keep=cur>=0&&(bcat==='all'||kindOf(l[cur])===bcat); showBoard(keep?cur:l.findIndex(e=>bcat==='all'||kindOf(e)===bcat)); }
+// the rows that slide sideways (the event tabs, the filters) stay where they were when the board is drawn again,
+// with the event picked in sight
+function keepX(){ const sel='.b-card .b-tabs,.b-card .b-scopes', was=[...OV.querySelectorAll(sel)].map(e=>e.scrollLeft);
+  return ()=>{ OV.querySelectorAll(sel).forEach((e,k)=>{ e.scrollLeft=was[k]||0; });
+    const on=OV.querySelector('.b-card .b-tab.on'), t=on?.parentElement; if(!on) return;
+    if(on.offsetLeft<t.scrollLeft) t.scrollLeft=on.offsetLeft-8; else if(on.offsetLeft+on.offsetWidth>t.scrollLeft+t.clientWidth) t.scrollLeft=on.offsetLeft+on.offsetWidth-t.clientWidth+8; }; }
 export async function showBoard(i,from,group,sp){
   if(from!==undefined) back=from; else if(i!==undefined&&!document.querySelector('.b-card')) back=null;
   if(group!==undefined) scope=group||null;
@@ -80,7 +92,9 @@ export async function showBoard(i,from,group,sp){
   // the table (the podium in gold, silver and bronze, you highlighted) and «Volver» at the bottom
   const scopes=`<div class="b-scopes">${[{id:'',name:'Mundial'},...(player()?.token?[{id:'friends',name:'Amigos'}]:[])].map(g=>`<button class="b-scope${(g.id||null)===scope?' on':''}" data-act="board" data-i="${evI}" data-group="${g.id}">${g.name}</button>`).join('')}<button class="b-scope add" data-act="friends">${myFriends().length?'Editar amigos ›':'+ Agregar amigos'}</button></div>`
     +`<div class="b-scopes b-spans">${SPANS.map(([k,t])=>`<button class="b-scope${k===span?' on':''}" data-act="board" data-i="${evI}" data-span="${k}">${t}</button>`).join('')}</div>`;
-  const tabs=scopes+`<div class="b-tabs" role="tablist">${EVENTS.concat(SURVS).map((e,j)=>`<button class="b-tab${e===ev?' on':''}" role="tab" aria-selected="${e===ev}" data-act="board" data-i="${j}">${e.tag}</button>`).join('')}</div>`;
+  if(bcat!=='all'&&kindOf(ev)!==bcat) bcat='all';
+  const cats=`<div class="b-scopes b-cats">${BCATS.map(([c,n])=>`<button class="b-scope${c===bcat?' on':''}" data-act="bcat" data-c="${c}">${n}</button>`).join('')}</div>`;
+  const tabs=scopes+cats+`<div class="b-tabs" role="tablist">${EVENTS.concat(SURVS).map((e,j)=>bcat==='all'||kindOf(e)===bcat?`<button class="b-tab${e===ev?' on':''}" role="tab" aria-selected="${e===ev}" data-act="board" data-i="${j}">${e.tag}</button>`:'').join('')}</div>`;
   const card=body=>`<div class="mm b-card">
     <header class="m-top"><div class="m-logo">Récords</div><div class="m-title">${scope?'Amigos':'Top 10'}${span?' · '+SPANS.find(x=>x[0]===span)[1]:''} · ${esc(ev.name)}</div></header>
     <div class="b-filters">${tabs}</div>${body}
@@ -90,12 +104,12 @@ export async function showBoard(i,from,group,sp){
     return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev.surv?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table></div>`
     :`<p class="small b-empty">${scope?`${myFriends().length?'Ni vos ni tus amigos tienen':'Agregá amigos para comparar sus récords con los tuyos. Vos no tenés'} marca en esta prueba${span?(span==='year'?' este año':' este mes'):''} todavía.`:span?`Todavía no hay marcas ${span==='year'?'este año':'este mes'}. ¡La primera puede ser la tuya!`:'Todavía no hay marcas. ¡La primera puede ser la tuya!'}</p>`;
   const c=cachedTop(ev.id,scope,span), here=shownEv+span;
-  showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'),'menu');
+  let back2=keepX(); showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'),'menu'); back2();
   if(player()?.token) loadFriends().then(()=>{ const add=OV.querySelector('.b-card .b-scope.add'); if(shownEv===here&&add) add.textContent=myFriends().length?'Editar amigos ›':'+ Agregar amigos'; },()=>{});
   await syncMarks();
   let top, note='';
   try{ top=await loadTop(ev.id,false,scope,span); if(wasOffline(ev.id,scope,span)) note='<p class="small">Sin conexión: estos son los últimos récords que viste.</p>'; }
   catch(e){ top=scope||span?[]:localTop(ev); note=`<p class="small">${scope?'No se pudo conectar con el servidor.':'No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.'}</p>`; }
   if(shownEv+span!==here||!OV.querySelector('.b-card')) return;  // left the board meanwhile
-  const y=OV.scrollTop, ly=OV.querySelector('.scroll')?.scrollTop||0; showOv(card(note+rows(top)),'menu'); OV.scrollTop=y; const l=OV.querySelector('.scroll'); if(l) l.scrollTop=ly;
+  const y=OV.scrollTop, ly=OV.querySelector('.scroll')?.scrollTop||0; back2=keepX(); showOv(card(note+rows(top)),'menu'); back2(); OV.scrollTop=y; const l=OV.querySelector('.scroll'); if(l) l.scrollTop=ly;
 }
