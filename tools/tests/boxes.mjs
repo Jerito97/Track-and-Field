@@ -13,7 +13,7 @@ const us=[];
 for(let k=0;k<40;k++){ const u=await post({action:'register',name:'Atleta'+k+'x'+sfx,pin:'1234',color:['#2f6fd6','#1f9e54','#f0a020'][k%3]}); us.push(u);
   await post({action:'marks',token:u.token,list:[{ev:'100',mark:10+k*.05,date:now}]});
   if(k<MAXT){ await post({action:'join',code:T,token:u.token}); await post({action:'result',code:T,ev:'100',mark:10.5+k*.03,token:u.token}); }
-  if(k<20) await post({action:'fadd',token:A.token,player:u.player.id}); }
+  if(k<20){ await post({action:'fadd',token:A.token,player:u.player.id}); await post({action:'faccept',token:u.token,player:A.player.id}); } }
 await post({action:'marks',token:A.token,list:[{ev:'100',mark:11.5,date:now}]});
 console.log('torneo',T,'grupo',gid);
 const b=await chromium.launch(); const errs=[];

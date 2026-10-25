@@ -10,6 +10,8 @@ async function open(seed=3){
   const p=await (await b.newContext({viewport:{width:844,height:390}})).newPage();
   p.on('pageerror',e=>errs.push(String(e)));
   p.on('response',r=>{ if(r.status()>=400) errs.push(r.status()+' '+r.url()); });
+  // the test player has a made-up session: the server's answers are stood in for (empty boards, no friends)
+  await p.route('**/api/t**',r=>r.fulfill({json:{top:[],players:[],friends:[],incoming:[],outgoing:[],leaders:[],tours:[],ok:true}}));
   await p.addInitScript(INIT(seed)); await p.goto(BASE+'/'); await p.waitForFunction(()=>document.querySelector('.mm')); await p.waitForTimeout(300);
   return p;
 }

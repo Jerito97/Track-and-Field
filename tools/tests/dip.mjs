@@ -21,5 +21,7 @@ async function run(evI,lead,shot){
     if(res&&f%20===0) break;
     await p.evaluate(()=>window.__step(1)); }
   await p.context().close(); return res; }
-for(const lead of [.45,.25]){ const r=await run(0,lead,lead===.45); console.log('100 m, apretando',lead,'s antes de la meta →',JSON.stringify(r)); }
-console.log(errs.length?errs:'sin errores'); await b.close();
+const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
+const R={}; for(const lead of [.45,.25,.05]){ const r=await run(0,lead,lead===.45); R[lead]=r; console.log('100 m, apretando',lead,'s antes de la meta →',JSON.stringify(r)); }
+ok(R[.25].pops.includes('¡PERFECTO!')&&R[.25].final<R[.45].final&&R[.25].final<R[.05].final,'el cabezazo en el momento justo es perfecto y saca más tiempo que temprano o tarde');
+ok(!errs.length,'sin errores en la página'); await b.close();

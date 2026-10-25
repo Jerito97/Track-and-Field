@@ -15,8 +15,8 @@ import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,onBoardCat,showBoard,syncMarks} from './board.js';
 import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
-import {friendsStrip,onAddFriend,refreshFriendsStrip,showFriends} from './friends.js';
-import {personAdd,personDel,showPeople,showPerson} from './people.js';
+import {friendsStrip,onAcceptFriend,onAddFriend,onRejectFriend,refreshFriendsStrip,showFriends} from './friends.js';
+import {personAccept,personAdd,personDel,personReject,showPeople,showPerson} from './people.js';
 import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {afterDaily,dailyBar,finishDaily,leaveDaily,playDaily,refreshDailyBar,showDaily} from './daily.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
@@ -86,7 +86,8 @@ export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 // hero (the chosen event): every illustration is in place from the start and only the chosen one shows, so changing
 // event swaps them instantly (no reloading, no blank frame); an event without one gets the drawn stickman
 function heroArt(){ const k=thumbKey(menuSel);
-  return Object.entries(THUMBS).map(([id,pos])=>`<img class="m-th${id===k?' on':''}" data-k="${id}" src="assets/thumbs/${id}.webp" alt="" style="object-position:${pos}">`).join('')
+  // (surv is only the position for the survival button's own picture: no file of that name)
+  return Object.entries(THUMBS).filter(([id])=>id!=='surv').map(([id,pos])=>`<img class="m-th${id===k?' on':''}" data-k="${id}" src="assets/thumbs/${id}.webp" alt="" style="object-position:${pos}">`).join('')
     +(THUMBS[k]?'':`<canvas data-pict="${menuSel}"></canvas>`); }
 // the event's name on one line: smaller when it doesn't fit (a long name pushed the buttons out of the box)
 function fitHero(){ const h=OV.querySelector('.mm .m-info h1'); if(!h) return; h.style.fontSize='';
@@ -339,6 +340,8 @@ OV.addEventListener('click',e=>{
   else if(a==='friends'||a==='groups') showFriends();
   else if(a==='fadd'){ if(b.dataset.from==='person') personAdd(b); else onAddFriend(b); }
   else if(a==='fdel') personDel(b);
+  else if(a==='faccept'){ if(b.dataset.from==='person') personAccept(b); else onAcceptFriend(b); }
+  else if(a==='freject'){ if(b.dataset.from==='person') personReject(b); else onRejectFriend(b); }
   else if(a==='admin') showAdmin();
   else if(a==='auser') showAdminUser(b.dataset.id);
   else if(a.startsWith('a')&&['asetpin','arename','aunlock','alogout','adelmark','adeluser','awipe'].includes(a)) onAdmin(a,b);

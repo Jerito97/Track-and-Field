@@ -5,7 +5,8 @@ const post=async b=>{ const r=await fetch(API,{method:'POST',headers:{'Content-T
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 const sfx=Date.now()%10000, reg=n=>post({action:'register',name:n+sfx,pin:'1234',color:'#2f6fd6'});
 const A=await reg('Jero'), B=await reg('Faca'), C=await reg('Muro');
-await post({action:'fadd',player:B.player.id,token:A.token});
+await post({action:'fadd',player:B.player.id,token:A.token}); await post({action:'faccept',player:A.player.id,token:B.token});
+const D=await reg('Dani'); await post({action:'fadd',player:D.player.id,token:A.token});
 const now=Date.now(); await post({action:'marks',token:A.token,list:[{ev:'110h',mark:14.5,date:now},{ev:'jav',mark:70,date:now}]}); await post({action:'marks',token:B.token,list:[{ev:'110h',mark:15.2,date:now},{ev:'jav',mark:75,date:now}]});
 const b=await chromium.launch(); const errs=[];
 const p=await (await b.newContext({viewport:{width:844,height:390},deviceScaleFactor:2,serviceWorkers:'block'})).newPage(); p.on('pageerror',e=>errs.push(String(e)));
@@ -14,10 +15,10 @@ await p.goto(BASE+'/'); await p.waitForSelector('.m-bell'); await p.waitForTimeo
 const check=()=>p.evaluate(async id=>{ const k='odb-notifs-'+id, d=JSON.parse(localStorage.getItem(k)||'{}'); d.at=0; localStorage.setItem(k,JSON.stringify(d)); const n=await import('/js/ui/notifs.js'); await n.checkNotifs(); return JSON.parse(localStorage.getItem(k)).list.map(x=>x.k+':'+(x.who||'')+':'+(x.ev||'')); },A.player.id);
 const l1=await check(); console.log('  primera vez:',JSON.stringify(l1)); ok(!l1.some(x=>x.startsWith('fp')),'la primera vez solo aprende (Faca ya estaba adelante en jabalina: no avisa)');
 // Faca passes Jero in hurdles; Muro adds Jero as a friend
-await post({action:'marks',token:B.token,list:[{ev:'110h',mark:14.1,date:Date.now()}]}); await post({action:'fadd',player:A.player.id,token:C.token});
+await post({action:'marks',token:B.token,list:[{ev:'110h',mark:14.1,date:Date.now()}]}); await post({action:'fadd',player:A.player.id,token:C.token}); await post({action:'faccept',player:A.player.id,token:D.token});
 const l2=await check(); console.log('  después:',JSON.stringify(l2));
 ok(l2.filter(x=>x.includes('Faca')&&x.endsWith(':110h')).length===1&&!l2.some(x=>x.endsWith(':jav')),'Faca te pasó en vallas: un solo aviso (de amigo o de récord mundial), y no repite jabalina');
-ok(l2.some(x=>x.startsWith('fa:Muro')),'aviso: Muro te agregó como amigo');
+ok(l2.some(x=>x.startsWith('fr:Muro')),'aviso: Muro quiere ser tu amigo'); ok(l2.some(x=>x.startsWith('fk:Dani')),'aviso: Dani aceptó tu solicitud');
 const l3=await check(); ok(l3.length===l2.length,'no se repiten');
 await p.evaluate(async()=>(await import('/js/ui/notifs.js')).showNotifs()); await p.waitForSelector('.n-item'); await p.screenshot({path:out+'/avisos.png'});
 const txt=await p.$$eval('.n-item',l=>l.map(e=>e.textContent)); console.log('  ',txt.join(' | '));

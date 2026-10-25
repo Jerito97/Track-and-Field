@@ -7,7 +7,7 @@ import {getPlayers,getProfile} from '../online.js';
 import {setS,setScreen} from '../state.js';
 import {player} from '../storage.js';
 import {catOf,esc,paintOv,recHidden,recTabs,showOv} from './screens.js';
-import {isFriend,loadFriends,onAddFriend,onDelFriend} from './friends.js';
+import {loadFriends,onAcceptFriend,onAddFriend,onDelFriend,onRejectFriend,relation} from './friends.js';
 
 let list=null, at=0, listOffline=false;
 export const cachedPlayers=()=>list;
@@ -40,11 +40,18 @@ export async function showPeople(){
   catch(e){ if(view==='list') draw(null,`<p class="o-err" role="alert">${esc(e.message)}</p>`); }
 }
 // back: where «Volver» goes (the list of everyone, or your friends)
-// on a profile (someone else's, with your player registered): add them to your friends, or take them off
-const friendBtn=id=>!player()?.token||id===player()?.id?'':isFriend(id)?`<div class="u-fr"><span class="o-in">Es tu amigo ✓</span><button class="btn alt g-x" data-act="fdel" data-id="${esc(id)}">Quitar de amigos</button></div>`
-  :`<div class="u-fr"><button class="btn" data-act="fadd" data-id="${esc(id)}" data-from="person">+ Agregar a amigos</button></div>`;
-export const personAdd=b=>onAddFriend(b,()=>{ const el=OV.querySelector('.u-fr'); if(el){ el.outerHTML=friendBtn(b.dataset.id); } });
-export const personDel=b=>onDelFriend(b,()=>{ const el=OV.querySelector('.u-fr'); if(el){ el.outerHTML=friendBtn(b.dataset.id); } });
+// on a profile (someone else's, with your player registered): ask them to be friends, accept or turn down their
+// request, take back yours, or take a friend off
+const friendBtn=id=>{ if(!player()?.token||id===player()?.id) return ''; const r=relation(id), x=`data-id="${esc(id)}"`;
+  return `<div class="u-fr">${r==='friend'?`<span class="o-in">Es tu amigo ✓</span><button class="btn alt g-x" data-act="fdel" ${x}>Quitar de amigos</button>`
+    :r==='out'?`<span class="o-in f-pend">Solicitud enviada</span><button class="btn alt g-x" data-act="fdel" ${x}>Cancelar solicitud</button>`
+    :r==='in'?`<span class="o-in">Quiere ser tu amigo</span><button class="btn" data-act="faccept" ${x} data-from="person">Aceptar</button><button class="btn alt" data-act="freject" ${x} data-from="person">Rechazar</button>`
+    :`<button class="btn" data-act="fadd" ${x} data-from="person">+ Agregar a amigos</button>`}</div>`; };
+const redrawFr=b=>()=>{ const el=OV.querySelector('.u-fr'); if(el) el.outerHTML=friendBtn(b.dataset.id); };
+export const personAdd=b=>onAddFriend(b,redrawFr(b));
+export const personDel=b=>onDelFriend(b,redrawFr(b));
+export const personAccept=b=>onAcceptFriend(b,redrawFr(b));
+export const personReject=b=>onRejectFriend(b,redrawFr(b));
 export async function showPerson(id,back){
   if(back) personBack=back; view=id; setS(null); setScreen('menu');
   const known=cachedPlayers()?.find(p=>p.id===id);

@@ -14,6 +14,6 @@ for(const [w,h,mob] of [[1000,462,true],[844,390,true],[390,844,true]]){
   const m=await p.evaluate(()=>{ const d=document.documentElement, o=document.querySelector('#ov'), card=o.querySelector('.card');
     const wide=[...o.querySelectorAll('*')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&!e.closest('.scroll,.o-evlist')).map(e=>e.className||e.tagName).slice(0,6);
     return {doc:[d.scrollWidth,d.clientWidth,d.scrollHeight,d.clientHeight],ov:[o.scrollWidth,o.clientWidth,o.scrollHeight,o.clientHeight],card:Math.round(card.getBoundingClientRect().width),wide}; });
-  console.log(w+'x'+h,JSON.stringify(m));
+  console.log(w+'x'+h,JSON.stringify(m)); console.log((m.doc[0]<=m.doc[1]&&m.ov[0]<=m.ov[1]&&!m.wide.length?'PASS':'FAIL')+' torneo en '+w+'x'+h+': nada más ancho que la pantalla');
   await p.screenshot({path:`${out}/move-${w}.png`}); }
 await b.close();

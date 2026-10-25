@@ -13,4 +13,4 @@ for(const [w,h,tag] of [[844,390,'land'],[390,844,'port'],[667,375,'small']]){
   await p.click('[data-act="board"][data-i="1"]'); await p.waitForTimeout(400);
   await p.click('.b-back'); await p.waitForTimeout(300); console.log(tag,'volver ->',await p.evaluate(()=>!!document.querySelector('.m-evs')||!!document.querySelector('.m-modes')));
   await p.context().close(); }
-console.log(errs.join('|')||'sin errores'); await b.close();
+console.log(errs.join('|')||'sin errores'); console.log((errs.length?'FAIL':'PASS')+' récords en tres tamaños sin errores en la página'); await b.close();

@@ -15,9 +15,10 @@
 //   GET  /api/t?top=100&friends=PLAYER                      -> {top:[...the best 10 of that player and their friends]}  (friends' board)
 //   GET  /api/t?top=100&me=PLAYER                           -> also {me:{...their row, rank}} when they're not in the 10
 //   GET  /api/t?top=100&span=year|month[&friends=PLAYER]    -> the same for this year / this month (Argentina's time)
-//   POST {action:'friends', token}                          -> {friends:[{id,name,color}]}
-//   GET  /api/t?social=PLAYER                               -> {ahead:[{ev,player_id,name,mark}] (their friends ahead of them), by:[{player_id,name,added_at}] (who has them as a friend)}
-//   POST {action:'fadd'|'fdel', token, player}              -> {ok}   (add a registered player to your friends / take them off)
+//   POST {action:'friends', token}                          -> {friends:[{id,name,color}], incoming:[...], outgoing:[...]}
+//   GET  /api/t?social=PLAYER                               -> {ahead:[{ev,player_id,name,mark}] (their friends ahead of them), req:[{player_id,name,created_at}] (requests to them), out:[{player_id,name}] (theirs waiting), friends:[ids]}
+//   POST {action:'fadd', token, player}                     -> {ok,status:'sent'|'friends'}  (a friend request; if they had asked you, friends)
+//   POST {action:'faccept'|'freject'|'fdel', token, player} -> {ok}   (accept / turn down their request; take off a friend or take back a request)
 //   POST {action:'admin', token, op, ...}                   -> admin tools (only the admin player, see below)
 //   GET  /api/t?players=1                                   -> {players:[{id,name,color,created_at,marks}]}
 //   GET  /api/t?player=ID                                   -> {player:{id,name,color,created_at}, marks:[{ev,mark,date,rank}]}
@@ -73,6 +74,9 @@ function db(){
     // friends: each player's list (one way: adding someone doesn't need their yes); their boards are you and them
     await sql`create table if not exists friends(player_id text not null references users(id) on delete cascade,
       friend_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(player_id,friend_id))`;
+    // friend requests: from one player to another, until it's accepted (both become friends) or turned down
+    await sql`create table if not exists friend_requests(from_id text not null references users(id) on delete cascade,
+      to_id text not null references users(id) on delete cascade, created_at timestamptz not null default now(), primary key(from_id,to_id))`;
     // each player's best of each year and of each month (period '2026', '2026-10'), for the boards of this year and month
     await sql`create table if not exists pmarks(player_id text not null references users(id) on delete cascade, ev text not null,
       period text not null, mark double precision not null, made_at timestamptz not null default now(), rounds int, primary key(player_id,ev,period))`;
@@ -120,6 +124,11 @@ function db(){
           on conflict(player_id,ev) do update set mark=excluded.mark, made_at=excluded.made_at, rounds=excluded.rounds where excluded.mark>marks.mark`; } }
     // the discus published: from zero (nothing from while it was being tried out)
     if((await sql`insert into migrations(id) values('reset-dis-1') on conflict do nothing returning id`).length) await wipe(sql,'dis',null);
+    // friends became mutual (a request the other accepts): a one-way friend from before turns into a request to them
+    if((await sql`insert into migrations(id) values('friends-mutual-1') on conflict do nothing returning id`).length){
+      await sql`insert into friend_requests(from_id,to_id,created_at) select f.player_id,f.friend_id,f.added_at from friends f
+        where not exists(select 1 from friends r where r.player_id=f.friend_id and r.friend_id=f.player_id) on conflict do nothing`;
+      await sql`delete from friends f where not exists(select 1 from friends r where r.player_id=f.friend_id and r.friend_id=f.player_id)`; }
     // pole vault started over (the records cleared before lived on in the phones and in this year's / month's boards)
     if((await sql`insert into migrations(id) values('reset-pv-2') on conflict do nothing returning id`).length) await wipe(sql,'pv',null);
   })().catch(e=>{ ready=null; throw e; });
@@ -327,18 +336,29 @@ async function daily(sql,pid){
     out.yday.me=yi>=0?{mark:yb[yi].mark,place:yb[yi].mark!=null?yi+1:null}:null; }
   return out;
 }
-// for a player's notices: in each event they have a mark, the friends of theirs ahead of them now; and who has them
-// among their own friends (newest first)
+// for a player's notices: in each event they have a mark, the friends of theirs ahead of them now; the friend requests
+// to them (newest first), the ones they sent still waiting, and their friends
 async function social(sql,pid){
   const mine=await sql`select ev,mark from marks where player_id=${pid}`;
   const theirs=mine.length?await sql`select m.ev,m.player_id,u.name,m.mark from marks m join friends f on f.friend_id=m.player_id and f.player_id=${pid} join users u on u.id=m.player_id where m.ev = any(${mine.map(m=>m.ev)})`:[];
   const ahead=theirs.filter(t=>{ const me=mine.find(m=>m.ev===t.ev); return SPRINT.includes(t.ev)?t.mark<me.mark:t.mark>me.mark; });
-  const by=await sql`select f.player_id,u.name,f.added_at from friends f join users u on u.id=f.player_id where f.friend_id=${pid} order by f.added_at desc limit 50`;
-  return {ahead,by};
+  const req=await sql`select r.from_id as player_id,u.name,r.created_at from friend_requests r join users u on u.id=r.from_id where r.to_id=${pid} order by r.created_at desc limit 50`;
+  const out=await sql`select r.to_id as player_id,u.name from friend_requests r join users u on u.id=r.to_id where r.from_id=${pid}`, friends=(await sql`select friend_id from friends where player_id=${pid}`).map(r=>r.friend_id);
+  return {ahead,req,out,friends};
 }
 // your friends (name and colour), in the order you added them
+// and the requests: to you (to accept or turn down) and yours still waiting
 async function myFriends(sql,u){
-  return {friends:await sql`select u.id,u.name,u.color from friends f join users u on u.id=f.friend_id where f.player_id=${u.id} order by f.added_at`};
+  return {friends:await sql`select u.id,u.name,u.color from friends f join users u on u.id=f.friend_id where f.player_id=${u.id} order by f.added_at`,
+    incoming:await sql`select u.id,u.name,u.color from friend_requests r join users u on u.id=r.from_id where r.to_id=${u.id} order by r.created_at desc`,
+    outgoing:await sql`select u.id,u.name,u.color from friend_requests r join users u on u.id=r.to_id where r.from_id=${u.id} order by r.created_at desc`};
+}
+// two players become friends (each one in the other's list), the requests between them gone
+async function befriend(sql,a,b){
+  for(const [x,y] of [[a,b],[b,a]]){
+    const ins=await sql`insert into friends(player_id,friend_id) select ${x},${y} where (select count(*) from friends where player_id=${x})<${MAX_FRIENDS} on conflict do nothing returning friend_id`;
+    if(!ins.length&&!(await sql`select 1 from friends where player_id=${x} and friend_id=${y}`).length){ await sql`delete from friends where (player_id=${a} and friend_id=${b}) or (player_id=${b} and friend_id=${a})`; throw new Bad(409,`Se puede tener hasta ${MAX_FRIENDS} amigos.`); } }
+  await sql`delete from friend_requests where (from_id=${a} and to_id=${b}) or (from_id=${b} and to_id=${a})`;
 }
 
 // everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
@@ -449,15 +469,21 @@ async function act(sql,b){
     case 'friends': return myFriends(sql,await auth(sql,b.token));
     case 'admin': return adminOp(sql,b);
     // add someone to your friends, or take them off
-    case 'fadd': case 'fdel': {
+    // friends: a request (if they had sent you one, you're friends right away), accept or turn one down, take off a
+    // friend (from both lists) or take back a request
+    case 'fadd': case 'faccept': case 'freject': case 'fdel': {
       const u=await auth(sql,b.token), pid=String(b.player||'').slice(0,64);
-      if(b.action==='fdel'){ await sql`delete from friends where player_id=${u.id} and friend_id=${pid}`; return {ok:true}; }
+      if(b.action==='fdel'){ await sql`delete from friends where (player_id=${u.id} and friend_id=${pid}) or (player_id=${pid} and friend_id=${u.id})`;
+        await sql`delete from friend_requests where (from_id=${u.id} and to_id=${pid}) or (from_id=${pid} and to_id=${u.id})`; return {ok:true}; }
+      if(b.action==='freject'){ await sql`delete from friend_requests where from_id=${pid} and to_id=${u.id}`; return {ok:true}; }
+      const asked=(await sql`select 1 from friend_requests where from_id=${pid} and to_id=${u.id}`).length>0;
+      if(b.action==='faccept'){ if(!asked) throw new Bad(404,'Esa solicitud ya no está.'); await befriend(sql,u.id,pid); return {ok:true,status:'friends'}; }
       if(pid===u.id) throw new Bad(400,'No te podés agregar a vos.');
       if(!(await sql`select 1 from users where id=${pid}`).length) throw new Bad(404,'No existe ese jugador.');
-      const ins=await sql`insert into friends(player_id,friend_id) select ${u.id},${pid}
-        where (select count(*) from friends where player_id=${u.id})<${MAX_FRIENDS} on conflict do nothing returning friend_id`;
-      if(!ins.length&&!(await sql`select 1 from friends where player_id=${u.id} and friend_id=${pid}`).length) throw new Bad(409,`Podés tener hasta ${MAX_FRIENDS} amigos.`);
-      return {ok:true};
+      if((await sql`select 1 from friends where player_id=${u.id} and friend_id=${pid}`).length) return {ok:true,status:'friends'};
+      if(asked){ await befriend(sql,u.id,pid); return {ok:true,status:'friends'}; }
+      await sql`insert into friend_requests(from_id,to_id) values(${u.id},${pid}) on conflict do nothing`;
+      return {ok:true,status:'sent'};
     }
     // put a registered player in a tournament (anyone in it, while it's on and there's room): it shows in their notices
     case 'invite': {

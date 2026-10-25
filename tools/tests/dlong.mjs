@@ -14,5 +14,5 @@ for(const [w,h,n] of [[844,390,'land'],[390,844,'port']]){
   await p.addInitScript(([a])=>{ localStorage.setItem('odb-players',JSON.stringify({list:[{id:a.player.id,name:a.player.name,color:a.player.color,token:a.token,created:0,rec:{},best:{},history:[],tours:[]}],cur:a.player.id})); },[A]);
   await p.goto(BASE+'/'); await p.waitForSelector('.m-daily:not([hidden])'); await p.click('.m-daily'); await p.waitForSelector('.d-list'); await p.waitForTimeout(500);
   const m=await p.evaluate(()=>{ const o=document.querySelector('#ov'), l=document.querySelector('.d-list'); return {ov:[o.scrollHeight,o.clientHeight],list:[l.scrollHeight,l.clientHeight],rows:l.querySelectorAll('tr').length}; });
-  console.log(n,JSON.stringify(m)); await p.screenshot({path:`${out}/long-${n}.png`}); }
+  console.log(n,JSON.stringify(m)); console.log((m.ov[0]<=m.ov[1]+1&&m.list[0]>m.list[1]?'PASS':'FAIL')+' desafío con lista larga ('+n+'): la pantalla no se desliza, la lista sí'); await p.screenshot({path:`${out}/long-${n}.png`}); }
 await b.close();

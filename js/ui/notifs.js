@@ -1,7 +1,7 @@
 // Notices (the bell on the main menu): a tournament someone put you in (invited you, or repeated one) that you haven't
 // played yet, a tournament of yours that ended (where you finished), a world record of yours that someone beat, how
-// yesterday's daily challenge went (if you played it), a friend who got ahead of you in an event, and someone who
-// added you as a friend.
+// yesterday's daily challenge went (if you played it), a friend who got ahead of you in an event, a friend request to
+// you and one of yours accepted.
 // Worked out on this phone from what the server says now against what it said the last time; kept per player on this
 // phone (the last 30).
 import {EVENTS} from '../config.js';
@@ -55,9 +55,12 @@ export async function checkNotifs(){
       // (not when the same mark took your world record: that notice says it already)
       if(was) soc.ahead.forEach(a=>{ if(!was.has(a.ev+'|'+a.player_id)&&!d.list.some(n=>n.id===`wr-${a.ev}-${a.player_id}-${a.mark}`)) add(d,{id:`fp-${a.ev}-${a.player_id}-${a.mark}`,k:'fp',ev:a.ev,who:a.name,mark:a.mark}); });
       d.ahead=now;
-      const seen=d.by?new Set(d.by):null;
-      soc.by.forEach(f=>{ if(seen?!seen.has(f.player_id):Date.now()-Date.parse(f.added_at)<2*864e5) add(d,{id:'fa-'+f.player_id,k:'fa',pid:f.player_id,who:f.name}); });
-      d.by=soc.by.map(f=>f.player_id); }
+      // a new friend request to you (the first time, only the last two days'); one of yours someone accepted
+      const seen=d.req?new Set(d.req):null;
+      soc.req.forEach(f=>{ if(seen?!seen.has(f.player_id):Date.now()-Date.parse(f.created_at)<2*864e5) add(d,{id:'fr-'+f.player_id+'-'+f.created_at,k:'fr',pid:f.player_id,who:f.name}); });
+      d.req=soc.req.map(f=>f.player_id);
+      (d.out||[]).forEach(o=>{ if(soc.friends.includes(o.player_id)) add(d,{id:'fk-'+o.player_id,k:'fk',pid:o.player_id,who:o.name}); });
+      d.out=soc.out; }
     save(d); return d.list.length>before;
   } catch(e){ return false; }
   finally{ busy=false; }
@@ -72,7 +75,8 @@ function text(n){
     return n.place===1?`¡Ganaste el desafío de ayer (<b>${esc(ev.name)}</b>)!`:`Desafío de ayer (<b>${esc(ev.name)}</b>): ${n.place?`quedaste ${n.place}º de ${n.of}`:'nulo'} · ganó <b>${esc(n.who)}</b> con ${fmt(ev,n.mark)}`; }
   if(n.k==='fp'){ const ev=evOf(n.ev); if(!ev) return '';
     return `Tu amigo <b>${esc(n.who)}</b> te superó en <b>${esc(ev.name)}</b>: ${ev.surv?`${n.mark} pts`:fmt(ev,n.mark)}`; }
-  if(n.k==='fa') return `<b>${esc(n.who)}</b> te agregó como amigo`;
+  if(n.k==='fr') return `<b>${esc(n.who)}</b> quiere ser tu amigo`;
+  if(n.k==='fk') return `<b>${esc(n.who)}</b> aceptó tu solicitud de amistad`;
   if(n.k==='te') return `Terminó <b>${esc(n.name)}</b>: ${n.place===1?'¡ganaste!':`quedaste ${n.place}º de ${n.of}`}`;
   return '';
 }
@@ -81,10 +85,11 @@ function act(n){
   if(n.k==='wr'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-back="notifs"`; }
   if(n.k==='dy') return 'data-act="daily"';
   if(n.k==='fp'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-group="friends" data-back="notifs"`; }
-  if(n.k==='fa') return `data-act="person" data-id="${esc(n.pid)}" data-back="notifs"`;
+  if(n.k==='fr') return 'data-act="friends"';
+  if(n.k==='fk') return `data-act="person" data-id="${esc(n.pid)}" data-back="notifs"`;
   return `data-act="oopen" data-code="${esc(n.code)}"`;
 }
-const icon=n=>n.k==='wr'?'🏆':n.k==='te'?'🏁':n.k==='dy'?'⚡':n.k==='fp'?'🏃':n.k==='fa'?'🤝':'📣';
+const icon=n=>n.k==='wr'?'🏆':n.k==='te'?'🏁':n.k==='dy'?'⚡':n.k==='fp'?'🏃':n.k==='fr'?'🤝':n.k==='fk'?'✅':'📣';
 const ago=t=>{ const m=(Date.now()-t)/60000; return m<60?`hace ${Math.max(1,Math.round(m))} min`:m<1440?`hace ${Math.round(m/60)} h`:`hace ${Math.round(m/1440)} d`; };
 // the list (opening it marks them all as seen)
 export function showNotifs(){
@@ -92,7 +97,7 @@ export function showNotifs(){
   const d=load(), list=d.list.filter(n=>text(n));
   showOv(card('AVISOS','Novedades',`
     ${list.length?`<div class="n-list scroll">${list.map(n=>`<button class="n-item${n.read?'':' new'}" ${act(n)}><span class="n-ic" aria-hidden="true">${icon(n)}</span><span class="n-tx"><span>${text(n)}</span><small>${ago(n.at)}</small></span></button>`).join('')}</div>`
-      :'<p class="small">No hay avisos. Acá te vamos a avisar si te invitan a un torneo, cuando termina uno tuyo, si alguien te supera un récord mundial, si un amigo te pasa en una prueba, si alguien te agrega como amigo y cómo te fue en el desafío de ayer.</p>'}
+      :'<p class="small">No hay avisos. Acá te vamos a avisar si te invitan a un torneo, cuando termina uno tuyo, si alguien te supera un récord mundial, si un amigo te pasa en una prueba, si alguien te manda una solicitud de amistad (o acepta la tuya) y cómo te fue en el desafío de ayer.</p>'}
     <div class="btns"><button class="btn alt" data-act="menu" data-focus>Volver</button></div>`));
   if(d.list.some(n=>!n.read)){ d.list.forEach(n=>{ n.read=true; }); save(d); }
 }

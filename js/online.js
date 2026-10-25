@@ -50,11 +50,14 @@ export const dailyStart=ev=>call('POST',{action:'daily',step:'start',ev,token:to
 export const dailyFinish=(day,mark)=>call('POST',{action:'daily',step:'mark',day,mark,token:tok()});
 // world top 10 of an event, and your marks for it
 export const getTop=(ev,friendsOf,span,me)=>call('GET',null,'?top='+encodeURIComponent(ev)+(friendsOf?'&friends='+encodeURIComponent(friendsOf):'')+(span?'&span='+span:'')+(me?'&me='+encodeURIComponent(me):''));
-// friends: your list, add a registered player, take one off
+// friends: your list and the requests; ask a registered player, accept or turn down a request, take one off (or
+// take back your request)
 export const getSocial=pid=>call('GET',null,'?social='+encodeURIComponent(pid));
-export const getFriends=async()=>(await call('POST',{action:'friends',token:tok()})).friends||[];
+export const getFriends=async()=>{ const r=await call('POST',{action:'friends',token:tok()}); return {friends:r.friends||[],incoming:r.incoming||[],outgoing:r.outgoing||[]}; };
 export const addFriend=player=>call('POST',{action:'fadd',player,token:tok()});
 export const delFriend=player=>call('POST',{action:'fdel',player,token:tok()});
+export const acceptFriend=player=>call('POST',{action:'faccept',player,token:tok()});
+export const rejectFriend=player=>call('POST',{action:'freject',player,token:tok()});
 export const sendMarks=list=>call('POST',{action:'marks',list,token:tok()});
 // registered players, and one player's public profile
 export const getPlayers=()=>call('GET',null,'?players=1');

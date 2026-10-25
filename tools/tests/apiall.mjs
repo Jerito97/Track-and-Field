@@ -69,15 +69,16 @@ ok((await call(null,null)).status!==500,'cuerpo vacío no rompe el servidor');
 console.log(fails?fails+' FALLAS':'API OK (2)');
 // friends
 { const A=await call({action:'register',name:'Gaby',pin:'1111',color:'#e8262d'}), Bt=await call({action:'register',name:'Gonzo',pin:'1111',color:'#2f6fe0'}), Ct=await call({action:'register',name:'Gina',pin:'1111',color:'#1f9e54'});
-  ok((await call({action:'fadd',token:A.token,player:Bt.player.id})).ok,'amigos: agregar');
+  ok((await call({action:'fadd',token:A.token,player:Bt.player.id})).status==='sent','amigos: mandar solicitud');
+  const so=await call(null,{social:Bt.player.id}); ok(so.req.length===1&&so.req[0].name==='Gaby','amigos: la solicitud le llega');
+  ok((await call({action:'faccept',token:Bt.token,player:A.player.id})).ok,'amigos: aceptar');
   ok((await call({action:'fadd',token:A.token,player:A.player.id})).status===400,'amigos: no te podés agregar a vos');
   ok((await call({action:'fadd',token:A.token,player:'nadie'})).status===404,'amigos: un jugador que no existe');
   await call({action:'marks',token:A.token,list:[{ev:'100',mark:11.1}]}); await call({action:'marks',token:Bt.token,list:[{ev:'100',mark:10.9}]}); await call({action:'marks',token:Ct.token,list:[{ev:'100',mark:9.0}]});
   const t=await call(null,{top:'100',friends:A.player.id}); ok(t.top.map(r=>r.name).join()==='Gonzo,Gaby','amigos: tabla solo con vos y tus amigos');
   const F=await call({action:'friends',token:A.token}); ok(F.friends.length===1&&F.friends[0].name==='Gonzo','amigos: mi lista');
-  ok((await call({action:'friends',token:Bt.token})).friends.length===0,'amigos: agregar no necesita el sí del otro');
-  const so=await call(null,{social:Bt.player.id}); ok(so.by.length===1&&so.by[0].name==='Gaby','amigos: quién te agregó');
-  await call({action:'fdel',token:A.token,player:Bt.player.id}); ok((await call({action:'friends',token:A.token})).friends.length===0,'amigos: quitar'); }
+  ok((await call({action:'friends',token:Bt.token})).friends.length===1,'amigos: aceptada, amigos los dos');
+  await call({action:'fdel',token:A.token,player:Bt.player.id}); ok((await call({action:'friends',token:A.token})).friends.length===0&&(await call({action:'friends',token:Bt.token})).friends.length===0,'amigos: quitar (de las dos listas)'); }
   console.log(fails?fails+' FALLAS':'AMIGOS OK');
 // admin
 { const J=await call({action:'login',name:'Jero',pin:'1234'}), X=await call({action:'register',name:'Xavi',pin:'1234',color:'#2f6fe0'});

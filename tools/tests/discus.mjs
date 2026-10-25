@@ -28,9 +28,11 @@ async function play(label,ringP,pace,ang,shots){
     await p.evaluate(()=>window.__step(1)); }
   console.log(label.padEnd(36),'marca',mark,'swings',JSON.stringify((qs||[]).map(q=>+q.toFixed(2))));
   await p.context().close(); return mark; }
-await play('perfecto (justo, 12 toques/s, 40°)',[1,1,1],5,40,false);
+const P=await play('perfecto (justo, 12 toques/s, 40°)',[1,1,1],5,40,false);
 await play('muy bueno (casi, 10/s, 41°)',[.97,1.04,.96],6,41);
-await play('bueno (6/s, 42°)',[.93,1.08,.92],10,42);
-await play('casual (swings flojos, 5/s, 45°)',[.8,1.2,.85],12,45);
-await play('sin swings (todos tarde, 6/s, 40°)',[2,2,2],10,40);
-console.log(errs.length?errs:'sin errores'); await b.close();
+const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
+const g=await play('bueno (6/s, 42°)',[.93,1.08,.92],10,42);
+const c=await play('casual (swings flojos, 5/s, 45°)',[.8,1.2,.85],12,45);
+const n=await play('sin swings (todos tarde, 6/s, 40°)',[2,2,2],10,40);
+ok(P>g&&g>c,'mejor juego, más lejos (perfecto > bueno > casual)'); ok(P>65&&P<80,'un tiro perfecto cerca del récord mundial ('+P+' m)'); ok(g>n,'pegarle a los balanceos suma');
+ok(!errs.length,'sin errores en la página'); await b.close();

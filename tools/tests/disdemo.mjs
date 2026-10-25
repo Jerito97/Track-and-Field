@@ -12,4 +12,6 @@ await p.click(`[data-act="sel"][data-i="${i}"]`); await p.click('[data-act="demo
 const caps=new Set(); let res=null, qs=null;
 for(let k=0;k<3000;k++){ await p.evaluate(()=>window.__step(2)); const s=await p.evaluate(()=>{ const S=window.__odb.S; return S?{c:S.demoCaption,demo:S.demo,mark:S.mark,qs:S.act&&S.act.qs}:null; });
   if(!s||!s.demo) break; if(s.c) caps.add(s.c); if(s.qs) qs=s.qs; if(s.mark!==undefined){ res=s.mark; break; } }
-console.log('textos:',[...caps].join(' | ')); console.log('swings',JSON.stringify(qs),'marca',res); console.log(errs.length?errs:'sin errores'); await b.close();
+const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
+console.log('textos:',[...caps].join(' | ')); console.log('swings',JSON.stringify(qs),'marca',res);
+ok(res>20&&caps.size>=4,'el tutorial del disco se juega solo hasta el tiro, con sus textos'); ok(!errs.length,'sin errores en la página'); await b.close();

@@ -5,7 +5,7 @@ const post=async b=>{ const r=await fetch(API,{method:'POST',headers:{'Content-T
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 const sfx=Date.now()%10000, now=Date.now();
 const A=await post({action:'register',name:'Jero'+sfx,pin:'1234',color:'#e8262d'});
-for(let k=0;k<14;k++){ const u=await post({action:'register',name:'Atleta'+k+'x'+sfx,pin:'1234',color:'#2f6fd6'}); await post({action:'marks',token:u.token,list:[{ev:'110h',mark:13+k*.1,date:now}]}); if(k<12) await post({action:'fadd',player:u.player.id,token:A.token}); }
+for(let k=0;k<14;k++){ const u=await post({action:'register',name:'Atleta'+k+'x'+sfx,pin:'1234',color:'#2f6fd6'}); await post({action:'marks',token:u.token,list:[{ev:'110h',mark:13+k*.1,date:now}]}); if(k<12){ await post({action:'fadd',player:u.player.id,token:A.token}); await post({action:'faccept',player:A.player.id,token:u.token}); } }
 await post({action:'marks',token:A.token,list:[{ev:'110h',mark:14.25,date:now}]});
 const r=await (await fetch(API+'?top=110h&me='+A.player.id)).json(); console.log('  servidor: top',r.top.length,'vos',JSON.stringify(r.me&&{rank:r.me.rank,mark:r.me.mark}));
 ok(r.top.length===10&&r.me&&r.me.rank>10&&r.me.rank===1+r.top.length+(r.me.rank-11),'el servidor manda el top 10 y tu puesto (14º en el mundo)');

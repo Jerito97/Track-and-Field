@@ -16,5 +16,5 @@ await p.waitForTimeout(500); const top=(await (await fetch(API+'?top=dis')).json
 ok(top.length===1&&top[0].mark===55.4,'el servidor guarda la marca de disco y arma su tabla');
 ok(await p.evaluate(async()=>{ const cf=await import('/js/config.js'); return !!cf.EVENTS.find(e=>e.id==='dis')&&!cf.BETA.length; }),'disco publicado (ya no está en prueba)');
 await p.evaluate(async()=>(await import('/js/ui/board.js')).showBoard((await import('/js/config.js')).EVENTS.findIndex(e=>e.id==='dis'))); await p.waitForTimeout(1200);
-ok((await p.textContent('.b-card')).includes('Lanzamiento de disco'),'tiene su pestaña en Récords');
+ok((await p.textContent('.b-card')).includes('Disco'),'tiene su pestaña en Récords');
 console.log(errs.length?errs:'sin errores',fails?fails+' FALLAS':''); await b.close();

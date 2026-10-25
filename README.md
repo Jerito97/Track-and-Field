@@ -78,7 +78,7 @@ El menú principal tiene tres modos: **Pruebas** (la prueba elegida en grande y 
 
 ## Amigos
 
-Cada jugador registrado tiene su lista de amigos (agregar a alguien no necesita que acepte). En el menú principal, **Amigos** muestra tu lista, un buscador para agregar a cualquier jugador registrado y **Todos los jugadores**; en el perfil de otro jugador está **Agregar a amigos** / **Quitar de amigos**. En Récords, arriba se elige **Mundial** (el top 10) o **Amigos** (vos y tus amigos con marca); **Editar amigos ›** abre la lista. Hasta 200 amigos. Los grupos de antes se convirtieron en amigos (cada uno quedó con los demás de su grupo).
+Amigos de los dos lados, con solicitud. **Agregar** a alguien le manda una solicitud: le llega un aviso a la campanita y en **Amigos** la ve arriba con **Aceptar** / **Rechazar**. Cuando acepta, quedan amigos los dos (si los dos se mandaron solicitud, quedan amigos enseguida); mientras tanto figura como **Pendiente**. En el menú principal, **Amigos** muestra las solicitudes, tu lista, un buscador para mandarle solicitud a cualquier jugador registrado y **Todos los jugadores**; en el perfil de otro jugador está **Agregar a amigos**, **Aceptar** / **Rechazar**, **Cancelar solicitud** o **Quitar de amigos** (de las dos listas). En Récords, arriba se elige **Mundial** o **Amigos** (vos y tus amigos). Hasta 200 amigos. Avisos: un amigo que te pasa en una prueba, una solicitud nueva, una tuya aceptada. Los grupos de antes se convirtieron en amigos; los amigos de un solo lado que había antes de las solicitudes pasaron a ser solicitudes (migración `friends-mutual-1`).
 
 ## Administrador
 

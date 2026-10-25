@@ -11,13 +11,14 @@ async function play100(p,taps=6){ // plays the 100 m until the results table, th
   for(let f=0;f<4000;f++){ const s=await p.evaluate(()=>{ const S=window.__odb.S; const ov=document.getElementById('ov'); return {ov:!ov.hidden,acts:[...ov.querySelectorAll('[data-act]')].map(b=>b.dataset.act),ph:S&&S.phase,cue:S&&S.cue&&{...S.cue}}; });
     if(s.ov&&s.acts.includes('afterres')){ await p.click('[data-act="afterres"]'); return; }
     if(s.ph==='ready') await p.keyboard.press(' ');
+    if(s.ph==='lap'&&f%20===0) await p.keyboard.press('ArrowLeft');  // a world record: the lap of honour, a tap goes on
     if(s.cue&&s.cue.type==='side'&&f%taps===0) await p.keyboard.press(KEY[s.cue.side]);
     if(s.cue&&s.cue.type==='both') await p.keyboard.press(' ');
     await p.evaluate(()=>window.__step(1)); } }
 // A: create
 const A=await newPlayer(BASE,'Jero'+Date.now()%1000,'#2bc4e0'); await A.waitForSelector('.mm');
-await A.click('[data-act="sel"][data-i="5"]'); await A.waitForTimeout(200); await A.screenshot({path:`${OUT}/1-menu-tour.png`});
-await A.click('[data-act="online"]'); await A.waitForSelector('.o-card'); await A.screenshot({path:`${OUT}/2-hub.png`});
+await A.screenshot({path:`${OUT}/1-menu.png`});
+await A.click('[data-act="tours"]'); await A.waitForSelector('.o-card'); await A.screenshot({path:`${OUT}/2-hub.png`});
 for(const ev of ['pv','jav','110h']) await A.uncheck(`input[name="oev"][value="${ev}"]`);
 await A.fill('#oname','Copa del barrio'); await A.click('[data-act="ocreate"]'); await A.waitForSelector('.o-code'); await A.waitForTimeout(200);
 const code=await A.evaluate(()=>document.querySelector('.o-code b').textContent); console.log('code',code);
@@ -32,8 +33,13 @@ await B.click('[data-act="oplay"][data-ev="100"]'); await play100(B,9); await B.
 await B.click('[data-act="oplay"][data-ev="lj"]'); await B.waitForTimeout(100);
 for(let f=0;f<200;f++){ const s=await B.evaluate(()=>window.__odb.S&&window.__odb.S.phase); if(s==='ready') await B.keyboard.press('ArrowLeft'); if(s==='run'&&f>60) break; await B.evaluate(()=>window.__step(1)); }
 await B.evaluate(()=>{ const cv=document.getElementById('game'); const r=cv.getBoundingClientRect(); window.__odb.S.cue=null; });
-await B.mouse.click(20,375); await B.waitForSelector('.o-code'); await B.waitForTimeout(400); await B.screenshot({path:`${OUT}/6-board-B-left.png`});
+await B.keyboard.press('Escape'); await B.waitForSelector('[data-act="quit"]'); await B.click('[data-act="quit"]'); await B.waitForSelector('.o-code'); await B.waitForTimeout(400); await B.screenshot({path:`${OUT}/6-board-B-left.png`});
 // A refreshes
 await A.click('[data-act="orefresh"]'); await A.waitForSelector('.o-code'); await A.waitForTimeout(400); await A.screenshot({path:`${OUT}/7-board-A-refresh.png`});
-console.log(await A.evaluate(()=>[...document.querySelectorAll('.o-table tbody tr')].map(t=>t.innerText.replace(/\s+/g,' ')).join(' | ')));
+const rows=await A.evaluate(()=>[...document.querySelectorAll('.o-table tbody tr')].map(t=>t.innerText.replace(/\s+/g,' '))); console.log('  '+rows.join(' | '));
+const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
+ok(/^[0-9A-Z]{5}$/.test(code),'A crea el torneo y tiene su código');
+ok(rows.length===2,'B entra con el link: la tabla tiene a los dos');
+ok(rows.some(r=>/AMIGO/i.test(r)&&/NULO/.test(r)),'B salió a la mitad del largo: nulo');
+ok(rows.every(r=>/\d+\.\d\d s/.test(r)),'los dos jugaron los 100 m');
 await b.close();
