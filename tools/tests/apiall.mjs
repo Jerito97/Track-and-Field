@@ -1,0 +1,100 @@
+const ROOT=new URL('../..',import.meta.url).pathname.replace(/\/$/,'');
+// every action of api/t.js, against a throwaway Postgres (PGlite)
+process.env.DATABASE_URL='x';
+const {default:h}=await import(ROOT+'/api/t.js');
+const call=(body,query)=>new Promise(res=>{ const out={c:200,status(c){this.c=c;return this;},setHeader(){},json(o){res({status:this.c,...o});}}; h({method:query?'GET':'POST',query:query||{},body},out); });
+let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
+const R=await call({action:'register',name:'Jero',pin:'1234',color:'#e8262d'}); ok(R.status===200&&R.token,'register');
+ok((await call({action:'register',name:'JÉRO',pin:'1234',color:'#e8262d'})).status===409,'register: nombre repetido (mayúsculas/acentos)');
+ok((await call({action:'register',name:'Ana',pin:'12',color:'#e8262d'})).status===400,'register: código corto');
+ok((await call({action:'check',name:'jero'})).exists===true,'check existe'); ok((await call({action:'check',name:'nadie'})).exists===false,'check no existe');
+const L=await call({action:'login',name:'jero',pin:'1234'}); ok(L.status===200&&L.token&&Array.isArray(L.marks),'login');
+ok((await call({action:'login',name:'jero',pin:'9999'})).status===403,'login: código incorrecto');
+ok((await call({action:'update',token:R.token,color:'#2f6fe0'})).status===200,'update color (sesión 1 sigue viva tras login en otro lado)');
+const B=(await call({action:'register',name:'Lucho',pin:'5678',color:'#1f9e54'})).token;
+ok((await call({action:'update',token:B,name:'jero'})).status===409,'update: nombre usado');
+ok((await call({action:'update',token:B,name:'Luchito'})).player?.name==='Luchito','update: renombrar');
+ok((await call({action:'marks',token:L.token,list:[{ev:'100',mark:10.4},{ev:'lj',mark:7.5},{ev:'jav',mark:999}]})).ok,'marks');
+await call({action:'marks',token:L.token,list:[{ev:'100',mark:11}]}); await call({action:'marks',token:B,list:[{ev:'100',mark:10.1}]});
+const T=await call(null,{top:'100'}); ok(T.status===200&&T.top.map(r=>r.mark).join()==='10.1,10.4','top 100 (orden y mejor marca)');
+ok((await call(null,{top:'jav'})).top.length===0,'top: marca imposible rechazada');
+ok((await call(null,{top:'xx'})).status===400,'top: prueba desconocida');
+const P=await call(null,{players:'1'}); ok(P.players?.length===2,'players');
+const Pr=await call(null,{player:P.players.find(p=>p.name==='Jero').id}); ok(Pr.marks?.find(m=>m.ev==='100')?.rank===2,'player profile + puesto');
+ok((await call({action:'login',name:'jero',pin:'1234'})).marks.length===2,'login trae marcas');
+const C=(await call({action:'create',token:L.token,name:'Copa',events:['100','lj'],days:3})).code; ok(!!C,'create');
+ok((await call({action:'join',token:B,code:C})).ok,'join');
+ok((await call({action:'result',token:B,code:C,ev:'100',mark:10.2})).ok,'result');
+ok((await call({action:'result',token:B,code:C,ev:'100',mark:10.0})).status===409,'result: una sola vez');
+ok((await call({action:'result',token:B,code:C,ev:'pv',mark:5})).status===400,'result: prueba fuera del torneo');
+const V=await call(null,{code:C}); ok(V.entries.length===2&&V.results.length===1&&V.tournament.finished===false,'view');
+ok((await call({action:'close',token:B,code:C})).status===403,'close: solo el creador');
+ok((await call({action:'close',token:L.token,code:C})).ok&&(await call(null,{code:C})).tournament.reason==='host','close');
+ok((await call({action:'result',token:L.token,code:C,ev:'100',mark:10})).status===409,'result: torneo terminado');
+const M=await call({action:'mytours',token:L.token}); ok(M.tours?.length===1&&M.tours[0].tournament.finished,'mytours');
+ok((await call({action:'marks',token:'falso',list:[]})).status===401,'token falso');
+ok((await call({action:'nada'})).status===400,'acción desconocida');
+for(let i=0;i<5;i++) await call({action:'login',name:'Luchito',pin:'0000'}); ok((await call({action:'login',name:'Luchito',pin:'5678'})).status===429,'bloqueo tras 5 intentos');
+ok((await call({action:'marks',token:L.token,list:[{ev:'tj',mark:19.5},{ev:'ham',mark:66.2}]})).ok&&(await call(null,{top:'tj'})).top[0]?.mark===19.5&&(await call(null,{top:'ham'})).top[0]?.mark===66.2,'tj y martillo: marcas al Top 10');
+ok(!!(await call({action:'create',token:L.token,name:'Nuevas',events:['tj','ham'],days:1})).code,'tj y martillo: torneo con las nuevas');
+{ const A=(await call({action:'register',name:'Uno',pin:'1111',color:'#e8262d'})).token, Bt=(await call({action:'register',name:'Dos',pin:'2222',color:'#e8262d'})).token, Ct=(await call({action:'register',name:'Tres',pin:'3333',color:'#e8262d'})).token;
+  const K=(await call({action:'create',token:A,name:'Tres amigos',events:['100','lj'],days:1})).code; await call({action:'join',token:Bt,code:K});
+  for(const t of [A,Bt]) for(const [ev,m] of [['100',11],['lj',7]]) await call({action:'result',token:t,code:K,ev,mark:m});
+  ok((await call(null,{code:K})).tournament.finished===false,'torneo: los dos que estaban jugaron todo y sigue abierto');
+  ok((await call({action:'join',token:Ct,code:K})).ok&&(await call({action:'result',token:Ct,code:K,ev:'100',mark:10.5})).ok,'torneo: el tercero se suma después y juega'); }
+{ const A=(await call({action:'register',name:'Rep1',pin:'1111',color:'#e8262d'})).token, Bt=(await call({action:'register',name:'Rep2',pin:'2222',color:'#e8262d'})).token, Ct=(await call({action:'register',name:'Rep3',pin:'3333',color:'#e8262d'})).token, Xt=(await call({action:'register',name:'Afuera',pin:'4444',color:'#e8262d'})).token;
+  const K=(await call({action:'create',token:A,name:'La revancha',events:['100','lj'],days:1})).code; await call({action:'join',token:Bt,code:K}); await call({action:'join',token:Ct,code:K}); await call({action:'close',token:A,code:K});
+  const N=await call({action:'repeat',token:Bt,code:K,events:['100','lj','jav'],days:3}); ok(N.status===200&&N.code&&N.code!==K,'repetir: arma un torneo nuevo');
+  const V2=await call(null,{code:N.code}); ok(V2.tournament.name==='La revancha'&&V2.tournament.events.join()==='100,lj,jav'&&V2.entries.length===3&&!V2.tournament.finished,'repetir: mismo nombre, pruebas nuevas, los 3 jugadores adentro');
+  ok((await call({action:'mytours',token:Ct})).tours.some(d=>d.tournament.code===N.code),'repetir: al otro jugador le aparece en sus torneos sin código');
+  ok((await call({action:'repeat',token:Xt,code:K,events:['100'],days:1})).status===403,'repetir: alguien que no estaba no puede'); }
+{ const A=(await call({action:'register',name:'Per1',pin:'1111',color:'#e8262d'})).token, Bt=(await call({action:'register',name:'Per2',pin:'2222',color:'#e8262d'})).token;
+  const lastYear=Date.now()-400*86400000;
+  await call({action:'marks',token:A,list:[{ev:'pv',mark:7.5,date:lastYear}]});
+  await call({action:'marks',token:A,list:[{ev:'pv',mark:6.1}]}); await call({action:'marks',token:Bt,list:[{ev:'pv',mark:6.4}]});
+  const all=(await call(null,{top:'pv'})).top, yr=(await call(null,{top:'pv',span:'year'})).top, mo=(await call(null,{top:'pv',span:'month'})).top;
+  ok(all[0]?.mark===7.5&&all[0].name==='Per1','histórico: la marca de hace más de un año');
+  ok(yr.map(r=>r.name+':'+r.mark).join()==='Per2:6.4,Per1:6.1'&&mo.length===2,'este año y este mes: solo lo de ahora (Per2 6.4, Per1 6.1)');
+  await call({action:'marks',token:A,list:[{ev:'pv',mark:5.9}]});
+  ok((await call(null,{top:'pv',span:'month'})).top.find(r=>r.name==='Per1').mark===6.1,'este mes: queda la mejor del mes'); }
+console.log(fails?fails+' FALLAS':'API OK');
+// lockout under many attempts at once: at most MAX_FAILS guesses get checked
+const Z=await call({action:'register',name:'Zeta',pin:'4321',color:'#e8262d'});
+const tries=await Promise.all(Array.from({length:40},(_,i)=>call({action:'login',name:'Zeta',pin:String(1000+i)})));
+const checked=tries.filter(r=>r.status===403).length; ok(checked<=5,`intentos simultáneos: solo ${checked} se revisan, el resto bloqueado`);
+ok((await call({action:'login',name:'Zeta',pin:'4321'})).status===429,'bloqueado también con el código correcto');
+await globalThis.__pg.query(`update users set locked_until=now()-interval '1 second' where name='Zeta'`);
+ok((await call({action:'login',name:'Zeta',pin:'4321'})).status===200,'pasado el bloqueo entra con el código correcto');
+ok((await call(null,null)).status!==500,'cuerpo vacío no rompe el servidor');
+console.log(fails?fails+' FALLAS':'API OK (2)');
+// friends
+{ const A=await call({action:'register',name:'Gaby',pin:'1111',color:'#e8262d'}), Bt=await call({action:'register',name:'Gonzo',pin:'1111',color:'#2f6fe0'}), Ct=await call({action:'register',name:'Gina',pin:'1111',color:'#1f9e54'});
+  ok((await call({action:'fadd',token:A.token,player:Bt.player.id})).ok,'amigos: agregar');
+  ok((await call({action:'fadd',token:A.token,player:A.player.id})).status===400,'amigos: no te podés agregar a vos');
+  ok((await call({action:'fadd',token:A.token,player:'nadie'})).status===404,'amigos: un jugador que no existe');
+  await call({action:'marks',token:A.token,list:[{ev:'100',mark:11.1}]}); await call({action:'marks',token:Bt.token,list:[{ev:'100',mark:10.9}]}); await call({action:'marks',token:Ct.token,list:[{ev:'100',mark:9.0}]});
+  const t=await call(null,{top:'100',friends:A.player.id}); ok(t.top.map(r=>r.name).join()==='Gonzo,Gaby','amigos: tabla solo con vos y tus amigos');
+  const F=await call({action:'friends',token:A.token}); ok(F.friends.length===1&&F.friends[0].name==='Gonzo','amigos: mi lista');
+  ok((await call({action:'friends',token:Bt.token})).friends.length===0,'amigos: agregar no necesita el sí del otro');
+  const so=await call(null,{social:Bt.player.id}); ok(so.by.length===1&&so.by[0].name==='Gaby','amigos: quién te agregó');
+  await call({action:'fdel',token:A.token,player:Bt.player.id}); ok((await call({action:'friends',token:A.token})).friends.length===0,'amigos: quitar'); }
+  console.log(fails?fails+' FALLAS':'AMIGOS OK');
+// admin
+{ const J=await call({action:'login',name:'Jero',pin:'1234'}), X=await call({action:'register',name:'Xavi',pin:'1234',color:'#2f6fe0'});
+  const ad=(op,extra={},t=J.token)=>call({action:'admin',token:t,op,...extra});
+  ok((await ad('check',{},X.token)).admin===false,'admin: otro jugador no es administrador');
+  ok((await ad('check')).admin===true,'admin: Jero sí');
+  ok((await ad('stats')).stats.players>=2,'admin: estadísticas');
+  for(let i=0;i<5;i++) await call({action:'login',name:'Xavi',pin:'0000'});
+  ok((await ad('users')).users.find(u=>u.name==='Xavi').locked,'admin: ve bloqueado');
+  await ad('setpin',{player:X.player.id,pin:'7777'}); ok((await call({action:'login',name:'Xavi',pin:'7777'})).status===200,'admin: código nuevo (y desbloquea)');
+  await ad('logout',{player:X.player.id}); ok((await call({action:'update',token:X.token,color:'#e8262d'})).status===401,'admin: cerrar sesiones');
+  ok((await ad('rename',{player:X.player.id,name:'Xavier'})).ok,'admin: renombrar');
+  const XL=(await call({action:'login',name:'Xavier',pin:'7777'})).token; await call({action:'marks',token:XL,list:[{ev:'100',mark:9.1}]});
+  await ad('delmark',{player:X.player.id,ev:'100'}); ok(!(await call(null,{top:'100'})).top.some(r=>r.name==='Xavier'),'admin: borrar una marca');
+  await call({action:'update',token:J.token,name:'Jerónimo'}); ok((await ad('check')).ok,'admin: sigue siendo admin con otro nombre');
+  const imp=await call({action:'register',name:'Jero',pin:'1234',color:'#e8262d'}); ok((await ad('check',{},imp.token)).admin===false&&(await ad('stats',{},imp.token)).status===403,'admin: otro «Jero» nuevo no es admin');
+  ok((await ad('deluser',{player:X.player.id})).ok&&(await call({action:'login',name:'Xavier',pin:'7777'})).status===404,'admin: borrar jugador');
+  ok((await ad('deluser',{player:J.player.id})).status===400,'admin: no se puede borrar al admin');
+  console.log(fails?fails+' FALLAS':'ADMIN OK'); }
+process.exit(0);

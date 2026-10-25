@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Pruebas automáticas del juego (ver README.md de esta carpeta). Solo para correr acá, no van a Vercel.",
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.10"
+  }
+}
