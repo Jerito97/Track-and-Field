@@ -6,7 +6,6 @@
 import {ctx,LH,LW} from '../canvas.js';
 import {INK} from '../config.js';
 import {GEAR,LAP} from '../game/cycle.js';
-import {DIP_BEST,DIP_W,dipSpot} from '../game/sprint.js';
 import {ME,S} from '../state.js';
 import {drawAthlete} from '../rig.js';
 import {drawBackdrop,drawPauseBtn,drawStands,setTheme} from './scenery.js';
@@ -52,10 +51,6 @@ export function drawCycle(V){
   for(let m=0;m<=ev.dist;m+=LAP){ const x=X(m); if(x<-30||x>LW+30) continue; const t=topAt(m);
     ctx.fillStyle='#fff'; ctx.fillRect(x-4,t,8,GY-t); ctx.fillStyle=INK; ctx.fillRect(x-1,t,2,GY-t);
     txt(m===0?'SALIDA':m>=ev.dist?'META':'VUELTA 2',x,t-17,'#fff',12); }
-  // throwing the bike: where to press both buttons (the yellow line), the band around it still gaining something
-  if(S.dipCued&&!(S.dip>0)&&!S.finished){ const d=dipSpot(), w=d*DIP_W/DIP_BEST, x0=X(ev.dist-d-w), x1=X(ev.dist-d+w), xb=X(ev.dist-d), t=topAt(ev.dist-d);
-    const g=ctx.createLinearGradient(x0,0,x1,0); g.addColorStop(0,'rgba(255,210,58,0)'); g.addColorStop(.5,'rgba(255,210,58,.5)'); g.addColorStop(1,'rgba(255,210,58,0)');
-    ctx.fillStyle=g; ctx.fillRect(x0,t,x1-x0,GY-t); ctx.fillStyle='#ffd23a'; ctx.fillRect(xb-1.5,t,3,GY-t); txt('¡YA!',xb,t-17,'#ffd23a',12); }
   // the starter, on the blue band by the start (in front of everyone: on the infield side)
   drawStarter(X(-3.5),GY+9,2.1*U);
   // the machines, highest first

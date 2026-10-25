@@ -30,12 +30,10 @@ export function resetRivals(){
     Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:ev.relay?(ev.legs-1)*GAIN:0))/(T-(ev.tau||2)-react-chT),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); if(ev.laser) laserRival(r,ev); });
 }
 // the dip at the line (both red buttons): the line reached DIP_BEST s after pressing them (the lean all the way
-// forward) takes DIP_MAX s off the time; DIP_W s earlier or later, nothing (in between, in proportion). The track shows
-// where to press (dipSpot)
-export const DIP_BEST=.25, DIP_W=.2, DIP_MAX=.2;
+// forward) takes DIP_MAX s off the time; DIP_W s earlier or later, nothing (in between, in proportion). Nothing on the
+// track says where: it's judged by eye, watching the line come
+const DIP_BEST=.25, DIP_W=.2, DIP_MAX=.2;
 const dipBonus=t=>DIP_MAX*clamp(1-Math.abs(t-DIP_BEST)/DIP_W,0,1);
-// metres before the line to press them, at the speed one goes now
-export const dipSpot=()=>S.v*DIP_BEST*(S.ev&&S.ev.swim?SWIM_K:1);
 
 export function updateSprint(dt){
   const ev=S.ev;

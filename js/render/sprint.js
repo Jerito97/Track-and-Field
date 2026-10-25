@@ -11,7 +11,6 @@ import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 import {BACK,CH_OK,CH_W,changes,MATE} from '../game/relay.js';
-import {DIP_BEST,DIP_W,dipSpot} from '../game/sprint.js';
 import {D,DIRS,laserAim,laserArrow,scope} from '../game/laser.js';
 
 const LANES=6;
@@ -53,10 +52,6 @@ export function drawSprint(V){
     for(let l=0;l<LANES;l++){ const y=TT+lh*(l+.5); ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=1; ctx.fillRect(X(-1.1),y-3,10,7); ctx.strokeRect(X(-1.1),y-3,10,7); txt(String(l+1),X(1.1),y+1,'#fff',lh*.7,{stroke:null}); } }
   for(let m=10;m<ev.dist;m+=10){ const x=X(m); if(x>-30&&x<LW+30){ ctx.fillStyle='rgba(255,255,255,.75)'; ctx.fillRect(x-1,TT,2,5); txt(String(m),x,TT+10,'rgba(255,255,255,.85)',10,{stroke:null}); } }
   const fx=X(ev.dist); if(fx>-20&&fx<LW+20){ ctx.fillStyle='#fff'; ctx.fillRect(fx-2,TT,4,TB-TT); for(let y=TT,j=0;y<TB;y+=5,j++){ ctx.fillStyle=j%2?INK:'#fff'; ctx.fillRect(fx+2,y,5,5); } txt('META',fx,TT-8,'#fff',12); }
-  // the dip: where to press both buttons (the yellow line), the band around it still gaining something
-  if(S.dipCued&&!(S.dip>0)&&!S.finished&&!ev.swim){ const d=dipSpot(), w=d*DIP_W/DIP_BEST, x0=X(ev.dist-d-w), x1=X(ev.dist-d+w), xb=X(ev.dist-d);
-    const g=ctx.createLinearGradient(x0,0,x1,0); g.addColorStop(0,'rgba(255,210,58,0)'); g.addColorStop(.5,'rgba(255,210,58,.45)'); g.addColorStop(1,'rgba(255,210,58,0)');
-    ctx.fillStyle=g; ctx.fillRect(x0,TT,x1-x0,TB-TT); ctx.fillStyle='#ffd23a'; ctx.fillRect(xb-1.5,TT,3,TB-TT); txt('¡YA!',xb,TT-8,'#ffd23a',12); }
   for(let l=0;l<LANES;l++){
     const feet=TT+lh*(l+.85);
     if(ev.hurdles){ const ref=l===S.plLane?S:S.rivals.find(r=>r.lane===l); HURDLES.forEach((h,i)=>{ const x=X(h); if(x>-40&&x<LW+40) hurdle(x,feet,s*.85,ref&&ref.knocked&&ref.knocked.has(i)); }); }
