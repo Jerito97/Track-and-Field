@@ -88,6 +88,10 @@ export const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 function heroArt(){ const k=thumbKey(menuSel);
   return Object.entries(THUMBS).map(([id,pos])=>`<img class="m-th${id===k?' on':''}" data-k="${id}" src="assets/thumbs/${id}.webp" alt="" style="object-position:${pos}">`).join('')
     +(THUMBS[k]?'':`<canvas data-pict="${menuSel}"></canvas>`); }
+// the event's name on one line: smaller when it doesn't fit (a long name pushed the buttons out of the box)
+function fitHero(){ const h=OV.querySelector('.mm .m-info h1'); if(!h) return; h.style.fontSize='';
+  let f=parseFloat(getComputedStyle(h).fontSize); while(h.scrollWidth>h.clientWidth+1&&f>12){ f-=1; h.style.fontSize=f+'px'; } }
+addEventListener('resize',()=>fitHero()); document.fonts?.ready.then(()=>fitHero());
 function heroInfo(){ const tour=menuSel===TOUR, ev=evAt(menuSel);
   return `<h1>${tour?'Torneo':ev.name}</h1>
       <div class="m-acts">${tour?'<button class="m-play" data-act="online" data-focus>Con amigos <span aria-hidden="true">›</span></button>':'<button class="m-play" data-act="go" data-focus>Jugar ahora <span aria-hidden="true">›</span></button>'+(ev.beta?'':`<button class="m-rec" data-act="board" data-i="${menuSel}"><span class="m-ic">${ICON.cup}</span>Récords</button>`)+'<button class="m-rec" data-act="demo">Cómo se juega</button>'}</div>`; }
@@ -108,7 +112,7 @@ function selectEvent(i){
   else { art.classList.remove('img'); art.querySelectorAll('.m-th').forEach(im=>im.classList.remove('on')); art.insertAdjacentHTML('beforeend',`<canvas data-pict="${i}"></canvas>`); }
   OV.querySelector('.mm .m-info').innerHTML=heroInfo(); OV.querySelector('.mm .m-stats').innerHTML=heroStats();
   OV.querySelectorAll('.m-evs .m-ev').forEach(b=>{ const on=+b.dataset.i===i; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
-  paintOv(); keepInView(); loadWr();
+  paintOv(); keepInView(); loadWr(); fitHero();
 }
 // main menu: three modes (events, tournaments, survival), the player and the players below
 const footer=()=>`<footer class="m-bot">
@@ -156,7 +160,7 @@ export function showEvents(){
   <div class="m-cats" role="group" aria-label="Tipo de prueba">${CATS.filter(([c])=>c==='all'||shownEvents().some(e=>catOf(e)===c)).map(([c,n])=>`<button class="m-cat${c===menuCat?' on':''}" data-act="cat" data-c="${c}" aria-pressed="${c===menuCat}">${n}</button>`).join('')}</div>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   ${footer()}</div>`,'menu');
-  initCarousel(); refreshFriendsStrip(); loadWr();
+  initCarousel(); refreshFriendsStrip(); loadWr(); fitHero();
 }
 // carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
 let evScroll=0;
