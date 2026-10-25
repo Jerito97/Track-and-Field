@@ -11,16 +11,17 @@ import {setS,setScreen} from '../state.js';
 import {applyWipes,lastWipe,periods,player,players,survBestKey,updatePlayer} from '../storage.js';
 import {CATS,catOf,esc,place,showOv} from './screens.js';
 
-const cache={};  // 'ev' (world) or 'ev:friends' (and '@year' / '@month') -> {at, top}
+const cache={};  // 'ev' (world) or 'ev:friends' (and '@year' / '@month') -> {at, top, me (your row when not in the 10)}
 const FRESH=60000;
 // span: '' all-time, 'year' this year, 'month' this month
 const key=(ev,group,span)=>ev+(group?':'+group:'')+(span?'@'+span:'');
 // group: null for the world, 'friends' for you and your friends
 export async function loadTop(ev,force,group,span){
   const k=key(ev,group,span), c=cache[k]; if(c&&!force&&Date.now()-c.at<FRESH) return c.top;
-  const r=await getTop(ev,group==='friends'?player()?.id:null,span); cache[k]={at:r.offline?0:Date.now(),top:r.top,offline:!!r.offline}; return r.top;
+  const r=await getTop(ev,group==='friends'?player()?.id:null,span,player()?.token?player().id:null); cache[k]={at:r.offline?0:Date.now(),top:r.top,me:r.me||null,offline:!!r.offline}; return r.top;
 }
 export const cachedTop=(ev,group,span)=>cache[key(ev,group,span)]?.top||null;
+const cachedMe=(ev,group,span)=>{ const m=cache[key(ev,group,span)]?.me; return m&&m.player_id===player()?.id?m:null; };
 const wasOffline=(ev,group,span)=>!!cache[key(ev,group,span)]?.offline;
 // which board: the world (null) or you and your friends ('friends'), and which time (all-time, this year, this month); remembered
 let scope=null, span='', bcat='all';  // bcat: the kind of event the tabs show (all, races, jumps...)
@@ -82,6 +83,18 @@ function keepX(){ const sel='.b-card .b-tabs,.b-card .b-scopes', was=[...OV.quer
   return ()=>{ OV.querySelectorAll(sel).forEach((e,k)=>{ e.scrollLeft=was[k]||0; });
     const on=OV.querySelector('.b-card .b-tab.on'), t=on?.parentElement; if(!on) return;
     if(on.offsetLeft<t.scrollLeft) t.scrollLeft=on.offsetLeft-8; else if(on.offsetLeft+on.offsetWidth>t.scrollLeft+t.clientWidth) t.scrollLeft=on.offsetLeft+on.offsetWidth-t.clientWidth+8; }; }
+// the top 10 (and your row) always fit with no scrolling: the rows take the height left on the screen, measured
+// (the filters wrap differently on each phone), between a small and a comfortable size
+function fitBoard(){
+  const card=OV.querySelector('.b-card'), l=card?.querySelector('.b-list'); if(!l) return;
+  const cs=getComputedStyle(OV), room=OV.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  for(let k=0;k<2;k++){ const rows=l.querySelectorAll('tbody tr:not(.b-gap)'), gap=l.querySelector('.b-gap'), head=l.querySelector('thead')?.getBoundingClientRect().height||0;
+    const other=card.getBoundingClientRect().height-l.getBoundingClientRect().height, ls=getComputedStyle(l), pad=parseFloat(ls.paddingTop)+parseFloat(ls.paddingBottom)+2;
+    const free=room-other-pad-head-(gap?gap.getBoundingClientRect().height:0), sp=parseFloat(getComputedStyle(l.querySelector('table')).borderSpacing.split(' ')[1]||'0');
+    l.style.setProperty('--rowh',Math.max(13,Math.min(42,Math.floor((free-sp*(rows.length+2))/Math.max(rows.length,1)))));
+    l.style.setProperty('--rowh',l.style.getPropertyValue('--rowh')+'px'); }
+}
+addEventListener('resize',()=>fitBoard());
 export async function showBoard(i,from,group,sp){
   if(from!==undefined) back=from; else if(i!==undefined&&!document.querySelector('.b-card')) back=null;
   if(group!==undefined) scope=group||null;
@@ -100,16 +113,16 @@ export async function showBoard(i,from,group,sp){
     <div class="b-filters">${tabs}</div>${body}
     <div class="b-foot"><button class="b-back" data-act="${back||(ev===SURV?'sclassic':ev===SURVM?'smodern':'events')}" data-focus>Volver</button></div></div>`;
   const me=player()?.id, unit=ev.surv?'Puntos':ev.type==='sprint'?'Tiempo':'Marca';
-  const rows=top=>top.length?`<div class="b-list scroll"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev.surv?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
-    return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev.surv?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}</tbody></table></div>`
+  const rows=(top,mine)=>top.length?`<div class="b-list scroll"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev.surv?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
+    return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev.surv?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}${mine?`<tr class="b-gap"><td colspan="${ev.surv?5:4}">…</td></tr><tr class="me b-mine"><td class="pos">${mine.rank}.</td><td class="nm"><canvas data-color="${esc(mine.color)}"></canvas>${esc(mine.name)}</td><td class="mk">${mk(ev,mine.mark)}</td>${ev.surv?`<td class="sub">${(mine.rounds||0)+1}</td>`:''}<td class="sub">${day(mine.date)}</td></tr>`:''}</tbody></table></div>`
     :`<p class="small b-empty">${scope?`${myFriends().length?'Ni vos ni tus amigos tienen':'Agregá amigos para comparar sus récords con los tuyos. Vos no tenés'} marca en esta prueba${span?(span==='year'?' este año':' este mes'):''} todavía.`:span?`Todavía no hay marcas ${span==='year'?'este año':'este mes'}. ¡La primera puede ser la tuya!`:'Todavía no hay marcas. ¡La primera puede ser la tuya!'}</p>`;
   const c=cachedTop(ev.id,scope,span), here=shownEv+span;
-  let back2=keepX(); showOv(card(c?rows(c):'<p class="small o-wait">Cargando…</p>'),'menu'); back2();
+  let back2=keepX(); showOv(card(c?rows(c,cachedMe(ev.id,scope,span)):'<p class="small o-wait">Cargando…</p>'),'menu'); fitBoard(); back2();
   if(player()?.token) loadFriends().then(()=>{ const add=OV.querySelector('.b-card .b-scope.add'); if(shownEv===here&&add) add.textContent=myFriends().length?'Editar amigos ›':'+ Agregar amigos'; },()=>{});
   await syncMarks();
   let top, note='';
   try{ top=await loadTop(ev.id,false,scope,span); if(wasOffline(ev.id,scope,span)) note='<p class="small">Sin conexión: estos son los últimos récords que viste.</p>'; }
   catch(e){ top=scope||span?[]:localTop(ev); note=`<p class="small">${scope?'No se pudo conectar con el servidor.':'No se pudo conectar con el servidor de récords: se ven solo los jugadores de este celular.'}</p>`; }
   if(shownEv+span!==here||!OV.querySelector('.b-card')) return;  // left the board meanwhile
-  const y=OV.scrollTop, ly=OV.querySelector('.scroll')?.scrollTop||0; back2=keepX(); showOv(card(note+rows(top)),'menu'); back2(); OV.scrollTop=y; const l=OV.querySelector('.scroll'); if(l) l.scrollTop=ly;
+  const y=OV.scrollTop, ly=OV.querySelector('.scroll')?.scrollTop||0; back2=keepX(); showOv(card(note+rows(top,cachedMe(ev.id,scope,span))),'menu'); fitBoard(); back2(); OV.scrollTop=y; const l=OV.querySelector('.scroll'); if(l) l.scrollTop=ly;
 }

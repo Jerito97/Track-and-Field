@@ -687,3 +687,14 @@ tr.me td{background:var(--red)}
 .d-table td{font-size:.78rem;padding:2px 8px}
 .d-table td:last-child{font-size:.9rem}
 .d-card .d-play{font-size:.9rem;padding:4px 12px}
+/* records: the rows sized to fit the top 10 and your row (--rowh, measured by the game) */
+.b-list{--rowh:34px}
+.b-big{border-spacing:0 2px}
+.b-big td{height:var(--rowh);padding-top:0;padding-bottom:0;font-size:clamp(10px,calc(var(--rowh)*.46),17px);line-height:1}
+.b-big td.mk{font-size:clamp(11px,calc(var(--rowh)*.54),20px)}
+.b-big td.sub{font-size:clamp(9px,calc(var(--rowh)*.38),14px)}
+.b-big td.nm canvas{width:calc(var(--rowh)*.72);height:calc(var(--rowh)*.72)}
+.b-big th{line-height:1.1;padding-top:0;padding-bottom:1px}
+.b-big tr.b-gap td{height:auto;background:none!important;padding:0 10px;line-height:.6;color:#9fb0d2;font-size:12px;text-align:left!important}
+/* your own row, out of the top 10, at the bottom */
+.b-big tr.b-mine td{background:var(--red)!important;color:#fff}

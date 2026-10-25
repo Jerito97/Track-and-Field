@@ -12,7 +12,8 @@
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date,rounds}, ...10]}  (top=surv: survival)
 //   POST {action:'marks', token, list:[{ev,mark,date,rounds}]} -> {ok}  (your marks for the world top 10; ev 'surv' / 'survm': survival points, classic / modern)
-//   GET  /api/t?top=100&friends=PLAYER                      -> {top:[...that player and their friends with a mark]}  (friends' board)
+//   GET  /api/t?top=100&friends=PLAYER                      -> {top:[...the best 10 of that player and their friends]}  (friends' board)
+//   GET  /api/t?top=100&me=PLAYER                           -> also {me:{...their row, rank}} when they're not in the 10
 //   GET  /api/t?top=100&span=year|month[&friends=PLAYER]    -> the same for this year / this month (Argentina's time)
 //   POST {action:'friends', token}                          -> {friends:[{id,name,color}]}
 //   POST {action:'fadd'|'fdel', token, player}              -> {ok}   (add a registered player to your friends / take them off)
@@ -245,9 +246,10 @@ async function adminOp(sql,b){
 // world top 10, or (group) every member of a group with a mark
 // the year and the month a moment belongs to, in Argentina's time (UTC-3): ['2026', '2026-10']
 const periods=t=>{ const d=new Date(new Date(t).getTime()-3*3600000), y=String(d.getUTCFullYear()); return [y,y+'-'+String(d.getUTCMonth()+1).padStart(2,'0')]; };
-async function top(sql,ev,fof,span){
-  // a player's friends board (fof: the player): them and their friends; else the world's top 10
-  const ids=fof?[fof,...(await sql`select friend_id from friends where player_id=${fof}`).map(r=>r.friend_id)]:null, n=fof?MAX_FRIENDS+1:10;
+async function top(sql,ev,fof,span,me){
+  // the top 10: the world's, or a player's friends board (fof: the player: them and their friends); me: a player
+  // whose own row comes too, with their place, when it's not among the 10
+  const ids=fof?[fof,...(await sql`select friend_id from friends where player_id=${fof}`).map(r=>r.friend_id)]:null, n=10;
   // every board checks the others: a mark in the all-time one made this year (or month) is in this year's (month's)
   // too, and the all-time one has the best of a player even if it only reached a period's board
   const all=await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev}`;
@@ -257,7 +259,10 @@ async function top(sql,ev,fof,span){
   const rows=all.concat(per).filter(r=>k<0||periods(r.date)[k]===now);
   const sp=SPRINT.includes(ev), better=(a,b)=>(sp?a.mark-b.mark:b.mark-a.mark)||new Date(a.date)-new Date(b.date), best=new Map();
   rows.forEach(r=>{ if(ids&&!ids.includes(r.player_id)) return; const o=best.get(r.player_id); if(!o||better(r,o)<0) best.set(r.player_id,r); });
-  return {top:[...best.values()].sort(better).slice(0,n).map(({period,...r})=>r)};
+  const all2=[...best.values()].sort(better), clean=({period,...r})=>r, i=me?all2.findIndex(r=>r.player_id===me):-1;
+  // (their place: one more than how many have a better mark; a tie shares it)
+  const mine=i>=n?{...clean(all2[i]),rank:1+all2.filter(r=>sp?r.mark<all2[i].mark:r.mark>all2[i].mark).length}:null;
+  return {top:all2.slice(0,n).map(clean),me:mine};
 }
 // wipe an event's records: one player's, or everyone's (player null); the world, this year's and this month's boards,
 // and a note so each phone clears its own
@@ -510,7 +515,7 @@ export default async function handler(req,res){
       if(req.query.wipes!=null) return res.status(200).json({wipes:await sql`select id,ev,player_id,at from wipes where id>${Math.max(0,Math.floor(Number(req.query.after)||0))} order by id limit 200`});
       if(req.query.daily!=null) return res.status(200).json(await daily(sql,req.query.player?String(req.query.player).slice(0,64):null));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
-      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.friends?String(req.query.friends).slice(0,64):null,String(req.query.span||''))); }
+      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.friends?String(req.query.friends).slice(0,64):null,String(req.query.span||''),req.query.me?String(req.query.me).slice(0,64):null)); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');
       return res.status(200).json(v);

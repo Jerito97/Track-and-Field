@@ -49,7 +49,7 @@ export const getDaily=pid=>call('GET',null,'?daily=1'+(pid?'&player='+encodeURIC
 export const dailyStart=ev=>call('POST',{action:'daily',step:'start',ev,token:tok()});
 export const dailyFinish=(day,mark)=>call('POST',{action:'daily',step:'mark',day,mark,token:tok()});
 // world top 10 of an event, and your marks for it
-export const getTop=(ev,friendsOf,span)=>call('GET',null,'?top='+encodeURIComponent(ev)+(friendsOf?'&friends='+encodeURIComponent(friendsOf):'')+(span?'&span='+span:''));
+export const getTop=(ev,friendsOf,span,me)=>call('GET',null,'?top='+encodeURIComponent(ev)+(friendsOf?'&friends='+encodeURIComponent(friendsOf):'')+(span?'&span='+span:'')+(me?'&me='+encodeURIComponent(me):''));
 // friends: your list, add a registered player, take one off
 export const getFriends=async()=>(await call('POST',{action:'friends',token:tok()})).friends||[];
 export const addFriend=player=>call('POST',{action:'fadd',player,token:tok()});
