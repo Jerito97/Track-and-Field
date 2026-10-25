@@ -85,6 +85,6 @@ export function demoStep(dt){
   if(k==='sp'&&a){ if(a.stage==='angle'&&m&&m.p>=44.5) hold(true); if(a.stage==='aim'&&m&&m.p>=.92) hold(false); }
   // discus: a tap as each ring closes (let go in between), the angle a little past the green
   if(k==='dis'&&a){ if(a.stage==='swing'){ if(m&&m.k==='disring'&&m.p>=.97&&!S.held2) hold(true); else if(S.held2&&(!m||m.p<.5)) hold(false); }
-    if(a.stage==='spin'&&S.held2) hold(false);
+    if((a.stage==='ready'||a.stage==='spin')&&S.held2) hold(false);
     if(a.stage==='angle'&&m&&m.p>=41.5&&!S.held2) hold(true); if(a.stage==='fly'&&S.held2) hold(false); }
 }

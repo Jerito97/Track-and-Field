@@ -1,5 +1,5 @@
 // Discus throw, in three parts. Swings: three times a ring closes around the discus; tap both buttons (or Space) right
-// as it closes: the better the timing, the more speed the spin starts with. Spin: SPIN_T s of the green buttons as in
+// as it closes: the better the timing, the more speed the spin starts with. After a moment, the spin: SPIN_T s of the green buttons as in
 // the 100 m while the athlete turns across the circle (more speed). Angle: as in the shot put a needle rises on a
 // gauge and doesn't come back; press both buttons in the green and the discus goes right then (no release bar). If the
 // needle reaches the top first, no mark.
@@ -13,16 +13,16 @@ import {angleQ,SP_MAX,SP_RATE} from './shot.js';
 
 // the three swings: seconds for each ring to close (a little quicker each time), the pause between them; a tap with
 // the ring within RING_OK of closed (share of its time) is perfect, nothing RING_W away; past RING_LATE it's missed
-export const RINGS=[.95,.85,.75];
+export const RINGS=[.75,.66,.57];
 const RING_GAP=.25, RING_OK=.07, RING_W=.35, RING_LATE=1.35;
-// the speed the spin starts with (m/s of tapping speed) for three perfect swings
-const V0=5;
+// the speed the spin starts with (m/s of tapping speed) for three perfect swings; then a pause before the spin (s)
+const V0=7, READY=.5;
 // tapping time (s), then the pause before the needle
 const SPIN_T=3, GAP=.5, LAG=.03;
 // not tapping: as in the 100 m
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
 // throw length (m) per m/s of speed at the best angle
-const DIS_K=5.2;
+const DIS_K=4.9;
 // the athlete: at the back of the circle for the swings, across it while spinning (hip, m from the circle's centre)
 const FROM=-.8, TO=.45;
 const TAU=Math.PI*2;
@@ -52,7 +52,10 @@ export function updateDiscus(dt){
     else if(m.p>=RING_LATE){ q=0; S.pops.push({text:'¡TARDE!',t:0,dur:.6,col:'#fff',sub:'',big:.55,small:true}); tone(160,.15,'sawtooth',.04); }
     if(q==null) return;
     a.qs.push(q); a.n++; S.meter=null; S.cue=null; a.t=0;
-    if(a.n>=RINGS.length){ a.stage='spin'; a.t=0; a.ph=0; S.v=V0*a.qs.reduce((s,x)=>s+x,0)/RINGS.length; S.lastTap=S.clock; sideCue(); tone(600,.06,'triangle',.04); }
+    if(a.n>=RINGS.length){ a.stage='ready'; a.t=0; S.v=V0*a.qs.reduce((s,x)=>s+x,0)/RINGS.length; S.pops.push({text:'¡A GIRAR!',t:0,dur:READY+.3,col:'#ffd23a',sub:'',big:.6,small:true}); }
+  } else if(a.stage==='ready'){
+    S.pose=SWING(0);
+    if(a.t>=READY){ a.stage='spin'; a.t=0; a.ph=0; S.lastTap=S.clock; sideCue(); tone(600,.06,'triangle',.04); }
   } else if(a.stage==='spin'){
     if(S.cue&&S.cue.type==='side'&&S.clock-(S.lastTap||0)>IDLE_GRACE) S.v-=S.v*IDLE_DECAY*dt;
     const k=clamp(a.t/SPIN_T,0,1); S.x=FROM+(TO-FROM)*k; a.ph+=dt*(TAU*.9+.25*S.v); S.pose=SPIN(a.ph);
