@@ -51,6 +51,7 @@ export const dailyFinish=(day,mark)=>call('POST',{action:'daily',step:'mark',day
 // world top 10 of an event, and your marks for it
 export const getTop=(ev,friendsOf,span,me)=>call('GET',null,'?top='+encodeURIComponent(ev)+(friendsOf?'&friends='+encodeURIComponent(friendsOf):'')+(span?'&span='+span:'')+(me?'&me='+encodeURIComponent(me):''));
 // friends: your list, add a registered player, take one off
+export const getSocial=pid=>call('GET',null,'?social='+encodeURIComponent(pid));
 export const getFriends=async()=>(await call('POST',{action:'friends',token:tok()})).friends||[];
 export const addFriend=player=>call('POST',{action:'fadd',player,token:tok()});
 export const delFriend=player=>call('POST',{action:'fdel',player,token:tok()});

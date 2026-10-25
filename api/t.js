@@ -16,6 +16,7 @@
 //   GET  /api/t?top=100&me=PLAYER                           -> also {me:{...their row, rank}} when they're not in the 10
 //   GET  /api/t?top=100&span=year|month[&friends=PLAYER]    -> the same for this year / this month (Argentina's time)
 //   POST {action:'friends', token}                          -> {friends:[{id,name,color}]}
+//   GET  /api/t?social=PLAYER                               -> {ahead:[{ev,player_id,name,mark}] (their friends ahead of them), by:[{player_id,name,added_at}] (who has them as a friend)}
 //   POST {action:'fadd'|'fdel', token, player}              -> {ok}   (add a registered player to your friends / take them off)
 //   POST {action:'admin', token, op, ...}                   -> admin tools (only the admin player, see below)
 //   GET  /api/t?players=1                                   -> {players:[{id,name,color,created_at,marks}]}
@@ -326,6 +327,15 @@ async function daily(sql,pid){
     out.yday.me=yi>=0?{mark:yb[yi].mark,place:yb[yi].mark!=null?yi+1:null}:null; }
   return out;
 }
+// for a player's notices: in each event they have a mark, the friends of theirs ahead of them now; and who has them
+// among their own friends (newest first)
+async function social(sql,pid){
+  const mine=await sql`select ev,mark from marks where player_id=${pid}`;
+  const theirs=mine.length?await sql`select m.ev,m.player_id,u.name,m.mark from marks m join friends f on f.friend_id=m.player_id and f.player_id=${pid} join users u on u.id=m.player_id where m.ev = any(${mine.map(m=>m.ev)})`:[];
+  const ahead=theirs.filter(t=>{ const me=mine.find(m=>m.ev===t.ev); return SPRINT.includes(t.ev)?t.mark<me.mark:t.mark>me.mark; });
+  const by=await sql`select f.player_id,u.name,f.added_at from friends f join users u on u.id=f.player_id where f.friend_id=${pid} order by f.added_at desc limit 50`;
+  return {ahead,by};
+}
 // your friends (name and colour), in the order you added them
 async function myFriends(sql,u){
   return {friends:await sql`select u.id,u.name,u.color from friends f join users u on u.id=f.friend_id where f.player_id=${u.id} order by f.added_at`};
@@ -515,6 +525,7 @@ export default async function handler(req,res){
       if(req.query.players!=null) return res.status(200).json(await people(sql));
       if(req.query.leaders!=null) return res.status(200).json(await leaders(sql));
       if(req.query.wipes!=null) return res.status(200).json({wipes:await sql`select id,ev,player_id,at from wipes where id>${Math.max(0,Math.floor(Number(req.query.after)||0))} order by id limit 200`});
+      if(req.query.social!=null) return res.status(200).json(await social(sql,String(req.query.social).slice(0,64)));
       if(req.query.daily!=null) return res.status(200).json(await daily(sql,req.query.player?String(req.query.player).slice(0,64):null));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
       if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.friends?String(req.query.friends).slice(0,64):null,String(req.query.span||''),req.query.me?String(req.query.me).slice(0,64):null)); }
