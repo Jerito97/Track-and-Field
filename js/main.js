@@ -1,4 +1,5 @@
 // Entry point
+import {musicStep} from './audio.js';
 import {loadAssets} from './assets.js';
 import {OV,resize} from './canvas.js';
 import {update} from './game/core.js';
@@ -39,7 +40,8 @@ syncMarks();
 // leaving the app (or locking the phone) in the middle of an event pauses it
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&screen==='play'&&S&&S.ev&&!S.replay&&S.phase!=='lap') showPause(); });
 let lastT=performance.now();
-function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); requestAnimationFrame(loop); }
+// (the menus' music: on the menus, with no event under way)
+function loop(now){ const dt=Math.min(.05,(now-lastT)/1000); lastT=now; if(screen==='play'&&S) update(dt); frame(); musicStep(screen==='menu'&&!S,dt); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ if(!OV.hidden) paintOv(); });
 // debug hooks

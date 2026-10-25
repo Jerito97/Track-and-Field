@@ -20,7 +20,7 @@ pisan entre sí. Al final dice cuáles pasan y cuáles fallan; las capturas y el
 
 - **Servidor** (sin navegador): `apiall` (todas las acciones del servidor), `friendsapi`, `agree` (histórico,
   año y mes coinciden; desafíos ganados), `dreset` y `dkeep` (la prueba de cada día queda guardada).
-- **Juego en el navegador**: `smoke` (recorrida por todas las pantallas), `checkall` (reglas de cada prueba),
+- **Juego en el navegador**: `music` (la música del menú), `smoke` (recorrida por todas las pantallas), `checkall` (reglas de cada prueba),
   `online` (un torneo entre dos jugadores), `daily`, `dlong`, `friendsui`, `notifs`, `fnotifs` (avisos de
   amigos), `invite`, `boxes` (listas en su recuadro), `recui`, `top10`, `boardui`, `tourfit`, `tourmove`,
   `wipes` (borrar récords llega a los celulares), `compat` (actualizar no rompe lo guardado), `guard`

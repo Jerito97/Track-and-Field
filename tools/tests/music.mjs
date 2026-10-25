@@ -1,0 +1,20 @@
+// The menus' music: starts with the first tap on the menus, low; fades out when an event starts and comes back after;
+// stops with the sound off
+import {chromium} from './pw.mjs';
+import {BASE,INIT} from './lib.mjs';
+const b=await chromium.launch({args:['--autoplay-policy=no-user-gesture-required']}); const errs=[];
+const ok=(c,m)=>console.log((c?'PASS ':'FAIL ')+m);
+const p=await (await b.newContext({viewport:{width:844,height:390},serviceWorkers:'block'})).newPage(); p.on('pageerror',e=>errs.push(String(e)));
+await p.route('**/api/t**',r=>r.fulfill({json:{top:[],players:[],friends:[],incoming:[],outgoing:[],leaders:[],tours:[],ok:true}}));
+await p.addInitScript(INIT(7)); await p.goto(BASE+'/'); await p.waitForSelector('.m-modes');
+const st=()=>p.evaluate(async()=>(await import('/js/audio.js')).musicState());
+await p.evaluate(()=>window.__step(60)); ok(!(await st())||(await st()).paused,'sin tocar nada, no suena (los navegadores no lo dejan)');
+await p.mouse.click(420,10); await p.evaluate(()=>window.__step(90)); await p.waitForTimeout(300); await p.evaluate(()=>window.__step(30));
+const a=await st(); console.log('  en el menú:',JSON.stringify(a)); ok(a&&!a.paused&&a.vol>.15&&a.vol<=.22,'después del primer toque suena, bajito, en el menú');
+await p.click('[data-act="events"]'); await p.evaluate(()=>window.__step(20)); ok(!(await st()).paused,'sigue sonando en la pantalla de pruebas');
+await p.click('[data-act="go"]'); await p.evaluate(()=>window.__step(90)); const g=await st(); console.log('  jugando:',JSON.stringify(g)); ok(g.paused&&g.vol===0,'al jugar una prueba se apaga (de a poco)');
+await p.keyboard.press('Escape'); await p.waitForSelector('[data-act="quit"]'); await p.click('[data-act="quit"]'); const back=async()=>{ for(let k=0;k<20;k++){ await p.evaluate(()=>window.__step(15)); await p.waitForTimeout(50); const m=await st(); if(!m.paused&&m.vol>.05) return m; } return await st(); };
+const r=await back(); console.log('  de vuelta:',JSON.stringify(r)); ok(!r.paused&&r.vol>.05,'al volver al menú vuelve');
+await p.click('[data-act="sound"]'); await p.evaluate(()=>window.__step(5)); ok((await st()).paused,'con el sonido apagado no suena');
+await p.click('[data-act="sound"]'); const r2=await back(); ok(!r2.paused&&r2.vol>.05,'al prenderlo, vuelve');
+ok(!errs.length,'sin errores en la página'); console.log(errs.join('\n')); await b.close(); process.exit(0);
