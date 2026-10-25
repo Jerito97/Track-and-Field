@@ -653,3 +653,6 @@ tr.me td{background:var(--red)}
 .o-tbl .o-table td:last-child{font-size:1.05rem}
 /* an event played: its points, on one line (the mark is in the table) */
 .o-ev span{white-space:nowrap;font-weight:700}
+/* a profile: add to friends / it's your friend (and take them off) */
+.u-fr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.u-fr .btn{font-size:.95rem;padding:4px 14px}

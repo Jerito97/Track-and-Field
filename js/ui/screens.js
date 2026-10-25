@@ -14,8 +14,8 @@ import {startPodium} from '../game/podium.js';
 import {bestOf,fmt,pts,sortRows} from '../game/scoring.js';
 import {cachedTop,loadTop,showBoard,syncMarks} from './board.js';
 import {checkAdmin,isAdmin,onAdmin,showAdmin,showAdminUser} from './admin.js';
-import {onAdd,onCreateGroup,onLeave,onRemove,showGroup,showGroups} from './groups.js';
-import {peopleStrip,refreshStrip,showPeople,showPerson} from './people.js';
+import {friendsStrip,onAddFriend,refreshFriendsStrip,showFriends} from './friends.js';
+import {personAdd,personDel,showPeople,showPerson} from './people.js';
 import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {afterDaily,dailyBar,finishDaily,leaveDaily,playDaily,refreshDailyBar,showDaily} from './daily.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
@@ -112,7 +112,7 @@ function selectEvent(i){
 // main menu: three modes (events, tournaments, survival), the player and the players below
 const footer=()=>`<footer class="m-bot">
     <div class="m-ath"><span class="m-lbl">Jugador</span><button class="m-me" data-act="profile"><span class="m-av"><canvas data-face="yo"></canvas></span><span class="m-nm"><b>${esc(player().name)}</b><i>Ver perfil ›</i></span></button></div>
-    <button class="m-people" data-act="people"><span class="m-lbl">Jugadores</span><span class="u-row">${peopleStrip()}</span></button>
+    <button class="m-people" data-act="friends"><span class="m-lbl">Amigos</span><span class="u-row">${friendsStrip()}</span></button>
     <button class="m-snd" data-act="sound" aria-label="Sonido ${soundOn?'activado':'apagado'}">${ICON.snd(soundOn)}</button>
   </footer>`;
 // the bell's count of notices not seen yet (notifs.js)
@@ -132,7 +132,7 @@ export function showMenu(){
     ${mode('surv','survmenu',THUMBS.surv,'Supervivencia',' surv')}
   </section>
   ${footer()}</div>`,'menu');
-  OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshStrip();
+  OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshFriendsStrip();
   refreshBell(); checkNotifs().then(n=>{ if(n) refreshBell(); }); refreshDailyBar();
 }
 // tournaments: with friends (online) or against the machines (all 5 events in a row)
@@ -155,7 +155,7 @@ export function showEvents(){
   <div class="m-cats" role="group" aria-label="Tipo de prueba">${CATS.filter(([c])=>c==='all'||shownEvents().some(e=>catOf(e)===c)).map(([c,n])=>`<button class="m-cat${c===menuCat?' on':''}" data-act="cat" data-c="${c}" aria-pressed="${c===menuCat}">${n}</button>`).join('')}</div>
   <div class="m-evw"><button class="m-arr l" data-act="scroll" data-d="-1" aria-label="Ver pruebas anteriores" hidden>‹</button><nav class="m-evs" aria-label="Pruebas">${cards}</nav><button class="m-arr r" data-act="scroll" data-d="1" aria-label="Ver más pruebas" hidden>›</button></div>
   ${footer()}</div>`,'menu');
-  initCarousel(); refreshStrip(); loadWr();
+  initCarousel(); refreshFriendsStrip(); loadWr();
 }
 // carousel: keeps its scroll between menu redraws, keeps the chosen card in view, arrows when there's more to see
 let evScroll=0;
@@ -328,17 +328,14 @@ OV.addEventListener('click',e=>{
   else if(a==='reload'){ (window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):Promise.resolve()).finally(()=>location.reload()); }
   else if(a==='dplay') playDaily();
   else if(a==='board') showBoard(b.dataset.i==null?undefined:+b.dataset.i,b.dataset.back,b.dataset.group,b.dataset.span);
-  else if(a==='groups') showGroups();
+  else if(a==='friends'||a==='groups') showFriends();
+  else if(a==='fadd'){ if(b.dataset.from==='person') personAdd(b); else onAddFriend(b); }
+  else if(a==='fdel') personDel(b);
   else if(a==='admin') showAdmin();
   else if(a==='auser') showAdminUser(b.dataset.id);
   else if(a.startsWith('a')&&['asetpin','arename','aunlock','alogout','adelmark','adeluser','awipe'].includes(a)) onAdmin(a,b);
-  else if(a==='gcreate') onCreateGroup();
-  else if(a==='group') showGroup(b.dataset.id);
-  else if(a==='gadd') onAdd(b.dataset.id);
-  else if(a==='gremove') onRemove(b);
-  else if(a==='gleave') onLeave(b);
   else if(a==='people') showPeople();
-  else if(a==='person') showPerson(b.dataset.id);
+  else if(a==='person') showPerson(b.dataset.id,b.dataset.back);
   else if(a==='profile') showProfile();
   else if(a==='players') showPlayers();
   else if(a==='newplayer') showAccount('add');

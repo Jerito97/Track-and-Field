@@ -12,13 +12,10 @@
 //   POST {action:'result', token, code, ev, mark}           -> {ok}
 //   GET  /api/t?top=100                                     -> {top:[{player_id,name,color,mark,date,rounds}, ...10]}  (top=surv: survival)
 //   POST {action:'marks', token, list:[{ev,mark,date,rounds}]} -> {ok}  (your marks for the world top 10; ev 'surv' / 'survm': survival points, classic / modern)
-//   GET  /api/t?top=100&group=ID                            -> {top:[...every member with a mark]}  (a group's board)
-//   GET  /api/t?top=100&span=year|month[&group=ID]          -> the same for this year / this month (Argentina's time)
-//   POST {action:'groups', token}                           -> {groups:[{id,name,owner_id,members:[{id,name,color}]}]}
-//   POST {action:'gcreate', token, name}                    -> {id}
-//   POST {action:'gadd', token, group, player}              -> {ok}   (any member adds a registered player)
-//   POST {action:'gleave', token, group}                    -> {ok}   (the last one out deletes the group)
-//   POST {action:'gremove', token, group, player}           -> {ok}   (only who created it)
+//   GET  /api/t?top=100&friends=PLAYER                      -> {top:[...that player and their friends with a mark]}  (friends' board)
+//   GET  /api/t?top=100&span=year|month[&friends=PLAYER]    -> the same for this year / this month (Argentina's time)
+//   POST {action:'friends', token}                          -> {friends:[{id,name,color}]}
+//   POST {action:'fadd'|'fdel', token, player}              -> {ok}   (add a registered player to your friends / take them off)
 //   POST {action:'admin', token, op, ...}                   -> admin tools (only the admin player, see below)
 //   GET  /api/t?players=1                                   -> {players:[{id,name,color,created_at,marks}]}
 //   GET  /api/t?player=ID                                   -> {player:{id,name,color,created_at}, marks:[{ev,mark,date,rank}]}
@@ -40,7 +37,7 @@ const SPRINT=['100','110h','crawl','breast','fly','4x100','laser','cycle'];  // 
 // plausible marks per event (anything outside is rejected; null = foul / disqualified)
 const RANGE={'100':[4,60],'110h':[5,90],lj:[0,25],pv:[0,15],jav:[0,250],tj:[0,45],ham:[0,250],hj:[0,5],sp:[0,60],crawl:[8,200],breast:[8,200],fly:[8,200],'4x100':[15,300],laser:[20,300],cycle:[20,200]};
 const CODE_CHARS='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  // no 0/O, 1/I
-const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_GROUP=50, MAX_GROUPS=20;
+const MAX_PLAYERS=30, MAX_FAILS=5, LOCK_MIN=10, MAX_FRIENDS=200;
 
 let sql=null, ready=null;
 function db(){
@@ -71,6 +68,9 @@ function db(){
     await sql`create table if not exists groups(id text primary key, name text not null, owner_id text not null, created_at timestamptz not null default now())`;
     await sql`create table if not exists group_members(group_id text not null references groups(id) on delete cascade,
       player_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(group_id,player_id))`;
+    // friends: each player's list (one way: adding someone doesn't need their yes); their boards are you and them
+    await sql`create table if not exists friends(player_id text not null references users(id) on delete cascade,
+      friend_id text not null references users(id) on delete cascade, added_at timestamptz not null default now(), primary key(player_id,friend_id))`;
     // each player's best of each year and of each month (period '2026', '2026-10'), for the boards of this year and month
     await sql`create table if not exists pmarks(player_id text not null references users(id) on delete cascade, ev text not null,
       period text not null, mark double precision not null, made_at timestamptz not null default now(), rounds int, primary key(player_id,ev,period))`;
@@ -101,6 +101,9 @@ function db(){
     // 21/10/2026's challenge started over: the versions put up that night each drew a different event for it
     if((await sql`insert into migrations(id) values('reset-daily-2026-10-21') on conflict do nothing returning id`).length)
       await sql`delete from daily where day='2026-10-21'`;
+    // the groups gave way to friends: everyone in a group gets the others in it as friends
+    if((await sql`insert into migrations(id) values('groups-to-friends-1') on conflict do nothing returning id`).length)
+      await sql`insert into friends(player_id,friend_id) select a.player_id,b.player_id from group_members a join group_members b on a.group_id=b.group_id and a.player_id<>b.player_id on conflict do nothing`;
     // pole vault started over (the records cleared before lived on in the phones and in this year's / month's boards)
     if((await sql`insert into migrations(id) values('reset-pv-2') on conflict do nothing returning id`).length) await wipe(sql,'pv',null);
   })().catch(e=>{ ready=null; throw e; });
@@ -193,7 +196,7 @@ async function adminOp(sql,b){
     case 'stats': {
       const [r]=await sql`select (select count(*)::int from users) as players, (select count(*)::int from marks where not (ev = any(${SURVS}))) as marks,
         (select count(*)::int from tournaments) as tournaments, (select count(*)::int from tournaments where closed_at is null and coalesce(ends_at,created_at+interval '7 days')>now()) as open_tournaments,
-        (select count(*)::int from groups) as groups, (select count(*)::int from users where created_at>now()-interval '7 days') as new_week`;
+        (select count(*)::int from friends) as friends, (select count(*)::int from users where created_at>now()-interval '7 days') as new_week`;
       return {stats:r};
     }
     case 'users': {
@@ -219,7 +222,7 @@ async function adminOp(sql,b){
     case 'wipeev': { const ev=String(b.ev||''); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); await wipe(sql,ev,null); return {ok:true}; }
     case 'deluser': { const t=await target(); if(t.admin) throw new Bad(400,'No podés borrar al administrador.');
       await sql`delete from users where id=${t.id}`;
-      // their groups: to the next member, and groups left empty go
+      // their groups (from before friends): to the next member, and groups left empty go
       await sql`update groups g set owner_id=(select player_id from group_members m where m.group_id=g.id order by added_at limit 1) where owner_id=${t.id}`;
       await sql`delete from groups g where not exists(select 1 from group_members m where m.group_id=g.id)`;
       return {ok:true}; }
@@ -230,20 +233,22 @@ async function adminOp(sql,b){
 // world top 10, or (group) every member of a group with a mark
 // the year and the month a moment belongs to, in Argentina's time (UTC-3): ['2026', '2026-10']
 const periods=t=>{ const d=new Date(new Date(t).getTime()-3*3600000), y=String(d.getUTCFullYear()); return [y,y+'-'+String(d.getUTCMonth()+1).padStart(2,'0')]; };
-async function top(sql,ev,group,span){
+async function top(sql,ev,fof,span){
+  // a player's friends board (fof: the player): them and their friends; else the world's top 10
+  const ids=fof?[fof,...(await sql`select friend_id from friends where player_id=${fof}`).map(r=>r.friend_id)]:null, n=fof?MAX_FRIENDS+1:10;
   // this year / this month: each player's best of that period
   if(span==='year'||span==='month'){
     const per=periods(Date.now())[span==='year'?0:1];
-    const rows=group
-      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} and m.period=${per}`
+    const rows=ids
+      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id where m.ev=${ev} and m.period=${per} and m.player_id = any(${ids})`
       :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from pmarks m join users u on u.id=m.player_id where m.ev=${ev} and m.period=${per}`;
     const sp=SPRINT.includes(ev); rows.sort((a,b)=>(sp?a.mark-b.mark:b.mark-a.mark)||new Date(a.date)-new Date(b.date));
-    return {top:rows.slice(0,group?MAX_GROUP:10)};
+    return {top:rows.slice(0,n)};
   }
-  const rows=group
+  const rows=ids
     ?(SPRINT.includes(ev)
-      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} order by m.mark asc, m.made_at asc limit ${MAX_GROUP}`
-      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id join group_members g on g.player_id=m.player_id and g.group_id=${group} where m.ev=${ev} order by m.mark desc, m.made_at asc limit ${MAX_GROUP}`)
+      ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} and m.player_id = any(${ids}) order by m.mark asc, m.made_at asc limit ${n}`
+      :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} and m.player_id = any(${ids}) order by m.mark desc, m.made_at asc limit ${n}`)
     :SPRINT.includes(ev)
       ?await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark asc, m.made_at asc limit 10`
       :await sql`select m.player_id,u.name,u.color,m.mark,m.made_at as date,m.rounds from marks m join users u on u.id=m.player_id where m.ev=${ev} order by m.mark desc, m.made_at asc limit 10`;
@@ -309,15 +314,10 @@ async function daily(sql,pid){
     out.yday.me=yi>=0?{mark:yb[yi].mark,place:yb[yi].mark!=null?yi+1:null}:null; }
   return out;
 }
-// your groups, with their members
-async function myGroups(sql,u){
-  const gs=await sql`select g.id,g.name,g.owner_id,g.created_at from groups g join group_members me on me.group_id=g.id and me.player_id=${u.id} order by g.created_at`;
-  if(!gs.length) return {groups:[]};
-  const ids=gs.map(g=>g.id);
-  const ms=await sql`select m.group_id,u.id,u.name,u.color from group_members m join users u on u.id=m.player_id where m.group_id = any(${ids}) order by m.added_at`;
-  return {groups:gs.map(g=>({...g,members:ms.filter(m=>m.group_id===g.id).map(({id,name,color})=>({id,name,color}))}))};
+// your friends (name and colour), in the order you added them
+async function myFriends(sql,u){
+  return {friends:await sql`select u.id,u.name,u.color from friends f join users u on u.id=f.friend_id where f.player_id=${u.id} order by f.added_at`};
 }
-async function inGroup(sql,gid,pid){ return (await sql`select 1 from group_members where group_id=${gid} and player_id=${pid}`).length>0; }
 
 // everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
 async function people(sql){
@@ -420,40 +420,17 @@ async function act(sql,b){
       return {ok:true};
     }
     case 'mytours': return myTours(sql,await auth(sql,b.token));
-    case 'groups': return myGroups(sql,await auth(sql,b.token));
+    case 'friends': return myFriends(sql,await auth(sql,b.token));
     case 'admin': return adminOp(sql,b);
-    case 'gcreate': {
-      const u=await auth(sql,b.token), name=String(b.name||'').replace(/\s+/g,' ').trim().slice(0,24);
-      if(name.length<2) throw new Bad(400,'El nombre del grupo tiene que tener al menos 2 letras.');
-      const [{n}]=await sql`select count(*)::int as n from group_members where player_id=${u.id}`;
-      if(n>=MAX_GROUPS) throw new Bad(409,`Podés estar en hasta ${MAX_GROUPS} grupos.`);
-      const id=randomUUID();
-      await sql`insert into groups(id,name,owner_id) values(${id},${name},${u.id})`;
-      await sql`insert into group_members(group_id,player_id) values(${id},${u.id})`;
-      return {id};
-    }
-    case 'gadd': case 'gleave': case 'gremove': {
-      const u=await auth(sql,b.token), gid=String(b.group||'').slice(0,64);
-      const g=(await sql`select id,owner_id from groups where id=${gid}`)[0];
-      if(!g||!await inGroup(sql,gid,u.id)) throw new Bad(404,'No estás en ese grupo.');
-      if(b.action==='gleave'){
-        await sql`delete from group_members where group_id=${gid} and player_id=${u.id}`;
-        const [{n}]=await sql`select count(*)::int as n from group_members where group_id=${gid}`;
-        if(!n) await sql`delete from groups where id=${gid}`;
-        else if(g.owner_id===u.id) await sql`update groups set owner_id=(select player_id from group_members where group_id=${gid} order by added_at limit 1) where id=${gid}`;
-        return {ok:true};
-      }
-      const pid=String(b.player||'').slice(0,64);
-      if(b.action==='gremove'){
-        if(g.owner_id!==u.id) throw new Bad(403,'Solo quien creó el grupo puede sacar gente.');
-        if(pid===u.id) throw new Bad(400,'Para irte, usá «Salir del grupo».');
-        await sql`delete from group_members where group_id=${gid} and player_id=${pid}`;
-        return {ok:true};
-      }
+    // add someone to your friends, or take them off
+    case 'fadd': case 'fdel': {
+      const u=await auth(sql,b.token), pid=String(b.player||'').slice(0,64);
+      if(b.action==='fdel'){ await sql`delete from friends where player_id=${u.id} and friend_id=${pid}`; return {ok:true}; }
+      if(pid===u.id) throw new Bad(400,'No te podés agregar a vos.');
       if(!(await sql`select 1 from users where id=${pid}`).length) throw new Bad(404,'No existe ese jugador.');
-      const ins=await sql`insert into group_members(group_id,player_id) select ${gid},${pid}
-        where (select count(*) from group_members where group_id=${gid})<${MAX_GROUP} on conflict do nothing returning player_id`;
-      if(!ins.length&&!await inGroup(sql,gid,pid)) throw new Bad(409,`El grupo ya tiene ${MAX_GROUP} jugadores.`);
+      const ins=await sql`insert into friends(player_id,friend_id) select ${u.id},${pid}
+        where (select count(*) from friends where player_id=${u.id})<${MAX_FRIENDS} on conflict do nothing returning friend_id`;
+      if(!ins.length&&!(await sql`select 1 from friends where player_id=${u.id} and friend_id=${pid}`).length) throw new Bad(409,`Podés tener hasta ${MAX_FRIENDS} amigos.`);
       return {ok:true};
     }
     // put a registered player in a tournament (anyone in it, while it's on and there's room): it shows in their notices
@@ -524,7 +501,7 @@ export default async function handler(req,res){
       if(req.query.wipes!=null) return res.status(200).json({wipes:await sql`select id,ev,player_id,at from wipes where id>${Math.max(0,Math.floor(Number(req.query.after)||0))} order by id limit 200`});
       if(req.query.daily!=null) return res.status(200).json(await daily(sql,req.query.player?String(req.query.player).slice(0,64):null));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
-      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.group?String(req.query.group).slice(0,64):null,String(req.query.span||''))); }
+      if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.friends?String(req.query.friends).slice(0,64):null,String(req.query.span||''))); }
       const code=cleanCode(req.query.code); if(!code) throw new Bad(400,'Falta el código.');
       const v=await view(sql,code); if(!v) throw new Bad(404,'No existe ese torneo.');
       return res.status(200).json(v);

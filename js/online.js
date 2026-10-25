@@ -49,13 +49,11 @@ export const getDaily=pid=>call('GET',null,'?daily=1'+(pid?'&player='+encodeURIC
 export const dailyStart=ev=>call('POST',{action:'daily',step:'start',ev,token:tok()});
 export const dailyFinish=(day,mark)=>call('POST',{action:'daily',step:'mark',day,mark,token:tok()});
 // world top 10 of an event, and your marks for it
-export const getTop=(ev,group,span)=>call('GET',null,'?top='+encodeURIComponent(ev)+(group?'&group='+encodeURIComponent(group):'')+(span?'&span='+span:''));
-// groups of friends: your groups (with members), create, add a registered player, leave, remove (who created it)
-export const getGroups=async()=>(await call('POST',{action:'groups',token:tok()})).groups;
-export const createGroup=async name=>(await call('POST',{action:'gcreate',name,token:tok()})).id;
-export const addToGroup=(group,player)=>call('POST',{action:'gadd',group,player,token:tok()});
-export const leaveGroup=group=>call('POST',{action:'gleave',group,token:tok()});
-export const removeFromGroup=(group,player)=>call('POST',{action:'gremove',group,player,token:tok()});
+export const getTop=(ev,friendsOf,span)=>call('GET',null,'?top='+encodeURIComponent(ev)+(friendsOf?'&friends='+encodeURIComponent(friendsOf):'')+(span?'&span='+span:''));
+// friends: your list, add a registered player, take one off
+export const getFriends=async()=>(await call('POST',{action:'friends',token:tok()})).friends||[];
+export const addFriend=player=>call('POST',{action:'fadd',player,token:tok()});
+export const delFriend=player=>call('POST',{action:'fdel',player,token:tok()});
 export const sendMarks=list=>call('POST',{action:'marks',list,token:tok()});
 // registered players, and one player's public profile
 export const getPlayers=()=>call('GET',null,'?players=1');
