@@ -12,11 +12,11 @@ export const LAP=250;
 // seconds for a ring to fill; let go between PERFECT and PAST of it is a full stroke (the ring closes inside it, more
 // of it after: the screen shows the ring a moment late, so one sees it close a little after it does); past PAST it's
 // half one, held to OVER it goes on its own
-export const FILL_T=.5;
+export const FILL_T=.42;
 const PERFECT=.95, PAST=1.15, OVER=1.4, OVER_Q=.5;
 // a full stroke adds IMP m/s; the air takes DRAG·v² m/s every second (COAST of it once the pedalling is over, the
 // bike thrown at the line: tucked in, coasting)
-const IMP=2.0, DRAG=.012, COAST=.3;
+const IMP=1.8, DRAG=.012, COAST=.3;
 // metres the bike goes for a turn of the pedals (track gear)
 export const GEAR=7.5;
 

@@ -23,7 +23,7 @@ let busy=false;
 
 // hub: create (name, events, how long it lasts), join with a code, your tournaments being played, and the history
 const DAYS=[[1,'1 día'],[3,'3 días'],[7,'1 semana']];
-let days=7, tours=null, toursPid=null;  // your tournaments as the server sent them last, and whose they are
+let days=1, tours=null, toursPid=null;  // your tournaments as the server sent them last, and whose they are
 const ownTours=()=>{ if(toursPid!==player().id){ tours=null; toursPid=player().id; } };
 const day=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
 function timeLeft(t){ const ms=new Date(t.ends_at)-Date.now(), h=ms/3600000;

@@ -13,11 +13,12 @@ import {bothCue,judge,pop,sideCue} from './core.js';
 // (the baton goes from hand to hand: the race goes on from there, GAIN m further on); the red buttons come when the
 // baton is CUE_D m from the board's middle, and from then the game runs at SLOW of its speed
 export const CH_OK=.12, CH_W=1.4, BACK=1.5, MATE=.6;
-const BATON=.35, LAG=.03, SLOW=.6, CUE_D=6;
+export const BATON=.35;
+const LAG=.03, SLOW=.6, CUE_D=6;
 export const GAIN=BATON+MATE;
 // the next runner takes off with CH_BASE of the speed the baton came with, plus a boost of up to CH_BOOST more for a
 // good change (all of it for a perfect one, nothing for the worst)
-const CH_BASE=.5, CH_BOOST=.25;
+export const CH_BASE=.5, CH_BOOST=.25;
 // the change marks (m), the next board's middle
 export const changes=ev=>Array.from({length:ev.legs-1},(_,i)=>ev.dist/ev.legs*(i+1));
 const board=()=>{ const m=changes(S.ev)[S.leg]; return m==null?null:m-BACK; };
@@ -34,6 +35,17 @@ export function relayStep(){
 }
 // the red buttons at a change
 export function relayHit(){ if(!S.ev.relay||!S.chCued||board()==null) return false; handOver(); return true; }
+// the machines change too: each one's changes, how good (better machines, better changes); the time they cost
+// (the speed lost, got back at RECOVER per second: the rival's slow), to run the rest faster and keep their time
+const RECOVER=.9;
+export function rivalChanges(r,ev){ const sk=r.a.sk??.8; r.leg=0; r.chq=changes(ev).map(()=>clamp(.55+.45*sk+(Math.random()*.25-.15),0,1));
+  return r.chq.reduce((t,q)=>t+(1-(CH_BASE+CH_BOOST*q))/RECOVER,0); }
+// once a frame for a machine: the baton reaching the board, handed over (the runner who gave it slows down behind)
+export function rivalRelay(r,dt){
+  const m=changes(S.ev)[r.leg];
+  if(m!=null&&r.x+BATON>=m-BACK){ r.prev={x:r.x,v:r.v,t:0,legP:r.legP}; r.x+=GAIN; r.slow=CH_BASE+CH_BOOST*r.chq[r.leg]; r.leg++; }
+  const p=r.prev; if(p){ p.t+=dt; p.v=Math.max(0,p.v-p.v*1.8*dt); p.x+=p.v*dt; p.legP+=p.v*dt*2.4; }
+}
 function handOver(){
   const e=off(), q=clamp(1-(Math.abs(e)-CH_OK)/CH_W,0,1);
   S.pops=S.pops.filter(p=>p.text!=='¡PASALO!');  // (so it doesn't sit on top of RELEVO n)

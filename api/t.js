@@ -111,7 +111,7 @@ function db(){
 async function newTournament(sql,u,name,evs,d){
   const events=[...new Set((Array.isArray(evs)?evs:[]).filter(e=>EVENTS.includes(e)))];
   if(!events.length) throw new Bad(400,'Elegí al menos una prueba.');
-  const days=[1,3,7].includes(Number(d))?Number(d):7, ends=new Date(Date.now()+days*86400000).toISOString();
+  const days=[1,3,7].includes(Number(d))?Number(d):1, ends=new Date(Date.now()+days*86400000).toISOString();
   for(let i=0;i<8;i++){
     const code=newCode();
     const ins=await sql`insert into tournaments(code,name,events,host_id,ends_at) values(${code},${name},${events.join(',')},${u.id},${ends}) on conflict do nothing returning code`;

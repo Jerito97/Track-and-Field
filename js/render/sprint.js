@@ -11,6 +11,7 @@ import {SCENE} from '../assets.js';
 import {drawBackdrop,drawBoards,drawBottomAds,drawPauseBtn,drawStands,GRASS,GRASS_L,hurdle,LINE,setTheme,shadow,TARTAN,TARTAN_D} from './scenery.js';
 import {txt} from './text.js';
 import {BACK,CH_OK,CH_W,changes,MATE} from '../game/relay.js';
+import {DIP_BEST,DIP_W,dipSpot} from '../game/sprint.js';
 import {D,DIRS,laserAim,laserArrow,scope} from '../game/laser.js';
 
 const LANES=6;
@@ -52,6 +53,10 @@ export function drawSprint(V){
     for(let l=0;l<LANES;l++){ const y=TT+lh*(l+.5); ctx.fillStyle='#ffcf1f'; ctx.strokeStyle=INK; ctx.lineWidth=1; ctx.fillRect(X(-1.1),y-3,10,7); ctx.strokeRect(X(-1.1),y-3,10,7); txt(String(l+1),X(1.1),y+1,'#fff',lh*.7,{stroke:null}); } }
   for(let m=10;m<ev.dist;m+=10){ const x=X(m); if(x>-30&&x<LW+30){ ctx.fillStyle='rgba(255,255,255,.75)'; ctx.fillRect(x-1,TT,2,5); txt(String(m),x,TT+10,'rgba(255,255,255,.85)',10,{stroke:null}); } }
   const fx=X(ev.dist); if(fx>-20&&fx<LW+20){ ctx.fillStyle='#fff'; ctx.fillRect(fx-2,TT,4,TB-TT); for(let y=TT,j=0;y<TB;y+=5,j++){ ctx.fillStyle=j%2?INK:'#fff'; ctx.fillRect(fx+2,y,5,5); } txt('META',fx,TT-8,'#fff',12); }
+  // the dip: where to press both buttons (the yellow line), the band around it still gaining something
+  if(S.dipCued&&!(S.dip>0)&&!S.finished&&!ev.swim){ const d=dipSpot(), w=d*DIP_W/DIP_BEST, x0=X(ev.dist-d-w), x1=X(ev.dist-d+w), xb=X(ev.dist-d);
+    const g=ctx.createLinearGradient(x0,0,x1,0); g.addColorStop(0,'rgba(255,210,58,0)'); g.addColorStop(.5,'rgba(255,210,58,.45)'); g.addColorStop(1,'rgba(255,210,58,0)');
+    ctx.fillStyle=g; ctx.fillRect(x0,TT,x1-x0,TB-TT); ctx.fillStyle='#ffd23a'; ctx.fillRect(xb-1.5,TT,3,TB-TT); txt('¡YA!',xb,TT-8,'#ffd23a',12); }
   for(let l=0;l<LANES;l++){
     const feet=TT+lh*(l+.85);
     if(ev.hurdles){ const ref=l===S.plLane?S:S.rivals.find(r=>r.lane===l); HURDLES.forEach((h,i)=>{ const x=X(h); if(x>-40&&x<LW+40) hurdle(x,feet,s*.85,ref&&ref.knocked&&ref.knocked.has(i)); }); }
@@ -70,7 +75,9 @@ export function drawSprint(V){
       if(!drawn) fig=drawAthlete(ctx,s*RIV_K,px,feet,V.y/RIV_K,STYLE.stick?sprintPose({blocks:S.phase==='set'||(S.phase==='wait'&&!S.t),setStage:S.setStage,airU:S.air>0?1-S.air/S.airT:null,dipT:S.dip>0?S.dipT:null,tripT:S.stumble>0?S.stumble:0,cheer:S.finished&&V.v<=.3&&!(S.dip>0),running:V.v>.3,legP:S.legP,v:V.v,clock:S.clock,lane:0}):V.pose||POSE.stand,ME(),V.v>5);
       if(ev.relay&&!S.finished) baton(fig&&fig.hand?fig.hand:[px+10,feet-YO_H*.4]);
       ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.5; const ty=feet-V.y*s-YO_H-4; ctx.beginPath(); ctx.moveTo(px-5,ty-7); ctx.lineTo(px+5,ty-7); ctx.lineTo(px,ty); ctx.closePath(); ctx.fill(); ctx.stroke(); }
-    else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue; const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
+    else { const r=S.rivals.find(r=>r.lane===l); if(!r||r.vmax==null) continue;
+      if(ev.relay&&r.chq) rivalMates(ev,r,X,feet,s,l);
+      const x=X(r.x); if(x<-60||x>LW+60) continue; shadow(x,feet,r.y/RIV_K,s*RIV_K);
       let J; if(r.t<=r.react) J=S.setStage>=1?POSE.set:POSE.crouch; else if(r.air>0) J=POSE.hurdle; else if(r.tripT>0) J=POSE.stumble; else if(r.final!=null&&r.v<.5) J=POSE.cheer; else J=r.v>.2?runPose(r.legP,Math.min(1,r.v/4)):POSE.stand;
       const f=animFrame(r.a.C,ev,{blocks:r.t<=r.react,setStage:S.setStage,running:r.t>r.react&&!(r.air>0)&&!(r.tripT>0)&&!(r.final!=null&&r.v<.5)&&r.v>.2,cheer:r.final!=null&&r.v<.5,tripT:r.tripT,airU:r.air>0?1-r.air/r.airT:null,standing:!(r.air>0),x:r.x,lane:l});
       if(f) drawAnim(ctx,r.a.C,f[0],f[1],x,feet-r.y*s,animScale(r.a.C,RUN_H));
@@ -123,6 +130,12 @@ function relayLane(ev,X,top,lh,feet,s){
   const C=ME(), sk=s*RIV_K, next=changes(ev)[S.leg];
   if(next!=null){ const x=X(next-BACK+MATE); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:false,clock:S.clock,lane:1}):POSE.stand,C,false); }
   const p=S.prev; if(p&&p.t<3){ const x=X(p.x); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:p.v>.3,legP:p.legP||0,v:p.v,clock:S.clock,lane:2}):p.v>.3?runPose(p.legP||0,Math.min(1,p.v/4)):POSE.stand,C,p.v>5); }
+}
+// a machine's relay: its next runner waiting at the change, the one who just gave it slowing down behind
+function rivalMates(ev,r,X,feet,s,l){
+  const sk=s*RIV_K, next=changes(ev)[r.leg];
+  if(next!=null){ const x=X(next-BACK+MATE); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:false,clock:S.clock,lane:l}):POSE.stand,r.a.C,false); }
+  const p=r.prev; if(p&&p.t<3){ const x=X(p.x); if(x>-60&&x<LW+60) drawAthlete(ctx,sk,x,feet,0,STYLE.stick?sprintPose({running:p.v>.3,legP:p.legP||0,v:p.v,clock:S.clock,lane:l}):p.v>.3?runPose(p.legP||0,Math.min(1,p.v/4)):POSE.stand,r.a.C,p.v>5); }
 }
 // the baton in the runner's (near) hand, sticking out both sides of the fist
 function baton([hx,hy]){ ctx.save(); ctx.translate(hx,hy); ctx.rotate(-.35); ctx.fillStyle='#ffd23a'; ctx.strokeStyle=INK; ctx.lineWidth=1.2;

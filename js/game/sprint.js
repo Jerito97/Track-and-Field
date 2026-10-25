@@ -10,7 +10,7 @@ import {endEvent} from '../ui/screens.js';
 import {clamp,rand,secs} from '../utils.js';
 import {bothCue,HURDLE_SLIP,judge,numCue,pop,sideCue} from './core.js';
 import {REACH,SWIM_K,swimGun,swimStep,touchAt} from './swim.js';
-import {GAIN,relayStep} from './relay.js';
+import {GAIN,relayStep,rivalChanges,rivalRelay} from './relay.js';
 import {laserRival,laserRivalStop,laserStep} from './laser.js';
 import {cycleGun,cycleStep} from './cycle.js';
 
@@ -26,8 +26,17 @@ export function resetRivals(){
     const k=(ev.spread||16)/16, T=r.a.target?r.a.target[ev.id]*(1+rand(-.012,.012)):ev.cpu+(1-r.a.sk)*16*k+rand(-.3,.3)*k;  // around the middle machine's time (100 m ~11.7-13.1 s, vallas ~14.5-15.9 s)
     // flat sprint: about one in three rivals trips somewhere mid-race (not in the water)
     const trip=!ev.hurdles&&!ev.swim&&!ev.relay&&!ev.laser&&!ev.cycle&&!r.a.target&&Math.random()<.3?rand(15,85):null;
-    Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:ev.relay?(ev.legs-1)*GAIN:0))/(T-(ev.tau||2)-react),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); if(ev.laser) laserRival(r,ev); });
+    const chT=ev.relay?rivalChanges(r,ev):0;
+    Object.assign(r,{T,react,trip,tripT:0,vmax:(ev.dist-(ev.swim?2*REACH:ev.relay?(ev.legs-1)*GAIN:0))/(T-(ev.tau||2)-react-chT),x:0,v:0,t:0,legP:rand(0,6),air:0,airT:.4,y:0,final:null,done:0,slow:1,knocked:new Set(),turned:false}); if(ev.laser) laserRival(r,ev); });
 }
+// the dip at the line (both red buttons): the line reached DIP_BEST s after pressing them (the lean all the way
+// forward) takes DIP_MAX s off the time; DIP_W s earlier or later, nothing (in between, in proportion). The track shows
+// where to press (dipSpot)
+export const DIP_BEST=.25, DIP_W=.2, DIP_MAX=.2;
+const dipBonus=t=>DIP_MAX*clamp(1-Math.abs(t-DIP_BEST)/DIP_W,0,1);
+// metres before the line to press them, at the speed one goes now
+export const dipSpot=()=>S.v*DIP_BEST*(S.ev&&S.ev.swim?SWIM_K:1);
+
 export function updateSprint(dt){
   const ev=S.ev;
   if(S.phase==='set'){
@@ -77,7 +86,7 @@ export function updateSprint(dt){
   else if(S.dip>0){ S.dip-=dt; S.pose=POSE.dip; if(S.dip<=0&&!S.finished) S.pops.push({text:'¡MUY TEMPRANO!',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
   else S.pose=S.v>.3?runPose(S.legP,Math.min(1,S.v/4)):(S.finished?POSE.cheer:POSE.stand);
   if(!S.finished&&S.x>=ev.dist){
-    S.finished=true; const over=(S.x-ev.dist)/Math.max(S.v*(ev.swim?SWIM_K:1),.5); let bonus=0; if(S.dip>0){ const f=S.dipT/.5; bonus=.12*clamp(1-Math.abs(f-.55)/.55,0,1); judge(bonus/.12); } else if(!S.dipCued||S.cue){ S.pops.push({text:ev.swim?'SIN TOQUE':'SIN CABEZAZO',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
+    S.finished=true; const over=(S.x-ev.dist)/Math.max(S.v*(ev.swim?SWIM_K:1),.5); let bonus=0; if(S.dip>0){ bonus=dipBonus(S.dipT); judge(bonus/DIP_MAX); const j=S.pops[S.pops.length-1]; if(j&&bonus>=.005) j.sub=`−${bonus.toFixed(2)} s`; } else if(!S.dipCued||S.cue){ S.pops.push({text:ev.swim?'SIN TOQUE':'SIN CABEZAZO',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
     if(ev.swim) S.x=ev.dist;
     S.final=Math.ceil((S.t-over-bonus+(S.pen||0))*100)/100; S.cue=null; if(!(S.dip>0)) S.dip=.3;
     tone(880,.3,'triangle',.06); cheer();
@@ -101,6 +110,8 @@ export function rivalStep(r,dt){
   if(r.tripT>0) r.tripT-=dt;
   // swimming: a turn at the far wall costs a little
   if(S.ev.swim&&!r.turned&&r.x>=S.ev.pool){ r.turned=true; r.slow=.8; r.x+=2*REACH; }
+  // relay: the changes
+  if(S.ev.relay&&r.chq&&r.final==null) rivalRelay(r,dt);
   // laser run: stopped at a range, then off again from a standstill
   if(S.ev.laser&&r.final==null&&laserRivalStop(r,S.ev)) return;
   let v=r.vmax*(1-Math.exp(-Math.max(0,r.t-(r.go??r.react))/(S.ev.tau||2)))*r.slow;
