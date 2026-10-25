@@ -18,11 +18,11 @@ const RING_GAP=.25, RING_OK=.07, RING_W=.35, RING_LATE=1.35;
 // the speed the spin starts with (m/s of tapping speed) for three perfect swings
 const V0=5;
 // tapping time (s), then the pause before the needle
-const SPIN_T=2.5, GAP=.5, LAG=.03;
+const SPIN_T=3, GAP=.5, LAG=.03;
 // not tapping: as in the 100 m
 const IDLE_GRACE=.5, IDLE_DECAY=.3;
 // throw length (m) per m/s of speed at the best angle
-const DIS_K=5.6;
+const DIS_K=5.2;
 // the athlete: at the back of the circle for the swings, across it while spinning (hip, m from the circle's centre)
 const FROM=-.8, TO=.45;
 const TAU=Math.PI*2;

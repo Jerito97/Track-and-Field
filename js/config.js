@@ -47,7 +47,7 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
  {id:'dis',name:'Lanzamiento de disco',tag:'DISCO',type:'field',kind:'dis',line:1.25,cpu:40,extra:true,
-  help:'Tres partes. <b>1. Balanceo:</b> tres veces se cierra un <b>anillo</b> alrededor del disco: tocá los <b>dos botones</b> juntos (o Espacio) justo cuando se cierra. Cuanto más justo, con <b>más velocidad arrancás</b> el giro. <b>2. Giro:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece mientras tu atleta gira por el círculo: cada acierto suma velocidad. <b>3. Ángulo:</b> como en la bala, la aguja del medidor <b>sube sola y no vuelve</b>: apretá los <b>dos botones</b> cuando esté en lo verde y el disco sale en ese momento. Si llega arriba de todo, es <b>nulo</b>.'},
+  help:'Tres partes. <b>1. Balanceo:</b> tres veces se cierra un <b>anillo</b> alrededor del disco: tocá los <b>dos botones</b> juntos (o Espacio) justo cuando se cierra. Cuanto más justo, con <b>más velocidad arrancás</b> el giro. <b>2. Giro (3 segundos):</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece mientras tu atleta gira por el círculo: cada acierto suma velocidad. <b>3. Ángulo:</b> como en la bala, la aguja del medidor <b>sube sola y no vuelve</b>: apretá los <b>dos botones</b> cuando esté en lo verde y el disco sale en ese momento. Si llega arriba de todo, es <b>nulo</b>.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];
