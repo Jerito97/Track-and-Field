@@ -38,6 +38,8 @@ export const EVENTS=[
   help:'Correr y tirar, como en el pentatlón moderno. <b>1. Correr:</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece. <b>2. Tirar:</b> a los 100 y a los 200 m frenás en el puesto de tiro y mirás por la mira: el blanco que te toca tiene un <b>anillo amarillo</b>. En el punto negro aparece un <b>puntito blanco</b> que crece hasta ser una <b>flecha</b>: tocá la <b>flecha de ese lado</b> (alrededor de la mira, o la cruz de abajo con el celular parado). Si le pegás, el blanco se pone blanco; si tocás otra flecha, o antes de que aparezca, es error: <b>+5 segundos</b>. Tirar apenas la ves es más rápido; esperar a que se lea clarito, más seguro. <b>3. Llegada:</b> después de los 5 tiros seguís corriendo; al final, los dos rojos para <b>tirarte</b> como en los 100 metros.'},
  {id:'cycle',name:'Ciclismo 500 m',tag:'CICLISMO',type:'sprint',cycle:true,dist:500,tau:4,cpu:40,spread:36,extra:true,
   help:'Contrarreloj de 500 metros en el velódromo: <b>2 vueltas</b>. <b>Pedalear:</b> al lado del ciclista aparece un <b>anillo</b> de un lado (izquierda, derecha, izquierda…). <b>Mantené apretado</b> ese lado: el anillo se llena. <b>Soltá justo cuando se completa</b> para una pedaleada perfecta; si soltás antes vale menos, y si <b>te pasás</b> vale la mitad. Entre pedaleada y pedaleada el aire te frena. Al pasar la línea por primera vez suena la campana: <b>última vuelta</b>. <b>Llegada:</b> los dos rojos para <b>tirar la bici</b> sobre la línea.'},
+ {id:'dis',name:'Lanzamiento de disco',tag:'DISCO',type:'field',kind:'dis',line:1.25,cpu:40,extra:true,
+  help:'Tres partes. <b>1. Balanceo:</b> tres veces se cierra un <b>anillo</b> alrededor del disco: tocá los <b>dos botones</b> juntos (o Espacio) justo cuando se cierra. Cuanto más justo, con <b>más velocidad arrancás</b> el giro. <b>2. Giro (3 segundos):</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece mientras tu atleta gira por el círculo: cada acierto suma velocidad. <b>3. Ángulo:</b> como en la bala, la aguja del medidor <b>sube sola y no vuelve</b>: apretá los <b>dos botones</b> cuando esté en lo verde y el disco sale en ese momento. Si llega arriba de todo, es <b>nulo</b>.'},
 ];
 // the classic five: survival and the tournament against the machines (the newer ones, extra:true, are on their
 // own, in the online tournaments and on the boards)
@@ -46,8 +48,6 @@ export const CLASSIC=EVENTS.filter(e=>!e.extra);
 // events still being tried out: only the admin sees them (in the events screen, tagged EN PRUEBA); they're not in
 // tournaments, survival, the world boards or profiles. To publish one, move it into EVENTS.
 export const BETA=[
- {id:'dis',name:'Lanzamiento de disco',tag:'DISCO',type:'field',kind:'dis',line:1.25,cpu:40,extra:true,beta:true,
-  help:'Tres partes. <b>1. Balanceo:</b> tres veces se cierra un <b>anillo</b> alrededor del disco: tocá los <b>dos botones</b> juntos (o Espacio) justo cuando se cierra. Cuanto más justo, con <b>más velocidad arrancás</b> el giro. <b>2. Giro (3 segundos):</b> como en los 100 metros, tocá el <b>botón verde</b> del lado donde aparece mientras tu atleta gira por el círculo: cada acierto suma velocidad. <b>3. Ángulo:</b> como en la bala, la aguja del medidor <b>sube sola y no vuelve</b>: apretá los <b>dos botones</b> cuando esté en lo verde y el disco sale en ese momento. Si llega arriba de todo, es <b>nulo</b>.'},
 ];
 // an event by index: EVENTS first, then BETA
 export const evAt=i=>i<EVENTS.length?EVENTS[i]:BETA[i-EVENTS.length];

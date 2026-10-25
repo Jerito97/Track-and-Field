@@ -222,3 +222,4 @@ En prueba: **Laser Run** (`js/game/laser.js` sobre el motor de los 100 m; la mir
 - Datos guardados en el celular: si cambia su forma, leer también la forma vieja (como `saved()` en supervivencia).
 - Una versión vieja del juego con algo nuevo del servidor: tiene que avisar y ofrecer «Actualizar el juego» (`data-act="reload"`), nunca quedarse trabada.
 - Borrar récords: con `wipe()` (servidor), nunca con un `delete` suelto: borra el mundial, el del año y el del mes, y deja una nota en `wipes` para que cada celular borre lo suyo (si no, el récord viejo del celular frena las marcas nuevas). El administrador tiene «Reiniciar los récords de una prueba» y el borrado por jugador; un reinicio desde el código va en una migración de una vez (`migrations`), y solo si se pidió.
+Disco: publicado desde cero (servidor `reset-dis-1`, teléfonos `dis-1`): se borran las marcas de cuando estaba en prueba.
