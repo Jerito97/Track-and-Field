@@ -84,7 +84,7 @@ export function updateSprint(dt){
   else if(S.dip>0){ S.dip-=dt; S.pose=POSE.dip; if(S.dip<=0&&!S.finished) S.pops.push({text:'¡MUY TEMPRANO!',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
   else S.pose=S.v>.3?runPose(S.legP,Math.min(1,S.v/4)):(S.finished?POSE.cheer:POSE.stand);
   if(!S.finished&&S.x>=ev.dist){
-    S.finished=true; const over=(S.x-ev.dist)/Math.max(S.v*(ev.swim?SWIM_K:1),.5); let bonus=0; if(S.dip>0){ bonus=dipBonus(S.dipT); judge(bonus/DIP_MAX); const j=S.pops[S.pops.length-1]; if(j&&bonus>=.005) j.sub=`−${bonus.toFixed(2)} s`; } else if(!S.dipCued||S.cue){ S.pops.push({text:ev.swim?'SIN TOQUE':'SIN CABEZAZO',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
+    S.finished=true; const over=(S.x-ev.dist)/Math.max(S.v*(ev.swim?SWIM_K:1),.5); let bonus=0; if(S.dip>0){ bonus=dipBonus(S.dipT); judge(bonus/DIP_MAX); } else if(!S.dipCued||S.cue){ S.pops.push({text:ev.swim?'SIN TOQUE':'SIN CABEZAZO',t:0,dur:.8,col:'#fff',sub:'',big:.55,small:true}); }
     if(ev.swim) S.x=ev.dist;
     S.final=Math.ceil((S.t-over-bonus+(S.pen||0))*100)/100; S.cue=null; if(!(S.dip>0)) S.dip=.3;
     tone(880,.3,'triangle',.06); cheer();
