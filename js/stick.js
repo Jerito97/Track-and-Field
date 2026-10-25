@@ -59,8 +59,9 @@ const LJ_FLY=[[0,LJ_TAKE[2][1]],[.35,P(.82,.05,[.1,1.0],[-.1,1.3],[2.9,.1],[2.7,
 // the push in the air: arms swing up and forward, the legs straighten out in front little by little, the body folds
 // toward them only at the end (ready for the sand)
 const LJ_STRETCH=[[0,P(.82,.3,[1.2,.8],[1.0,.9],[2.2,.3],[2.0,.3])],[.25,P(.82,.2,[1.35,.2],[1.25,.25],[2.5,.2],[2.3,.25])],[.7,P(.8,.4,[1.5,.1],[1.4,.15],[1.7,.15],[1.5,.2])],[1,P(.72,.7,[1.6,.05],[1.5,.1],[.9,.15],[.7,.2])]];
-// landing: from the last flight pose (heels first) sinking into the sand, then sitting, then a fist up
-const LJ_LAND=[[0,P(.62,.72,[1.6,.05],[1.5,.1],[.9,.15],[.7,.2])],[.08,P(.4,.78,[1.55,.15],[1.45,.2],[1.1,.2],[.9,.3])],[.15,P(.3,.8,[1.5,.25],[1.4,.3],[1.5,.2],[1.3,.3])],[.45,P(.34,.45,[1.45,.4],[1.35,.5],[.9,.4],[.6,.4])],[1.1,P(.34,.3,[1.4,.5],[1.3,.6],[2.8,.3],[.4,.4])]];
+// landing: from the last flight pose (heels first) sinking into the sand, then sitting on it (the hip low: the seat on
+// the sand, where the mark is), then a fist up
+const LJ_LAND=[[0,P(.62,.72,[1.6,.05],[1.5,.1],[.9,.15],[.7,.2])],[.08,P(.4,.78,[1.55,.15],[1.45,.2],[1.1,.2],[.9,.3])],[.15,P(.22,.8,[1.5,.25],[1.4,.3],[1.5,.2],[1.3,.3])],[.45,P(.15,.45,[1.45,.4],[1.35,.5],[.9,.4],[.6,.4])],[1.1,P(.15,.3,[1.4,.5],[1.3,.6],[2.8,.3],[.4,.4])]];
 // triple jump bound (hop, step): push off, legs split wide in the air, front foot reaching down for the contact
 const TJ_BOUND=[[0,P(.8,.25,[.9,1.4],[-.7,.3],[-.7,.6],[1.0,.6])],[.4,P(.82,.2,[1.1,.6],[-.8,.9],[-.9,.5],[1.3,.4])],[1,P(.8,.25,[.4,.2],[-.6,1.1],[.8,.6],[-.7,.6])]];
 // high jump, Fosbury: knee drive at the take-off; then the athlete has turned its back to the bar (drawn facing the
