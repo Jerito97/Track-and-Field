@@ -621,6 +621,24 @@ tr.me td{background:var(--red)}
 .scroll thead th{position:sticky;top:0;z-index:1;background:#13264f}
 .b-list.scroll thead th{background:#142a55}
 .card>.body>.scroll:empty{min-height:0}
+/* any card: never taller than the screen (the phone sideways); if what's in it still doesn't fit, it scrolls inside the
+   card and the buttons (Volver and the rest) stay pinned at the bottom, always in sight */
+.card{max-height:100%}
+.card>.body{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.card>.body>*{flex:none}
+.card>.body>.btns{position:sticky;bottom:0;z-index:2;background:rgb(16,30,62);box-shadow:0 0 0 6px rgb(16,30,62)}
+/* the buttons go down to the card's edge, so nothing scrolling shows under them */
+.card>.body:has(>.btns:last-child){padding-bottom:0}
+.card>.body>.btns:last-child{padding-bottom:14px}
+@media (max-height:440px){ .card>.body>.btns:last-child{padding-bottom:10px} }
+/* someone's profile: the daily wins and the friend button beside the name (wrapping below it on a narrow screen) */
+.p-row{flex-wrap:wrap}
+.p-side{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.p-side .p-stats{grid-template-columns:auto}
+@media (max-height:500px){
+  .p-av{width:54px;height:54px} .u-big{font-size:1.3rem}
+  .p-stats b{font-size:1.1rem} .p-stats>div{padding:3px 6px} .p-stats span{font-size:.66rem}
+}
 /* a phone upright: no heads in a tournament's table, the names keep a width and the events slide sideways */
 @media (max-width:520px){ .o-table td.nm canvas{display:none} .o-table td.nm{min-width:84px} }
 /* the points always in sight, at the right, when the events slide sideways */
@@ -700,3 +718,4 @@ tr.me td{background:var(--red)}
 .b-big tr.b-mine td{background:var(--red)!important;color:#fff}
 /* the event's name in the menu's big box: always one line (the game shrinks it to fit) */
 .m-info h1{white-space:nowrap;overflow:hidden;text-wrap:nowrap;padding-right:.18em}
+@media (max-height:500px){ .p-prof .p-hint{display:none} }

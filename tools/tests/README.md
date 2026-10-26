@@ -23,7 +23,7 @@ pisan entre sí. Al final dice cuáles pasan y cuáles fallan; las capturas y el
 - **Juego en el navegador**: `music` (la música del menú), `smoke` (recorrida por todas las pantallas), `checkall` (reglas de cada prueba),
   `online` (un torneo entre dos jugadores), `daily`, `dlong`, `friendsui`, `notifs`, `fnotifs` (avisos de
   amigos), `invite`, `boxes` (listas en su recuadro), `recui`, `top10`, `boardui`, `tourfit`, `tourmove`,
-  `wipes` (borrar récords llega a los celulares), `compat` (actualizar no rompe lo guardado), `guard`
+  `wipes` (borrar récords llega a los celulares), `landfit` (con el celular acostado, los botones de cada pantalla se ven), `compat` (actualizar no rompe lo guardado), `guard`
   (recarga si el juego no arranca), `dispub`, `played`, `herofit`, `beta`, `relayriv` (las máquinas pasan el
   testimonio), `dip` (el cabezazo), `discus`, `disdemo`, `cycrace` (ciclismo, lenta).
 
