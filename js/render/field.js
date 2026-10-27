@@ -90,25 +90,7 @@ export function drawField(V){
   const hb=ev.kind==='ham'?hamDraw(V,X,GY):null;
   if(hb&&hb.far) hb.draw();
   shadow(px,GY+2,Math.max(0,V.y-(ev.kind==='pv'&&V.x>ev.line?.85:0)),s);
-  // long jump: drawn animations (stand, run cycle, take-off, flight, stretch, landing); rig pieces as fallback
-  let fig=null;
-  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='tj'?tjFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):ev.kind==='pv'?pvFrame(ME(),V):null;
-    if(f){ const K=animScale(ME(),s*FIELD_H), A0=ME().anims[f[0]], fi0=((f[1]%A0.frames)+A0.frames)%A0.frames;
-      // frames placed by the hip (pole vault in the air: the body turns over) or by their lowest point
-      const feet=f[2]&&A0.hipy?GY-f[2].hip*s+(A0.feet-A0.hipy[fi0])*K:GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
-      // javelin in the frame: its tail and tip on screen (for the star); the whole javelin goes underneath, tip on the
-      // drawn tip, so every frame shows it at full length (the sheets draw it shorter or cut off at the tail)
-      const A=ME().anims[f[0]], fi=((f[1]%A.frames)+A.frames)%A.frames, j=A.jav&&A.jav[fi], hd=A.hands&&A.hands[fi];
-      // hands drawn holding a pole the game draws: pole through the front hand, along the line of both hands
-      if(hd){ fig.hands=[px+(hd[0]-A.hx)*K,feet+(hd[1]-A.feet)*K,px+(hd[2]-A.hx)*K,feet+(hd[3]-A.feet)*K]; fig.hand=[fig.hands[2],fig.hands[3]]; }
-      if(j){ fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K];
-        const [tx,ty,hx,hy]=fig.jav, a=Math.atan2(ty-hy,hx-tx), L=JAV_L*s; javelin(hx-Math.cos(a)*L/2,hy+Math.sin(a)*L/2,a,L); }
-      drawAnim(ctx,ME(),f[0],f[1],px,feet,K); } }
-  // high jump: back to the bar in the air, drawn facing the run-up (mirrored)
-  const turn=!!V.turn;
-  if(turn){ ctx.save(); ctx.translate(px,0); ctx.scale(-1,1); ctx.translate(-px,0); }
-  if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,STYLE.stick?fieldPose({...V,clock:S.clock}):V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
-  if(turn) ctx.restore();
+  const fig=drawMe(V,X,GY,s,px);
   if(hb&&!hb.far) hb.draw();
   if(hb&&hb.arc) hb.arc();
   if(ev.kind==='sp') spDraw(V,X,GY,fig);
@@ -129,8 +111,54 @@ export function drawField(V){
       else javelin(X(V.jv.x)-Math.cos(a)*h,GY-V.jv.y*s+Math.sin(a)*h,a,JAV_L*s); }
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
+  if(ev.kind==='jav') javInset(V);
   S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle=f.dust?'rgba(235,215,200,.8)':'#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,f.dust?1.8:2.2,0,Math.PI*2); ctx.fill(); });
   drawPauseBtn();
+}
+// the athlete at px (V.x on the ground line GY, s px per m): drawn animations for the long and triple jump, the pole
+// vault and the javelin (stand, run cycle, take-off, flight, landing...), the rig pieces otherwise
+function drawMe(V,X,GY,s,px){
+  const ev=V.ev;
+  let fig=null;
+  { const f=ev.kind==='lj'?ljFrame(ME(),V):ev.kind==='tj'?tjFrame(ME(),V):ev.kind==='jav'?javFrame(ME(),V):ev.kind==='pv'?pvFrame(ME(),V):null;
+    if(f){ const K=animScale(ME(),s*FIELD_H), A0=ME().anims[f[0]], fi0=((f[1]%A0.frames)+A0.frames)%A0.frames;
+      // frames placed by the hip (pole vault in the air: the body turns over) or by their lowest point
+      const feet=f[2]&&A0.hipy?GY-f[2].hip*s+(A0.feet-A0.hipy[fi0])*K:GY-V.y*s; fig={hand:[px,feet-1.4*s],drawnJav:f[0].startsWith('jav')};
+      // javelin in the frame: its tail and tip on screen (for the star); the whole javelin goes underneath, tip on the
+      // drawn tip, so every frame shows it at full length (the sheets draw it shorter or cut off at the tail)
+      const A=ME().anims[f[0]], fi=((f[1]%A.frames)+A.frames)%A.frames, j=A.jav&&A.jav[fi], hd=A.hands&&A.hands[fi];
+      // hands drawn holding a pole the game draws: pole through the front hand, along the line of both hands
+      if(hd){ fig.hands=[px+(hd[0]-A.hx)*K,feet+(hd[1]-A.feet)*K,px+(hd[2]-A.hx)*K,feet+(hd[3]-A.feet)*K]; fig.hand=[fig.hands[2],fig.hands[3]]; }
+      if(j){ fig.jav=[px+(j[0]-A.hx)*K,feet+(j[1]-A.feet)*K,px+(j[2]-A.hx)*K,feet+(j[3]-A.feet)*K];
+        const [tx,ty,hx,hy]=fig.jav, a=Math.atan2(ty-hy,hx-tx), L=JAV_L*s; javelin(hx-Math.cos(a)*L/2,hy+Math.sin(a)*L/2,a,L); }
+      drawAnim(ctx,ME(),f[0],f[1],px,feet,K); } }
+  // high jump: back to the bar in the air, drawn facing the run-up (mirrored)
+  const turn=!!V.turn;
+  if(turn){ ctx.save(); ctx.translate(px,0); ctx.scale(-1,1); ctx.translate(-px,0); }
+  if(!fig) fig=rigReady(ME())?drawRig(ctx,s,px,GY,V.y,V.pose||POSE.stand,ME(),V.rot||0):drawChar(ctx,s,px,GY,V.y,STYLE.stick?fieldPose({...V,clock:S.clock}):V.pose||POSE.stand,ME(),(V.v||0)>5,V.rot||0);
+  if(turn) ctx.restore();
+  return fig;
+}
+// javelin, once it's gone: a small window at the bottom with the athlete by the line (the camera is off with the
+// javelin), how far behind the line he stopped or that he went over it (a foul)
+function javInset(V){
+  const jv=V.jv; if(!jv||jv.held) return;
+  const ev=V.ev, w=170, h=88, x0=Math.round(LW/2-w/2), y0=LH-h-6, GY=y0+h-18;
+  // the athlete and the line in sight, a metre and a bit to spare on each side
+  const a=Math.min(V.x,ev.line)-1.3, b=Math.max(V.x,ev.line)+1.3, s=Math.min(30,w/(b-a)), c0=(a+b)/2-w/2/s, X=m=>x0+(m-c0)*s;
+  const k=jv.stuck?1:clamp(((jv.t||0)-.35)*4,0,1), over=V.x>ev.line, gap=ev.line-V.x; if(!k) return;
+  ctx.save(); ctx.globalAlpha=k;
+  ctx.beginPath(); ctx.roundRect(x0,y0,w,h,8); ctx.save(); ctx.clip();
+  // like a TV camera's small window: the stands' wall behind, the grass, the runway up to the line
+  ctx.fillStyle=GRASS; ctx.fillRect(x0,y0,w,h); ctx.fillStyle='#2b3f72'; ctx.fillRect(x0,y0,w,GY-y0-34); ctx.fillStyle='#ffd23a'; ctx.fillRect(x0,GY-36,w,3);
+  const lx=X(ev.line); ctx.fillStyle=TARTAN; ctx.fillRect(x0,GY-12,lx-x0,22); ctx.fillStyle=TARTAN_D; ctx.fillRect(x0,GY-2,lx-x0,12);
+  ctx.fillStyle='#fff'; ctx.fillRect(lx-1.5,GY-33,3,y0+h-GY+33);
+  shadow(X(V.x),GY+1,0,s); drawMe(V,X,GY,s,X(V.x));
+  ctx.restore();
+  ctx.beginPath(); ctx.roundRect(x0,y0,w,h,8); ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.stroke(); ctx.strokeStyle=over?'#ff5a3c':'#fff'; ctx.lineWidth=2; ctx.stroke();
+  txt('LÍNEA',lx,GY-44,'#fff',9);
+  txt(over?'¡NULO! PISASTE LA LÍNEA':gap<.005?'¡JUSTO EN LA LÍNEA!':`a ${gap.toFixed(2)} m de la línea`,x0+w/2,y0+h-7,over?'#ff5a3c':'#fff',11);
+  ctx.restore();
 }
 // the javelin drawn back while running: it follows the hand smoothed (not every bob of the stride), so the star along
 // it moves steadily
