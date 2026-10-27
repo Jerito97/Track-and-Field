@@ -139,11 +139,12 @@ function drawMe(V,X,GY,s,px){
   if(turn) ctx.restore();
   return fig;
 }
-// javelin, once it's gone: a small window at the bottom with the athlete by the line (the camera is off with the
+// javelin, once it's gone: a small window with the athlete by the line (the camera is off with the
 // javelin), how far behind the line he stopped or that he went over it (a foul)
 function javInset(V){
   const jv=V.jv; if(!jv||jv.held) return;
-  const ev=V.ev, w=170, h=88, x0=Math.round(LW/2-w/2), y0=LH-h-6, GY=y0+h-18;
+  // up on the right, over the stands (the javelin comes down on the grass below); on a narrow screen under the mark
+  const ev=V.ev, wide=LW>=560, w=wide?170:150, h=wide?88:76, x0=LW-w-8, y0=wide?26:160, GY=y0+h-18;
   // the athlete and the line in sight, a metre and a bit to spare on each side
   const a=Math.min(V.x,ev.line)-1.3, b=Math.max(V.x,ev.line)+1.3, s=Math.min(30,w/(b-a)), c0=(a+b)/2-w/2/s, X=m=>x0+(m-c0)*s;
   const k=jv.stuck?1:clamp(((jv.t||0)-.35)*4,0,1), over=V.x>ev.line, gap=ev.line-V.x; if(!k) return;
