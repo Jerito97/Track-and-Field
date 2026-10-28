@@ -79,7 +79,7 @@ export function demoStep(dt){
     if(a&&a.T&&a.t/a.T>=.36) press('B'); }
   if(k==='tj'&&c&&c.type==='foot'&&a&&(a.stage==='contact'||a.T-a.t<=-.04)) press(c.side);
   if(k==='pv'){ if(m&&m.k==='pole'&&m.on&&m.p>=.92) hold(true); if(m&&m.k==='rise'&&m.p>=.92) hold(false); }
-  if(k==='jav'){ if(S.phase==='run'&&S.zone&&ev.line-S.x<15&&!m) hold(true); if(m&&m.k==='jav'&&m.p>=.92&&S.held2){ hold(false); javThrow(); } }
+  if(k==='jav'){ if(S.phase==='run'&&S.zone&&c&&c.type==='hold'&&ev.line-S.x<15&&!m) hold(true); if(m&&m.k==='jav'&&m.p>=.92&&S.held2){ hold(false); javThrow(); } }
   if(k==='ham'&&a){ if(c&&c.type==='rush'&&f%7===0) press(f%8?'L':'R');
     if(a.stage==='final'&&!m) hold(true); if(m&&m.k==='ham'&&m.p>=.92) hold(false); }
   if(k==='sp'&&a){ if(a.stage==='angle'&&m&&m.p>=44.5) hold(true); if(a.stage==='aim'&&m&&m.p>=.92) hold(false); }

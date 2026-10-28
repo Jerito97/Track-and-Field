@@ -84,7 +84,7 @@ const setHeld2=()=>{ const v=[...down.values()], h=kbHold||(v.includes('L')&&v.i
   if(h!==!!S.held2) S.held2At=performance.now(); S.held2=h;
   S.press=S.press||{}; S.pressAt=S.pressAt||{};
   ['L','R'].forEach(k=>{ const on=kbSide[k]||v.includes(k); if(on!==!!S.press[k]) S.pressAt[k]=performance.now(); S.press[k]=on; }); };
-export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) return; if(S.phase==='run'&&S.zone&&S.ev.kind==='jav'&&!S.meter){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
+export function holdStart(){ setHeld2(); if(screen!=='play'||!S||!S.held2) return; if(S.phase==='run'&&S.zone&&S.ev.kind==='jav'&&!S.meter&&!(S.javWait>0)){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
 // letting go of either button throws
 export function holdEnd(){ setHeld2(); if(screen==='play'&&S&&!S.held2&&S.phase==='run'&&S.meter&&S.meter.k==='jav') javThrow(); }
 export function initInput(){

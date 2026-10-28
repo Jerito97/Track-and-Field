@@ -25,7 +25,7 @@ pisan entre sí. Al final dice cuáles pasan y cuáles fallan; las capturas y el
   amigos), `invite`, `boxes` (listas en su recuadro), `recui`, `top10`, `boardui`, `tourfit`, `tourmove`,
   `wipes` (borrar récords llega a los celulares), `landfit` (con el celular acostado, los botones de cada pantalla se ven), `compat` (actualizar no rompe lo guardado), `guard`
   (recarga si el juego no arranca), `dispub`, `played`, `herofit`, `beta`, `relayriv` (las máquinas pasan el
-  testimonio), `dip` (el cabezazo), `discus`, `disdemo`, `cycrace` (ciclismo, lenta).
+  testimonio), `dip` (el cabezazo), `javwait` (jabalina: un momento sin botones antes de mantener los dos), `discus`, `disdemo`, `cycrace` (ciclismo, lenta).
 
 ## Cómo están hechas
 

@@ -21,6 +21,8 @@ const POLE_T=1.0, PV_REACH=3.5;
 const PV_OK=.07, PV_LAG=.03, JAV_T=.7;
 // javelin's point when it leaves the hand: ahead of the athlete and up (m)
 const JAV_TIP_X=1.55, JAV_TIP_Y=2.6;  // JAV_T: seconds for the star to reach the javelin's tip
+// javelin: seconds with no buttons between the run-up's taps and the two to hold (so a tap isn't taken for the hold)
+const JAV_WAIT=.2;
 // (without it every perfect attempt at the same speed came out the same to the centimetre: the run-up's speed only
 // changes tap by tap)
 const FINE=.04;
@@ -68,14 +70,17 @@ export function updateField(dt){
       S.pops.push({text:'¡PREPARATE!',t:0,dur:.8,col:'#ffd23a',sub:'',big:.6,small:true});
       if(jumps(ev)) bothCue();
       else if(ev.kind==='pv') S.meter={k:'pole',p:0,on:false,wasHeld:!!S.held2};
+      else if(ev.kind==='jav') S.javWait=JAV_WAIT;
       else S.cue={type:'hold',t:0};
     }
     const sp=S.v;
     S.x+=sp*dt; S.legP+=sp*dt*2.4;
     if(S.zone&&ev.kind==='jav'){
       S.pose=S.meter?POSE.javBack:runPose(S.legP,Math.min(1,sp/4),'jav');
-      // already holding both when the zone starts: the star starts right away
-      if(!S.meter&&S.held2){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); }
+      // a moment without buttons after the run-up's taps, then the two to hold; a press only counts if it starts
+      // once they're showing (fingers still down from the taps don't draw the javelin back)
+      if(S.javWait>0){ S.javWait-=dt; if(S.javWait<=0){ S.cue={type:'hold',t:0}; S.javFresh=!S.held2; } }
+      else if(!S.meter){ if(!S.held2) S.javFresh=true; else if(S.javFresh){ S.meter={k:'jav',p:0}; S.cue=null; tone(500,.06,'triangle',.04); } }
       if(S.meter){ S.meter.p+=dt/JAV_T; if(S.meter.p>=1.2) javThrow(); }
     } else {
       S.pose=S.v>.2?runPose(S.legP,Math.min(1,S.v/4),armsFor()):S.pose;

@@ -129,7 +129,7 @@ async function nextRound(p){ // skip replay and table -> next round
     if(s.cue&&s.cue.type==='side'&&f%6===0) await p.keyboard.press(KEY[s.cue.side]);
     const d=s.line-s.x;
     if(r===0){
-      if(phase===0&&s.cue&&s.cue.type==='hold'&&d<17){ await ptr(p,'pointerdown',1,200); await step(p,10); ok(!(await st(p)).m,'jabalina: con un dedo no arranca'); await ptr(p,'pointerdown',2,700); await step(p,2); ok((await st(p)).m?.k==='jav','jabalina: con los dos dedos arranca'); phase=1; }
+      if(phase===0&&s.cue&&s.cue.type==='hold'&&d<17){ await ptr(p,'pointerdown',1,200); await step(p,4); ok(!(await st(p)).m,'jabalina: con un dedo no arranca'); await ptr(p,'pointerdown',2,700); await step(p,2); ok((await st(p)).m?.k==='jav','jabalina: con los dos dedos arranca'); phase=1; }
       if(phase===1&&s.m&&s.m.k==='jav'&&s.m.p>=.95){ await ptr(p,'pointerup',2,700); await step(p,1); ok((await st(p)).ph==='act','jabalina: levantar un dedo lanza'); await ptr(p,'pointerup',1,200); phase=2; } }
     if(r===1){ if(phase===0&&s.cue&&s.cue.type==='hold'&&d<1.6+.7*s.v){ await p.keyboard.down(' '); phase=1; }
       if(phase===1&&s.m&&s.m.p>=.95){ await p.keyboard.up(' '); phase=2; ok(s.line-s.x<3.2&&s.line-s.x>0,`jabalina: suelta a ${(s.line-s.x).toFixed(1)} m de la línea`); } }
