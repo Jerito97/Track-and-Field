@@ -112,6 +112,7 @@ export function drawField(V){
   }
   if(V.landX!=null&&ev.kind!=='pv') flag(X(V.landX),GY+4,'#e8262d','');
   if(ev.kind==='jav') javInset(V);
+  if(ev.kind==='lj'||ev.kind==='tj') boardInset(V,X);
   S.fx.forEach(f=>{ if(f.k!=='sand') return; const t=f.t, x=X(f.wx+f.vx*t), y=GY-(f.wy+f.vy*t-4.9*t*t)*s; ctx.fillStyle=f.dust?'rgba(235,215,200,.8)':'#e9d9a8'; ctx.beginPath(); ctx.arc(x,y,f.dust?1.8:2.2,0,Math.PI*2); ctx.fill(); });
   drawPauseBtn();
 }
@@ -139,27 +140,54 @@ function drawMe(V,X,GY,s,px){
   if(turn) ctx.restore();
   return fig;
 }
-// javelin, once it's gone: a small window with the athlete by the line (the camera is off with the
-// javelin), how far behind the line he stopped or that he went over it (a foul)
+// a small camera window up on the right, over the stands (what happens down on the field stays in sight); on a
+// narrow screen under the mark (small: smaller and a bit higher, where the field below has more going on). open: the window and its ground line; close: its border (red for a foul), what it
+// says at the bottom
+function insetBox(k,small){ const wide=LW>=560, w=wide?170:small?120:150, h=wide?88:small?62:76, x0=LW-w-8, y0=wide?26:small?124:160;
+  ctx.save(); ctx.globalAlpha=k; ctx.beginPath(); ctx.roundRect(x0,y0,w,h,8); ctx.save(); ctx.clip(); return {x0,y0,w,h,GY:y0+h-18}; }
+function insetClose(b,foul,label,col){
+  ctx.restore();
+  ctx.beginPath(); ctx.roundRect(b.x0,b.y0,b.w,b.h,8); ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.stroke(); ctx.strokeStyle=foul?'#ff5a3c':'#fff'; ctx.lineWidth=2; ctx.stroke();
+  txt(label,b.x0+b.w/2,b.y0+b.h-7,col||(foul?'#ff5a3c':'#fff'),b.w<140?9:11);
+  ctx.restore(); }
+// javelin, once it's gone (the camera is off with it): the athlete by the line, how far behind it he stopped or
+// that he went over it (a foul)
 function javInset(V){
   const jv=V.jv; if(!jv||jv.held) return;
-  // up on the right, over the stands (the javelin comes down on the grass below); on a narrow screen under the mark
-  const ev=V.ev, wide=LW>=560, w=wide?170:150, h=wide?88:76, x0=LW-w-8, y0=wide?26:160, GY=y0+h-18;
+  const ev=V.ev, k=jv.stuck?1:clamp(((jv.t||0)-.35)*4,0,1); if(!k) return;
+  const b=insetBox(k), {x0,y0,w,h,GY}=b;
   // the athlete and the line in sight, a metre and a bit to spare on each side
-  const a=Math.min(V.x,ev.line)-1.3, b=Math.max(V.x,ev.line)+1.3, s=Math.min(30,w/(b-a)), c0=(a+b)/2-w/2/s, X=m=>x0+(m-c0)*s;
-  const k=jv.stuck?1:clamp(((jv.t||0)-.35)*4,0,1), over=V.x>ev.line, gap=ev.line-V.x; if(!k) return;
-  ctx.save(); ctx.globalAlpha=k;
-  ctx.beginPath(); ctx.roundRect(x0,y0,w,h,8); ctx.save(); ctx.clip();
+  const a=Math.min(V.x,ev.line)-1.3, e=Math.max(V.x,ev.line)+1.3, s=Math.min(30,w/(e-a)), c0=(a+e)/2-w/2/s, X=m=>x0+(m-c0)*s;
+  const over=V.x>ev.line, gap=ev.line-V.x;
   // like a TV camera's small window: the stands' wall behind, the grass, the runway up to the line
   ctx.fillStyle=GRASS; ctx.fillRect(x0,y0,w,h); ctx.fillStyle='#2b3f72'; ctx.fillRect(x0,y0,w,GY-y0-34); ctx.fillStyle='#ffd23a'; ctx.fillRect(x0,GY-36,w,3);
   const lx=X(ev.line); ctx.fillStyle=TARTAN; ctx.fillRect(x0,GY-12,lx-x0,22); ctx.fillStyle=TARTAN_D; ctx.fillRect(x0,GY-2,lx-x0,12);
   ctx.fillStyle='#fff'; ctx.fillRect(lx-1.5,GY-33,3,y0+h-GY+33);
   shadow(X(V.x),GY+1,0,s); drawMe(V,X,GY,s,X(V.x));
-  ctx.restore();
-  ctx.beginPath(); ctx.roundRect(x0,y0,w,h,8); ctx.strokeStyle=INK; ctx.lineWidth=5; ctx.stroke(); ctx.strokeStyle=over?'#ff5a3c':'#fff'; ctx.lineWidth=2; ctx.stroke();
   txt('LÍNEA',lx,GY-44,'#fff',9);
-  txt(over?'¡NULO! PISASTE LA LÍNEA':gap<.005?'¡JUSTO EN LA LÍNEA!':`a ${gap.toFixed(2)} m de la línea`,x0+w/2,y0+h-7,over?'#ff5a3c':'#fff',11);
-  ctx.restore();
+  insetClose(b,over,over?'¡NULO! PISASTE LA LÍNEA':gap<.005?'¡JUSTO EN LA LÍNEA!':`a ${gap.toFixed(2)} m de la línea`);
+}
+// long and triple jump, once the camera has left the board: the board up close, from above, and the take-off's
+// footprint; how many centimetres were left before the foul line
+function boardInset(V,X){
+  const ev=V.ev, k=clamp((30-X(ev.line))/40,0,1); if(V.print==null||!k) return;
+  const b=insetBox(k,true), {x0,y0,w,h}=b, c0=Math.min(ev.line-.55,V.print-.4), s=w/(ev.line+.25-c0), Z=m=>x0+(m-c0)*s, mid=y0+(h-18)/2+2;
+  // the runway, the white board (20 cm), the plasticine strip past the foul line, the sand
+  ctx.fillStyle=TARTAN_D; ctx.fillRect(x0,y0,w,h); ctx.fillStyle=TARTAN; ctx.fillRect(x0,y0+8,w,h-34);
+  ctx.fillStyle='#fff'; ctx.fillRect(Z(ev.line-.2),y0+8,.2*s,h-34); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(Z(ev.line-.2),y0+8,.2*s,h-34);
+  for(let y=y0+8,i=0;y<y0+h-26;y+=6,i++){ ctx.fillStyle=i%2?'#fff':'#e8262d'; ctx.fillRect(Z(ev.line),y,.1*s,Math.min(6,y0+h-26-y)); }
+  ctx.fillStyle='#ecd096'; ctx.fillRect(Z(ev.line+.1),y0+8,w,h-34);
+  // the footprint (sole and heel, toes at V.print) and the gap measured from its toes to the line
+  const px=Z(V.print), gap=ev.line-V.print, fs=Math.min(s,w/.8)*.85;
+  // a spiked shoe's print seen from above: the sole (wide at the toes), the narrow middle, the heel; a few spike holes
+  ctx.fillStyle='rgba(20,20,40,.72)'; ctx.beginPath(); ctx.moveTo(px,mid);
+  ctx.bezierCurveTo(px,mid-.045*fs,px-.12*fs,mid-.05*fs,px-.16*fs,mid-.025*fs); ctx.bezierCurveTo(px-.19*fs,mid-.035*fs,px-.26*fs,mid-.035*fs,px-.26*fs,mid);
+  ctx.bezierCurveTo(px-.26*fs,mid+.035*fs,px-.19*fs,mid+.035*fs,px-.16*fs,mid+.025*fs); ctx.bezierCurveTo(px-.12*fs,mid+.05*fs,px,mid+.045*fs,px,mid); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.35)'; [[-.03,-.02],[-.03,.02],[-.07,-.025],[-.07,.025],[-.11,0]].forEach(([a,c])=>{ ctx.beginPath(); ctx.arc(px+a*fs,mid+c*fs,Math.max(1,.006*fs),0,Math.PI*2); ctx.fill(); });
+  if(gap>.005){ const lx=Z(ev.line), y=mid-.06*fs-4; ctx.strokeStyle='#ffd23a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(px,y); ctx.lineTo(lx,y); ctx.moveTo(px,y-4); ctx.lineTo(px,y+4); ctx.moveTo(lx,y-4); ctx.lineTo(lx,y+4); ctx.stroke(); }
+  txt('TABLA',Z(ev.line-.1),y0+5,'#fff',9);
+  const cm=Math.round(gap*100);
+  insetClose(b,false,cm<1?'¡JUSTO EN LA TABLA!':`a ${cm} cm de la tabla`,cm<1?'#ffd23a':'#fff');
 }
 // the javelin drawn back while running: it follows the hand smoothed (not every bob of the stride), so the star along
 // it moves steadily
