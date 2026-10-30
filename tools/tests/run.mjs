@@ -5,7 +5,7 @@
 import {spawn} from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
 const DIR=path.dirname(new URL(import.meta.url).pathname);
 // browser tests (need the server), and the ones that only use api/t.js
-const UI=['smoke','landfit','javwait','checkall','daily','dlong','friendsui','notifs','fnotifs','invite','boxes','recui','top10','tourfit','tourmove','wipes','compat','guard','dispub','played','herofit','beta','boardui','music','relayriv','dip','discus','disdemo','cycrace','online'];
+const UI=['smoke','landfit','javwait','vertical','checkall','daily','dlong','friendsui','notifs','fnotifs','invite','boxes','recui','top10','tourfit','tourmove','wipes','compat','guard','dispub','played','herofit','beta','boardui','music','relayriv','dip','discus','disdemo','cycrace','online'];
 const API=['apiall','friendsapi','agree','dreset','dkeep'];
 if(!fs.existsSync(path.join(DIR,'node_modules/@electric-sql/pglite'))){ console.log('Falta instalar: cd tools/tests && npm install'); process.exit(1); }
 const want=process.argv.slice(2), list=[...API,...UI].filter(n=>!want.length||want.includes(n));

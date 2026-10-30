@@ -1,7 +1,7 @@
 // Event setup, cues, popups and the per-frame update dispatcher
 import {loadCycleScene,loadSwimScene} from '../assets.js';
 import {tone} from '../audio.js';
-import {LW} from '../canvas.js';
+import {LW,PORTRAIT} from '../canvas.js';
 import {evAt} from '../config.js';
 import {POSE,runPose} from '../poses.js';
 import {ATH,S,setS,setScreen} from '../state.js';
@@ -40,9 +40,11 @@ export function resetAttempt(){
 // camera zoom (logical px per metre): sprints, field events
 export const SPRINT_PPM=29, FIELD_PPM=41, SWIM_PPM=24, CYCLE_PPM=20;
 const ppmOf=ev=>ev.swim?SWIM_PPM:ev.cycle?CYCLE_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM;
-export const camLead=()=>LW*.36/S.ppm;
-// where the camera goes: the athlete a third of the way in (swimming: in the pool, and from the other side on the way back)
-const camTo=()=>S.ev.swim?hipX(S.ev,S.x)-(isBack(S.ev,S.x)?LW-LW*.36:LW*.36)/S.ppm:S.x-camLead();
+// where the camera goes: the athlete a third of the way in (swimming: in the pool, and from the other side on the way
+// back); phone upright (a narrower view), further to the side he comes from, so there's more to see ahead
+const LEAD=()=>PORTRAIT?.26:.36;
+export const camLead=()=>LW*LEAD()/S.ppm;
+const camTo=()=>S.ev.swim?hipX(S.ev,S.x)-(isBack(S.ev,S.x)?LW-LW*LEAD():LW*LEAD())/S.ppm:S.x-camLead();
 export const CUEPOS={L:()=>[64,150],C:()=>[LW/2,150],R:()=>[LW-64,150]};
 // hurdle numbers: the screen in three equal columns, a number in the middle of each (a tap anywhere in a column is
 // that number); NUM_DX = gap between neighbours (logical px)

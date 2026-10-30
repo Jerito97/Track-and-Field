@@ -462,11 +462,15 @@ tr.me td{background:var(--red)}
   .m-top .m-recs{padding:.35em .5em .35em 1em}
   .m-title,.m-recs{font-size:clamp(.95rem,5.4vw,1.4rem);padding:.35em .6em .35em 1.1em}
   .m-modes{height:auto;grid-template-columns:1fr;gap:10px}
-  .m-mode{flex-direction:row;height:clamp(96px,17vh,150px);align-items:stretch}
+  /* the three cards share what the screen has left (the top bar, the player's strip and the daily bar take the rest) */
+  .m-mode{flex-direction:row;height:clamp(96px,calc((100svh - 330px)/3),210px);align-items:stretch}
+  .mm:has(.m-daily:not([hidden])) .m-mode{height:clamp(90px,calc((100svh - 400px)/3),200px)}
   .m-mart{flex:0 0 52%}
   .m-mode b{align-self:center;font-size:clamp(1.3rem,7vw,2rem);padding:0 .6em;white-space:normal;line-height:1}
   .m-hero{grid-template-columns:1fr;height:auto;padding:0 0 12px}
-  .m-art{height:clamp(150px,26vh,240px);clip-path:none}
+  .m-art{height:clamp(150px,30vh,280px);clip-path:none}
+  /* the events' screen: the logo and the back arrow are enough up there (Elegí tu prueba doesn't fit beside them) */
+  .mm:has(.m-evs) .m-top .m-title{display:none}
   .m-info{padding:0 12px}
   .m-info h1{font-size:clamp(2rem,10vw,3rem)}
   .m-play{font-size:clamp(1.1rem,5.6vw,1.5rem)}

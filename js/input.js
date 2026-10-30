@@ -1,6 +1,6 @@
 // Touch / keyboard input
 import {tone,unlockAudio} from './audio.js';
-import {cv,LH,LW,OX,OY,PORTRAIT,SC,SH,SW} from './canvas.js';
+import {cv,LH,LW,OX,OY,padArea,PORTRAIT,SC,SW} from './canvas.js';
 import {addRing,addX,bad,badNum,COMBO_K,comboQ,gH,gS,judge,sideCue,speedUp,startRun} from './game/core.js';
 import {fieldAction,footTap,javThrow} from './game/field.js';
 import {demoTap,endDemo} from './game/demo.js';
@@ -21,7 +21,7 @@ export function zoneOf(clientX,three,clientY=0){ const f=clientX/SW;
   return f<.5?'L':'R'; }
 // laser run: which arrow a touch is, from where it is around the sight (upright, below the game: around the pad there)
 export function arrowOf(x,y){ let cx,cy;
-  if(PORTRAIT&&y>OY+LH*SC){ cx=SW/2; cy=(OY+LH*SC+14+SH-18)/2; }
+  if(PORTRAIT&&y>OY+LH*SC){ const a=padArea(); cx=SW/2; cy=(a.top+a.bot)/2; }
   else { const o=scope(); cx=OX+o.cx*SC; cy=OY+o.cy*SC; }
   const dx=x-cx, dy=y-cy; return Math.abs(dx)>Math.abs(dy)?(dx<0?'L':'R'):(dy<0?'U':'D'); }
 export function onTap(pos){

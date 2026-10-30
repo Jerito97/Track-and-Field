@@ -1,10 +1,10 @@
 // Frame composition
-import {ctx,DPR,LH,LW,OX,OY,PORTRAIT,SC,SH,SIZED,SW} from '../canvas.js';
+import {ctx,DPR,LH,LW,OX,OY,padArea,PORTRAIT,SC,SH,SIZED,SW} from '../canvas.js';
 import {HURDLES} from '../config.js';
 import {snap} from '../game/replay.js';
 import {S} from '../state.js';
 import {drawField} from './field.js';
-import {drawHud} from './hud.js';
+import {drawHud,finger} from './hud.js';
 import {drawLap} from './lap.js';
 import {drawPodium} from './podium.js';
 import {arrowBtn,drawSprint} from './sprint.js';
@@ -22,7 +22,9 @@ export function frame(){
   if(idle&&idleFor===key) return;
   idleFor=idle?key:null;
   ctx.setTransform(DPR,0,0,DPR,0,0); ctx.fillStyle='#0b1730'; ctx.fillRect(0,0,SW,SH);
-  ctx.setTransform(SC*DPR,0,0,SC*DPR,OX*DPR,OY*DPR);
+  // phone upright with no buttons below (the lap of honour, the podium): the game in the middle of the screen
+  const oy=PORTRAIT&&S&&(S.phase==='podium'||S.phase==='lap')?OY+Math.max(0,(padArea().bot-OY-LH*SC)/2):OY;
+  ctx.setTransform(SC*DPR,0,0,SC*DPR,OX*DPR,oy*DPR);
   // menus: the background fills the whole screen (also behind the camera island); the game stays in the safe area
   if(idle){ ctx.setTransform(DPR*SW/LW,0,0,DPR*SH/LH,0,0); drawIdle(); return; }
   ctx.save(); ctx.beginPath(); ctx.rect(0,0,LW,LH); ctx.clip();
@@ -36,8 +38,27 @@ export function frame(){
 // phone upright: below the game, two big buttons (left and right half of the screen, as when it's sideways); the side
 // the game asks for lights up, both when it asks for both
 function drawPads(){
-  const top=OY+LH*SC+14, bot=SH-18, h=bot-top; if(h<60) return;
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const {top,bot}=padArea(); if(bot-top<60) return;
+  ctx.setTransform(DPR,0,0,DPR,0,0); pads(); if(S.demo&&!S.replay) padFingers(); padFx();
+}
+// a tap's ring, a wrong tap's red cross, on the button it was (the side of the game it was drawn at)
+function padFx(){
+  const {top,bot}=padArea(), cy=(top+bot)/2, h=bot-top;
+  S.fx.forEach(f=>{ if(f.k!=='ring'&&f.k!=='x') return; const q=f.x/LW, cx=S.ev.hurdles?SW*(q<1/3?1/6:q<2/3?.5:5/6):q<.5?SW/4:SW*3/4, k=f.t/.45;
+    if(f.k==='ring'){ ctx.strokeStyle=`rgba(255,255,255,${1-k})`; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(cx,cy,h*.2+k*h*.12,0,Math.PI*2); ctx.stroke(); return; }
+    const r=h*.14; ctx.save(); ctx.globalAlpha=1-k; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(cx-r,cy-r); ctx.lineTo(cx+r,cy+r); ctx.moveTo(cx+r,cy-r); ctx.lineTo(cx-r,cy+r);
+    ctx.strokeStyle='#0e1a34'; ctx.lineWidth=16; ctx.stroke(); ctx.strokeStyle='#e8262d'; ctx.lineWidth=9; ctx.stroke(); ctx.restore(); });
+}
+// the tutorial's finger on the button it taps (a tap in the middle of the game: both), and on both while it holds
+function padFingers(){
+  const {top,bot}=padArea(), y=(top+bot)/2-24, x={L:SW/4-12,C:SW/2-12,R:SW*3/4-12}, k=SC;
+  if(S.shot&&S.cue&&S.cue.type==='shoot') return;
+  S.fingers.forEach(f=>{ const a=1-f.t/.35, q=f.x/LW; (q<.3?['L']:q>.7?['R']:S.ev.hurdles?['C']:['L','R']).forEach(p=>fingerAt(x[p],y,a,k)); });
+  if(S.held2) ['L','R'].forEach(p=>fingerAt(x[p],y,1,k));
+}
+const fingerAt=(x,y,a,k)=>{ ctx.save(); ctx.translate(x,y); ctx.scale(k,k); finger(0,0,a); ctx.restore(); };
+function pads(){
+  const {top,bot}=padArea(), h=bot-top;
   // laser run, shooting: the four arrows instead (a touch anywhere there goes to the arrow on its side)
   if(S.shot&&S.cue&&S.cue.type==='shoot'&&!S.replay){ const cx=SW/2, cy=(top+bot)/2, r=Math.min(h*.17,SW*.11), d=Math.min(h*.33,SW*.24), f=S.shot.flash&&S.shot.flash.t<.3?S.shot.flash:null;
     [['U',0,-1],['D',0,1],['L',-1,0],['R',1,0]].forEach(([k,dx,dy])=>arrowBtn(cx+dx*d,cy+dy*d,r,dx,dy,f&&f.dir===k?(f.hit?'#2fd166':'#ff5a3c'):null));

@@ -1,6 +1,6 @@
 // HUD: header bar, cue buttons, popups, meters
 import {secs} from '../utils.js';
-import {ctx,LH,LW} from '../canvas.js';
+import {ctx,LH,LW,PORTRAIT} from '../canvas.js';
 import {INK} from '../config.js';
 import {OVER,PAST,PERFECT,pedalP} from '../game/cycle.js';
 import {CUEPOS,NUMPOS} from '../game/core.js';
@@ -17,8 +17,9 @@ export function drawHud(V){
   if(S.ev.cycle) drawPedalLast();
   if(!V.replay&&S.cue) drawCue(S.cue);
   if(S.demo&&!V.replay) drawDemo();
-  if(S.phase==='ready'&&!V.replay){ cueCircle(LW/2,150,'#ff4d2e',''); txt('TOCÁ PARA EMPEZAR',LW/2,196,'#fff',16); }
-  S.fx.forEach(f=>{ if(f.k==='ring'){ const k=f.t/.45; ctx.strokeStyle=`rgba(255,255,255,${1-k})`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(f.x,f.y,28+k*16,0,Math.PI*2); ctx.stroke(); }
+  if(S.phase==='ready'&&!V.replay){ if(!PORTRAIT) cueCircle(LW/2,150,'#ff4d2e',''); txt('TOCÁ PARA EMPEZAR',LW/2,PORTRAIT?150:196,'#fff',PORTRAIT?20:16); }
+  // a tap's ring and a wrong tap's cross where the button is (phone upright: on the big buttons, render/frame.js)
+  if(!PORTRAIT) S.fx.forEach(f=>{ if(f.k==='ring'){ const k=f.t/.45; ctx.strokeStyle=`rgba(255,255,255,${1-k})`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(f.x,f.y,28+k*16,0,Math.PI*2); ctx.stroke(); }
     else if(f.k==='x'){ const k=f.t/.45; ctx.save(); ctx.globalAlpha=1-k; ctx.translate(f.x,f.y); ctx.strokeStyle=INK; ctx.lineWidth=9; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(-14,-14); ctx.lineTo(14,14); ctx.moveTo(14,-14); ctx.lineTo(-14,14); ctx.stroke(); ctx.strokeStyle='#e8262d'; ctx.lineWidth=5.5; ctx.stroke(); ctx.restore(); } });
   S.pops.forEach(p=>{ const k=Math.min(1,p.t/.15), sc=(.6+.4*k)*p.big, a=p.hold?1:Math.min(1,(p.dur-p.t)/.3);
     ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.translate(LW/2,p.small?52:(ev.hurdles&&S.phase!=='wait'?205:94)); /* hurdles: big popups below the raised number buttons */ ctx.rotate(-.05); ctx.scale(sc,sc);
@@ -69,7 +70,8 @@ export function drawPedalLast(){
 }
 export function drawCue(cue){
   const pulse=1+.06*Math.sin(S.clock*14);
-  const at=(p,col,label)=>{ const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
+  // phone upright: the buttons are the big ones below the game (render/frame.js drawPads), none drawn in it
+  const at=(p,col,label)=>{ if(PORTRAIT) return; const [x,y]=CUEPOS[p](); ctx.save(); ctx.translate(x,y); ctx.scale(pulse,pulse); cueCircle(0,0,col,label); ctx.restore(); };
   if(cue.type==='side') at(cue.side,'#2fd166','');
   else if(cue.type==='foot') at(cue.side,'#ff8a1e','');
   else if(cue.type==='rush'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); const k=1+.12*Math.abs(Math.sin(S.clock*18)); ctx.save(); ctx.translate(LW/2,104); ctx.scale(k,k); txt('¡TOCÁ RÁPIDO!',0,0,'#ffd23a',24,{lw:5}); ctx.restore(); }
@@ -78,28 +80,34 @@ export function drawCue(cue){
   else if(cue.type==='both') ['L','R'].forEach(p=>{ if(!(S.pend&&S.pend.side===p)) at(p,'#ff4d2e',''); });
   else if(cue.type==='pedal'){ const [x,y]=CUEPOS[cue.side](), p=pedalP();
     // the button (orange: hold it), and round it the ring filling from 12 o'clock
-    ctx.save(); ctx.translate(x,y); if(!p) ctx.scale(pulse,pulse); cueCircle(0,0,p>PAST?'#ff4d2e':'#ff8a1e',''); ctx.restore();
+    // (phone upright: the ring alone, how far the stroke is; the button is below)
+    if(!PORTRAIT){ ctx.save(); ctx.translate(x,y); if(!p) ctx.scale(pulse,pulse); cueCircle(0,0,p>PAST?'#ff4d2e':'#ff8a1e',''); ctx.restore(); }
     pedalRing(x,y,p,1);
-    if(!p) txt('MANTENÉ',x,y+37+14,'#fff',12,{lw:3}); }
+    if(!p&&!PORTRAIT) txt('MANTENÉ',x,y+37+14,'#fff',12,{lw:3}); }
   else if(cue.type==='hold'){ ['L','R'].forEach(p=>at(p,'#ff4d2e','')); txt('MANTENÉ LOS DOS',LW/2,150,'#fff',18,{lw:4}); }
-  else if(cue.type==='num'){ // the three columns, faintly
+  else if(cue.type==='num'&&!PORTRAIT){ // the three columns, faintly
     ctx.save(); ctx.setLineDash([7,6]); ctx.lineCap='round';
     [LW/3,LW*2/3].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,58); ctx.lineTo(x,160); ctx.strokeStyle='rgba(14,26,52,.7)'; ctx.lineWidth=5; ctx.stroke(); ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.stroke(); }); ctx.restore();
     cue.order.forEach((p,i)=>{ if(i>=cue.next){ const [x,y]=NUMPOS[p](); cueCircle(x,y,'#2f7fd6',String(i+1)); } }); }
 }
-// the tutorial: a finger on each tap (and on both buttons while holding), what to do now at the bottom, how to leave
-function drawDemo(){
-  const finger=(x,y,k)=>{ ctx.save(); ctx.globalAlpha=k; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.strokeStyle=INK; ctx.lineWidth=2.5;
+// a fingertip (the tutorial's taps), its top left at x,y
+export const finger=(x,y,k)=>{ ctx.save(); ctx.globalAlpha=k; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.strokeStyle=INK; ctx.lineWidth=2.5;
     ctx.beginPath(); ctx.arc(x+10,y+12,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
     ctx.beginPath(); ctx.roundRect(x+4,y+14,13,34,6); ctx.fill(); ctx.stroke(); ctx.restore(); };
-  S.fingers.forEach(f=>finger(f.x,f.y,1-f.t/.35));
-  if(S.held2) [CUEPOS.L(),CUEPOS.R()].forEach(([x,y])=>finger(x,y,1));
+// the tutorial: a finger on each tap (and on both buttons while holding), what to do now at the bottom, how to leave
+function drawDemo(){
+  // (phone upright: on the big buttons below instead, render/frame.js)
+  if(!PORTRAIT){ S.fingers.forEach(f=>finger(f.x,f.y,1-f.t/.35));
+    if(S.held2) [CUEPOS.L(),CUEPOS.R()].forEach(([x,y])=>finger(x,y,1)); }
   txt('CÓMO SE JUEGA · TOCÁ LA PANTALLA PARA SALIR',LW/2,32,'#ffd23a',12,{lw:3});
   const t=S.demoCaption; if(!t) return;
-  // as big as fits in the width
-  let size=18; ctx.font=`${size}px Bangers, Impact, sans-serif`; while(size>10&&ctx.measureText(t).width>LW-44){ size--; ctx.font=`${size}px Bangers, Impact, sans-serif`; }
-  const w=Math.min(LW-12,ctx.measureText(t).width+30), y=LH-48;
-  ctx.fillStyle='rgba(14,26,52,.88)'; ctx.beginPath(); ctx.roundRect((LW-w)/2,y-16,w,32,10); ctx.fill();
+  // as big as fits in the width; too long for that (a narrow screen), in two lines
+  const fit=(l,min)=>{ let size=18; ctx.font=`${size}px Bangers, Impact, sans-serif`; while(size>min&&l.some(x=>ctx.measureText(x).width>LW-44)){ size--; ctx.font=`${size}px Bangers, Impact, sans-serif`; } return size; };
+  let lines=[t], size=fit(lines,12);
+  if(lines.some(x=>ctx.measureText(x).width>LW-44)){ const w=t.split(' '), cut=w.reduce((b,_,i)=>Math.abs(w.slice(0,i).join(' ').length-t.length/2)<Math.abs(w.slice(0,b).join(' ').length-t.length/2)?i:b,1);
+    lines=[w.slice(0,cut).join(' '),w.slice(cut).join(' ')]; size=fit(lines,10); }
+  const w=Math.min(LW-12,Math.max(...lines.map(x=>ctx.measureText(x).width))+30), hh=16+lines.length*size*.62, y=LH-40-hh/2;
+  ctx.fillStyle='rgba(14,26,52,.88)'; ctx.beginPath(); ctx.roundRect((LW-w)/2,y-hh/2,w,hh,10); ctx.fill();
   ctx.strokeStyle='#ffd23a'; ctx.lineWidth=2; ctx.stroke();
-  txt(t,LW/2,y,'#fff',size,{lw:3});
+  lines.forEach((x,i)=>txt(x,LW/2,y+(i-(lines.length-1)/2)*size*1.05,'#fff',size,{lw:3}));
 }
