@@ -463,8 +463,8 @@ tr.me td{background:var(--red)}
   .m-title,.m-recs{font-size:clamp(.95rem,5.4vw,1.4rem);padding:.35em .6em .35em 1.1em}
   .m-modes{height:auto;grid-template-columns:1fr;gap:10px}
   /* the three cards share what the screen has left (the top bar, the player's strip and the daily bar take the rest) */
-  .m-mode{flex-direction:row;height:clamp(96px,calc((100svh - 330px)/3),210px);align-items:stretch}
-  .mm:has(.m-daily:not([hidden])) .m-mode{height:clamp(90px,calc((100svh - 400px)/3),200px)}
+  .m-mode{flex-direction:row;height:clamp(96px,calc((100svh - 330px - env(safe-area-inset-top) - env(safe-area-inset-bottom))/3),210px);align-items:stretch}
+  .mm:has(.m-daily:not([hidden])) .m-mode{height:clamp(90px,calc((100svh - 400px - env(safe-area-inset-top) - env(safe-area-inset-bottom))/3),200px)}
   .m-mart{flex:0 0 52%}
   .m-mode b{align-self:center;font-size:clamp(1.3rem,7vw,2rem);padding:0 .6em;white-space:normal;line-height:1}
   .m-hero{grid-template-columns:1fr;height:auto;padding:0 0 12px}
