@@ -7,7 +7,7 @@ import {noise,tone} from '../audio.js';
 import {POSE} from '../poses.js';
 import {S} from '../state.js';
 import {clamp} from '../utils.js';
-import {judge,sideCue,sinceHold} from './core.js';
+import {FLY_PPM,judge,sideCue,sinceHold} from './core.js';
 import {landed} from './field.js';
 import {angleQ,SP_MAX,SP_RATE} from './shot.js';
 
@@ -90,6 +90,6 @@ function flight(dt,a){
   const j=S.jv; S.pose=j.stuck?POSE.cheer:THROW(a.d);
   if(j.stuck) return;
   j.t+=dt; const u=Math.min(1,j.t/a.T); j.spin=(j.spin||0)+dt*14;
-  j.x=j.x0+a.R*u; j.y=j.y0*(1-u)+4*a.top*u*(1-u); S.ppm+=(16-S.ppm)*Math.min(1,dt*1.6);
+  j.x=j.x0+a.R*u; j.y=j.y0*(1-u)+4*a.top*u*(1-u); S.ppm+=(FLY_PPM()-S.ppm)*Math.min(1,dt*1.6);
   if(u>=1){ j.stuck=true; j.y=.05; S.landX=j.x; tone(130,.15,'square',.05); noise(.12,.2,700); landed(Math.floor((j.x-S.ev.line)*100)/100); }
 }

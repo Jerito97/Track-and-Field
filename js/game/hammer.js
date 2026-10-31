@@ -6,7 +6,7 @@
 import {noise,tone} from '../audio.js';
 import {POSE} from '../poses.js';
 import {S} from '../state.js';
-import {judge,sideCue,sinceHold} from './core.js';
+import {FLY_PPM,judge,sideCue,sinceHold} from './core.js';
 import {landed,qPole} from './field.js';
 
 const TAU=Math.PI*2;
@@ -108,7 +108,7 @@ function flight(dt,a){
   j.t+=dt; const u=Math.min(1,j.t/a.T);
   // into the net: straight back, dropping to its foot
   if(a.stage==='foul'&&a.early){ j.x=j.x0+a.R*u; j.y=j.y0+(.12-j.y0)*u*u; }
-  else { const top=a.R*.2; j.x=j.x0+a.R*u; j.y=j.y0*(1-u)+4*top*u*(1-u); S.ppm+=(16-S.ppm)*Math.min(1,dt*1.6); }
+  else { const top=a.R*.2; j.x=j.x0+a.R*u; j.y=j.y0*(1-u)+4*top*u*(1-u); S.ppm+=(FLY_PPM()-S.ppm)*Math.min(1,dt*1.6); }
   if(u>=1){ j.stuck=true; j.y=.12; tone(140,.12,'square',.05);
     if(a.stage==='fly'){ S.landX=j.x; landed(Math.floor((j.x-S.ev.line)*100)/100); } else landed(null); }
 }

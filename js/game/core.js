@@ -39,7 +39,12 @@ export function resetAttempt(){
 }
 // camera zoom (logical px per metre): sprints, field events
 export const SPRINT_PPM=29, FIELD_PPM=41, SWIM_PPM=24, CYCLE_PPM=20;
-const ppmOf=ev=>ev.swim?SWIM_PPM:ev.cycle?CYCLE_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM;
+// phone upright (a narrower view): the camera further back, so more of the field fits (the pole vault's bar, what's
+// ahead); FLY_PPM: the zoom a throw's camera pulls back to while it's in the air
+// (the races' lanes keep their size, so there only a little: the runners would look tiny on them)
+const ZOOM=ev=>!PORTRAIT?1:ev.type==='field'?.68:.86;
+const ppmOf=ev=>(ev.swim?SWIM_PPM:ev.cycle?CYCLE_PPM:ev.type==='sprint'?SPRINT_PPM:FIELD_PPM)*ZOOM(ev);
+export const FLY_PPM=()=>16*ZOOM(S.ev);
 // where the camera goes: the athlete a third of the way in (swimming: in the pool, and from the other side on the way
 // back); phone upright (a narrower view), further to the side he comes from, so there's more to see ahead
 const LEAD=()=>PORTRAIT?.26:.36;

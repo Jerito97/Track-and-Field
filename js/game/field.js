@@ -5,7 +5,7 @@ import {POSE,runPose} from '../poses.js';
 import {S} from '../state.js';
 import {rec} from '../storage.js';
 import {clamp,rand} from '../utils.js';
-import {armsFor,bothCue,judge,pop,sinceHold} from './core.js';
+import {armsFor,bothCue,FLY_PPM,judge,pop,sinceHold} from './core.js';
 import {startHammer,updateHammer} from './hammer.js';
 import {startShot,updateShot} from './shot.js';
 import {startDiscus,updateDiscus} from './discus.js';
@@ -276,7 +276,7 @@ export function updateAct(dt){
         // the point's path: from the hand (the point ahead of it) to the grass, landing where it did before
         S.jv.t+=dt; const u=Math.min(1,S.jv.t/a.T), top=a.R*.16, R=a.R-(JAV_TIP_X-.4);
         S.jv.x=S.jv.x0+R*u; S.jv.y=JAV_TIP_Y*(1-u)+4*top*u*(1-u); S.jv.a=Math.atan2(-JAV_TIP_Y+4*top*(1-2*u),R);
-        S.ppm+=(16-S.ppm)*Math.min(1,dt*1.6);
+        S.ppm+=(FLY_PPM()-S.ppm)*Math.min(1,dt*1.6);
         if(u>=1){ S.jv.stuck=true; S.jv.y=0; S.jv.a=Math.min(S.jv.a,-.5); S.landX=S.jv.x; tone(140,.12,'square',.05); landed(a.over?null:Math.floor((S.jv.x-ev.line)*100)/100); }
       }
     }
