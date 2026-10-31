@@ -141,9 +141,9 @@ function drawMe(V,X,GY,s,px){
   return fig;
 }
 // a small camera window up on the right, over the stands (what happens down on the field stays in sight); on a
-// narrow screen under the mark (small: smaller and a bit higher, where the field below has more going on). open: the window and its ground line; close: its border (red for a foul), what it
+// narrow screen smaller, right under the top bar (the mark comes down a little to make room, render/hud.js). open: the window and its ground line; close: its border (red for a foul), what it
 // says at the bottom
-function insetBox(k,small){ const wide=LW>=560, w=wide?170:small?120:150, h=wide?88:small?62:76, x0=LW-w-8, y0=wide?26:small?124:160;
+function insetBox(k){ const wide=LW>=560, w=wide?170:118, h=wide?88:58, x0=LW-w-(wide?8:5), y0=wide?26:24;
   ctx.save(); ctx.globalAlpha=k; ctx.beginPath(); ctx.roundRect(x0,y0,w,h,8); ctx.save(); ctx.clip(); return {x0,y0,w,h,GY:y0+h-18}; }
 function insetClose(b,foul,label,col){
   ctx.restore();
@@ -171,7 +171,7 @@ function javInset(V){
 // footprint; how many centimetres were left before the foul line
 function boardInset(V,X){
   const ev=V.ev, k=clamp((30-X(ev.line))/40,0,1); if(V.print==null||!k) return;
-  const b=insetBox(k,true), {x0,y0,w,h}=b, c0=Math.min(ev.line-.55,V.print-.4), s=w/(ev.line+.25-c0), Z=m=>x0+(m-c0)*s, mid=y0+(h-18)/2+2;
+  const b=insetBox(k), {x0,y0,w,h}=b, c0=Math.min(ev.line-.55,V.print-.4), s=w/(ev.line+.25-c0), Z=m=>x0+(m-c0)*s, mid=y0+(h-18)/2+2;
   // the runway, the white board (20 cm), the plasticine strip past the foul line, the sand
   ctx.fillStyle=TARTAN_D; ctx.fillRect(x0,y0,w,h); ctx.fillStyle=TARTAN; ctx.fillRect(x0,y0+8,w,h-34);
   ctx.fillStyle='#fff'; ctx.fillRect(Z(ev.line-.2),y0+8,.2*s,h-34); ctx.strokeStyle=INK; ctx.lineWidth=1.5; ctx.strokeRect(Z(ev.line-.2),y0+8,.2*s,h-34);

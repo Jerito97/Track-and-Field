@@ -78,8 +78,9 @@ function pads(){
   ['L','R'].forEach((side,i)=>{ const x=gap+i*(w+gap), lit=on(side), col=c&&(c.type==='both'||c.type==='rush')?'#ff4d2e':c&&c.type==='num'?'#2f6fe0':c&&(c.type==='foot'||c.type==='hamhold'||c.type==='pedal')?'#ff8a1e':'#27c26a';
     ctx.fillStyle=lit?col:'rgba(255,255,255,.07)'; ctx.strokeStyle=lit?'#fff':'rgba(255,255,255,.18)'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.roundRect(x,top,w,h,22); ctx.fill(); ctx.stroke();
-    ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.font=`${Math.round(Math.min(w,h)*.28)}px Bangers, Impact, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(side==='L'?'◀':'▶',x+w/2,top+h/2); });
+    // the arrow drawn (as a character, iPhones show it as an emoji)
+    const a=Math.min(w,h)*.13, cx=x+w/2, cy=top+h/2, d=side==='L'?-1:1;
+    ctx.fillStyle=lit?'#fff':'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.moveTo(cx+d*a,cy); ctx.lineTo(cx-d*a*.75,cy-a); ctx.lineTo(cx-d*a*.75,cy+a); ctx.closePath(); ctx.fill(); });
 }
 // menus: dark navy background with the curves of a running track (no stadium), in the menu's colours
 export function drawIdle(){

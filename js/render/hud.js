@@ -22,7 +22,7 @@ export function drawHud(V){
   if(!PORTRAIT) S.fx.forEach(f=>{ if(f.k==='ring'){ const k=f.t/.45; ctx.strokeStyle=`rgba(255,255,255,${1-k})`; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(f.x,f.y,28+k*16,0,Math.PI*2); ctx.stroke(); }
     else if(f.k==='x'){ const k=f.t/.45; ctx.save(); ctx.globalAlpha=1-k; ctx.translate(f.x,f.y); ctx.strokeStyle=INK; ctx.lineWidth=9; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(-14,-14); ctx.lineTo(14,14); ctx.moveTo(14,-14); ctx.lineTo(-14,14); ctx.stroke(); ctx.strokeStyle='#e8262d'; ctx.lineWidth=5.5; ctx.stroke(); ctx.restore(); } });
   S.pops.forEach(p=>{ const k=Math.min(1,p.t/.15), sc=(.6+.4*k)*p.big, a=p.hold?1:Math.min(1,(p.dur-p.t)/.3);
-    ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.translate(LW/2,p.small?52:(ev.hurdles&&S.phase!=='wait'?205:94)); /* hurdles: big popups below the raised number buttons */ ctx.rotate(-.05); ctx.scale(sc,sc);
+    ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.translate(LW/2,p.small?52:(ev.hurdles&&S.phase!=='wait'?205:PORTRAIT&&ev.type==='field'?112:94)); /* hurdles: big popups below the raised number buttons */ ctx.rotate(-.05); ctx.scale(sc,sc);
     txt(p.text,0,0,p.col,40,{lw:6}); if(p.sub) txt(p.sub,0,32,'#ffd23a',20,{lw:4}); ctx.restore(); });
   if(V.replay){ txt('REPETICIÓN',LW/2,36,'#fff',20); ctx.fillStyle=INK; ctx.beginPath(); ctx.arc(LW-22,282,13,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.moveTo(LW-29,276); ctx.lineTo(LW-22,282); ctx.lineTo(LW-29,288); ctx.closePath(); ctx.moveTo(LW-22,276); ctx.lineTo(LW-15,282); ctx.lineTo(LW-22,288); ctx.closePath(); ctx.fill(); }
 }
