@@ -8,7 +8,7 @@ import {cleanCode,closeTournament,createTournament,repeatTournament,getMyTours,g
 import {buildAthletes,G,screen,setS,setScreen} from '../state.js';
 import {player,players,store} from '../storage.js';
 import {loadPlayers} from './people.js';
-import {CATS,catOf,esc,paintOv,place,showOv} from './screens.js';
+import {CATS,catOf,esc,paintOv,place,placeTd,showOv} from './screens.js';
 import {forgetWeek,isWeek} from './weekly.js';
 
 const evById=id=>EVENTS.find(e=>e.id===id);
@@ -131,6 +131,7 @@ export function standings(data){
     return {...en,marks,played:mine.length,total,done:mine.length>=evs.length}; }).sort((a,b)=>b.total-a.total);
 }
 let shown=null;  // code of the board on screen
+const WEEK_TOP=5;
 export const shownCode=()=>shown;
 // while a board of a tournament in play is open (and the phone screen on), it updates itself every few seconds:
 // only redrawn when something changed, keeping the scroll and without the «Cargando» in between
@@ -161,12 +162,15 @@ export async function showTournament(code,msg,silent){
   const p=player(), evs=t.events.map(evById).filter(Boolean), rows=standings(data), meRow=rows.find(r=>r.player_id===p.id), fin=t.finished;
   if(!meRow){ if(fin){ showOnline('Este torneo ya terminó.'); return; } try{ await joinTournament(code); }catch(e){ showOnline(e.message); return; } return showTournament(code,msg); }
   // the ones still to play first (their Jugar in sight), short names
+  const wk=isWeek(code);
   const myEvs=evs.filter(ev=>!(ev.id in meRow.marks)).concat(evs.filter(ev=>ev.id in meRow.marks)).map(ev=>{ const played=ev.id in meRow.marks;
     return `<div class="o-ev${played||fin?' done':''}" title="${ev.name}"><b>${ev.tag}</b>${played?`<span title="${fmt(ev,meRow.marks[ev.id])}">${pts(ev,meRow.marks[ev.id])} pts</span>`:fin?'<span class="o-np">No jugada · 0 pts</span>':`<button class="btn" data-act="oplay" data-ev="${ev.id}">Jugar</button>`}</div>`; }).join('');
-  const table=`<table class="o-table"><thead><tr><th></th><th></th>${evs.map(ev=>`<th>${ev.tag.replace(/ /g,'&nbsp;')}</th>`).join('')}<th>Pts</th></tr></thead><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.total));
-    return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}.${fin&&pl<=3?' '+['🥇','🥈','🥉'][pl-1]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td>${evs.map(ev=>`<td class="sub">${ev.id in r.marks?fmt(ev,r.marks[ev.id]):fin?'—':'·'}</td>`).join('')}<td>${r.total}</td></tr>`; }).join('')}</tbody></table>`;
+  const table=`<table class="o-table"><thead><tr><th></th><th></th>${evs.map(ev=>`<th>${ev.tag.replace(/ /g,'&nbsp;')}</th>`).join('')}<th>Pts</th></tr></thead><tbody>${rows.map((r,i)=>({r,pl:place(rows,i,q=>String(q.total))})).filter(({r},i)=>!wk||i<WEEK_TOP||r.player_id===p.id).map(({r,pl},k,l)=>{
+    // the weekly challenge (everyone in it): the top WEEK_TOP, then a gap and you
+    const gap=wk&&k===WEEK_TOP&&l.length>WEEK_TOP?`<tr class="gap"><td></td><td class="nm">…</td>${evs.map(()=>'<td></td>').join('')}<td></td></tr>`:'';
+    return `${gap}<tr class="${r.player_id===p.id?'me':''}">${placeTd(pl,fin)}<td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td>${evs.map(ev=>`<td class="sub">${ev.id in r.marks?fmt(ev,r.marks[ev.id]):fin?'—':'·'}</td>`).join('')}<td>${r.total}</td></tr>`; }).join('')}</tbody></table>`;
   const why={all:'Todos jugaron todas las pruebas.',time:'Se terminó el tiempo: las pruebas que no se jugaron cuentan 0.',host:'Lo terminó quien lo creó: las pruebas que no se jugaron cuentan 0.'}[t.reason]||'';
-  const host=t.host_id===p.id, wk=isWeek(code); if(wk) forgetWeek();
+  const host=t.host_id===p.id; if(wk) forgetWeek();
   showOv(card(wk?'SEMANAL':'TORNEO',esc(t.name),`
     ${msg?err(msg):''}${note}
     ${fin?`<p class="small o-final"><b>¡Torneo terminado!</b> ${why}</p>`
@@ -176,6 +180,8 @@ export async function showTournament(code,msg,silent){
     <span class="lbl">Tabla${fin?' final':''}</span><div class="scroll o-tbl">${table}</div>
     <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin&&!wk?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${wk?'menu':fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
   if(silent){ OV.scrollTop=keepY; const l=OV.querySelector('.o-tbl'); if(l) l.scrollTop=keepL; }
+  // the weekly challenge, you below the top: your row in sight in the table's box
+  else if(wk){ const l=OV.querySelector('.o-tbl'), r=l&&l.querySelector('tr.me'); if(r&&r.offsetTop+r.offsetHeight>l.clientHeight) l.scrollTop=r.offsetTop+r.offsetHeight-l.clientHeight; }
   if(!fin) autoRefresh(code);
 }
 // who created it can end it now (asks once more first)

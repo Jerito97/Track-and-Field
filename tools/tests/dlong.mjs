@@ -1,3 +1,4 @@
+// The daily challenge with many players: the top 5 only, then a gap and you with your place; the screen doesn't scroll
 import {BASE} from './lib.mjs';
 import {chromium} from './pw.mjs';
 const API=BASE+'/api/t', out=process.argv[2];
@@ -13,6 +14,6 @@ for(const [w,h,n] of [[844,390,'land'],[390,844,'port']]){
   const p=await (await b.newContext({viewport:{width:w,height:h},deviceScaleFactor:2,serviceWorkers:'block'})).newPage();
   await p.addInitScript(([a])=>{ localStorage.setItem('odb-players',JSON.stringify({list:[{id:a.player.id,name:a.player.name,color:a.player.color,token:a.token,created:0,rec:{},best:{},history:[],tours:[]}],cur:a.player.id})); },[A]);
   await p.goto(BASE+'/'); await p.waitForSelector('.m-daily:not([hidden])'); await p.click('.m-daily'); await p.waitForSelector('.d-list'); await p.waitForTimeout(500);
-  const m=await p.evaluate(()=>{ const o=document.querySelector('#ov'), l=document.querySelector('.d-list'); return {ov:[o.scrollHeight,o.clientHeight],list:[l.scrollHeight,l.clientHeight],rows:l.querySelectorAll('tr').length}; });
-  console.log(n,JSON.stringify(m)); console.log((m.ov[0]<=m.ov[1]+1&&m.list[0]>m.list[1]?'PASS':'FAIL')+' desafío con lista larga ('+n+'): la pantalla no se desliza, la lista sí'); await p.screenshot({path:`${out}/long-${n}.png`}); }
+  const m=await p.evaluate(()=>{ const o=document.querySelector('#ov'), l=document.querySelector('.d-list'), me=l.querySelector('tr.me'); return {ov:[o.scrollHeight,o.clientHeight],rows:l.querySelectorAll('tr').length,me:me&&me.textContent,meIn:me&&me.getBoundingClientRect().bottom<=l.getBoundingClientRect().bottom+1}; });
+  console.log(n,JSON.stringify(m)); console.log((m.ov[0]<=m.ov[1]+1&&m.rows===7&&/^\s*1[0-9]\./.test(m.me||'')&&m.meIn?'PASS':'FAIL')+' desafío con 31 jugadores ('+n+'): el top 5, y abajo vos con tu puesto, sin deslizar'); await p.screenshot({path:`${out}/long-${n}.png`}); }
 await b.close();

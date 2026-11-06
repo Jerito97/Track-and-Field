@@ -7,7 +7,7 @@ import {fmt} from '../game/scoring.js';
 import {dailyFinish,dailyStart,getDaily} from '../online.js';
 import {buildAthletes,G,setS,setScreen} from '../state.js';
 import {player,store} from '../storage.js';
-import {art,esc,paintOv,place,showOv} from './screens.js';
+import {art,esc,paintOv,place,placeTd,showOv} from './screens.js';
 
 let data=null, at=0, pid=null;
 const evOf=id=>EVENTS.find(e=>e.id===id);
@@ -54,9 +54,10 @@ export async function showDaily(msg){
   if(!ev){ showOv(card('Desafío del día',`<p class="small">El desafío de hoy es una prueba nueva que esta versión del juego todavía no tiene.</p><div class="btns"><button class="btn" data-act="reload" data-focus>Actualizar el juego</button><button class="btn alt" data-act="menu">Volver</button></div>`)); return; }
   const me=d.me||{}, i=EVENTS.indexOf(ev);
   // the board brings the first 50: further down, you after them
-  const out=me.played&&!d.top.some(r=>r.player_id===p.id);
-  const rows=d.top.length?`<table class="o-table d-table"><tbody>${d.top.map((r,k)=>{ const pl=r.mark==null?'—':place(d.top,k,q=>q.mark==null?'x':fmt(ev,q.mark))+'.';
-      return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}${r.mark!=null&&k<3?' '+['🥇','🥈','🥉'][k]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${r.mark==null?'Nulo':fmt(ev,r.mark)}</td></tr>`; }).join('')}${out?`<tr class="gap"><td></td><td class="nm">…</td><td></td></tr><tr class="me"><td>${me.place?me.place+'.':'—'}</td><td class="nm"><canvas data-color="${esc(p.color)}"></canvas>${esc(p.name)}</td><td class="mk">${me.mark==null?'Nulo':fmt(ev,me.mark)}</td></tr>`:''}</tbody></table>`
+  // the top TOP; you further down: a gap, then you with your place
+  const TOP=5, mi=d.top.findIndex(r=>r.player_id===p.id), out=me.played&&(mi<0||mi>=TOP);
+  const row=(r,pl,mine)=>`<tr class="${mine?'me':''}">${placeTd(pl,true)}<td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${r.mark==null?'Nulo':fmt(ev,r.mark)}</td></tr>`;
+  const rows=d.top.length?`<table class="o-table d-table"><tbody>${d.top.slice(0,TOP).map((r,k)=>row(r,r.mark==null?'—':place(d.top,k,q=>q.mark==null?'x':fmt(ev,q.mark)),r.player_id===p.id)).join('')}${out?`<tr class="gap"><td></td><td class="nm">…</td><td></td></tr>${row({color:p.color,name:p.name,mark:me.mark},me.place||'—',true)}`:''}</tbody></table>`
     :'<p class="small">Todavía nadie lo jugó hoy: ¡estrenalo!</p>';
   const mine=me.played?`<div class="d-me"><span class="lbl">Tu resultado</span><b>${me.mark!=null?fmt(ev,me.mark):'Nulo'}</b>${me.place?`<small>${me.place}º de ${d.count}</small>`:''}</div>`
     :`<button class="btn d-play" data-act="dplay" data-focus>Jugar · 1 intento</button>`;

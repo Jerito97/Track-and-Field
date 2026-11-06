@@ -601,6 +601,10 @@ tr.me td{background:var(--red)}
 .d-info .small{margin:0}
 .d-play{font-size:1.2rem}
 .d-table td.mk{text-align:right;font-weight:700}
+/* a board's place: the number right-aligned in its own width, the medal (or nothing) beside it */
+td.pl{white-space:nowrap;width:1%}
+td.pl .pn{display:inline-block;min-width:1.7em;text-align:right}
+td.pl .md{display:inline-block;width:1.35em;margin-left:.15em;text-align:center;font-style:normal}
 .d-yday{margin:2px 0 0}
 @media (max-width:520px){ .d-top{flex-direction:column} .d-pic{flex:none;max-height:120px} }
 /* the daily challenge's screen, compact (the day's board below can be long: it scrolls in its box) */
@@ -616,7 +620,7 @@ tr.me td{background:var(--red)}
 .d-card .d-play{font-size:1rem;padding:5px 14px}
 .d-table td{padding:3px 8px;font-size:.85rem}
 .d-table td:last-child{font-size:1rem}
-.d-table tr.gap td{background:none;padding:0 8px;color:#aab8d8;line-height:1}
+.d-table tr.gap td,.o-table tr.gap td{background:none;padding:0 8px;color:#aab8d8;line-height:1}
 .d-me .lbl,.d-me b,.d-me small{white-space:nowrap}
 .d-card .d-info{min-width:0}
 .d-me{flex-wrap:wrap;row-gap:0}

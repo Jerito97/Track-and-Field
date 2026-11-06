@@ -248,6 +248,9 @@ export function showPause(){
     <div class="btns"><button class="btn" data-act="resume" data-focus>Reanudar</button><button class="btn alt" data-act="quit">Volver al menú</button></div></div></div>`,'pause');
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
+// a board's place cell: the number and, in the top three, its medal, each in a column of its own (the numbers line
+// up whether there's a medal or not); pl: a place, or '—' (no mark)
+export const placeTd=(pl,medal)=>`<td class="pl"><span class="pn">${typeof pl==='number'?pl+'.':pl}</span><i class="md">${medal&&typeof pl==='number'&&pl<=3?['🥇','🥈','🥉'][pl-1]:''}</i></td>`;
 export const place=(rows,i,valFmt)=>{ let j=i; while(j>0&&valFmt(rows[j-1])===valFmt(rows[i])) j--; return j+1; };
 export function table(tag,title,rows,valFmt,subFmt,btn){
   return `<div class="card"><div class="head"><div class="logo">${tag}</div><h2>${title}</h2></div><div class="body">
