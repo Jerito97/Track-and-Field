@@ -11,6 +11,7 @@ import {setS,setScreen} from '../state.js';
 import {player,store} from '../storage.js';
 import {standings} from './online.js';
 import {esc,showOv} from './screens.js';
+import {isWeek} from './weekly.js';
 
 const card=(logo,title,body)=>`<div class="card n-card"><div class="head"><div class="logo">${logo}</div><h2>${title}</h2></div><div class="body">${body}</div></div>`;
 const KEY=()=>'odb-notifs-'+(player()?.id||'');
@@ -42,7 +43,8 @@ export async function checkNotifs(){
     // in), nothing played yet; one that ended where you played (the ones already over the first time, not)
     const own=new Set(myTournaments()), ended=new Set(d.ended||[]), first=d.ended==null;
     tours.forEach(x=>{ const t=x.tournament, played=x.results.some(r=>r.player_id===p.id);
-      if(!t.finished){ if(!played&&t.host_id!==p.id&&!own.has(t.code)) add(d,{id:'tn-'+t.code,k:'tn',code:t.code,name:t.name,evs:t.events.length,by:(x.entries.find(e=>e.player_id===p.id)||{}).invited_by||null}); return; }
+      // (the weekly challenge: nobody put you in it; only how you did when it ends)
+      if(!t.finished){ if(!played&&t.host_id!==p.id&&!own.has(t.code)&&!isWeek(t.code)) add(d,{id:'tn-'+t.code,k:'tn',code:t.code,name:t.name,evs:t.events.length,by:(x.entries.find(e=>e.player_id===p.id)||{}).invited_by||null}); return; }
       if(ended.has(t.code)) return; ended.add(t.code);
       if(first||!played) return;
       const rows=standings(x), i=rows.findIndex(r=>r.player_id===p.id);

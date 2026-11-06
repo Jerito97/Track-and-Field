@@ -28,7 +28,7 @@ const left=t=>{ const ms=Math.max(0,new Date(t)-Date.now()), h=Math.floor(ms/360
 const clock=t=>{ const s=Math.max(0,Math.floor((new Date(t)-Date.now())/1000)), h=Math.floor(s/3600), m=Math.floor(s/60)%60;
   return `${h}:${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; };
 // the countdown ticks every second while the bar is on screen; at zero, the next day's challenge is asked for
-globalThis.setInterval(()=>{ const el=document.querySelector('.m-daily .m-dt'); if(!el) return; el.textContent='⏱ '+clock(el.dataset.ends);
+globalThis.setInterval(()=>{ const el=document.querySelector('.m-daily:not(.m-week) .m-dt'); if(!el) return; el.textContent='⏱ '+clock(el.dataset.ends);
   if(new Date(el.dataset.ends)<=Date.now()&&!el.dataset.next){ el.dataset.next='1'; data=null; refreshDailyBar(); } },1000);
 // the menu's bar: today's event, your streak, the countdown, Jugar (or how you did)
 export function dailyBar(){

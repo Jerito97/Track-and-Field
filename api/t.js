@@ -336,6 +336,25 @@ async function daily(sql,pid){
     out.yday.me=yi>=0?{mark:yb[yi].mark,place:yb[yi].mark!=null?yi+1:null}:null; }
   return out;
 }
+// the weekly challenge: a tournament everyone can play, WEEK_N events drawn each week (Monday 00:00 to Sunday,
+// Argentina's time) among those that weren't last week's; made the first time anyone asks for it that week. Its code
+// is S and the Monday's date (S261102): never one a person's tournament gets (5 letters and digits)
+const WEEK_N=5;
+const mondayOf=(t=Date.now())=>{ const d=new Date(Date.parse(dayOf(t)+'T00:00:00Z')); return new Date(+d-((d.getUTCDay()+6)%7)*864e5); };
+const weekCode=m=>'S'+m.toISOString().slice(2,10).replace(/-/g,'');
+const isWeek=code=>/^S\d{6}$/.test(code);
+async function week(sql){
+  const m=mondayOf(), code=weekCode(m);
+  if(!(await sql`select 1 from tournaments where code=${code}`).length){
+    const prev=(await sql`select events from tournaments where code=${weekCode(new Date(+m-7*864e5))}`)[0], skip=new Set(prev?prev.events.split(','):[]);
+    const pool=EVENTS.filter(e=>!skip.has(e)), evs=[];
+    while(evs.length<WEEK_N&&pool.length) evs.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+    // it ends the next Monday at 00:00 in Argentina (03:00 UTC)
+    const ends=new Date(+m+7*864e5+3*3600e3).toISOString();
+    await sql`insert into tournaments(code,name,events,host_id,ends_at) values(${code},'Desafío semanal',${evs.join(',')},'',${ends}) on conflict do nothing`;
+  }
+  return {...await view(sql,code),code};
+}
 // for a player's notices: in each event they have a mark, the friends of theirs ahead of them now; the friend requests
 // to them (newest first), the ones they sent still waiting, and their friends
 async function social(sql,pid){
@@ -437,6 +456,7 @@ async function act(sql,b){
     // already in (no code to pass around)
     case 'repeat': {
       const u=await auth(sql,b.token), old=cleanCode(b.code);
+      if(isWeek(old)) throw new Bad(400,'El desafío semanal no se repite: cada lunes hay uno nuevo.');
       const t=(await sql`select name from tournaments where code=${old}`)[0]; if(!t) throw new Bad(404,'No existe ese torneo.');
       if(!(await sql`select 1 from entries where code=${old} and player_id=${u.id}`).length) throw new Bad(403,'No estabas en ese torneo.');
       const code=await newTournament(sql,u,t.name,b.events,b.days);
@@ -488,6 +508,7 @@ async function act(sql,b){
     // put a registered player in a tournament (anyone in it, while it's on and there's room): it shows in their notices
     case 'invite': {
       const u=await auth(sql,b.token), code=cleanCode(b.code), t=await getT(sql,code); if(!t) throw new Bad(404,'No existe ese torneo.');
+      if(isWeek(code)) throw new Bad(400,'En el desafío semanal ya pueden jugar todos.');
       if(t.finished) throw new Bad(409,'Este torneo ya terminó.');
       if(!(await sql`select 1 from entries where code=${code} and player_id=${u.id}`).length) throw new Bad(403,'No estás en este torneo.');
       const p=(await sql`select id,name,color from users where id=${String(b.player||'').slice(0,64)}`)[0]; if(!p) throw new Bad(404,'No existe ese jugador.');
@@ -523,8 +544,9 @@ async function act(sql,b){
       if(b.action==='join'){
         if(!inT&&t.finished) throw new Bad(409,'Este torneo ya terminó.');
         // only while there's room (checked in the same step, so two joining at once can't go over)
+        // (the weekly challenge: no limit, it's for everyone)
         if(!inT){ const ins=await sql`insert into entries(code,player_id,name,color) select ${code},${u.id},${u.name},${u.color}
-            where (select count(*) from entries where code=${code})<${MAX_PLAYERS} on conflict do nothing returning player_id`;
+            where ${isWeek(code)} or (select count(*) from entries where code=${code})<${MAX_PLAYERS} on conflict do nothing returning player_id`;
           if(!ins.length) throw new Bad(409,'El torneo está lleno.'); }
         return {ok:true};
       }
@@ -552,6 +574,7 @@ export default async function handler(req,res){
       if(req.query.leaders!=null) return res.status(200).json(await leaders(sql));
       if(req.query.wipes!=null) return res.status(200).json({wipes:await sql`select id,ev,player_id,at from wipes where id>${Math.max(0,Math.floor(Number(req.query.after)||0))} order by id limit 200`});
       if(req.query.social!=null) return res.status(200).json(await social(sql,String(req.query.social).slice(0,64)));
+      if(req.query.week!=null) return res.status(200).json(await week(sql));
       if(req.query.daily!=null) return res.status(200).json(await daily(sql,req.query.player?String(req.query.player).slice(0,64):null));
       if(req.query.player!=null) return res.status(200).json(await profile(sql,String(req.query.player).slice(0,64)));
       if(req.query.top!=null){ const ev=String(req.query.top); if(!EVENTS.includes(ev)&&!SURVS.includes(ev)) throw new Bad(400,'Prueba desconocida.'); return res.status(200).json(await top(sql,ev,req.query.friends?String(req.query.friends).slice(0,64):null,String(req.query.span||''),req.query.me?String(req.query.me).slice(0,64):null)); }

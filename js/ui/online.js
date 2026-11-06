@@ -9,6 +9,7 @@ import {buildAthletes,G,screen,setS,setScreen} from '../state.js';
 import {player,players,store} from '../storage.js';
 import {loadPlayers} from './people.js';
 import {CATS,catOf,esc,paintOv,place,showOv} from './screens.js';
+import {forgetWeek,isWeek} from './weekly.js';
 
 const evById=id=>EVENTS.find(e=>e.id===id);
 // choosing the events: grouped as on the events screen (races, jumps, throws, swimming); a group's name ticks all of it,
@@ -73,7 +74,7 @@ export async function showHistory(){
   draw(tours?'':'<p class="small o-wait">Cargando…</p>');
   try{ const t=await getMyTours(); if(player().id!==pid) return; tours=t; draw(); }catch(e){ if(!tours) draw(err(e.message)); }
 }
-const loading=t=>showOv(card('ONLINE',t,'<p class="small o-wait">Cargando…</p>'));
+export const loading=t=>showOv(card('ONLINE',t,'<p class="small o-wait">Cargando…</p>'));
 
 async function guard(fn){ if(busy) return; busy=true; try{ await fn(); } finally{ busy=false; } }
 // repeat a finished tournament: choose the events (the same ones ticked) and how long; everyone who played it is in
@@ -165,14 +166,15 @@ export async function showTournament(code,msg,silent){
   const table=`<table class="o-table"><thead><tr><th></th><th></th>${evs.map(ev=>`<th>${ev.tag.replace(/ /g,'&nbsp;')}</th>`).join('')}<th>Pts</th></tr></thead><tbody>${rows.map((r,i)=>{ const pl=place(rows,i,q=>String(q.total));
     return `<tr class="${r.player_id===p.id?'me':''}"><td>${pl}.${fin&&pl<=3?' '+['🥇','🥈','🥉'][pl-1]:''}</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td>${evs.map(ev=>`<td class="sub">${ev.id in r.marks?fmt(ev,r.marks[ev.id]):fin?'—':'·'}</td>`).join('')}<td>${r.total}</td></tr>`; }).join('')}</tbody></table>`;
   const why={all:'Todos jugaron todas las pruebas.',time:'Se terminó el tiempo: las pruebas que no se jugaron cuentan 0.',host:'Lo terminó quien lo creó: las pruebas que no se jugaron cuentan 0.'}[t.reason]||'';
-  const host=t.host_id===p.id;
-  showOv(card('TORNEO',esc(t.name),`
+  const host=t.host_id===p.id, wk=isWeek(code); if(wk) forgetWeek();
+  showOv(card(wk?'SEMANAL':'TORNEO',esc(t.name),`
     ${msg?err(msg):''}${note}
     ${fin?`<p class="small o-final"><b>¡Torneo terminado!</b> ${why}</p>`
+      :wk?`<p class="small o-wk">Para todos: 5 pruebas al azar, una vez cada una. Cada lunes hay uno nuevo · <b>${timeLeft(t)}</b></p>`
       :`<div class="o-code"><div class="o-cd"><b aria-label="Código">${code}</b><small>${timeLeft(t)}</small></div><div class="o-inv"><button class="btn" data-act="oinvite" data-code="${code}">Invitar jugadores</button><button class="btn alt" data-act="oshare" data-code="${code}">Compartir link</button></div></div>`}
     <span class="lbl">Tus pruebas</span><div class="o-evlist">${myEvs}</div>
     <span class="lbl">Tabla${fin?' final':''}</span><div class="scroll o-tbl">${table}</div>
-    <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
+    <div class="btns">${fin?'':`<button class="btn alt" data-act="orefresh" data-code="${code}">Actualizar</button>`}${fin&&!wk?`<button class="btn" data-act="orepeat" data-code="${code}">Repetir torneo</button>`:''}<button class="btn alt" data-act="${wk?'menu':fin?'ohist':'online'}">Volver</button>${host&&!fin?`<button class="btn alt o-close" data-act="oclose" data-code="${code}">Terminar torneo</button>`:''}</div>`));
   if(silent){ OV.scrollTop=keepY; const l=OV.querySelector('.o-tbl'); if(l) l.scrollTop=keepL; }
   if(!fin) autoRefresh(code);
 }

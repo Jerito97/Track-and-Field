@@ -575,6 +575,16 @@ tr.me td{background:var(--red)}
 .m-daily{display:flex;align-items:center;gap:10px;font:inherit;color:#fff;cursor:pointer;text-align:left;min-height:0;
   height:clamp(26px,8vh,40px);padding:0 6px 0 12px;border:2px solid var(--sun);border-radius:10px;background:linear-gradient(90deg,#e8262d,#b8141c 55%,#14284f);box-shadow:0 3px 0 rgba(0,0,0,.3)}
 .m-daily[hidden]{display:none}
+.m-chal{display:flex;gap:clamp(6px,1.4vw,12px);min-width:0}
+.m-chal:not(:has(.m-daily:not([hidden]))){display:none}
+.m-chal>.m-daily{flex:1 1 0;min-width:0}
+/* the weekly challenge's half: blue */
+.m-week{background:linear-gradient(90deg,#2f6fd6,#1b4f9c 55%,#14284f)}
+/* both halves shown: each says less (the name, how you're doing) */
+.m-chal:has(.m-week:not([hidden])):has(.m-daily:not(.m-week):not([hidden])) .m-dk{display:none}
+.m-chal:has(.m-week:not([hidden])):has(.m-daily:not(.m-week):not([hidden])) .m-ds{display:none}
+@media (max-width:760px){ .m-chal .m-dt{display:none} }
+.o-wk{margin:0}
 .m-daily:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .m-dk{font-size:clamp(.62rem,2.6vh,.78rem);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sun);white-space:nowrap}
 .m-daily b{font-family:var(--f-display);font-style:italic;font-weight:400;letter-spacing:.04em;font-size:clamp(1rem,4.6vh,1.45rem);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}

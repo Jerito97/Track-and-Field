@@ -19,6 +19,7 @@ import {friendsStrip,onAcceptFriend,onAddFriend,onRejectFriend,refreshFriendsStr
 import {personAccept,personAdd,personDel,personReject,showPeople,showPerson} from './people.js';
 import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {afterDaily,dailyBar,finishDaily,leaveDaily,playDaily,refreshDailyBar,showDaily} from './daily.js';
+import {refreshWeekBar,showWeek,weekBar} from './weekly.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {getProfile,updateRemote} from '../online.js';
@@ -131,7 +132,7 @@ export function showMenu(){
   const mode=(act,img,pos,name,cls='')=>`<button class="m-mode${cls}" data-act="${act}"><span class="m-mart">${img?`<img src="assets/thumbs/${img}.webp" alt="" style="object-position:${pos}">`:'<i aria-hidden="true">VS</i>'}</span><b>${name}</b></button>`;
   showOv(`<div class="mm">
   <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-96.png" alt="">TRACK &amp; FIELD</div><div class="m-tr"><button class="m-bell" data-act="notifs" aria-label="Avisos"><span class="m-ic">${ICON.bell}</span><i class="m-badge" hidden></i></button><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></div></header>
-  <button class="m-daily" data-act="daily"${dailyBar()?'':' hidden'}>${dailyBar()}</button>
+  <div class="m-chal"><button class="m-daily" data-act="daily"${dailyBar()?'':' hidden'}>${dailyBar()}</button><button class="m-daily m-week" data-act="week"${weekBar()?'':' hidden'}>${weekBar()}</button></div>
   <section class="m-modes">
     ${mode('events','100',THUMBS['100'],'Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}
@@ -139,7 +140,7 @@ export function showMenu(){
   </section>
   ${footer()}</div>`,'menu');
   OV.querySelector('.m-mode')?.setAttribute('data-focus',''); refreshFriendsStrip();
-  refreshBell(); checkNotifs().then(n=>{ if(n) refreshBell(); }); refreshDailyBar();
+  refreshBell(); checkNotifs().then(n=>{ if(n) refreshBell(); }); refreshDailyBar(); refreshWeekBar();
 }
 // tournaments: with friends (online) or against the machines (all 5 events in a row)
 // events: the chosen event in big, the carousel of events below
@@ -332,6 +333,7 @@ OV.addEventListener('click',e=>{
   else if(a==='oplay') playOnline(shownCode(),b.dataset.ev);
   else if(a==='notifs') showNotifs();
   else if(a==='daily') showDaily();
+  else if(a==='week') showWeek();
   // a newer version is needed (something the server has that this copy doesn't): the kept copy goes, load it again
   else if(a==='reload'){ (window.caches?caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))):Promise.resolve()).finally(()=>location.reload()); }
   else if(a==='dplay') playDaily();
