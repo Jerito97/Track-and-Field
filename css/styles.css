@@ -222,8 +222,14 @@ tr.me td{background:var(--red)}
 .p-pl b{flex:1;font-family:var(--f-display);font-weight:400;font-size:1.2rem;letter-spacing:.04em;text-transform:uppercase}
 .p-pl small{color:#aab8d8}
 .p-pl.on{border-color:var(--sun)}
-.p-recs{grid-template-columns:repeat(5,minmax(0,1fr))}
-@media (max-width:560px){ .p-recs{grid-template-columns:repeat(3,minmax(0,1fr))} }
+/* your records: five a row (three on a narrow screen), the last row's centred */
+.p-stats.p-recs{display:flex;flex-wrap:wrap;justify-content:center}
+.p-recs>div{flex:0 0 calc((100% - 4*8px)/5);min-width:0}
+@media (max-width:560px){ .p-recs>div{flex-basis:calc((100% - 2*8px)/3)} }
+/* your profile's numbers: played and challenges won three in a row, the two survivals below them, half each */
+.p-stats.p-main{grid-template-columns:repeat(6,minmax(0,1fr))}
+.p-main>div{grid-column:span 2}
+.p-main>div:nth-child(n+4){grid-column:span 3}
 
 /* ===== Online tournaments ===== */
 .m-play.alt{background:#2a4377;box-shadow:0 4px 0 #14284f}
@@ -652,7 +658,8 @@ td.pl .md{display:inline-block;width:1.35em;margin-left:.15em;text-align:center;
 /* someone's profile: the daily wins and the friend button beside the name (wrapping below it on a narrow screen) */
 .p-row{flex-wrap:wrap}
 .p-side{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.p-side .p-stats{grid-template-columns:auto}
+.p-side .p-stats{grid-template-columns:auto auto}
+.p-side .p-stats span{display:block;max-width:7.5em;margin:0 auto;line-height:1.15}
 @media (max-height:500px){
   .p-av{width:54px;height:54px} .u-big{font-size:1.3rem}
   .p-stats b{font-size:1.1rem} .p-stats>div{padding:3px 6px} .p-stats span{font-size:.66rem}

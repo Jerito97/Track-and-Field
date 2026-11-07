@@ -32,6 +32,11 @@ ok((await call({action:'result',code:w.code,ev:e0,mark:null,token:A.token})).sta
 ok((await call({action:'repeat',code:w.code,events:['100'],days:1,token:A.token})).status===400,'no se repite');
 ok((await call({action:'invite',code:w.code,player:B.player.id,token:A.token})).status===400,'no se invita (ya pueden todos)');
 await sql('delete from entries where code=$1 and player_id like $2',[w.code,'x%']);
+// weekly challenges won, in the profile: one already over where Jero made more points than Faca (a week in the past)
+await sql(`insert into tournaments(code,name,events,host_id,ends_at) values('S200106','Desafío semanal','100,lj,pv,jav,hj','',now()-interval '1 day')`);
+for(const [u,m] of [[A,10.5],[B,11.2]]){ await sql(`insert into entries(code,player_id,name,color) values('S200106',$1,'x','#123456')`,[u.player.id]); await sql(`insert into results(code,player_id,ev,mark) values('S200106',$1,'100',$2)`,[u.player.id,m]); }
+const pa=await call(null,'?player='+A.player.id), pb=await call(null,'?player='+B.player.id);
+ok(pa.week_wins===1&&pb.week_wins===0,`perfil: semanales ganados (Jero ${pa.week_wins}, Faca ${pb.week_wins})`);
 // the menu and its screen
 const b=await chromium.launch(); const errs=[];
 const p=await (await b.newContext({viewport:{width:844,height:390}})).newPage(); p.on('pageerror',e=>errs.push(String(e)));
@@ -50,4 +55,11 @@ const pp=await (await b.newContext({viewport:{width:390,height:844}})).newPage()
 await pp.addInitScript(([a])=>{ localStorage.clear(); localStorage.setItem('odb-players',JSON.stringify({list:[{id:a.player.id,name:a.player.name,color:a.player.color,token:a.token,created:0,rec:{},best:{},history:[],tours:[]}],cur:a.player.id})); },[A]);
 await pp.goto(BASE+'/'); await pp.waitForSelector('.m-modes'); await pp.waitForSelector('.m-week:not([hidden])',{timeout:8000}).catch(()=>{}); await pp.waitForTimeout(300);
 const over=await pp.$$eval('.m-chal>.m-daily:not([hidden])',l=>l.some(e=>e.scrollWidth>e.clientWidth+2)); ok(!over,'parado: las dos mitades entran'); await pp.screenshot({path:out+'/menu-vertical.png'});
+await pp.click('[data-act="profile"]'); await pp.waitForSelector('#pweek'); await pp.waitForFunction(()=>document.getElementById('pweek').textContent!=='…');
+ok((await pp.textContent('#pweek'))==='1','tu perfil: 1 desafío semanal ganado'); await pp.screenshot({path:out+'/perfil-vertical.png'});
+await p.click('[data-act="menu"]').catch(()=>{}); await p.goto(BASE+'/'); await p.waitForSelector('.m-modes'); await p.click('[data-act="profile"]'); await p.waitForFunction(()=>document.getElementById('pweek')?.textContent==='1');
+const g=await p.$$eval('.p-main>div',l=>l.map(e=>Math.round(e.getBoundingClientRect().width)));
+ok(g.length===5&&Math.abs(g[0]-g[2])<2&&Math.abs(g[3]-g[4])<2&&g[3]>g[0]*1.3,'tu perfil: 3 arriba, las 2 supervivencias abajo más anchas ('+g.join(',')+')');
+await p.evaluate(()=>document.querySelector('.p-recs').scrollIntoView()); const last=await p.$$eval('.p-recs>div',l=>{ const r=l[l.length-1].getBoundingClientRect(), box=l[0].parentElement.getBoundingClientRect(); return Math.abs((r.left+r.right)/2-(box.left+box.right)/2); });
+ok(last<3,'tus récords: el último, solo en su fila, centrado'); await p.screenshot({path:out+'/perfil.png'});
 ok(!errs.length,'sin errores'+(errs[0]?': '+errs[0]:'')); await b.close();

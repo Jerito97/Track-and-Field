@@ -209,12 +209,12 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b id="pdaily">${p.token?'…':'—'}</b><span>desafíos del día ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div><div><b>${p.survmBest?p.survmBest.pts:'—'}</b><span>mejor supervivencia moderna</span></div></div>
+    <div class="p-stats p-main"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b id="pdaily">${p.token?'…':'—'}</b><span>desafíos del día ganados</span></div><div><b id="pweek">${p.token?'…':'—'}</b><span>desafíos semanales ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div><div><b>${p.survmBest?p.survmBest.pts:'—'}</b><span>mejor supervivencia moderna</span></div></div>
     <span class="lbl">Tus récords</span>${recTabs()}<div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
-  // the daily challenges won come from the server
-  if(p.token) getProfile(p.id).then(r=>{ const el=$('pdaily'); if(el&&player()===p) el.textContent=r.daily_wins??'—'; },()=>{ const el=$('pdaily'); if(el) el.textContent='—'; });
+  // the daily and weekly challenges won come from the server
+  if(p.token) getProfile(p.id).then(r=>{ if(player()!==p) return; [['pdaily',r.daily_wins],['pweek',r.week_wins]].forEach(([id,v])=>{ const el=$(id); if(el) el.textContent=v??'—'; }); },()=>{ ['pdaily','pweek'].forEach(id=>{ const el=$(id); if(el) el.textContent='—'; }); });
   checkAdmin(()=>{ if(OV.querySelector('.p-prof')&&!OV.querySelector('.a-btn')) OV.querySelector('.p-prof .btns').insertAdjacentHTML('beforeend','<button class="btn alt a-btn" data-act="admin">Administrador</button>'); });
   const pn=$('pname'), rb=OV.querySelector('[data-act="rename"]');
   pn.addEventListener('input',()=>{ rb.disabled=pn.value.replace(/\s+/g,' ').trim()===p.name; });

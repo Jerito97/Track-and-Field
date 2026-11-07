@@ -34,6 +34,7 @@
 import {Buffer} from 'node:buffer';
 import {createHash,randomBytes,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
 import {neon} from '@neondatabase/serverless';
+import {ptsOf} from '../js/game/points.js';
 
 const EVENTS=['100','lj','110h','pv','jav','tj','ham','hj','sp','crawl','breast','fly','4x100','laser','cycle','dis'];
 const SPRINT=['100','110h','crawl','breast','fly','4x100','laser','cycle'];  // lower is better (times)
@@ -386,6 +387,16 @@ async function people(sql){
     from users u order by u.created_at desc limit 500`;
   return {players};
 }
+// weekly challenges won: those already over that they played where nobody had more points (a tie: both won it)
+async function weekWins(sql,id){
+  const ws=await sql`select t.code,t.events from tournaments t join entries e on e.code=t.code and e.player_id=${id}
+    where t.code ~ '^S[0-9]{6}$' and t.ends_at<=now()`;
+  if(!ws.length) return 0;
+  const res=await sql`select code,player_id,ev,mark from results where code = any(${ws.map(w=>w.code)})`;
+  return ws.filter(w=>{ const evs=w.events.split(','), tot=new Map();
+    res.forEach(r=>{ if(r.code===w.code&&evs.includes(r.ev)) tot.set(r.player_id,(tot.get(r.player_id)||0)+ptsOf(r.ev,r.mark)); });
+    const mine=tot.get(id)||0; return mine>0&&[...tot.values()].every(v=>v<=mine); }).length;
+}
 // (its place in the world: as the world top 10 has it, a tie going to whoever made it first)
 async function profile(sql,id){
   const u=(await sql`select id,name,color,created_at from users where id=${id}`)[0];
@@ -398,7 +409,7 @@ async function profile(sql,id){
   const days=await sql`select day,ev,player_id,mark,made_at from daily where mark is not null and day<${dayOf()}
     and day in (select day from daily where player_id=${id} and mark is not null)`, win=new Map();
   days.forEach(r=>{ const o=win.get(r.day), sp=SPRINT.includes(r.ev); if(!o||(sp?r.mark<o.mark:r.mark>o.mark)||r.mark===o.mark&&new Date(r.made_at)<new Date(o.made_at)) win.set(r.day,r); });
-  return {player:u,marks,daily_wins:[...win.values()].filter(r=>r.player_id===id).length};
+  return {player:u,marks,daily_wins:[...win.values()].filter(r=>r.player_id===id).length,week_wins:await weekWins(sql,id)};
 }
 
 async function act(sql,b){
