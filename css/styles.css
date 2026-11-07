@@ -521,7 +521,6 @@ tr.me td{background:var(--red)}
 .b-big tr.p3 td{background:#b06634;color:#fff}.b-big tr.p3 td.mk,.b-big tr.p3 td.sub{background:#c37943}
 .b-big td.mk,.b-big td.sub{background:#24407a}
 .b-big tr.p1 td.sub,.b-big tr.p2 td.sub,.b-big tr.p3 td.sub{color:rgba(255,255,255,.9)}
-.b-big tr.me td.nm{text-decoration:underline;text-decoration-color:var(--sun);text-decoration-thickness:3px;text-underline-offset:4px}
 .b-card .b-empty,.b-card .o-wait{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px;margin:0}
 .b-foot{display:flex;justify-content:center;align-items:center;gap:14px}
 .b-foot::before,.b-foot::after{content:"";flex:0 1 120px;height:3px;background:var(--red);border-radius:2px}
