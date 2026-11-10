@@ -41,8 +41,12 @@ export function onTap(pos){
   if(cue.type==='shoot'){ laserShoot(pos); return; }
   if(cue.type==='side'){
     if(pos==='C'||pos==='B') return;  // Space/Enter is for the red buttons
+    // the throws' turns (hammer, shot, discus: a couple of seconds): after a wrong tap the next ones don't count for a
+    // moment, so hitting both buttons at random doesn't pay (there the quick recovery after a mistake made it as good
+    // as tapping well)
+    if(S.ev.type==='field'&&S.clock<(S.stunUntil||0)){ addX(pos); return; }
     if(pos===cue.side){ speedUp(gS(S.v)); S.lastTap=S.clock; addRing(pos); tone(pos==='L'?330:392,.04,'triangle',.035); sideCue(); }
-    else { addX(pos); bad(); }
+    else { addX(pos); bad(); if(S.ev.type==='field') S.stunUntil=S.clock+STUN; }
   } else if(cue.type==='foot'){
     // triple jump: the side of the foot that touches down
     if(pos!=='L'&&pos!=='R') return;
@@ -73,6 +77,8 @@ export function bothHit(){
   if(S.ev.type==='sprint'){ S.cue=null; S.dip=.5; S.dipT=0; tone(300,.15,'triangle',.05); }
   else fieldAction();
 }
+// throws' turns: how long taps don't count after a wrong one (s)
+const STUN=.35;
 export let holdN=0;
 let kbHold=false;
 // each side held on its own (track cycling's pedals): a finger on that half, or its arrow key
