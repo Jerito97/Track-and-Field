@@ -6,7 +6,7 @@ import {$,OV} from '../canvas.js';
 import {acceptFriend,addFriend,delFriend,getFriends,rejectFriend} from '../online.js';
 import {setS,setScreen} from '../state.js';
 import {player} from '../storage.js';
-import {loadPlayers} from './people.js';
+import {lastSeen,loadPlayers} from './people.js';
 import {esc,paintOv,showOv} from './screens.js';
 
 // your friends and the requests (to you, yours) as the server sent them last, whose they are, when
@@ -27,6 +27,7 @@ const card=(title,body,btns)=>`<div class="card g-card"><div class="head"><div c
 const err=m=>m?`<p class="o-err" role="alert">${esc(m)}</p>`:'';
 const head=c=>`<span class="p-av sm"><canvas data-color="${esc(c)}"></canvas></span>`;
 const fold=t=>String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const online=t=>lastSeen(t)==='En línea';
 const byName=(a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'});
 
 // the menu's strip: a few heads (yours first) and how many friends
@@ -63,7 +64,7 @@ function rows(){
   const me=player()?.id, f=fold(query.trim());
   if(!f){ const l=myFriends().slice().sort(byName), req=myRequests();
     const reqs=req.length?`<span class="lbl">Solicitudes (${req.length})</span>`+req.map(p=>`<div class="u-item o-invp f-req">${head(p.color)}<span class="u-nm"><b>${esc(p.name)}</b><small>quiere ser tu amigo</small></span>${relBtn(p.id)}</div>`).join('')+(l.length?'<span class="lbl">Tus amigos</span>':''):'';
-    return reqs+(l.length?l.map(p=>`<button class="u-item" data-act="person" data-id="${esc(p.id)}" data-back="friends">${head(p.color)}<span class="u-nm"><b>${esc(p.name)}</b></span><i>›</i></button>`).join('')
+    return reqs+(l.length?l.map(p=>`<button class="u-item" data-act="person" data-id="${esc(p.id)}" data-back="friends">${head(p.color)}<span class="u-nm"><b>${esc(p.name)}</b>${lastSeen(p.seen_at)?`<small class="${online(p.seen_at)?'u-on':''}">${lastSeen(p.seen_at)}</small>`:''}</span><i>›</i></button>`).join('')
       :req.length?'':'<p class="small">Todavía no tenés amigos. Buscá jugadores por su nombre acá arriba y mandales una solicitud: cuando la acepten, vas a ver sus récords junto a los tuyos en Récords › Amigos.</p>'); }
   if(!all) return '<p class="small o-wait">Cargando jugadores…</p>';
   const hits=all.filter(p=>p.id!==me&&fold(p.name).includes(f)).sort(byName).slice(0,30);

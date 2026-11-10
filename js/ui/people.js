@@ -22,12 +22,18 @@ const MENU='<button class="btn alt" data-act="menu">Menú</button>';
 
 let view=null;  // what's on screen, so a late answer doesn't replace another screen
 let listBack='friends', personBack='people';  // where each «Volver» goes
+// when a player was last in the game, in words (a few minutes: they're in it now)
+export function lastSeen(t){
+  if(!t) return ''; const m=(Date.now()-new Date(t))/60000;
+  if(m<10) return 'En línea'; if(m<60) return `Hace ${Math.round(m)} min`; const h=m/60; if(h<24) return `Hace ${Math.round(h)} h`;
+  const d=Math.floor(h/24); return d===1?'Ayer':d<30?`Hace ${d} días`:d<60?'Hace un mes':`Hace ${Math.floor(d/30)} meses`;
+}
 // list: one per line, in alphabetical order, with a search box (ignores case and accents)
 const fold=t=>String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const byName=(a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'});
 function rows(l,q){ const me=player()?.id, f=fold(q.trim()), shown=l.filter(p=>!f||fold(p.name).includes(f)).sort(byName);
   if(!shown.length) return `<p class="small u-none">${l.length?'No hay ningún jugador con ese nombre.':'Todavía no hay jugadores.'}</p>`;
-  return shown.map(p=>`<button class="u-item${p.id===me?' me':''}" data-act="person" data-id="${esc(p.id)}"><span class="p-av sm"><canvas data-color="${esc(p.color)}"></canvas></span><span class="u-nm"><b>${esc(p.name)}</b><small>${p.id===me?'Vos · ':''}${p.marks?`${p.marks} ${p.marks===1?'prueba':'pruebas'} con marca`:'Sin marcas todavía'}</small></span><i>›</i></button>`).join(''); }
+  return shown.map(p=>`<button class="u-item${p.id===me?' me':''}" data-act="person" data-id="${esc(p.id)}"><span class="p-av sm"><canvas data-color="${esc(p.color)}"></canvas></span><span class="u-nm"><b>${esc(p.name)}</b><small>${p.id===me?'Vos · ':''}${p.marks?`${p.marks} ${p.marks===1?'prueba':'pruebas'} con marca`:'Sin marcas todavía'}${p.id!==me&&lastSeen(p.seen_at)?` · ${lastSeen(p.seen_at)}`:''}</small></span><i>›</i></button>`).join(''); }
 let query='';
 export async function showPeople(){
   view='list'; personBack='people'; setS(null); setScreen('menu');
@@ -64,7 +70,7 @@ export async function showPerson(id,back){
     return `<tr data-pc="${catOf(ev)}"${recHidden(catOf(ev))}><td class="nm">${ev.tag.charAt(0)+ev.tag.slice(1).toLowerCase()}</td><td class="mk">${m?fmt(ev,m.mark):'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; }).join('')
     +[['surv','Supervivencia clásica'],['survm','Supervivencia moderna']].map(([k,n])=>{ const m=marks[k]; return `<tr data-pc="surv"${recHidden('surv')}><td class="nm">${n}</td><td class="mk">${m?`${m.mark} pts`:'—'}</td><td class="sub">${m?`${m.rank<=3?['🥇','🥈','🥉'][m.rank-1]+' ':''}${m.rank}º del mundo · ronda ${(m.rounds||0)+1}`:''}</td><td class="sub">${m?day(m.date):''}</td></tr>`; }).join('');
   showOv(card('JUGADOR','Perfil',`
-    <div class="p-row"><span class="p-av"><canvas data-color="${esc(p.color)}"></canvas></span><div><b class="u-big">${esc(p.name)}</b><p class="small">${p.id===player()?.id?'Sos vos · ':''}Juega desde el ${day(p.created_at)}</p></div>
+    <div class="p-row"><span class="p-av"><canvas data-color="${esc(p.color)}"></canvas></span><div><b class="u-big">${esc(p.name)}</b><p class="small">${p.id===player()?.id?'Sos vos · ':''}Juega desde el ${day(p.created_at)}${p.id!==player()?.id&&lastSeen(p.seen_at)?`<br>Última conexión: ${lastSeen(p.seen_at).toLowerCase().replace('en línea','ahora, en línea')}`:''}</p></div>
       <div class="p-side"><div class="p-stats"><div><b>${r.daily_wins??'—'}</b><span>desafíos del día ganados</span></div><div><b>${r.week_wins??'—'}</b><span>desafíos semanales ganados</span></div></div>${friendBtn(p.id)}</div></div>
     <span class="lbl">Récords</span>${recTabs()}<div class="scroll"><table class="b-table u-recs"><tbody>${rows}</tbody></table></div>`,
     `<button class="btn" data-act="${personBack}" data-focus>Volver</button>`+MENU));

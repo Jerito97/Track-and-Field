@@ -132,6 +132,11 @@ function db(){
       await sql`delete from friends f where not exists(select 1 from friends r where r.player_id=f.friend_id and r.friend_id=f.player_id)`; }
     // pole vault started over (the records cleared before lived on in the phones and in this year's / month's boards)
     if((await sql`insert into migrations(id) values('reset-pv-2') on conflict do nothing returning id`).length) await wipe(sql,'pv',null);
+    // when each player was last in the game (marked as they use it); for those from before, their last result
+    await sql`alter table users add column if not exists seen_at timestamptz`;
+    if((await sql`insert into migrations(id) values('seen-1') on conflict do nothing returning id`).length)
+      await sql`update users u set seen_at=greatest((select max(made_at) from marks where player_id=u.id),(select max(created_at) from results where player_id=u.id),
+        (select max(made_at) from daily where player_id=u.id),u.created_at) where seen_at is null`;
   })().catch(e=>{ ready=null; throw e; });
   return ready.then(()=>sql);
 }
@@ -168,6 +173,8 @@ async function auth(sql,token){
   const u=(await sql`select u.* from sessions s join users u on u.id=s.user_id where s.token_hash=${h}`)[0]
     ||(await sql`select * from users where token_hash=${h}`)[0];
   if(!u) throw new Bad(401,'Tu sesión venció: entrá de nuevo con tu código.');
+  // they're in the game now (written at most every couple of minutes)
+  if(!u.seen_at||Date.now()-new Date(u.seen_at)>120000) await sql`update users set seen_at=now() where id=${u.id}`;
   return u;
 }
 // tournaments made before there were deadlines stay open a week
@@ -369,7 +376,7 @@ async function social(sql,pid){
 // your friends (name and colour), in the order you added them
 // and the requests: to you (to accept or turn down) and yours still waiting
 async function myFriends(sql,u){
-  return {friends:await sql`select u.id,u.name,u.color from friends f join users u on u.id=f.friend_id where f.player_id=${u.id} order by f.added_at`,
+  return {friends:await sql`select u.id,u.name,u.color,u.seen_at from friends f join users u on u.id=f.friend_id where f.player_id=${u.id} order by f.added_at`,
     incoming:await sql`select u.id,u.name,u.color from friend_requests r join users u on u.id=r.from_id where r.to_id=${u.id} order by r.created_at desc`,
     outgoing:await sql`select u.id,u.name,u.color from friend_requests r join users u on u.id=r.to_id where r.from_id=${u.id} order by r.created_at desc`};
 }
@@ -383,7 +390,7 @@ async function befriend(sql,a,b){
 
 // everyone registered (newest first), and one player's public profile: best mark per event and its place in the world
 async function people(sql){
-  const players=await sql`select u.id,u.name,u.color,u.created_at,(select count(*)::int from marks m where m.player_id=u.id and not (m.ev = any(${SURVS}))) as marks
+  const players=await sql`select u.id,u.name,u.color,u.created_at,u.seen_at,(select count(*)::int from marks m where m.player_id=u.id and not (m.ev = any(${SURVS}))) as marks
     from users u order by u.created_at desc limit 500`;
   return {players};
 }
@@ -399,7 +406,7 @@ async function weekWins(sql,id){
 }
 // (its place in the world: as the world top 10 has it, a tie going to whoever made it first)
 async function profile(sql,id){
-  const u=(await sql`select id,name,color,created_at from users where id=${id}`)[0];
+  const u=(await sql`select id,name,color,created_at,seen_at from users where id=${id}`)[0];
   if(!u) throw new Bad(404,'No existe ese jugador.');
   const marks=await sql`select m.ev,m.mark,m.made_at as date,m.rounds,
     1+(select count(*)::int from marks o where o.ev=m.ev and ((case when m.ev = any(${SPRINT}) then o.mark<m.mark else o.mark>m.mark end)
