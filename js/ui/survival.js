@@ -23,10 +23,11 @@ const ROUND_BONUS=1000;
 // jump and the javelin); cycling on its own scale (it can't get much faster than a perfect rider, ~32.6 s): round 4
 // the normal machines', 16 close to perfect
 const STEPS=[1,4,8,12,16];
+// each mode's machine (bot): named after the Terminators of the second and third films
 const MODES={
-  classic:{id:'surv',name:'Clásica',img:'survclas',evs:['100','lj','110h','pv','jav'],
+  classic:{id:'surv',name:'Clásica',img:'survclas',bot:'T-1000',evs:['100','lj','110h','pv','jav'],
     levels:{'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.0,14.0,13.1,12.1,11.7],lj:[6.3,7.6,8.8,10.6,11.2],pv:[5.6,5.9,6.3,6.8,7.3],jav:[62,80,96,121,131]}},
-  modern:{id:'survm',name:'Moderna',img:'survmod',evs:['4x100','tj','ham','crawl','cycle'],
+  modern:{id:'survm',name:'Moderna',img:'survmod',bot:'T-X',evs:['4x100','tj','ham','crawl','cycle'],
     levels:{'4x100':[36.3,33.4,30.8,27.0,25.4],tj:[14.9,17.6,19.8,22.5,24.0],ham:[46,55,62,73,79],crawl:[21.8,20.0,18.5,16.2,15.3],cycle:[44,40,37.5,34.5,33.0]}}};
 // the mode being played (the run in progress says which), or the one on screen
 let shownMode='classic';
@@ -89,7 +90,7 @@ export function resumeSurvival(){ const sv=saved(MODES[shownMode]); if(!sv) retu
 function showSurvEvent(){
   const s=R(); setS(null); setScreen('menu');
   G.evIdx=evIdx(s.order[s.k]); const ev=EVENTS[G.evIdx];
-  buildAthletes(false,{name:'Máquina',target:targets(M(),s.round)});
+  buildAthletes(false,{name:M().bot,target:targets(M(),s.round)});
   // the round's progress: a dot per event (done, this one, still to come)
   const done=s.order.map((i,k)=>`<span class="s-step${k<s.k?' s-done':k===s.k?' s-now':''}" title="${EVENTS[evIdx(i)].name}">${k<s.k?'✓':k+1}</span>`).join('');
   showOv(card(`RONDA ${s.round}`,`${ev.name} · ${s.k+1}/5`,`
@@ -104,7 +105,7 @@ export function survAfterEvent(){
   const s=R(), ev=EVENTS[G.evIdx], vals=G.res[ev.id], me=vals[0], cpu=vals[1], sprint=ev.type==='sprint';
   const beat=me!=null&&(cpu==null||(sprint?me<=cpu:me>=cpu)), tie=me!=null&&cpu!=null&&me===cpu;
   const both=me==null&&cpu==null;  // both fouled: nobody beat anybody, keep going
-  const line=`<div class="s-vs"><div><span class="lbl">Vos</span><b>${fmt(ev,me)}</b></div><i>vs</i><div><span class="lbl">Máquina</span><b>${fmt(ev,cpu)}</b></div></div>`;
+  const line=`<div class="s-vs"><div><span class="lbl">Vos</span><b>${fmt(ev,me)}</b></div><i>vs</i><div><span class="lbl">${M().bot}</span><b>${fmt(ev,cpu)}</b></div></div>`;
   if(!beat&&!both) return gameOver(`<p class="s-verdict lost">Perdiste en ${ev.name}</p>${line}`);
   const p=beat?pts(ev,me):0; s.pts+=p; if(beat) s.won++; s.log.push({ev:ev.id,round:s.round,me,cpu,pts:p});
   s.k++; const roundDone=s.k>=5; if(roundDone) s.pts+=ROUND_BONUS; keep();
@@ -112,7 +113,7 @@ export function survAfterEvent(){
   showOv(card(`RONDA ${s.round}`,tie?'¡Empate!':both?'Nulo los dos':'¡Le ganaste!',`
     <p class="s-verdict">${tie?'Empataste: seguís en carrera.':both?'Ninguno marcó: seguís en carrera.':`+${p} puntos`}</p>${line}
     <div class="s-best"><span class="lbl">Puntos</span><b>${s.pts}</b></div>
-    ${roundDone?`<p class="small s-up"><b>¡Ronda ${s.round} superada! +${ROUND_BONUS} puntos de bonus.</b> En la próxima la máquina viene más fuerte.</p>`:''}
+    ${roundDone?`<p class="small s-up"><b>¡Ronda ${s.round} superada! +${ROUND_BONUS} puntos de bonus.</b> En la próxima ${M().bot} viene más fuerte.</p>`:''}
     <div class="btns"><button class="btn" data-act="snext" data-focus>${roundDone?`Ronda ${s.round+1}`:'Siguiente prueba'}</button><button class="btn alt" data-act="menu">Seguir después</button><button class="btn alt" data-act="squit">Abandonar</button></div>`));
 }
 export function survNext(){ const s=R(); if(s.k>=5){ s.round++; s.k=0; s.order=shuffle(M().evs.slice()); keep(); } showSurvEvent(); }
