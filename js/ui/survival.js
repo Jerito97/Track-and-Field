@@ -26,7 +26,7 @@ const STEPS=[1,4,8,12,16];
 // each mode's machine (bot): named after the Terminators of the second and third films
 const MODES={
   classic:{id:'surv',name:'Clásica',img:'survclas',bot:'T-1000',evs:['100','lj','110h','pv','jav'],
-    levels:{'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.0,14.0,13.1,12.1,11.7],lj:[6.3,7.6,8.8,10.6,11.2],pv:[5.6,5.9,6.3,6.8,7.3],jav:[62,80,96,121,131]}},
+    levels:{'100':[13.1,11.9,10.8,9.0,8.3],'110h':[15.0,14.0,13.1,12.1,11.7],lj:[6.3,7.6,8.8,10.6,11.2],pv:[5.6,5.9,6.3,6.8,7.3],jav:[62,80,90,103,110]}},
   modern:{id:'survm',name:'Moderna',img:'survmod',bot:'T-X',evs:['4x100','tj','ham','crawl','cycle'],
     levels:{'4x100':[36.3,33.4,30.8,27.0,25.4],tj:[14.9,17.6,19.8,22.5,24.0],ham:[46,55,62,73,79],crawl:[21.8,20.0,18.5,16.2,15.3],cycle:[44,40,37.5,34.5,33.0]}}};
 // the mode being played (the run in progress says which), or the one on screen
