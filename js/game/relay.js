@@ -15,6 +15,8 @@ import {bothCue,judge,pop,sideCue} from './core.js';
 export const CH_OK=.12, CH_W=1.4, BACK=1.5, MATE=.6;
 export const BATON=.35;
 const LAG=.03, SLOW=.6, CUE_D=6;
+// the moment with no buttons before the red ones (s of the game's clock: a bit longer seen, in slow motion)
+const PREP_T=.3;
 export const GAIN=BATON+MATE;
 // the next runner takes off with CH_BASE of the speed the baton came with, plus a boost of up to CH_BOOST more for a
 // good change (all of it for a perfect one, nothing for the worst)
@@ -25,12 +27,15 @@ const board=()=>{ const m=changes(S.ev)[S.leg]; return m==null?null:m-BACK; };
 // the baton from the board's middle (m; >0 past it), counting the press's lag
 const off=()=>S.x+BATON-S.v*LAG*(S.ts??1)-board();
 // how fast the game runs: slowing down into the red, back to normal after the change
-export function relayTime(dt){ const want=S.chCued?SLOW:1; S.ts=(S.ts??1)+(want-(S.ts??1))*Math.min(1,dt*(S.chCued?10:5)); return S.ts; }
+export function relayTime(dt){ const on=S.chCued||S.chPrep, want=on?SLOW:1; S.ts=(S.ts??1)+(want-(S.ts??1))*Math.min(1,dt*(on?10:5)); return S.ts; }
 
 // once a frame while running: the change coming (the red buttons), and the late change
 export function relayStep(){
   const b=board(); if(b==null||S.finished) return;
-  if(!S.chCued&&b-S.x-BATON<=CUE_D){ S.chCued=true; bothCue(); pop('¡PASALO!',{dur:.6,col:'#ffd23a',big:.6}); }
+  // just before the red buttons, a moment with no buttons at all (the slow motion already on): the last green taps
+  // can't be taken for the two red ones
+  if(!S.chPrep&&!S.chCued&&b-S.x-BATON<=CUE_D+S.v*PREP_T){ S.chPrep=true; S.prepAt=S.clock; S.cue=null; S.pend=null; }
+  if(S.chPrep&&!S.chCued&&S.clock-S.prepAt>=PREP_T){ S.chCued=true; S.pend=null; bothCue(); pop('¡PASALO!',{dur:.6,col:'#ffd23a',big:.6}); }
   if(off()>=CH_OK+CH_W) handOver();
 }
 // the red buttons at a change
