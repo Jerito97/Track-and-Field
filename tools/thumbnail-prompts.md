@@ -379,7 +379,43 @@ DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or wa
 Para ChatGPT: pedí una imagen por mensaje y las tres en el mismo chat, así el atleta queda igual. Si una sale con
 algún texto o número, contestale solo `Remove every letter and number from the image, keep everything else the same.`
 
-### Disco
+### Pruebas (la tarjeta del menú principal)
+
+```
+STYLE: A wide landscape digital illustration (3:2) in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look. Saturated, cheerful colors.
+
+ATHLETE (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
+
+SETTING: A large outdoor athletics stadium on a sunny day, the sun shining from the upper left corner. Bright light blue sky with a few soft white cartoon clouds. Four tall floodlight towers on the stadium roof and small triangular colored flags (red, yellow, green, blue) along the roof edge. Two tiers of stands packed with small colorful cheering cartoon fans (many colors of shirts, many arms raised, a few small flags). A bright green grass infield and a red-brown running track with crisp white lane lines.
+
+EVENT AND SCENE: The game's 'Events' card: all of athletics at once. The athlete stands on the track in the middle of the image, proud and ready, around him the equipment of the different events, all clearly visible and none touching the edges: on his left a white-and-black hurdle; behind him a javelin stuck at an angle in the green grass and a long bent vaulting pole leaning on the right; on the track by his feet a black shot put ball, a discus (a flat round disc with a gold-brown edge and silver center) and a red relay baton; a starting block behind his heels.
+
+POSE (follow exactly): Standing tall facing slightly toward the viewer, feet apart on the track, one fist raised high in the air in triumph, the other hand on his hip, chest out: confident, like the champion of every event.
+
+COMPOSITION: Side view at the athlete's chest height. The athlete is shown FULL BODY from head to feet, large (about 60-70% of the image height), in the CENTER of the image, with clear empty space around him on every side: the image will be cropped to 16:9 and into a small card, so nothing important near the edges. Background slightly simpler and lighter than the athlete so he stands out.
+
+DO NOT include: any text, letters, numbers, words or watermarks anywhere (not on the bib, not on the stands, not on banners); a face, eyes or hair on the athlete; extra athletes; extra arms, legs or fingers; a realistic or 3D style. Also avoid: equipment floating in the air; more than one of each item; a podium or trophy (that is the tournaments' card).
+```
+
+### Disco (para ChatGPT, como el set nuevo)
+
+```
+STYLE: A wide landscape digital illustration (3:2) in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look. Saturated, cheerful colors.
+
+ATHLETE (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
+
+SETTING: A large outdoor athletics stadium on a sunny day, the sun shining from the upper left corner. Bright light blue sky with a few soft white cartoon clouds. Four tall floodlight towers on the stadium roof and small triangular colored flags (red, yellow, green, blue) along the roof edge. Two tiers of stands packed with small colorful cheering cartoon fans (many colors of shirts, many arms raised, a few small flags). A bright green grass infield and a red-brown running track with crisp white lane lines.
+
+EVENT AND SCENE: Discus throw, from inside a gray concrete throwing circle with a white rim, surrounded at the back and sides by a tall dark safety cage made of netting on metal posts, open at the front toward the green field. The discus is ONE flat round disc (like a big thick plate), about 22 cm wide, with a gold-brown edge and a silver center.
+
+POSE (follow exactly): The release after spinning: the athlete has turned around and is facing forward, body twisted, the right (throwing) arm swept fully out to the side and slightly forward at shoulder height, the discus just leaving the flat palm of the hand (held by the fingertips on its edge, flat, NOT gripped like a ball); the left arm thrown back and out for balance; the right leg pivoting on the toes, the left leg braced. A curved white motion arc behind the arm shows the spin.
+
+COMPOSITION: Side view at the athlete's chest height. The athlete is shown FULL BODY from head to feet, large (about 60-70% of the image height), in the CENTER of the image, with clear empty space around him on every side: the image will be cropped to 16:9 and into a small card, so nothing important near the edges. Background slightly simpler and lighter than the athlete so he stands out.
+
+DO NOT include: any text, letters, numbers, words or watermarks anywhere (not on the bib, not on the stands, not on banners); a face, eyes or hair on the athlete; extra athletes; extra arms, legs or fingers; a realistic or 3D style. Also avoid: a frisbee; a plate of food; a CD; holding it like a shot put ball against the neck; the discus thrown overhand; two discs.
+```
+
+### Disco (versión anterior)
 
 ```
 STYLE: A 16:9 horizontal digital illustration in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look. Saturated, cheerful colors.
