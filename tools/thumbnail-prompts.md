@@ -322,26 +322,62 @@ COMPOSITION: Camera at the athlete's chest height, side view, slightly from the 
 DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or watermarks anywhere (not on the bib, not on the stands, not on banners); a face, eyes or hair on the athlete; extra athletes unless asked; extra arms, legs or fingers; a realistic or 3D style. Also avoid: numbers on the podium; other athletes on the podium.
 ```
 
-### Supervivencia
+### Supervivencia: el menú (el pasado contra el futuro)
 
 ```
-STYLE: A 16:9 horizontal digital illustration in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look. Saturated, cheerful colors.
+STYLE: A wide landscape digital illustration (3:2) in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look.
 
-CHARACTER (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
+ATHLETE (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
 
-SETTING: A large outdoor athletics stadium on a sunny day. Light blue sky with a few soft white cartoon clouds. Red-brown running track with crisp white lane lines, a bright green grass infield. In the background, two tiers of stands packed with small colorful cheering cartoon fans (many colors of shirts, some arms raised, a few small flags), four tall floodlight towers on the stadium roof, and small triangular colored flags along the roof edge. Sunlight from the upper left.
+SETTING: An athletics stadium split in two down the middle by a bright zigzag lightning bolt (white core, electric blue glow) that runs from the top to the bottom of the image between the two characters. LEFT half: the same stadium in the past, drawn in black-and-white / sepia grays like an old photo: old wooden stands with gray cheering fans, an old flip-panel scoreboard with blank panels, a cinder track. RIGHT half: the same stadium in the future, in full color: sleek modern stands with colorful cheering fans, giant blank LED screens glowing blue and red, a glossy red track with white lane lines. Small sparks fly from the lightning.
 
-EVENT AND SCENE: Survival mode: the athlete is chased on the track by rival 'machines'.
+ROBOT: ONE humanoid athletic robot, as tall as the athlete and with the same athletic proportions (same height, same leg length), made of polished silver-chrome armor plates with thin dark seams, a smooth rounded helmet-like head with a narrow visor of two small glowing red lights (no mouth, no nose), red glowing details on the chest and joints. It stands like an athlete, not like a soldier.
 
-POSE (follow exactly): Running straight toward the viewer at full speed, determined body language, one knee high, arms pumping. Close behind him, two or three glowing red silhouettes of runners (same body shape, made of red light, slightly transparent) are chasing him.
+SCENE (follow exactly): Face-off before a race. The athlete stands on the left side, in the black-and-white past half, but HE stays in full color (red top, white spikes) while everything around him is gray. The robot stands on the right side, in the colorful future half. They stare at each other, both leaning slightly forward, fists clenched, ready to race: rivals, not enemies.
 
-COMPOSITION: Camera at the athlete's chest height, side view, slightly from the front. The athlete is shown FULL BODY from head to feet, large (about 60-70% of the image height), placed in the CENTER of the image, with clear empty space around him on every side (the image will be cropped into a smaller card, so nothing important near the edges). Background slightly simpler and lighter than the athlete so he stands out.
+COMPOSITION: Side view at chest height. The athlete on the LEFT half and the robot on the RIGHT half, both FULL BODY from head to feet, large (about 65-75% of the image height), facing each other in profile, about one body-width of space between them in the middle. Keep both of them, and the gap between them, inside the central 80% of the width and the central 85% of the height: the image will be cropped to 16:9 and also into a small card, so nothing important near the edges. Background simpler and less saturated than the two of them, so they stand out.
 
-DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or watermarks anywhere (not on the bib, not on the stands, not on banners); a face, eyes or hair on the athlete; extra athletes unless asked; extra arms, legs or fingers; a realistic or 3D style. Also avoid: monsters or robots with faces; weapons.
+DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or watermarks anywhere (not on the bib, not on the stands, not on scoreboards: scoreboards show only blank lit panels); a face, eyes or hair on the athlete; any weapon; blood or damage; extra athletes or extra robots; extra arms, legs or fingers; a realistic or 3D style; a robot that looks like any robot from a movie, TV show or video game.
 ```
-Variantes de supervivencia (en el mismo chat, después de la de arriba):
-- **Clásica:** `Make the same image as a vintage 1980s sports poster: warm faded colors, film grain, slightly soft focus, a retro stadium. Keep the same character and pose.`
-- **Moderna:** `Make the same image at night in a futuristic stadium: neon blue and red lights, a glossy track reflecting the lights, the chasing rivals as bright digital silhouettes. Keep the same character and pose.`
+
+### Supervivencia clásica (años 80)
+
+```
+STYLE: A wide landscape digital illustration (3:2) in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look.
+
+ATHLETE (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
+
+SETTING: A 1980s athletics stadium, drawn as an old faded photo: everything in warm sepia and gray tones, light film grain, slightly yellowed. Old wooden stands full of gray cheering fans with 1980s haircuts and caps, an old flip-panel scoreboard with blank panels behind them, a cinder track with chalk-white lane lines, a hurdle and a starting block resting on the side.
+
+ROBOT: ONE retro 1980s robot, as tall as the athlete: a boxy body made of gray riveted metal plates, a square head with two round glowing yellow lamp-eyes and a small antenna, accordion-tube arms and legs, chunky blocky feet like big sneakers, a small dial panel on its chest. Friendly-looking but competitive, like a toy robot that wants to race.
+
+SCENE (follow exactly): Face-off before a race, everything in the same sepia/gray tones (the athlete's red top shows as a faded dark red, his spikes as faded cream). The athlete on the left and the robot on the right stare at each other, both leaning slightly forward, fists clenched, ready to race: rivals, not enemies.
+
+COMPOSITION: Side view at chest height. The athlete on the LEFT half and the robot on the RIGHT half, both FULL BODY from head to feet, large (about 65-75% of the image height), facing each other in profile, about one body-width of space between them in the middle. Keep both of them, and the gap between them, inside the central 80% of the width and the central 85% of the height: the image will be cropped to 16:9 and also into a small card, so nothing important near the edges. Background simpler and less saturated than the two of them, so they stand out.
+
+DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or watermarks anywhere (not on the bib, not on the stands, not on scoreboards: scoreboards show only blank lit panels); a face, eyes or hair on the athlete; any weapon; blood or damage; extra athletes or extra robots; extra arms, legs or fingers; a realistic or 3D style; a robot that looks like any robot from a movie, TV show or video game.
+```
+
+### Supervivencia moderna (el futuro)
+
+```
+STYLE: A wide landscape digital illustration (3:2) in a bright, flat cartoon style, like a modern mobile sports game. Thick, clean black outlines on everything (about the same thickness everywhere), simple cel shading with one shadow tone and one highlight per color, no textures, no painterly brush strokes, no realism, no 3D render look.
+
+ATHLETE (keep exactly the same in every image): ONE adult male athlete drawn as a stylized stickman-like figure. His head is a perfect sphere, solid glossy black, with a single small white shine on the upper left, and it has NO face at all: no eyes, no nose, no mouth, no ears, no hair. His neck, arms, hands and legs are smooth solid glossy black, slim but athletic, with simple muscle shapes; hands are black with five fingers. He wears a red sleeveless athletics racing top (bright red, slightly darker red side panels) with a small plain white rectangular bib patch on the chest that is completely blank, black running shorts to mid-thigh, and white running spikes with gold details. Normal human proportions (head about 1/7 of his height).
+
+SETTING: A futuristic athletics stadium at night, in full saturated color: sleek curved stands full of colorful cheering fans, giant blank LED screens glowing electric blue, red and purple, beams of stadium light crossing the sky, a glossy red track with bright white lane lines reflecting the lights, a few floating light drones high above.
+
+ROBOT: ONE sleek modern humanoid athletic robot, as tall as the athlete and with the same athletic proportions (same height, same leg length), made of smooth white and silver armor plates with thin black seams, a smooth rounded helmet-like head with a narrow visor of two small glowing red lights (no mouth, no nose), thin red light lines along the arms, chest and legs, red glowing joints. It stands like an athlete, not like a soldier.
+
+SCENE (follow exactly): Face-off before a race. The athlete on the left, in full color (red top, white spikes with gold details), and the robot on the right stare at each other, both leaning slightly forward, fists clenched, ready to race: rivals, not enemies. Electric blue and red light from the screens behind them rims their outlines.
+
+COMPOSITION: Side view at chest height. The athlete on the LEFT half and the robot on the RIGHT half, both FULL BODY from head to feet, large (about 65-75% of the image height), facing each other in profile, about one body-width of space between them in the middle. Keep both of them, and the gap between them, inside the central 80% of the width and the central 85% of the height: the image will be cropped to 16:9 and also into a small card, so nothing important near the edges. Background simpler and less saturated than the two of them, so they stand out.
+
+DO NOT include: any text, letters, numbers, words, logos, brands, sponsors or watermarks anywhere (not on the bib, not on the stands, not on scoreboards: scoreboards show only blank lit panels); a face, eyes or hair on the athlete; any weapon; blood or damage; extra athletes or extra robots; extra arms, legs or fingers; a realistic or 3D style; a robot that looks like any robot from a movie, TV show or video game.
+```
+
+Para ChatGPT: pedí una imagen por mensaje y las tres en el mismo chat, así el atleta queda igual. Si una sale con
+algún texto o número, contestale solo `Remove every letter and number from the image, keep everything else the same.`
 
 ### Disco
 
