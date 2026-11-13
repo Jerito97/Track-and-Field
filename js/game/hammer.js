@@ -26,7 +26,7 @@ const RUSH_T=1.5, RUSH_TAP=.014, RUSH_MAX=.3;
 // taps) doesn't throw: it starts over
 const GAP=.6, BLIP=.12;
 // seconds for the star to reach the ball; let go before EARLY (of the way) = into the net, after LATE = out
-const HAM_T=.42, EARLY=.45, LATE=1.25, LAG=.03;
+const HAM_T=.42, EARLY=.45, LATE=1.25;
 // without holding, the throw goes off on its own after this long (s)
 const WAIT=2;
 // throw length per m/s of tapping speed (full marks)
@@ -94,7 +94,8 @@ function release(a){
     judge(0); a.stage='foul'; a.early=p<EARLY; a.R=a.early?-(b[0]-(S.x-HAM_CAGE)):14+6*Math.random(); a.T=a.early?.35:1.1;
     S.pops.push({text:a.early?'¡A LA RED!':'¡AFUERA DEL SECTOR!',t:0,dur:1.4,col:'#ff5a3c',sub:'',big:.6,small:true}); tone(160,.45,'sawtooth',.06);
   } else {
-    const q=qPole(p-LAG/HAM_T); judge(q);
+    // judged where the star is drawn when you let go (as the butterfly: no other delay taken off)
+    const q=qPole(p); judge(q);
     a.stage='fly'; a.R=Math.max(8,HAM_K*a.v*(1+rushBonus(a))*(.6+.4*q)-(b[0]-S.ev.line)); a.T=1.4+.035*a.R;
   }
   a.t=0; a.wf=a.w;

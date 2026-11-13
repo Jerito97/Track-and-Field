@@ -74,7 +74,9 @@ function flyStep(dt){
   if(f.st==='wait'){ if(!S.held2) f.free=true; if(S.held2&&f.free){ f.st='hold'; S.cue=null; S.meter={k:'fly',p:0}; tone(500,.05,'triangle',.04); } return; }
   if(f.st==='hold'){ const m=S.meter; m.p+=dt/FLY_T;
     if(!S.held2&&m.p*FLY_T<BLIP){ strokeCue(); return; }  // a blip (fingers left over): start over
-    if(!S.held2||m.p>=FLY_LATE){ if(!S.held2) m.p-=sinceHold()/FLY_T; m.hit=m.p; const q=m.p>=FLY_LATE?0:flyQ(m.p-LAG/FLY_T);
+    // judged where the star is drawn when you let go (the moment the fingers came off: no other delay taken off, with
+    // the star this quick that put perfect past the circle)
+    if(!S.held2||m.p>=FLY_LATE){ if(!S.held2) m.p-=sinceHold()/FLY_T; m.hit=m.p; const q=m.p>=FLY_LATE?0:flyQ(m.p);
       judge(q); tone(300+300*q,.1,'triangle',.05); stroke(q); f.st='rec'; f.t=0; setTimeout(()=>{ if(S&&S.meter&&S.meter.k==='fly'&&S.meter.hit!=null) S.meter=null; },350); }
     return; }
   if(f.st==='rec'){ f.t+=dt; if(f.t>=FLY_REC) strokeCue(); }
