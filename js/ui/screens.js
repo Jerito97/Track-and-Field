@@ -54,7 +54,7 @@ export function paintPict(c,i){ const px=c.clientWidth||64, d=2; c.width=c.heigh
 }
 // illustrated thumbnails (assets/thumbs/<id>.webp, small <id>-sm.webp for the cards; the .jpg are the originals), with where the athlete is so a crop
 // keeps them in view; an event without one (a new invented event) gets the stickman drawn in code
-export const THUMBS={'100':'50% 20%','lj':'56% 15%','tj':'45% 20%','110h':'50% 25%','pv':'45% 8%','jav':'48% 25%','ham':'45% 35%','sp':'48% 25%','dis':'48% 30%','hj':'50% 30%','crawl':'58% 58%','4x100':'50% 30%','laser':'30% 25%','cycle':'50% 45%','breast':'60% 58%','fly':'57% 58%','tour':'50% 5%','surv':'50% 35%'};
+export const THUMBS={'100':'50% 20%','lj':'56% 15%','tj':'45% 20%','110h':'50% 25%','pv':'45% 8%','jav':'48% 25%','ham':'45% 35%','sp':'48% 25%','dis':'50% 30%','hj':'50% 30%','crawl':'58% 58%','4x100':'50% 30%','laser':'30% 25%','cycle':'50% 45%','breast':'60% 58%','fly':'57% 58%','tour':'50% 5%','surv':'50% 35%'};
 const thumbKey=i=>i>=0&&i<EVENTS.length+BETA.length?evAt(i).id:'tour';
 // the events on the events screen: the published ones, and for the admin also the ones in testing
 const shownEvents=()=>isAdmin()?EVENTS.concat(BETA):EVENTS;
@@ -134,7 +134,7 @@ export function showMenu(){
   <header class="m-top"><div class="m-logo"><img class="m-app" src="assets/icons/icon-96.png" alt="">TRACK &amp; FIELD</div><div class="m-tr"><button class="m-bell" data-act="notifs" aria-label="Avisos"><span class="m-ic">${ICON.bell}</span><i class="m-badge" hidden></i></button><button class="m-title m-recs" data-act="board" data-i="0" data-back="menu"><span class="m-ic">${ICON.cup}</span>Récords</button></div></header>
   <div class="m-chal"><button class="m-daily" data-act="daily"${dailyBar()?'':' hidden'}>${dailyBar()}</button><button class="m-daily m-week" data-act="week"${weekBar()?'':' hidden'}>${weekBar()}</button></div>
   <section class="m-modes">
-    ${mode('events','100',THUMBS['100'],'Pruebas')}
+    ${mode('events','events','50% 0%','Pruebas')}
     ${mode('tours','tour',THUMBS.tour,'Torneos')}
     ${mode('surv','survmenu',THUMBS.surv,'Supervivencia',' surv')}
   </section>
