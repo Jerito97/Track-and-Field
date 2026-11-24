@@ -68,7 +68,7 @@ export async function checkNotifs(){
   finally{ busy=false; }
 }
 
-const evOf=id=>id==='surv'?{id,name:'Supervivencia clásica',surv:true}:id==='survm'?{id,name:'Supervivencia moderna',surv:true}:EVENTS.find(e=>e.id===id);
+const evOf=id=>id==='surv'?{id,name:'Supervivencia clásica',surv:true}:id==='survm'?{id,name:'Supervivencia moderna',surv:true}:id==='deca'?{id,name:'Decatlón',surv:true}:EVENTS.find(e=>e.id===id);
 function text(n){
   if(n.k==='wr'){ const ev=evOf(n.ev); if(!ev) return '';
     return `<b>${esc(n.who)}</b> te superó el récord mundial de <b>${esc(ev.name)}</b>: ${ev.surv?`${n.mark} pts`:fmt(ev,n.mark)}`; }
@@ -84,9 +84,9 @@ function text(n){
 }
 // where a notice takes you: the tournament, or the event's world records
 function act(n){
-  if(n.k==='wr'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-back="notifs"`; }
+  if(n.k==='wr'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:n.ev==='deca'?EVENTS.length+2:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-back="notifs"`; }
   if(n.k==='dy') return 'data-act="daily"';
-  if(n.k==='fp'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-group="friends" data-back="notifs"`; }
+  if(n.k==='fp'){ const i=n.ev==='surv'?EVENTS.length:n.ev==='survm'?EVENTS.length+1:n.ev==='deca'?EVENTS.length+2:EVENTS.findIndex(e=>e.id===n.ev); return `data-act="board" data-i="${i}" data-group="friends" data-back="notifs"`; }
   if(n.k==='fr') return 'data-act="friends"';
   if(n.k==='fk') return `data-act="person" data-id="${esc(n.pid)}" data-back="notifs"`;
   return `data-act="oopen" data-code="${esc(n.code)}"`;

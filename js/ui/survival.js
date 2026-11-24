@@ -61,9 +61,10 @@ const keep=()=>store.set(KEY(M()),G.surv);
 export function showSurvModes(){
   setS(null); setScreen('menu');
   showOv(card('SUPERVIVENCIA','Elegí el modo',`
-    <div class="t-two">
+    <div class="t-two t-three">
       <button class="t-opt" data-act="sclassic" data-focus><img class="t-img" src="assets/thumbs/survclas-sm.webp" alt=""><b>Clásica</b><span>Las 5 pruebas de siempre: 100 m, largo, vallas, garrocha y jabalina.</span></button>
       <button class="t-opt" data-act="smodern"><img class="t-img" src="assets/thumbs/survmod-sm.webp" alt=""><b>Moderna</b><span>Las pruebas nuevas: posta, triple, martillo, crawl y ciclismo.</span></button>
+      <button class="t-opt" data-act="sdeca"><img class="t-img" src="assets/thumbs/events-sm.webp" alt=""><b>Decatlón</b><span>Las 16 pruebas seguidas, una vez cada una: suman los puntos de todas.</span></button>
     </div>
     <div class="btns"><button class="btn alt" data-act="menu">Volver</button></div>`));
 }

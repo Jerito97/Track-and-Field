@@ -42,7 +42,7 @@ export async function syncMarks(){
   const p=player(); if(!p||!p.token||syncing) return;
   const sent=p.sent||{}, list=EVENTS.filter(e=>p.rec[e.id]!=null&&sent[e.id]!==p.rec[e.id])
     .map(e=>({ev:e.id,mark:p.rec[e.id],date:(p.best[e.id]||[]).find(b=>b.v===p.rec[e.id])?.date}));
-  ['surv','survm'].forEach(k=>{ const b=p[survBestKey(k)]; if(p.rec[k]!=null&&sent[k]!==p.rec[k]) list.push({ev:k,mark:p.rec[k],rounds:b?.rounds,date:b?.date}); });
+  ['surv','survm','deca'].forEach(k=>{ const b=p[survBestKey(k)]; if(p.rec[k]!=null&&sent[k]!==p.rec[k]) list.push({ev:k,mark:p.rec[k],rounds:b?.rounds,date:b?.date}); });
   // this year's and this month's bests (they can be one without being a personal record)
   const recN=list.length, now=periods(Date.now()), psent=p.psent||{}, per=[];
   Object.entries(p.pb||{}).forEach(([ev,o])=>['y','m'].forEach((s,j)=>{ const b=o[s]; if(b&&b.k===now[j]&&psent[ev+'|'+b.k]!==b.v){ per.push(ev+'|'+b.k); list.push({ev,mark:b.v,date:b.date,rounds:b.rounds}); } }));
@@ -64,7 +64,9 @@ function localTop(ev){
 // survival as one more board: points of the best run, and the round it reached
 export const SURV={id:'surv',name:'Supervivencia clásica',tag:'SUPERV. CLÁSICA',type:'score',surv:true};
 export const SURVM={id:'survm',name:'Supervivencia moderna',tag:'SUPERV. MODERNA',type:'score',surv:true};
-const SURVS=[SURV,SURVM];
+// the decathlon: every event once, in a row; its points (no rounds)
+export const DECA={id:'deca',name:'Decatlón',tag:'DECATLÓN',type:'score',surv:true,noRounds:true};
+const SURVS=[SURV,SURVM,DECA];
 const mk=(ev,v)=>ev.surv?`${v} pts`:fmt(ev,v);
 const day=d=>{ if(!d) return ''; const t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}); };
 
@@ -113,8 +115,8 @@ export async function showBoard(i,from,group,sp){
     <div class="b-filters">${tabs}</div>${body}
     <div class="b-foot"><button class="b-back" data-act="${back||(ev===SURV?'sclassic':ev===SURVM?'smodern':'events')}" data-focus>Volver</button></div></div>`;
   const me=player()?.id, unit=ev.surv?'Puntos':ev.type==='sprint'?'Tiempo':'Marca';
-  const rows=(top,mine)=>top.length?`<div class="b-list scroll"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev.surv?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
-    return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev.surv?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}${mine?`<tr class="b-gap"><td colspan="${ev.surv?5:4}">…</td></tr><tr class="me b-mine"><td class="pos">${mine.rank}.</td><td class="nm"><canvas data-color="${esc(mine.color)}"></canvas>${esc(mine.name)}</td><td class="mk">${mk(ev,mine.mark)}</td>${ev.surv?`<td class="sub">${(mine.rounds||0)+1}</td>`:''}<td class="sub">${day(mine.date)}</td></tr>`:''}</tbody></table></div>`
+  const rows=(top,mine)=>top.length?`<div class="b-list scroll"><table class="b-table b-big"><thead><tr><th>Pos.</th><th class="nm">Atleta</th><th class="mk">${unit}</th>${ev.surv&&!ev.noRounds?'<th class="sub">Ronda</th>':''}<th class="sub">Fecha</th></tr></thead><tbody>${top.map((r,k)=>{ const pl=place(top,k,q=>mk(ev,q.mark));
+    return `<tr class="${pl<=3?'p'+pl:''}${r.player_id===me?' me':''}"><td class="pos">${pl}.</td><td class="nm"><canvas data-color="${esc(r.color)}"></canvas>${esc(r.name)}</td><td class="mk">${mk(ev,r.mark)}</td>${ev.surv&&!ev.noRounds?`<td class="sub">${(r.rounds||0)+1}</td>`:''}<td class="sub">${day(r.date)}</td></tr>`; }).join('')}${mine?`<tr class="b-gap"><td colspan="${ev.surv&&!ev.noRounds?5:4}">…</td></tr><tr class="me b-mine"><td class="pos">${mine.rank}.</td><td class="nm"><canvas data-color="${esc(mine.color)}"></canvas>${esc(mine.name)}</td><td class="mk">${mk(ev,mine.mark)}</td>${ev.surv&&!ev.noRounds?`<td class="sub">${(mine.rounds||0)+1}</td>`:''}<td class="sub">${day(mine.date)}</td></tr>`:''}</tbody></table></div>`
     :`<p class="small b-empty">${scope?`${myFriends().length?'Ni vos ni tus amigos tienen':'Agregá amigos para comparar sus récords con los tuyos. Vos no tenés'} marca en esta prueba${span?(span==='year'?' este año':' este mes'):''} todavía.`:span?`Todavía no hay marcas ${span==='year'?'este año':'este mes'}. ¡La primera puede ser la tuya!`:'Todavía no hay marcas. ¡La primera puede ser la tuya!'}</p>`;
   const c=cachedTop(ev.id,scope,span), here=shownEv+span;
   let back2=keepX(); showOv(card(c?rows(c,cachedMe(ev.id,scope,span)):'<p class="small o-wait">Cargando…</p>'),'menu'); fitBoard(); back2();

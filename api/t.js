@@ -207,7 +207,7 @@ async function myTours(sql,u){
 }
 
 // survival ('surv' the classic one, 'survm' the modern one): the best run's points, with the rounds it got through
-const SURVS=['surv','survm'];
+const SURVS=['surv','survm','deca'];  // (and the decathlon's points)
 const okMark=(ev,m)=>SURVS.includes(ev)?Number.isInteger(m)&&m>=0&&m<=10000000:EVENTS.includes(ev)&&Number.isFinite(m)&&m>=RANGE[ev][0]&&m<=RANGE[ev][1];
 // Admin: one player, by id. The first time the player named ADMIN_NAME (Jero) asks, and there's no admin yet, that
 // player becomes it for good: renaming later keeps it, and someone new taking the name doesn't get it.

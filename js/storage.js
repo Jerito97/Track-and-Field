@@ -54,7 +54,7 @@ export function linkPlayer(remote){ const p=player(); if(!p) return;
 // best marks kept on the server (logging in on another phone or app): the better of each stays as personal record
 export function mergeMarks(marks,evs){ const p=player(); if(!p||!Array.isArray(marks)) return;
   marks.forEach(m=>{
-    if(m.ev==='surv'||m.ev==='survm'){ const k=m.ev, b=survBestKey(k);
+    if(SCORE_IDS.includes(m.ev)){ const k=m.ev, b=survBestKey(k);
       if(Number.isFinite(m.mark)&&(p.rec[k]==null||m.mark>p.rec[k])){ p.rec[k]=m.mark; p[b]={pts:m.mark,rounds:m.rounds||0,date:Date.parse(m.date)||Date.now()}; }
       if(Number.isFinite(m.mark)) p.sent={...p.sent,[k]:Math.max(m.mark,p.rec[k])===m.mark?m.mark:p.sent?.[k]}; return; }
     const ev=evs.find(e=>e.id===m.ev); if(!ev||!Number.isFinite(m.mark)) return;
@@ -71,7 +71,7 @@ export function applyWipes(wipes){
   if(!wipes.length) return false;
   wipes.forEach(w=>{ const at=Date.parse(w.at)||Date.now(), ev=w.ev;
     DB.list.filter(p=>!w.player_id||p.id===w.player_id).forEach(p=>{
-      if(ev==='surv'||ev==='survm'){ const k=survBestKey(ev), b=p[k]; if(!b||!(b.date>=at)){ delete p[k]; delete p.rec[ev]; } }
+      if(SCORE_IDS.includes(ev)){ const k=survBestKey(ev), b=p[k]; if(!b||!(b.date>=at)){ delete p[k]; delete p.rec[ev]; } }
       else { const l=(p.best[ev]||[]).filter(b=>b.date>=at); if(l.length){ p.best[ev]=l; p.rec[ev]=l[0].v; } else { delete p.best[ev]; delete p.rec[ev]; } }
       if(p.sent) delete p.sent[ev];
       const pb=p.pb&&p.pb[ev]; if(pb) ['y','m'].forEach(s=>{ if(pb[s]&&!(pb[s].date>=at)) delete pb[s]; });
@@ -107,8 +107,11 @@ export function recordEvent(ev,mark,place,of,mode){
   lastPeriods=periodBest(p,ev.id,mark,sprint);
   save(); return isRec;
 }
-// survival's best run of each mode (id: 'surv' the classic one, 'survm' the modern one): its points, rounds, date
-export const survBestKey=id=>id==='survm'?'survmBest':'survBest';
+// survival's best run of each mode (id: 'surv' the classic one, 'survm' the modern one; 'deca' the decathlon's): its
+// points, rounds (the decathlon: events played), date
+export const survBestKey=id=>id==='survm'?'survmBest':id==='deca'?'decaBest':'survBest';
+// the boards counted in points (survival's two modes, the decathlon)
+export const SCORE_IDS=['surv','survm','deca'];
 // a survival run ended: best points (and how many rounds it got through); returns true for a new best
 export function recordSurv(pts,rounds,id='surv'){ const p=player(); if(!p) return false;
   const best=pts>0&&(p.rec[id]==null||pts>p.rec[id]); if(best){ p.rec[id]=pts; p[survBestKey(id)]={pts,rounds,date:Date.now()}; }

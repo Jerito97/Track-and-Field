@@ -20,6 +20,7 @@ import {personAccept,personAdd,personDel,personReject,showPeople,showPerson} fro
 import {checkNotifs,showNotifs,unread} from './notifs.js';
 import {afterDaily,dailyBar,finishDaily,leaveDaily,playDaily,refreshDailyBar,showDaily} from './daily.js';
 import {refreshWeekBar,showWeek,weekBar} from './weekly.js';
+import {decaAfterEvent,decaNext,decaQuit,leaveDeca,playDeca,resumeDecathlon,showDecathlon,startDecathlon} from './decathlon.js';
 import {playSurv,resumeSurvival,showSurvival,showSurvModes,startSurvival,survAfterEvent,survNext,survQuit} from './survival.js';
 import {onColor,onLocal,onLogin,onNext,onRegister,onSkip,showAccount,skipProtect} from './account.js';
 import {getProfile,updateRemote} from '../online.js';
@@ -209,7 +210,7 @@ export function showProfile(msg,ok,draft){
     <div class="p-row"><span class="p-av"><canvas data-face="yo"></canvas></span>
       <label class="p-name"><span class="lbl">Nombre de usuario</span><span class="p-edit"><input id="pname" maxlength="14" value="${esc(draft??p.name)}" autocomplete="off"><button class="btn alt" data-act="rename"${draft!=null&&draft!==p.name?'':' disabled'}>Cambiar</button></span><span class="small p-hint">${p.token?'Podés cambiarlo cuando quieras; tiene que ser único. Tu código sigue siendo el mismo.':'Podés cambiarlo cuando quieras.'}</span></label></div>
     <span class="lbl">Color del stickman</span>${swatches(p.color)}
-    <div class="p-stats p-main"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b id="pdaily">${p.token?'…':'—'}</b><span>desafíos del día ganados</span></div><div><b id="pweek">${p.token?'…':'—'}</b><span>desafíos semanales ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div><div><b>${p.survmBest?p.survmBest.pts:'—'}</b><span>mejor supervivencia moderna</span></div></div>
+    <div class="p-stats p-main"><div><b>${playedCount(p)}</b><span>pruebas jugadas</span></div><div><b id="pdaily">${p.token?'…':'—'}</b><span>desafíos del día ganados</span></div><div><b id="pweek">${p.token?'…':'—'}</b><span>desafíos semanales ganados</span></div><div><b>${p.survBest?p.survBest.pts:'—'}</b><span>mejor supervivencia clásica</span></div><div><b>${p.survmBest?p.survmBest.pts:'—'}</b><span>mejor supervivencia moderna</span></div><div><b>${p.decaBest?p.decaBest.pts:'—'}</b><span>mejor decatlón</span></div></div>
     <span class="lbl">Tus récords</span>${recTabs()}<div class="p-stats p-recs">${bests}</div>
     <div class="btns"><button class="btn" data-act="menu" data-focus>Volver</button><button class="btn alt" data-act="players">Cambiar de jugador</button>${isAdmin()?'<button class="btn alt a-btn" data-act="admin">Administrador</button>':''}</div>
   </div></div>`);
@@ -244,7 +245,7 @@ export function showPause(){
   hamPause(); shotPause(); discusPause();
   const online=G.mode==='online', tour=G.mode==='tour';
   showOv(`<div class="card"><div class="head"><div class="logo">PAUSA</div><h2>${S.ev.name}</h2></div><div class="body">
-    ${G.mode==='daily'?'<p class="small">Si volvés al menú, el desafío del día cuenta como <b>nulo</b>.</p>':online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, la partida queda guardada y la seguís después desde esta prueba.</p>':''}
+    ${G.mode==='daily'?'<p class="small">Si volvés al menú, el desafío del día cuenta como <b>nulo</b>.</p>':online?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el torneo.</p>':tour?'<p class="small">Si volvés al menú, se abandona el torneo.</p>':G.mode==='surv'?'<p class="small">Si volvés al menú, la partida queda guardada y la seguís después desde esta prueba.</p>':G.mode==='deca'?'<p class="small">Si volvés al menú, esta prueba cuenta como <b>nulo</b> en el decatlón.</p>':''}
     <div class="btns"><button class="btn" data-act="resume" data-focus>Reanudar</button><button class="btn alt" data-act="quit">Volver al menú</button></div></div></div>`,'pause');
 }
 // place shown in a table: equal values share it (1, 2, 2, 4)
@@ -296,6 +297,7 @@ export function afterResults(){
   if(G.mode==='online'){ showTournament(G.code); return; }
   if(G.mode==='daily'){ afterDaily(); return; }
   if(G.mode==='surv'){ survAfterEvent(); return; }
+  if(G.mode==='deca'){ decaAfterEvent(); return; }
   if(G.mode!=='tour'){ showEventCard(); return; }
   const p=G.pts[ev.id];
   showOv(table(ev.tag,'Puntos',ATH.map((a,i)=>({a,i,v:p[i]})).sort((x,y)=>y.v-x.v),r=>String(r.v),null,'standings'));
@@ -374,6 +376,12 @@ OV.addEventListener('click',e=>{
   else if(a==='events') showEvents();
   else if(a==='tours'){ if(player().token) showOnline(); else showAccount('protect'); }  // tournaments: only with friends now
   else if(a==='surv') showSurvModes();
+  else if(a==='sdeca') showDecathlon();
+  else if(a==='dstart') startDecathlon(b);
+  else if(a==='dresume') resumeDecathlon();
+  else if(a==='dplayev') playDeca();
+  else if(a==='dnext') decaNext();
+  else if(a==='dquit') decaQuit(b);
   else if(a==='sclassic') showSurvival('classic');
   else if(a==='smodern') showSurvival('modern');
   else if(a==='sstart') startSurvival();
@@ -383,7 +391,7 @@ OV.addEventListener('click',e=>{
   else if(a==='squit') survQuit(b);
   else if(a==='play'){ newEvent(G.evIdx); startPlay(); }
   else if(a==='resume'){ hideOv(); setScreen('play'); }
-  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else if(G.mode==='daily') leaveDaily(); else showMenu(); }
+  else if(a==='quit'){ if(G.mode==='online') leaveOnline(); else if(G.mode==='daily') leaveDaily(); else if(G.mode==='deca') leaveDeca(); else showMenu(); }
   else if(a==='menu') showMenu();
   else if(a==='sound'){ const on=toggleSound(); if(b.classList.contains('m-snd')){ b.innerHTML=ICON.snd(on); b.setAttribute('aria-label','Sonido '+(on?'activado':'apagado')); } else b.textContent='Sonido: '+(on?'activado':'apagado'); }
   else if(a==='nextround'){ S.round++; startPlay(); }
