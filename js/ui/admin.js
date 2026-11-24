@@ -19,7 +19,7 @@ export function checkAdmin(then){ const p=player(); if(!p?.token||allowed===p.id
 
 const card=(title,body,btns)=>`<div class="card a-card"><div class="head"><div class="logo">ADMIN</div><h2>${title}</h2></div><div class="body">${body}<div class="btns">${btns}</div></div></div>`;
 const day=d=>new Date(d).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-const evName=id=>id==='surv'?'Supervivencia clásica':id==='survm'?'Supervivencia moderna':id==='deca'?'Decatlón':EVENTS.find(e=>e.id===id)?.name||id;
+const evName=id=>id==='surv'?'Supervivencia clásica':id==='survm'?'Supervivencia moderna':id==='deca'?'Hexadecatlón':EVENTS.find(e=>e.id===id)?.name||id;
 const mk=(id,v)=>id==='surv'||id==='survm'||id==='deca'?v+' pts':fmt(EVENTS.find(e=>e.id===id),v);
 let users=[], query='', open=null;
 
@@ -31,7 +31,7 @@ export async function showAdmin(msg){
   showOv(card('Administrador',`${msg?`<p class="o-ok" role="status">${esc(msg)}</p>`:''}
     <div class="p-stats a-stats"><div><b>${st.players}</b><span>jugadores</span></div><div><b>${st.new_week}</b><span>nuevos esta semana</span></div><div><b>${st.marks}</b><span>récords</span></div><div><b>${st.open_tournaments}/${st.tournaments}</b><span>torneos en juego</span></div><div><b>${st.friends}</b><span>amistades</span></div></div>
     <span class="lbl">Reiniciar los récords de una prueba (los de todos)</span>
-    <div class="g-new"><select id="awipe" class="u-search"><option value="">Elegí la prueba…</option>${EVENTS.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}<option value="surv">Supervivencia clásica</option><option value="survm">Supervivencia moderna</option><option value="deca">Decatlón</option></select><button class="btn alt a-del" data-act="awipe">Reiniciar</button></div>
+    <div class="g-new"><select id="awipe" class="u-search"><option value="">Elegí la prueba…</option>${EVENTS.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}<option value="surv">Supervivencia clásica</option><option value="survm">Supervivencia moderna</option><option value="deca">Hexadecatlón</option></select><button class="btn alt a-del" data-act="awipe">Reiniciar</button></div>
     <span class="lbl">Jugadores</span>
     <input id="asearch" class="u-search" type="search" placeholder="Buscar jugador…" autocomplete="off" value="${esc(query)}">
     <div class="u-list scroll" id="alist"></div>`,'<button class="btn alt" data-act="profile" data-focus>Volver</button>'));

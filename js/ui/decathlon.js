@@ -15,7 +15,7 @@ const N=DECA_ORDER.length;
 // its board's index on the records screen (after the events: the two survivals, then this one)
 const BOARD_I=EVENTS.length+2;
 const evIdx=id=>EVENTS.findIndex(e=>e.id===id);
-const card=(title,body)=>`<div class="card s-card"><div class="head"><div class="logo">DECATLÓN</div><h2>${title}</h2></div><div class="body">${body}</div></div>`;
+const card=(title,body)=>`<div class="card s-card"><div class="head"><div class="logo">HEXADECATLÓN</div><h2>${title}</h2></div><div class="body">${body}</div></div>`;
 const KEY=()=>'odb-deca-'+(player()?.id||'');
 // the run kept on the phone; an event that was started and never finished (the game closed halfway) is a foul
 function saved(){ const sv=store.get(KEY(),null); if(!sv||typeof sv.k!=='number') return null;
@@ -32,7 +32,7 @@ export function showDecathlon(){
     <div class="s-hero"><img src="assets/thumbs/events.webp" alt=""></div>
     <p class="small">Las ${N} pruebas seguidas, <b>una sola vez cada una</b>: suman los puntos de todas. Podés parar entre prueba y prueba y seguir después, pero si salís en el medio de una, esa cuenta como <b>nulo</b>.</p>
     ${sv?`<div class="o-code s-resume"><div><span class="lbl">Partida guardada</span><b>${sv.pts} pts · ${sv.k}/${N}</b><small>Te toca ${esc(EVENTS[evIdx(DECA_ORDER[sv.k])]?.name||'')}</small></div><button class="btn" data-act="dresume" data-focus>Seguir</button></div>`:''}
-    <div class="s-best"><span class="lbl">Tu mejor decatlón</span><b>${b?`${b.pts} pts`:'—'}</b></div>
+    <div class="s-best"><span class="lbl">Tu mejor hexadecatlón</span><b>${b?`${b.pts} pts`:'—'}</b></div>
     <div class="btns"><button class="btn${sv?' alt':''}" data-act="dstart"${sv?'':' data-focus'}>${sv?'Nueva partida':'Jugar'}</button><button class="btn alt" data-act="board" data-i="${BOARD_I}">Récords</button><button class="btn alt" data-act="surv">Volver</button></div>`));
 }
 export function startDecathlon(b){
@@ -68,7 +68,7 @@ export const decaNext=()=>showDecaEvent();
 // left the event from the pause: a foul, and on
 export const leaveDeca=()=>decaAfterEvent(true);
 export function decaQuit(b){
-  if(b&&!b.dataset.sure){ b.dataset.sure='1'; b.textContent='¿Terminar el decatlón? Tocá de nuevo'; return; }
+  if(b&&!b.dataset.sure){ b.dataset.sure='1'; b.textContent='¿Terminar el hexadecatlón? Tocá de nuevo'; return; }
   if(G.deca) finish(true);
 }
 // the end (all played, or given up): the total, each event's points, best saved and sent to the world top 10
@@ -78,7 +78,7 @@ function finish(quit){
   const rows=s.log.map(r=>{ const ev=EVENTS[evIdx(r.ev)]; return `<tr><td class="nm">${esc(ev.name)}</td><td class="sub">${fmt(ev,r.mark)}</td><td class="mk">${r.pts}</td></tr>`; }).join('');
   showOv(card(best?'¡Nuevo récord!':quit?'Abandonaste':'¡Terminaste!',`
     <div class="s-final"><div><b>${s.pts}</b><span>puntos</span></div><div><b>${s.k}/${N}</b><span>pruebas</span></div></div>
-    ${best?'':player()?.decaBest?`<p class="small">Tu mejor decatlón: ${player().decaBest.pts} pts.</p>`:''}
+    ${best?'':player()?.decaBest?`<p class="small">Tu mejor hexadecatlón: ${player().decaBest.pts} pts.</p>`:''}
     ${rows?`<div class="scroll"><table class="o-table d-table d-sum"><tbody>${rows}</tbody></table></div>`:''}
     <div class="btns"><button class="btn" data-act="dstart" data-focus>Jugar de nuevo</button><button class="btn alt" data-act="board" data-i="${BOARD_I}">Récords</button><button class="btn alt" data-act="menu">Menú</button></div>`));
 }

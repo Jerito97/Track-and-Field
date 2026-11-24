@@ -65,7 +65,7 @@ function localTop(ev){
 export const SURV={id:'surv',name:'Supervivencia clásica',tag:'SUPERV. CLÁSICA',type:'score',surv:true};
 export const SURVM={id:'survm',name:'Supervivencia moderna',tag:'SUPERV. MODERNA',type:'score',surv:true};
 // the decathlon: every event once, in a row; its points (no rounds)
-export const DECA={id:'deca',name:'Decatlón',tag:'DECATLÓN',type:'score',surv:true,noRounds:true};
+export const DECA={id:'deca',name:'Hexadecatlón',tag:'HEXADECATLÓN',type:'score',surv:true,noRounds:true};
 const SURVS=[SURV,SURVM,DECA];
 const mk=(ev,v)=>ev.surv?`${v} pts`:fmt(ev,v);
 const day=d=>{ if(!d) return ''; const t=new Date(d); return isNaN(t)?'':t.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}); };

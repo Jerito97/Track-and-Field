@@ -68,7 +68,7 @@ export async function checkNotifs(){
   finally{ busy=false; }
 }
 
-const evOf=id=>id==='surv'?{id,name:'Supervivencia clásica',surv:true}:id==='survm'?{id,name:'Supervivencia moderna',surv:true}:id==='deca'?{id,name:'Decatlón',surv:true}:EVENTS.find(e=>e.id===id);
+const evOf=id=>id==='surv'?{id,name:'Supervivencia clásica',surv:true}:id==='survm'?{id,name:'Supervivencia moderna',surv:true}:id==='deca'?{id,name:'Hexadecatlón',surv:true}:EVENTS.find(e=>e.id===id);
 function text(n){
   if(n.k==='wr'){ const ev=evOf(n.ev); if(!ev) return '';
     return `<b>${esc(n.who)}</b> te superó el récord mundial de <b>${esc(ev.name)}</b>: ${ev.surv?`${n.mark} pts`:fmt(ev,n.mark)}`; }

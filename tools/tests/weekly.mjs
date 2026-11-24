@@ -59,7 +59,7 @@ await pp.click('[data-act="profile"]'); await pp.waitForSelector('#pweek'); awai
 ok((await pp.textContent('#pweek'))==='1','tu perfil: 1 desafío semanal ganado'); await pp.screenshot({path:out+'/perfil-vertical.png'});
 await p.click('[data-act="menu"]').catch(()=>{}); await p.goto(BASE+'/'); await p.waitForSelector('.m-modes'); await p.click('[data-act="profile"]'); await p.waitForFunction(()=>document.getElementById('pweek')?.textContent==='1');
 const g=await p.$$eval('.p-main>div',l=>l.map(e=>Math.round(e.getBoundingClientRect().width)));
-ok(g.length===6&&g.every(w=>Math.abs(w-g[0])<2),'tu perfil: 3 arriba y 3 abajo (las supervivencias y el decatlón), todos iguales ('+g.join(',')+')');
+ok(g.length===6&&g.every(w=>Math.abs(w-g[0])<2),'tu perfil: 3 arriba y 3 abajo (las supervivencias y el hexadecatlón), todos iguales ('+g.join(',')+')');
 await p.evaluate(()=>document.querySelector('.p-recs').scrollIntoView()); const last=await p.$$eval('.p-recs>div',l=>{ const r=l[l.length-1].getBoundingClientRect(), box=l[0].parentElement.getBoundingClientRect(); return Math.abs((r.left+r.right)/2-(box.left+box.right)/2); });
 ok(last<3,'tus récords: el último, solo en su fila, centrado'); await p.screenshot({path:out+'/perfil.png'});
 ok(!errs.length,'sin errores'+(errs[0]?': '+errs[0]:'')); await b.close();
